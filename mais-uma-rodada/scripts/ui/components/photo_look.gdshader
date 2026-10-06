@@ -15,6 +15,8 @@ uniform int mood = 0;
 uniform float seed = 0.0;
 uniform vec4 club1 : source_color = vec4(0.06, 0.18, 0.45, 1.0);
 uniform vec4 club2 : source_color = vec4(0.78, 0.12, 0.14, 1.0);
+// 1 = recorte (fundo transparente, como os cutouts do FM): só o jogador, com a luz do cenário
+uniform int cutout_mode = 0;
 
 // 1 px do protótipo (quadros de 400 px), em UV do retrato
 const float U = 1.0 / 400.0;
@@ -365,5 +367,5 @@ void fragment() {
 	vec2 pp = UV * size_px;
 	vec2 dq = max(vec2(corner_px) - pp, vec2(0.0)) + max(pp - (size_px - vec2(corner_px)), vec2(0.0));
 	float inside = clamp(corner_px + 0.5 - length(dq), 0.0, 1.0);
-	COLOR = vec4(o, inside);
+	COLOR = cutout_mode == 1 ? vec4(o, a) : vec4(o, inside);
 }

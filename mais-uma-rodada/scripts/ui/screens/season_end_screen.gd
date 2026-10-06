@@ -17,7 +17,24 @@ func _init() -> void:
 	screen_title = "Fim de temporada"
 
 
+## Rever um fim de temporada antigo: {"year": ano} abre o resumo guardado (SeasonArchive),
+## sem festa nem cerimônia, com setas para os outros anos.
+var _archived := false
+
+
+func setup(p: Dictionary) -> void:
+	super.setup(p)
+	if p.has("year") and world() != null:
+		_summary = SeasonArchive.summary_of(world(), int(p["year"]))
+		_archived = true
+		_celebrated = true
+		show_nav = true
+
+
 func on_show() -> void:
+	if _archived:
+		refresh()
+		return
 	if _summary.is_empty() and GameManager.season_over():
 		# A virada do ano é a operação mais pesada do jogo: roda numa thread, com o aviso.
 		GameManager.end_season_async(func(summary: Dictionary) -> void:
@@ -92,8 +109,10 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
+	if _archived:
+		c.add_child(_year_nav(w, year))
 	if _summary.is_empty():
-		c.add_child(UIKit.label("A temporada ainda não terminou.", "Muted"))
+		c.add_child(UIKit.label("Este fim de temporada não foi guardado (anos jogados antes desta versão)." if _archived else "A temporada ainda não terminou.", "Muted", true))
 		_footer(w)
 		return
 	max_content_width = 1700
@@ -476,9 +495,39 @@ func _club_card(w: GameWorld) -> Control:
 	return UIKit.card_panel(card)
 
 
+## Setas entre os fins de temporada guardados.
+func _year_nav(w: GameWorld, year: int) -> Control:
+	var years := SeasonArchive.summary_years(w)
+	var i := years.find(year)
+	var nav := UIKit.hbox(UITokens.S2)
+	var prev := UIKit.button("", "", func(): _go_year(int(years[i - 1])), "back")
+	prev.disabled = i <= 0
+	prev.tooltip_text = "Temporada anterior"
+	nav.add_child(prev)
+	var yl := UIKit.label("Temporada %d" % year, "Section")
+	yl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	yl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	nav.add_child(yl)
+	var nxt := UIKit.button("", "", func(): _go_year(int(years[i + 1])), "forward")
+	nxt.disabled = i < 0 or i >= years.size() - 1
+	nxt.tooltip_text = "Temporada seguinte"
+	nav.add_child(nxt)
+	return nav
+
+
+func _go_year(year: int) -> void:
+	_summary = SeasonArchive.summary_of(world(), year)
+	params["year"] = year
+	refresh()
+	scroll_to_top()
+
+
 func _footer(w: GameWorld) -> void:
 	var f := footer()
 	UIKit.clear(f)
+	if _archived:
+		f.add_child(UIKit.button("Voltar", "", func(): UIManager.back(), "back"))
+		return
 	var fired := not BoardManager.pending_job_offers(w).is_empty()
 	if fired:
 		f.add_child(UIKit.button("ESCOLHER NOVO CLUBE", "PrimaryButton", func(): UIManager.goto("hub"), "play"))

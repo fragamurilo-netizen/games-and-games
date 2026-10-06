@@ -39,6 +39,11 @@ var focus_x := 0.5:
 		focus_x = v
 		_layout()
 var corner_px := 6.0
+## Recorte sem fundo (cutout do FM): o jogador "sai" do cabeçalho, com a luz e a textura da foto.
+var transparent := false:
+	set(v):
+		transparent = v
+		_rerender()
 
 var _pv: PortraitView
 var _vp_cut: SubViewport
@@ -186,6 +191,7 @@ func _rerender() -> void:
 		return
 	var mat := _fx.material as ShaderMaterial
 	mat.set_shader_parameter(&"mood", mood)
+	mat.set_shader_parameter(&"cutout_mode", 1 if transparent else 0)
 	mat.set_shader_parameter(&"seed", _seed)
 	mat.set_shader_parameter(&"club1", _club1)
 	mat.set_shader_parameter(&"club2", _club2)

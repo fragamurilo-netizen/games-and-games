@@ -1266,6 +1266,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 				NewsManager.post(world, CupManager.news_cat(cid, "classificado"), {"club": world.user_club().short_name, "cup": world.season.cups[cid].name}, world.user_club_id, -1, NewsEvent.IMP_HIGH)
 		InboxManager.on_new_season(world)
 	tt = _time("es_fim", tt)
+	SeasonArchive.store_summary(world, summary) # para rever esta tela nos anos seguintes
 	progress = 100
 	return summary
 

@@ -31,6 +31,8 @@ func _start() -> void:
 			runner.set("only", a.substr(7))
 		if a.begins_with("--rounds="):
 			runner.set("rounds", int(a.substr(9)))
+		if a.begins_with("--seasons="):
+			runner.set("seasons", int(a.substr(10)))
 		if a == "--ugly":
 			runner.set("ugly", true)
 		if a == "--light":

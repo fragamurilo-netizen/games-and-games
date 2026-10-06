@@ -1,8 +1,8 @@
 class_name KitPresentation
 extends RefCounted
-## Apresentação dos uniformes como no lançamento de verdade: cada camisa vestida por um jogador do
-## elenco, em foto de estúdio (busto). Titular no melhor jogador, reserva no segundo, terceiro
-## uniforme no terceiro e o de goleiro no goleiro titular.
+## Apresentação dos uniformes (só no lançamento, SocialPost.show_launch): cada camisa vestida por
+## um jogador do elenco, em foto de estúdio (busto). Titular no melhor jogador, reserva no segundo,
+## terceiro uniforme no terceiro e o de goleiro no goleiro titular.
 
 const NAMES := {"home": "Titular", "away": "Reserva", "third": "Terceiro", "gk": "Goleiro"}
 
@@ -34,9 +34,12 @@ static func kit_of(club: Club, key: String) -> Dictionary:
 	return club.kit_home
 
 
-## Linha com as quatro fotos (largura total). `px` = lado de cada foto; com nomes embaixo.
-static func row(w: GameWorld, club: Club, px: float, with_names: bool = true) -> HBoxContainer:
-	var h := UIKit.hbox(UITokens.S2)
+## As quatro fotos em grade (`cols` colunas). `px` = largura de cada foto; com nomes embaixo.
+static func grid(w: GameWorld, club: Club, px: float, cols: int = 2, with_names: bool = true) -> GridContainer:
+	var h := GridContainer.new()
+	h.columns = cols
+	h.add_theme_constant_override(&"h_separation", UITokens.S2)
+	h.add_theme_constant_override(&"v_separation", UITokens.S2)
 	var who := models(w, club)
 	for key in ["home", "away", "third", "gk"]:
 		var v := UIKit.vbox(2)

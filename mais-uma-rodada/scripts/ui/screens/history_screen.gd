@@ -161,6 +161,9 @@ func _seasons(w: GameWorld, c: VBoxContainer) -> void:
 		idx = w.history.size() - 1
 		_year = int(w.history[idx]["y"])
 	var h: Dictionary = w.history[idx]
+	var tl := _timeline(w)
+	if tl != null:
+		c.add_child(tl)
 	# Navegação entre anos
 	var nav := UIKit.hbox(10)
 	var prev := UIKit.button("", "", func():
@@ -178,6 +181,9 @@ func _seasons(w: GameWorld, c: VBoxContainer) -> void:
 	nxt.disabled = idx >= w.history.size() - 1
 	nav.add_child(nxt)
 	c.add_child(nav)
+	if not SeasonArchive.summary_of(w, _year).is_empty():
+		var yy := _year
+		c.add_child(UIKit.button("Rever o fim de temporada %d" % _year, "", func(): UIManager.push("season_end", {"year": yy}), "trophy"))
 	# Resumo do usuário
 	var u: Dictionary = h.get("user", {})
 	if not u.is_empty():
@@ -315,6 +321,96 @@ func _seasons(w: GameWorld, c: VBoxContainer) -> void:
 			row.add_child(col)
 			cc.add_child(row)
 		c.add_child(UIKit.card_panel(cc))
+
+
+## Temporada a temporada do treinador: gráfico da posição na liga (toque escolhe o ano) e uma
+## linha por temporada com campanha, saldo e taças. O ano escolhido abre o detalhe logo abaixo.
+func _timeline(w: GameWorld) -> Control:
+	var rows: Array = []
+	for h: Dictionary in w.history:
+		var u: Dictionary = h.get("user", {})
+		if u.is_empty() or int(u.get("pos", 0)) <= 0:
+			continue
+		var club := w.club(int(h.get("club", w.user_club_id)))
+		var rec := {}
+		if club != null:
+			for e: Dictionary in club.history:
+				if int(e.get("y", 0)) == int(h["y"]):
+					rec = e
+		rows.append({"y": int(h["y"]), "u": u, "club": club, "rec": rec})
+	if rows.is_empty():
+		return null
+	var card := UIKit.card("Card", UITokens.S1)
+	card.add_child(UIKit.section("Temporada a temporada"))
+	var labels: Array = []
+	var pos: Array = []
+	var pts: Array = []
+	var sel := -1
+	var worst := 4
+	for i in rows.size():
+		var r: Dictionary = rows[i]
+		labels.append(int(r["y"]))
+		pos.append(int(r["u"]["pos"]))
+		pts.append(int(r["rec"].get("pts", 0)) if not (r["rec"] as Dictionary).is_empty() else null)
+		worst = maxi(worst, int(r["u"]["pos"]))
+		if int(r["y"]) == _year:
+			sel = i
+	if rows.size() >= 2:
+		var ch := StatChart.make(labels, [{"name": "Posição", "values": pos, "color": UIColors.TEXT}], 200.0)
+		ch.invert = true
+		ch.y_min = 1
+		ch.y_max = worst
+		ch.value_fmt = "%dº"
+		ch.sel = sel
+		ch.selected.connect(func(i: int):
+			_year = int(rows[i]["y"])
+			refresh())
+		card.add_child(ch)
+	var tf := DataTable.tabular_font()
+	for i in range(rows.size() - 1, -1, -1):
+		var r: Dictionary = rows[i]
+		var u: Dictionary = r["u"]
+		var rec: Dictionary = r["rec"]
+		var row := UIKit.hbox(UITokens.S2)
+		var yl := UIKit.label(str(r["y"]), "H3")
+		yl.custom_minimum_size.x = 64
+		yl.add_theme_font_override(&"font", tf)
+		row.add_child(yl)
+		if r["club"] != null:
+			row.add_child(UIKit.crest(r["club"], 30))
+		var col := UIKit.vbox(0)
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var head := "%dº na %s" % [int(u["pos"]), String(u.get("league_name", ""))]
+		if bool(u.get("champion", false)):
+			head = "Campeão da %s" % String(u.get("league_name", ""))
+		col.add_child(UIKit.label(head, "", true))
+		var bits: Array[String] = []
+		if not rec.is_empty():
+			bits.append("%d pts" % int(rec.get("pts", 0)))
+			bits.append("%d-%d-%d" % [int(rec.get("w", 0)), int(rec.get("dr", 0)), int(rec.get("lo", 0))])
+			bits.append("saldo %+d" % (int(rec.get("gf", 0)) - int(rec.get("ga", 0))))
+		var sub := UIKit.label("   ".join(PackedStringArray(bits)), "Small")
+		sub.add_theme_font_override(&"font", tf)
+		col.add_child(sub)
+		row.add_child(col)
+		# Taças e acessos do ano
+		var marks := UIKit.hbox(4)
+		if bool(u.get("champion", false)):
+			marks.add_child(TrophyView.make("L:" + String(u.get("league", "")), 28, w))
+		for cu: Dictionary in u.get("cups", []):
+			if bool(cu.get("champion", false)):
+				marks.add_child(TrophyView.make(CupManager.title_key(String(cu["id"])), 28, w))
+		if bool(u.get("promoted", false)):
+			marks.add_child(UIKit.icon_rect("up", 22, UIColors.GREEN))
+		elif bool(u.get("relegated", false)):
+			marks.add_child(UIKit.icon_rect("down", 22, UIColors.RED))
+		row.add_child(marks)
+		var yr := int(r["y"])
+		var tap := UIKit.tap_row(row, func():
+			_year = yr
+			refresh(), "CardHighlight" if yr == _year else "RowPanel")
+		card.add_child(tap)
+	return UIKit.card_panel(card)
 
 
 func _arch_card(w: GameWorld, h: Dictionary, a: Dictionary) -> Control:

@@ -271,6 +271,10 @@ estado alternável.
 - **Cabeçalho de identidade** (`IdentityBand`): bloco na cor principal do clube com corte
   diagonal e faixa na segunda cor, só atrás do escudo ou do retrato. O texto fica sobre a
   superfície neutra.
+  - **Variante ficha do jogador** (`gradient`): como no FM, o jogador recortado (sem moldura)
+    sai de um degradê horizontal na cor principal do clube, mais forte atrás dele e sumindo na
+    superfície antes do texto, na altura do recorte (os ombros encostam na base). Só no
+    cabeçalho do perfil do jogador; o resto segue o bloco chapado.
 - **Bloco de jogo** (`MatchHero`): faixa da competição nas cores da transmissão, lados nas
   cores dos clubes, escudos, ação principal de giz.
 - **Campo** (`PitchView`): mini camisas, sobrenome, condição discreta. Toque = painel

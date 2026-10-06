@@ -14,6 +14,8 @@ var only := ""
 ## --nt=BRA: o técnico também comanda essa seleção (telas de seleções e uniforme da seleção).
 var nt := ""
 var rounds := 3
+## --seasons=N: joga N temporadas inteiras (com o fim de temporada) antes das rodadas.
+var seasons := 0
 ## Com --only: modo claro, clube pelo nome (parte do nome basta) e tingimento do fundo (-1 = o salvo).
 var light := false
 ## Dados feios de propósito (nomes enormes, clube de nome comprido, lesão, suspensão,
@@ -231,6 +233,17 @@ func _only_pass() -> void:
 	if nt != "":
 		NationalCoach.accept(w, nt, true)
 	UIManager.apply_look()
+	for _s in seasons:
+		var guard := 0
+		while not GameManager.season_over() and guard < 400:
+			guard += 1
+			var rep := GameManager.play_instant()
+			if rep.is_empty():
+				GameManager.advance_to_end()
+			if guard % 10 == 0:
+				await _frames(1)
+		GameManager.end_season()
+		await _frames(2)
 	for i in rounds:
 		GameManager.play_instant()
 		await _frames(2)
@@ -391,6 +404,13 @@ func _dialog_shot(w: GameWorld, kind: String) -> void:
 		UIManager.close_all_modals()
 		return
 	match kind:
+		"launch":
+			# Lançamento dos uniformes: cada camisa vestida por um jogador
+			SocialPost.show_launch(w)
+			await _frames(30)
+			await _shot(prefix + "launch")
+			UIManager.close_all_modals()
+			return
 		"kid":
 			# Ficha de um garoto da base (Vida na base: contrato, família, corpo).
 			YouthManager.ensure_academy(w)

@@ -213,12 +213,18 @@ func _club_hero(w: GameWorld, club: Club) -> Control:
 
 
 ## Os uniformes da temporada: presença do clube (e atalho para o editor de uniformes).
-## Os uniformes vestidos pelos jogadores: titular no melhor, reserva no segundo, terceiro no
-## terceiro e o de goleiro no goleiro titular (KitPresentation).
 func _kits_row(club: Club) -> Control:
-	var cw := content_width() if content_width() < 1000.0 else content_width() * 0.5
-	var px := clampf((cw - 96.0) / 4.0, 80.0, 170.0)
-	var h := KitPresentation.row(world(), club, px)
+	var h := UIKit.hbox(UITokens.S2)
+	for k in [[club.kit_home, "Titular"], [club.kit_away, "Reserva"], [club.third_kit(), "Terceiro"], [club.gk_kit(), "Goleiro"]]:
+		var v := UIKit.vbox(2)
+		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var kv := UIKit.kit(k[0], 92, 0, club.crest)
+		kv.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		v.add_child(kv)
+		var l := UIKit.label(String(k[1]), "Caps")
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(l)
+		h.add_child(v)
 	var card := UIKit.card("Card", 0)
 	card.add_child(h)
 	var panel := UIKit.tap_row(UIKit.card_panel(card), func(): UIManager.push("kit"), "PanelContainer")
