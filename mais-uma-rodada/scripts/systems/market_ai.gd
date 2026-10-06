@@ -814,6 +814,7 @@ static func player_interest(world: GameWorld, p: Player, buyer: Club) -> float:
 	# Jovem de liga exportadora sonha com a liga rica.
 	if age <= 24 and p.club_id >= 0 and power(buyer) > power(world.club(p.club_id)) * 1.6:
 		v += 0.12
+	v += Aftermath.exit_pull(world, p, buyer) # quem caiu quer sair; o campeão atrai
 	return clampf(v, 0.05, 0.95)
 
 
@@ -837,6 +838,7 @@ static func _seller_mult(world: GameWorld, seller: Club, p: Player, buyer: Club,
 		m *= 1.08
 	if p.transfer_listed:
 		m *= 0.85
+	m *= Aftermath.sell_mult(world, seller, p) # recém-rebaixado não segura quem está acima do nível
 	if _memo_trouble(seller, memo):
 		m *= 0.8
 	if _memo_family_count(world, seller, p.position, memo) <= TransferManager._family_min(p.position):

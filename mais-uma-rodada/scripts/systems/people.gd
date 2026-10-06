@@ -423,7 +423,8 @@ static func _announce_change(world: GameWorld, club: Club, old: Dictionary, new_
 		return
 	var why: String = {"resultados": "após a sequência ruim", "temporada": "depois de uma temporada abaixo da meta", "proposta": "que aceitou outro desafio",
 		"usuario": "após a saída de %s" % world.manager_name, "res": "que pediu demissão", "efetivo": "que era interino",
-		"perdeu": "que foi contratado pelo %s" % note, "ciclo": "que encerrou o ciclo no clube"}.get(reason, "")
+		"perdeu": "que foi contratado pelo %s" % note, "ciclo": "que encerrou o ciclo no clube",
+		"ferida": "que não resistiu depois de %s" % note}.get(reason, "")
 	var nm := String(new_coach["n"])
 	var title := ""
 	var body := ""
@@ -1446,6 +1447,9 @@ static func on_season_end(world: GameWorld, summary: Dictionary) -> void:
 			continue
 		var goal := SeasonManager.goal_of(world, c.id)
 		var diff := int(goal[1]) - int(h["p"])
+		# Perder o título para o rival ou a final pesa como terminar abaixo da meta.
+		var sting := Aftermath.sting(world, c)
+		var sdiff := diff - int(round(float(sting["v"])))
 		co["rep"] = clampf(float(co["rep"]) + clampf(diff * 0.8, -5.0, 6.0) + (6.0 if int(h["p"]) == 1 else 0.0), 5.0, 99.0)
 		co["sk"] = clampf(float(co["sk"]) + r.randf_range(-1.0, 1.5), 15.0, 97.0)
 		CoachCareer.bank(co)
@@ -1458,10 +1462,10 @@ static func on_season_end(world: GameWorld, summary: Dictionary) -> void:
 			replace_coach(world, c, "efetivo") # a temporada acabou: o clube escolhe um técnico
 		elif age >= 70 and r.randf() < 0.5:
 			replace_coach(world, c, "")
-		elif diff <= -3 and r.randf() < 0.55 / pres_pat:
-			replace_coach(world, c, "temporada")
+		elif sdiff <= -3 and r.randf() < 0.55 / pres_pat:
+			replace_coach(world, c, "ferida" if diff > -3 else "temporada", String(sting["why"]))
 		else:
-			co["job"] = clampf(float(co["job"]) * 0.5 + 35.0 + diff * 2.0, 20.0, 90.0)
+			co["job"] = clampf(float(co["job"]) * 0.5 + 35.0 + sdiff * 2.0, 20.0, 90.0)
 	CoachCareer.retire_free(world, r)
 	# Presidentes: fim de mandato e eleições
 	for cid in pp["pres"]:

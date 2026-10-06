@@ -508,7 +508,9 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 		tt = _time("evolucao", tt)
 		for c: Club in world.clubs:
 			FinanceManager.process_week(world, c)
-			c.fan_mood = clampf(c.fan_mood + (60.0 - c.fan_mood) * 0.03, 0.0, 100.0)
+			# O clima volta devagar para o patamar do momento (títulos, finais perdidas, jejum).
+			c.fan_mood = clampf(c.fan_mood + (Aftermath.mood_target(world, c) - c.fan_mood) * 0.03, 0.0, 100.0)
+		Aftermath.weekly(world)
 		WorldEvents.weekly(world)
 		tt = _time("financas", tt)
 		TrainingManager.weekly(world)
@@ -642,6 +644,7 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 	var detail: Dictionary = MatchStats.build(world, f, res) if is_league else {}
 	TacticalScout.record(world, f, res, world.club(f.home).sheet, world.club(f.away).sheet)
 	var stakes := TieStakes.of(world, f) # mata-mata decidido: vale o agregado e a taça
+	Aftermath.on_match(world, f, stakes, derby) # final, queda para o rival e goleada em clássico ficam marcadas
 	for side in 2:
 		var club := world.club(f.home if side == 0 else f.away)
 		var result := f.result_for(club.id)
@@ -751,6 +754,10 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 				dmor -= 2.0
 			if big:
 				dmor *= 1.5
+			if not stakes.is_empty():
+				# Mata-mata: o vestiário mede pelo confronto (vencer a volta e cair não anima ninguém).
+				var wt := float(stakes["weight"])
+				dmor = (4.0 + 6.0 * wt) if int(stakes["w"]) == club.id else -(4.0 + 8.0 * wt)
 			p.morale = clampf(p.morale + dmor * vol, 0.0, 100.0)
 
 
@@ -859,6 +866,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 			_update_reputation(c, cfg, i + 1, teams, promoted.has(c.id), relegated.has(c.id))
 		var champ := world.club(LeagueFormat.champion(league, ids))
 		Rivalry.on_league_end(world, league, champ.id, LeagueFormat.runner_up(league, ids))
+		Aftermath.on_league_end(world, league, ids, champ, LeagueFormat.runner_up(league, ids), promoted, relegated)
 		champ.add_title("L:" + id)
 		# Título de liga forte vale mais reputação (Premier ≫ liga média ≫ divisão de baixo).
 		champ.reputation = clampf(champ.reputation + Reputation.title_rep_gain("L:" + id), 5.0, 99.0)
@@ -1192,6 +1200,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 		if not world.is_user_club(c.id):
 			PlayerGenerator.assign_statuses(world, c)
 		_assign_missing_shirts(world, c)
+	Aftermath.season_open(world) # cofre aberto depois do vice, cobrança e jejum
 	Valuation.refresh_shift(world)
 	Referees.season_close(world)
 	tt = _time("es_nova_temporada", tt)
