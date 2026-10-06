@@ -82,17 +82,29 @@ const CARRY := ["stripes_h", "hoops_thin", "hoops_pin", "hoop_fade", "faixa", "f
 ## Estampas pintadas com degradê (desenho próprio; pattern_bands dá só uma aproximação).
 const GRADIENTS := ["gradient", "fade_up"]
 
-## Corpo da camisa (coordenadas unitárias; 0.25..0.75 é a frente). Ombros caídos, cintura leve,
-## barra arredondada.
-const BODY := [Vector2(0.375, 0.062), Vector2(0.5, 0.072), Vector2(0.625, 0.062), Vector2(0.705, 0.083), Vector2(0.745, 0.2),
-	Vector2(0.748, 0.305), Vector2(0.738, 0.6), Vector2(0.742, 0.93), Vector2(0.62, 0.946), Vector2(0.5, 0.952),
-	Vector2(0.38, 0.946), Vector2(0.258, 0.93), Vector2(0.262, 0.6), Vector2(0.252, 0.305), Vector2(0.255, 0.2), Vector2(0.295, 0.083)]
-## Manga direita (de quem olha); a esquerda é o espelho. Os dois últimos pontos antes do fim são a boca da manga.
-const SLEEVE_SHORT := [Vector2(0.68, 0.075), Vector2(0.8, 0.113), Vector2(0.905, 0.255), Vector2(0.838, 0.362), Vector2(0.748, 0.305), Vector2(0.735, 0.2)]
-const SLEEVE_LONG := [Vector2(0.68, 0.075), Vector2(0.8, 0.113), Vector2(0.865, 0.3), Vector2(0.905, 0.615), Vector2(0.835, 0.635), Vector2(0.79, 0.43), Vector2(0.748, 0.33), Vector2(0.735, 0.2)]
+## Corpo da camisa (coordenadas unitárias; 0.25..0.75 é a frente). Formato do tronco: trapézio
+## descendo do pescoço para o ombro, peito largo na axila, cintura afinando e quadril de volta,
+## barra levemente curva.
+const BODY := [Vector2(0.378, 0.062), Vector2(0.5, 0.072), Vector2(0.622, 0.062), Vector2(0.682, 0.08), Vector2(0.722, 0.114),
+	Vector2(0.741, 0.2), Vector2(0.745, 0.3), Vector2(0.734, 0.45), Vector2(0.717, 0.62), Vector2(0.72, 0.78), Vector2(0.728, 0.93),
+	Vector2(0.62, 0.948), Vector2(0.5, 0.955), Vector2(0.38, 0.948), Vector2(0.272, 0.93), Vector2(0.28, 0.78), Vector2(0.283, 0.62),
+	Vector2(0.266, 0.45), Vector2(0.255, 0.3), Vector2(0.259, 0.2), Vector2(0.278, 0.114), Vector2(0.318, 0.08)]
+## Índices do contorno do corpo: ombro direito (gola..cava), lateral direita..barra..lateral esquerda, ombro esquerdo.
+const BODY_SHOULDER_R := [2, 3, 4, 5]
+const BODY_SIDES := [5, 19]
+const BODY_SHOULDER_L := [0, 21, 20, 19]
+## Manga direita (de quem olha); a esquerda é o espelho. Braço caído junto ao corpo, deltoide
+## arredondado no ombro e a boca da manga na metade do braço.
+const SLEEVE_SHORT := [Vector2(0.678, 0.079), Vector2(0.75, 0.094), Vector2(0.802, 0.128), Vector2(0.838, 0.19), Vector2(0.868, 0.325),
+	Vector2(0.766, 0.362), Vector2(0.746, 0.292), Vector2(0.736, 0.2)]
+const SLEEVE_LONG := [Vector2(0.678, 0.079), Vector2(0.75, 0.094), Vector2(0.8, 0.128), Vector2(0.835, 0.2), Vector2(0.86, 0.33),
+	Vector2(0.874, 0.47), Vector2(0.888, 0.6), Vector2(0.836, 0.616), Vector2(0.81, 0.47), Vector2(0.79, 0.37), Vector2(0.75, 0.3),
+	Vector2(0.736, 0.2)]
 ## Índices da boca da manga em cada formato.
-const CUFF_SHORT := [2, 3]
-const CUFF_LONG := [3, 4]
+const CUFF_SHORT := [4, 5]
+const CUFF_LONG := [6, 7]
+## Índice da ponta do ombro (alto do deltoide) nas duas mangas.
+const SLEEVE_TOP := 2
 ## Proporção largura/altura do uniforme completo e altura da camisa nele.
 const FULL_ASPECT := 0.55
 const FULL_SHIRT := 0.5
@@ -225,10 +237,10 @@ func _draw_shirt(s: float, off: Vector2) -> void:
 	# Raglan: a cor da manga sobe até a gola
 	if sleeve == "raglan":
 		for sx in [false, true]:
-			var rp := [Vector2(0.585, 0.064), Vector2(0.625, 0.062), Vector2(0.705, 0.083), Vector2(0.745, 0.2), Vector2(0.748, 0.305)]
+			var rp := [Vector2(0.585, 0.064), Vector2(0.622, 0.062), Vector2(0.682, 0.08), Vector2(0.722, 0.114), Vector2(0.741, 0.2), Vector2(0.745, 0.3)]
 			for piece in Geometry2D.intersect_polygons(_xf(_mirror(rp, sx), s, off), body):
 				draw_colored_polygon(piece, c2)
-			draw_polyline(_xf(_mirror([Vector2(0.585, 0.064), Vector2(0.748, 0.305)], sx), s, off), c3 if c3 != c2 else c2.darkened(0.3), maxf(1.0, s * 0.01), true)
+			draw_polyline(_xf(_mirror([Vector2(0.585, 0.064), Vector2(0.745, 0.3)], sx), s, off), c3 if c3 != c2 else c2.darkened(0.3), maxf(1.0, s * 0.01), true)
 	# Detalhes das mangas
 	var cuff_idx: Array = CUFF_LONG if long else CUFF_SHORT
 	for li in 2:
@@ -248,14 +260,14 @@ func _draw_shirt(s: float, off: Vector2) -> void:
 				_band(a, b, inward, 0.0, 0.03, s, off, c3)
 				_band(a, b, inward, 0.01, 0.01, s, off, c2 if c2 != c3 else c1)
 			"stripes":
-				var t: Vector2 = su[1]
+				var t: Vector2 = su[SLEEVE_TOP]
 				for i in 3:
 					var d := Vector2((i - 1) * 0.018 * (-1.0 if li == 1 else 1.0), (i - 1) * 0.018)
-					var p0: Vector2 = Vector2(0.705 if li == 0 else 0.295, 0.083) + d * 0.5
+					var p0: Vector2 = Vector2(0.682 if li == 0 else 0.318, 0.08) + d * 0.5
 					draw_line(off + p0 * s, off + ((a + b) * 0.5).lerp(t, 0.35 - 0.15 * (i - 1)) * s + d * s * 0.3, c3, maxf(1.0, s * 0.011), true)
 			"shoulder_stripe":
 				var nk: Vector2 = Vector2(0.6, 0.064) if li == 0 else Vector2(0.4, 0.064)
-				var tip: Vector2 = su[1]
+				var tip: Vector2 = su[SLEEVE_TOP]
 				var end: Vector2 = a.lerp(b, 0.2)
 				draw_polyline(_xf([nk, tip, end], s, off), c3, maxf(1.5, s * 0.022), true)
 	# Vivos
@@ -263,12 +275,12 @@ func _draw_shirt(s: float, off: Vector2) -> void:
 	var tw := maxf(1.0, s * 0.011)
 	if trim == "sides" or trim == "both":
 		for sx in [false, true]:
-			draw_polyline(_xf(_mirror([Vector2(0.742, 0.31), Vector2(0.733, 0.6), Vector2(0.737, 0.925)], sx), s, off), c3, tw * 1.4, true)
+			draw_polyline(_xf(_mirror([Vector2(0.739, 0.31), Vector2(0.728, 0.45), Vector2(0.711, 0.62), Vector2(0.714, 0.78), Vector2(0.722, 0.925)], sx), s, off), c3, tw * 1.4, true)
 	if trim == "shoulders" or trim == "both":
 		for sx in [false, true]:
-			draw_polyline(_xf(_mirror([Vector2(0.6, 0.066), Vector2(0.705, 0.083), Vector2(0.745, 0.2), Vector2(0.748, 0.305)], sx), s, off), c3, tw * 1.4, true)
+			draw_polyline(_xf(_mirror([Vector2(0.6, 0.066), Vector2(0.682, 0.08), Vector2(0.722, 0.114), Vector2(0.741, 0.2), Vector2(0.745, 0.3)], sx), s, off), c3, tw * 1.4, true)
 	if trim == "hem":
-		draw_polyline(_xf([Vector2(0.258, 0.915), Vector2(0.38, 0.931), Vector2(0.5, 0.937), Vector2(0.62, 0.931), Vector2(0.742, 0.915)], s, off), c3, maxf(1.5, s * 0.02), true)
+		draw_polyline(_xf([Vector2(0.272, 0.915), Vector2(0.38, 0.933), Vector2(0.5, 0.94), Vector2(0.62, 0.933), Vector2(0.728, 0.915)], s, off), c3, maxf(1.5, s * 0.02), true)
 	# Luz e dobras do tecido
 	_draw_shading(s, off, long, c1)
 	var show_logos := s >= 56.0
@@ -357,17 +369,16 @@ func _outline(s: float, off: Vector2, long: bool, c1: Color) -> void:
 			outer.append(sl[i])
 		draw_polyline(outer, col, w, true)
 	var body := _xf(BODY, s, off)
-	var pts := PackedVector2Array()
 	# Lados e barra (os ombros ficam por conta das mangas)
-	for i in range(4, 13):
+	var pts := PackedVector2Array()
+	for i in range(BODY_SIDES[0], BODY_SIDES[1] + 1):
 		pts.append(body[i])
 	draw_polyline(pts, col, w, true)
-	var shoulder_r := PackedVector2Array([body[2], body[3], body[4]])
-	var shoulder_l := PackedVector2Array([body[0], body[15], body[14]])
-	draw_polyline(shoulder_r, Color(col, col.a * 0.6), w, true)
-	draw_polyline(shoulder_l, Color(col, col.a * 0.6), w, true)
-	var lside := PackedVector2Array([body[12], body[13], body[14]])
-	draw_polyline(lside, col, w, true)
+	for idx: Array in [BODY_SHOULDER_R, BODY_SHOULDER_L]:
+		var sh := PackedVector2Array()
+		for i: int in idx:
+			sh.append(body[i])
+		draw_polyline(sh, Color(col, col.a * 0.6), w, true)
 
 
 ## Sombreado do tecido: laterais e barra mais escuras, peito e ombros iluminados, mangas com a parte
@@ -388,17 +399,36 @@ func _draw_shading(s: float, off: Vector2, long: bool, c1: Color) -> void:
 			var d := (p - Vector2(0.44, 0.24)).length() / 0.2
 			cols.append(Color(1, 1, 1, maxf(0.0, 0.09 * (1.0 - d * d)) * (1.6 if dark else 1.0)))
 		draw_polygon(_xf(piece, s, off), cols)
+	# Peitoral: luz em cima, sombra suave na linha de baixo, e o esterno discreto no meio.
+	for sx in [false, true]:
+		var pec := _mirror([Vector2(0.515, 0.335), Vector2(0.6, 0.35), Vector2(0.685, 0.335), Vector2(0.705, 0.355),
+			Vector2(0.69, 0.385), Vector2(0.6, 0.402), Vector2(0.52, 0.385)], sx)
+		draw_polygon(_xf(pec, s, off), PackedColorArray([Color(0, 0, 0, 0.0), Color(0, 0, 0, 0.0), Color(0, 0, 0, 0.0), Color(0, 0, 0, 0.0),
+			Color(0, 0, 0, 0.07 * k), Color(0, 0, 0, 0.09 * k), Color(0, 0, 0, 0.06 * k)]))
+		var lit := _mirror([Vector2(0.53, 0.2), Vector2(0.62, 0.19), Vector2(0.69, 0.23), Vector2(0.685, 0.33), Vector2(0.6, 0.345), Vector2(0.52, 0.32)], sx)
+		draw_polygon(_xf(lit, s, off), PackedColorArray([Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.035 * (1.6 if dark else 1.0)), Color(1, 1, 1, 0.0),
+			Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.05 * (1.6 if dark else 1.0)), Color(1, 1, 1, 0.0)]))
+	draw_polyline(_xf([Vector2(0.5, 0.2), Vector2(0.5, 0.38)], s, off), Color(0, 0, 0, 0.05 * k), maxf(1.0, s * 0.014), true)
+	# Mangas: a parte de baixo e o lado colado ao corpo ficam na sombra; o alto do deltoide pega luz.
+	var cuff_in: int = (CUFF_LONG if long else CUFF_SHORT)[1]
 	for left in [false, true]:
 		var su := _sleeve_poly(long, left)
 		var cols := PackedColorArray()
-		for p: Vector2 in su:
-			cols.append(Color(0, 0, 0, clampf((p.y - 0.09) / 0.3, 0.0, 1.0) * 0.2 * k))
+		for i in su.size():
+			var p: Vector2 = su[i]
+			var a := clampf((p.y - 0.09) / 0.3, 0.0, 1.0) * 0.14 + (0.1 if i >= cuff_in else 0.0)
+			cols.append(Color(0, 0, 0, a * k))
 		draw_polygon(_xf(su, s, off), cols)
+		var dl := _mirror([Vector2(0.72, 0.1), Vector2(0.775, 0.105), Vector2(0.81, 0.15), Vector2(0.79, 0.19), Vector2(0.75, 0.16)], left)
+		draw_polygon(_xf(dl, s, off), PackedColorArray([Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.06 * (1.6 if dark else 1.0)), Color(1, 1, 1, 0.0),
+			Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.03)]))
 	var fold := Color(0, 0, 0, 0.1 * k)
 	var fw := maxf(1.0, s * 0.012)
 	for sx in [false, true]:
-		draw_polyline(_xf(_mirror([Vector2(0.735, 0.315), Vector2(0.69, 0.345), Vector2(0.655, 0.36)], sx), s, off), fold, fw, true)
-		draw_polyline(_xf(_mirror([Vector2(0.73, 0.7), Vector2(0.69, 0.72), Vector2(0.66, 0.745)], sx), s, off), Color(fold, fold.a * 0.8), fw, true)
+		# Repuxo da axila em direção ao peito e dobra na cintura
+		draw_polyline(_xf(_mirror([Vector2(0.738, 0.31), Vector2(0.705, 0.335), Vector2(0.67, 0.348)], sx), s, off), fold, fw, true)
+		draw_polyline(_xf(_mirror([Vector2(0.712, 0.64), Vector2(0.68, 0.66), Vector2(0.65, 0.685)], sx), s, off), Color(fold, fold.a * 0.8), fw, true)
+		draw_polyline(_xf(_mirror([Vector2(0.716, 0.8), Vector2(0.69, 0.81)], sx), s, off), Color(fold, fold.a * 0.6), fw, true)
 
 
 ## Degradê vertical do corpo (e das mangas), da cor principal para a da estampa.
@@ -675,7 +705,25 @@ func _draw_text_centered(txt: String, center: Vector2, max_w: float, size_px: in
 	return true
 
 
-## Calção, pernas e meiões (modo completo). Desenhado antes da camisa, que cobre a cintura.
+## Calção (perna esquerda de quem olha; a direita é o espelho). Cintura sob a camisa, quadril
+## arredondado, barra mais baixa por fora e o gancho no meio.
+const SHORTS_L := [Vector2(0.3, 0.44), Vector2(0.283, 0.48), Vector2(0.262, 0.54), Vector2(0.243, 0.6), Vector2(0.226, 0.652),
+	Vector2(0.29, 0.662), Vector2(0.36, 0.668), Vector2(0.43, 0.664), Vector2(0.478, 0.655), Vector2(0.49, 0.625), Vector2(0.5, 0.598)]
+## Lateral (da cintura à barra) e barra do calção, prolongadas para os recortes.
+const SHORTS_SIDE := [Vector2(0.3, 0.42), Vector2(0.3, 0.44), Vector2(0.283, 0.48), Vector2(0.262, 0.54), Vector2(0.243, 0.6), Vector2(0.226, 0.652), Vector2(0.22, 0.68)]
+const SHORTS_HEM := [Vector2(0.2, 0.65), Vector2(0.226, 0.652), Vector2(0.29, 0.662), Vector2(0.36, 0.668), Vector2(0.43, 0.664), Vector2(0.478, 0.655), Vector2(0.5, 0.65)]
+## Coxa e joelho entre a barra do calção e o meião.
+const LEG := [Vector2(0.262, 0.62), Vector2(0.475, 0.62), Vector2(0.462, 0.665), Vector2(0.448, 0.712), Vector2(0.302, 0.712), Vector2(0.278, 0.665)]
+## Meião: contorno de fora e de dentro, de cima para baixo (panturrilha cheia, tornozelo fino).
+const SOCK_OUT := [Vector2(0.298, 0.705), Vector2(0.289, 0.74), Vector2(0.283, 0.78), Vector2(0.29, 0.83), Vector2(0.307, 0.875), Vector2(0.318, 0.922)]
+const SOCK_IN := [Vector2(0.447, 0.705), Vector2(0.455, 0.745), Vector2(0.46, 0.79), Vector2(0.45, 0.84), Vector2(0.43, 0.88), Vector2(0.42, 0.922)]
+## Chuteira com o bico um pouco virado para fora: cano, peito do pé, bico e solado.
+const BOOT := [Vector2(0.316, 0.913), Vector2(0.424, 0.913), Vector2(0.433, 0.94), Vector2(0.431, 0.965), Vector2(0.4, 0.976),
+	Vector2(0.33, 0.979), Vector2(0.275, 0.976), Vector2(0.248, 0.97), Vector2(0.243, 0.958), Vector2(0.258, 0.946), Vector2(0.29, 0.936), Vector2(0.31, 0.926)]
+const BOOT_SOLE := [Vector2(0.431, 0.962), Vector2(0.4, 0.973), Vector2(0.33, 0.976), Vector2(0.275, 0.973), Vector2(0.246, 0.966)]
+
+
+## Calção, pernas, meiões e chuteiras (modo completo). Desenhado antes da camisa, que cobre a cintura.
 func _draw_legs(r: Rect2) -> void:
 	var sh := Color(String(kit.get("shorts", kit.get("c2", "#111111"))))
 	var sh2 := Color(String(kit.get("shorts2", kit.get("c1", "#FFFFFF"))))
@@ -685,44 +733,51 @@ func _draw_legs(r: Rect2) -> void:
 	var boot := Color("#1A1A1A")
 	var lw := maxf(1.0, r.size.x * 0.011)
 	var out_sh := Color(1, 1, 1, 0.25) if sh.get_luminance() < 0.12 else Color(0, 0, 0, 0.42)
-	# Pernas (pele entre o calção e os meiões), com o joelho sombreado
-	for x0 in [0.305, 0.555]:
-		var leg := _fx(r, [Vector2(x0 + 0.01, 0.6), Vector2(x0 + 0.13, 0.6), Vector2(x0 + 0.135, 0.72), Vector2(x0 + 0.005, 0.72)])
-		draw_colored_polygon(leg, skin)
-		draw_polygon(_fx(r, [Vector2(x0 + 0.01, 0.66), Vector2(x0 + 0.13, 0.66), Vector2(x0 + 0.135, 0.72), Vector2(x0 + 0.005, 0.72)]),
-			PackedColorArray([Color(0, 0, 0, 0.0), Color(0, 0, 0, 0.0), Color(0, 0, 0, 0.18), Color(0, 0, 0, 0.18)]))
+	# Coxas e joelhos: sombra da barra do calção em cima, rótula com um toque de luz
+	for sx in [false, true]:
+		draw_colored_polygon(_fx(r, _mirror(LEG, sx)), skin)
+		draw_polygon(_fx(r, _mirror([Vector2(0.27, 0.655), Vector2(0.47, 0.655), Vector2(0.462, 0.685), Vector2(0.285, 0.685)], sx)),
+			PackedColorArray([Color(0, 0, 0, 0.3), Color(0, 0, 0, 0.3), Color(0, 0, 0, 0.0), Color(0, 0, 0, 0.0)]))
+		draw_polygon(_fx(r, _mirror([Vector2(0.35, 0.68), Vector2(0.4, 0.68), Vector2(0.41, 0.695), Vector2(0.375, 0.706), Vector2(0.34, 0.695)], sx)),
+			PackedColorArray([Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.1), Color(1, 1, 1, 0.14), Color(1, 1, 1, 0.1)]))
+		for side in [[Vector2(0.278, 0.665), Vector2(0.302, 0.712), Vector2(0.33, 0.712), Vector2(0.305, 0.665)],
+				[Vector2(0.462, 0.665), Vector2(0.448, 0.712), Vector2(0.425, 0.712), Vector2(0.44, 0.665)]]:
+			draw_polygon(_fx(r, _mirror(side, sx)), PackedColorArray([Color(0, 0, 0, 0.16), Color(0, 0, 0, 0.16), Color(0, 0, 0, 0.0), Color(0, 0, 0, 0.0)]))
 	# Calção (a camisa cobre a cintura)
-	var shorts_u := [Vector2(0.29, 0.44), Vector2(0.71, 0.44), Vector2(0.752, 0.55), Vector2(0.785, 0.645), Vector2(0.53, 0.665),
-		Vector2(0.5, 0.6), Vector2(0.47, 0.665), Vector2(0.215, 0.645), Vector2(0.248, 0.55)]
+	var shorts_u: Array = SHORTS_L.duplicate()
+	for i in range(SHORTS_L.size() - 2, -1, -1):
+		var p: Vector2 = SHORTS_L[i]
+		shorts_u.append(Vector2(1.0 - p.x, p.y))
 	var shorts := _fx(r, shorts_u)
 	draw_colored_polygon(shorts, sh)
 	var st: String = kit.get("shorts_style", "plain")
 	var bands: Array = []
 	match st:
 		"side_stripe":
-			bands = [[Vector2(0.27, 0.44), Vector2(0.305, 0.44), Vector2(0.25, 0.66), Vector2(0.21, 0.66)], [Vector2(0.695, 0.44), Vector2(0.73, 0.44), Vector2(0.79, 0.66), Vector2(0.75, 0.66)]]
+			bands = [_side_strip(-0.03, -0.03, 0.016, 0.035)]
 		"side_panel":
-			bands = [[Vector2(0.26, 0.44), Vector2(0.34, 0.44), Vector2(0.29, 0.66), Vector2(0.2, 0.66)], [Vector2(0.66, 0.44), Vector2(0.74, 0.44), Vector2(0.8, 0.66), Vector2(0.71, 0.66)]]
+			bands = [_side_strip(-0.03, -0.03, 0.05, 0.075)]
 		"piping":
-			bands = [[Vector2(0.3, 0.44), Vector2(0.312, 0.44), Vector2(0.233, 0.66), Vector2(0.221, 0.66)], [Vector2(0.688, 0.44), Vector2(0.7, 0.44), Vector2(0.779, 0.66), Vector2(0.767, 0.66)]]
+			bands = [_side_strip(0.01, 0.012, 0.022, 0.024)]
 		"hem":
-			bands = [[Vector2(0, 0.628), Vector2(1, 0.628), Vector2(1, 0.7), Vector2(0, 0.7)]]
+			bands = [_hem_strip(-0.05, 0.03)]
 		"hem_double":
-			bands = [[Vector2(0, 0.612), Vector2(1, 0.612), Vector2(1, 0.622), Vector2(0, 0.622)], [Vector2(0, 0.634), Vector2(1, 0.634), Vector2(1, 0.7), Vector2(0, 0.7)]]
+			bands = [_hem_strip(0.036, 0.046), _hem_strip(-0.05, 0.024)]
 		"two_tone":
 			bands = [[Vector2(0.5, 0.4), Vector2(1, 0.4), Vector2(1, 0.7), Vector2(0.5, 0.7)]]
 		"stripes3":
 			for i in 3:
-				var d := i * 0.018
-				bands.append([Vector2(0.325 - d, 0.44), Vector2(0.333 - d, 0.44), Vector2(0.26 - d, 0.66), Vector2(0.252 - d, 0.66)])
-				bands.append([Vector2(0.667 + d, 0.44), Vector2(0.675 + d, 0.44), Vector2(0.748 + d, 0.66), Vector2(0.74 + d, 0.66)])
+				var d := 0.006 + i * 0.018
+				bands.append(_side_strip(d, d + 0.005, d + 0.008, d + 0.013))
 		"vent":
-			bands = [[Vector2(0.215, 0.645), Vector2(0.232, 0.585), Vector2(0.255, 0.648)], [Vector2(0.785, 0.645), Vector2(0.768, 0.585), Vector2(0.745, 0.648)],
-				[Vector2(0, 0.636), Vector2(1, 0.636), Vector2(1, 0.7), Vector2(0, 0.7)]]
-	for b in bands:
-		for piece in Geometry2D.intersect_polygons(_fx(r, b), shorts):
-			draw_colored_polygon(piece, sh2)
-	# Sombra da camisa sobre o calção e volume das pernas do calção
+			bands = [[Vector2(0.226, 0.652), Vector2(0.247, 0.592), Vector2(0.266, 0.657)], _hem_strip(-0.05, 0.02)]
+	for b: Array in bands:
+		for sx in [false, true]:
+			if st == "two_tone" and sx:
+				continue
+			for piece in Geometry2D.intersect_polygons(_fx(r, _mirror(b, sx)), shorts):
+				draw_colored_polygon(piece, sh2)
+	# Sombra da camisa sobre o calção, volume das coxas e dobras do gancho
 	var shade_k := 0.6 if sh.get_luminance() < 0.15 else 1.0
 	for piece in Geometry2D.intersect_polygons(_fx(r, [Vector2(0.2, 0.46), Vector2(0.8, 0.46), Vector2(0.8, 0.515), Vector2(0.2, 0.515)]), shorts):
 		var cols := PackedColorArray()
@@ -731,9 +786,10 @@ func _draw_legs(r: Rect2) -> void:
 		draw_polygon(piece, cols)
 	draw_polyline(_fx(r, [Vector2(0.5, 0.52), Vector2(0.5, 0.6)]), Color(0, 0, 0, 0.18 * shade_k), lw, true)
 	for sx in [false, true]:
-		var edge := _fx(r, _mirror([Vector2(0.215, 0.645), Vector2(0.248, 0.55), Vector2(0.29, 0.44), Vector2(0.33, 0.44), Vector2(0.27, 0.65)], sx))
-		for piece in Geometry2D.intersect_polygons(edge, shorts):
+		for piece in Geometry2D.intersect_polygons(_fx(r, _mirror(_side_strip(-0.03, -0.03, 0.04, 0.05), sx)), shorts):
 			draw_colored_polygon(piece, Color(0, 0, 0, 0.12 * shade_k))
+		draw_polyline(_fx(r, _mirror([Vector2(0.488, 0.61), Vector2(0.455, 0.632), Vector2(0.42, 0.645)], sx)), Color(0, 0, 0, 0.14 * shade_k), lw, true)
+		draw_polyline(_fx(r, _mirror([Vector2(0.3, 0.6), Vector2(0.34, 0.625)], sx)), Color(0, 0, 0, 0.08 * shade_k), lw, true)
 	var sps: Dictionary = kit.get("sp_s", {})
 	if not sps.is_empty() and r.size.y >= 120.0 and not back:
 		_draw_patch(_fr(r, 0.56, 0.575, 0.18, 0.045), sps, sh, false, "spsc")
@@ -743,57 +799,96 @@ func _draw_legs(r: Rect2) -> void:
 	# Meiões e chuteiras
 	var ss: String = kit.get("socks_style", "plain")
 	var out_so := Color(1, 1, 1, 0.25) if so.get_luminance() < 0.12 else Color(0, 0, 0, 0.42)
-	for x0 in [0.3, 0.56]:
-		var sock := _fx(r, [Vector2(x0, 0.705), Vector2(x0 + 0.14, 0.705), Vector2(x0 + 0.148, 0.765), Vector2(x0 + 0.125, 0.93),
-			Vector2(x0 + 0.015, 0.93), Vector2(x0 - 0.008, 0.765)])
+	var sock_u: Array = SOCK_OUT.duplicate()
+	for i in range(SOCK_IN.size() - 1, -1, -1):
+		sock_u.append(SOCK_IN[i])
+	for sx in [false, true]:
+		var sock := _fx(r, _mirror(sock_u, sx))
 		draw_colored_polygon(sock, so)
+		var x0 := 0.24
+		var sw := 0.26
 		var sb: Array = []
 		match ss:
 			"hoops":
 				for i in 3:
-					sb.append(_fr(r, x0 - 0.02, 0.735 + i * 0.05, 0.19, 0.022))
+					sb.append(Rect2(x0, 0.735 + i * 0.05, sw, 0.022))
 			"top_band":
-				sb.append(_fr(r, x0 - 0.02, 0.705, 0.19, 0.04))
+				sb.append(Rect2(x0, 0.7, sw, 0.045))
 			"top_stripes":
-				sb.append(_fr(r, x0 - 0.02, 0.712, 0.19, 0.01))
-				sb.append(_fr(r, x0 - 0.02, 0.728, 0.19, 0.01))
+				sb.append(Rect2(x0, 0.712, sw, 0.01))
+				sb.append(Rect2(x0, 0.728, sw, 0.01))
 			"two_tone":
-				sb.append(_fr(r, x0 - 0.02, 0.82, 0.19, 0.11))
+				sb.append(Rect2(x0, 0.82, sw, 0.11))
 			"stripes3":
 				for i in 3:
-					sb.append(_fr(r, x0 - 0.02, 0.72 + i * 0.016, 0.19, 0.008))
+					sb.append(Rect2(x0, 0.72 + i * 0.016, sw, 0.008))
 			"hoops_thin":
-				sb.append(_fr(r, x0 - 0.02, 0.77, 0.19, 0.012))
-				sb.append(_fr(r, x0 - 0.02, 0.79, 0.19, 0.012))
+				sb.append(Rect2(x0, 0.77, sw, 0.012))
+				sb.append(Rect2(x0, 0.79, sw, 0.012))
 			"band_mid":
-				sb.append(_fr(r, x0 - 0.02, 0.77, 0.19, 0.045))
+				sb.append(Rect2(x0, 0.77, sw, 0.045))
 			"foot":
-				sb.append(_fr(r, x0 - 0.02, 0.88, 0.19, 0.05))
+				sb.append(Rect2(x0, 0.88, sw, 0.05))
 		for rr: Rect2 in sb:
-			var poly := PackedVector2Array([rr.position, rr.position + Vector2(rr.size.x, 0), rr.end, rr.position + Vector2(0, rr.size.y)])
+			var poly := _fx(r, _mirror([rr.position, rr.position + Vector2(rr.size.x, 0), rr.end, rr.position + Vector2(0, rr.size.y)], sx))
 			for piece in Geometry2D.intersect_polygons(poly, sock):
 				draw_colored_polygon(piece, so2)
 		if ss == "chevron":
-			var cv := _fx(r, [Vector2(x0, 0.73), Vector2(x0 + 0.07, 0.765), Vector2(x0 + 0.14, 0.73), Vector2(x0 + 0.14, 0.75), Vector2(x0 + 0.07, 0.785), Vector2(x0, 0.75)])
+			var cv := _fx(r, _mirror([Vector2(0.272, 0.73), Vector2(0.372, 0.765), Vector2(0.472, 0.73), Vector2(0.472, 0.75), Vector2(0.372, 0.785), Vector2(0.272, 0.75)], sx))
 			for piece in Geometry2D.intersect_polygons(cv, sock):
 				draw_colored_polygon(piece, so2)
-		# Dobra do punho e volume cilíndrico
-		draw_line(_fx(r, [Vector2(x0, 0.745)])[0], _fx(r, [Vector2(x0 + 0.145, 0.745)])[0], Color(0, 0, 0, 0.14), maxf(1.0, r.size.y * 0.004), true)
-		for sd in [[x0 - 0.008, x0 + 0.03], [x0 + 0.11, x0 + 0.15]]:
-			var side_poly := _fx(r, [Vector2(sd[0], 0.705), Vector2(sd[1], 0.705), Vector2(sd[1], 0.93), Vector2(sd[0], 0.93)])
-			for piece in Geometry2D.intersect_polygons(side_poly, sock):
-				draw_colored_polygon(piece, Color(0, 0, 0, 0.1 if so.get_luminance() > 0.15 else 0.06))
+		# Dobra do punho, volume da panturrilha e luz na canela
+		draw_line(_fx(r, _mirror([Vector2(0.29, 0.744)], sx))[0], _fx(r, _mirror([Vector2(0.455, 0.746)], sx))[0], Color(0, 0, 0, 0.14), maxf(1.0, r.size.y * 0.004), true)
+		var side_a := 0.12 if so.get_luminance() > 0.15 else 0.07
+		for edge: Array in [[SOCK_OUT, 0.04], [SOCK_IN, -0.045]]:
+			var pts: Array = edge[0]
+			var poly: Array = pts.duplicate()
+			for i in range(pts.size() - 1, -1, -1):
+				poly.append(pts[i] + Vector2(edge[1], 0.0))
+			var cols := PackedColorArray()
+			for i in poly.size():
+				cols.append(Color(0, 0, 0, side_a if i < pts.size() else 0.0))
+			draw_polygon(_fx(r, _mirror(poly, sx)), cols)
+		draw_polygon(_fx(r, _mirror([Vector2(0.33, 0.77), Vector2(0.357, 0.76), Vector2(0.385, 0.77), Vector2(0.37, 0.9), Vector2(0.357, 0.905), Vector2(0.344, 0.9)], sx)),
+			PackedColorArray([Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.08), Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.03), Color(1, 1, 1, 0.0)]))
 		var sk := sock.duplicate()
 		sk.append(sock[0])
 		draw_polyline(sk, out_so, lw, true)
-		var toe := 0.05 if x0 > 0.5 else -0.05
-		var bt := _fx(r, [Vector2(x0 + 0.01, 0.925), Vector2(x0 + 0.13, 0.925), Vector2(x0 + 0.135 + maxf(0.0, toe), 0.962), Vector2(x0 + 0.13 + maxf(0.0, toe), 0.975),
-			Vector2(x0 + 0.005 + minf(0.0, toe), 0.975), Vector2(x0 + minf(0.0, toe), 0.962)])
+		# Chuteira: cabedal, solado com travas, faixa da marca e brilho no bico
+		var bt := _fx(r, _mirror(BOOT, sx))
 		draw_colored_polygon(bt, boot)
-		# Faixa da chuteira e travas
-		var bx0: float = x0 + 0.03 + minf(0.0, toe) * 0.5
-		draw_line(_fx(r, [Vector2(bx0, 0.955)])[0], _fx(r, [Vector2(bx0 + 0.08, 0.935)])[0], Color(1, 1, 1, 0.75), maxf(1.0, r.size.y * 0.005), true)
-		draw_line(_fx(r, [Vector2(x0 + 0.005 + minf(0.0, toe), 0.975)])[0], _fx(r, [Vector2(x0 + 0.13 + maxf(0.0, toe), 0.975)])[0], Color("#3A3A3A"), maxf(1.0, r.size.y * 0.005), true)
+		for tx in [0.27, 0.32, 0.4]:
+			draw_colored_polygon(_fx(r, _mirror([Vector2(tx, 0.975), Vector2(tx + 0.022, 0.975), Vector2(tx + 0.018, 0.986), Vector2(tx + 0.004, 0.986)], sx)), Color("#2A2A2A"))
+		draw_polyline(_fx(r, _mirror(BOOT_SOLE, sx)), Color("#3A3A3A"), maxf(1.0, r.size.y * 0.006), true)
+		draw_polyline(_fx(r, _mirror([Vector2(0.41, 0.952), Vector2(0.35, 0.952), Vector2(0.295, 0.944)], sx)), Color(1, 1, 1, 0.75), maxf(1.0, r.size.y * 0.005), true)
+		draw_polygon(_fx(r, _mirror([Vector2(0.262, 0.95), Vector2(0.29, 0.942), Vector2(0.282, 0.956), Vector2(0.258, 0.962)], sx)),
+			PackedColorArray([Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.16), Color(1, 1, 1, 0.08), Color(1, 1, 1, 0.0)]))
+		draw_polyline(_fx(r, _mirror([Vector2(0.33, 0.918), Vector2(0.41, 0.918)], sx)), Color(1, 1, 1, 0.12), maxf(1.0, r.size.y * 0.004), true)
+
+
+## Faixa ao longo da lateral do calção: de `a` a `b` para dentro (topo → barra).
+func _side_strip(a0: float, a1: float, b0: float, b1: float) -> Array:
+	var n := SHORTS_SIDE.size()
+	var outer: Array = []
+	var inner: Array = []
+	for i in n:
+		var t := float(i) / float(n - 1)
+		var p: Vector2 = SHORTS_SIDE[i]
+		outer.append(p + Vector2(lerpf(a0, a1, t), 0.0))
+		inner.append(p + Vector2(lerpf(b0, b1, t), 0.0))
+	inner.reverse()
+	return outer + inner
+
+
+## Faixa acompanhando a barra do calção, de `a` a `b` acima dela (negativo = abaixo).
+func _hem_strip(a: float, b: float) -> Array:
+	var top: Array = []
+	var bot: Array = []
+	for p: Vector2 in SHORTS_HEM:
+		top.append(p - Vector2(0.0, b))
+		bot.append(p - Vector2(0.0, a))
+	bot.reverse()
+	return top + bot
 
 
 ## Faixas do padrão em coordenadas unitárias (serão recortadas pelo corpo da camisa).
