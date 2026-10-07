@@ -26,7 +26,9 @@
 				"symbol": "antlers",
 				"sc": "#FFFFFF"
 			},
-			"rivals": ["JPN_SAI"]
+			"rivals": [
+				"JPN_SAI"
+			]
 		},
 		{
 			"key": "JPN_SAI",
@@ -52,7 +54,10 @@
 				"symbol": "letter",
 				"initials": "URD"
 			},
-			"rivals": ["JPN_OSK", "JPN_KSH"]
+			"rivals": [
+				"JPN_OSK",
+				"JPN_KSH"
+			]
 		},
 		{
 			"key": "JPN_YKM",
@@ -134,7 +139,7 @@
 			"crest": {
 				"shape": "round",
 				"field": "plain",
-				"symbol": "ship",
+				"symbol": "club_ship",
 				"sc": "#FFFFFF"
 			},
 			"rivals": [
@@ -166,7 +171,11 @@
 				"initials": "G",
 				"sc": "#FFFFFF"
 			},
-			"rivals": ["JPN_KOB", "JPN_SAI", "JPN_CER"]
+			"rivals": [
+				"JPN_KOB",
+				"JPN_SAI",
+				"JPN_CER"
+			]
 		},
 		{
 			"key": "JPN_HIR",
@@ -239,7 +248,9 @@
 			"stadium": "Yodoko Sakura Stadium",
 			"capacity": 25000,
 			"kit": "plain",
-			"rivals": ["JPN_OSK"],
+			"rivals": [
+				"JPN_OSK"
+			],
 			"crest": {
 				"shape": "round",
 				"field": "plain",
@@ -484,7 +495,7 @@
 			"crest": {
 				"shape": "shield",
 				"field": "plain",
-				"symbol": "ship",
+				"symbol": "club_ship",
 				"c1": "#0055A4",
 				"c2": "#FFFFFF",
 				"sc": "#FFFFFF",

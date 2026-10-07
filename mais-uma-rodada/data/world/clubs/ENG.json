@@ -23,13 +23,57 @@
 			"crest": {
 				"shape": "ring",
 				"field": "plain",
-				"symbol": "ship",
+				"symbol": "none",
 				"text": "MANCHESTER CITY",
 				"year": "1894",
-				"c1": "#6CABDD",
-				"c2": "#6CABDD",
-				"c3": "#FFFFFF",
-				"sc": "#FFFFFF"
+				"c1": "#FFFFFF",
+				"c2": "#FFFFFF",
+				"c3": "#6CABDD",
+				"sc": "#FFFFFF",
+				"tc": "#172A47",
+				"bc": "#172A47",
+				"border": "double",
+				"sym_scale": 1.38,
+				"charge_layers": [
+					{
+						"symbol": "club_city_shield",
+						"sc": "#D2AE57",
+						"scale": 1,
+						"x": 0,
+						"y": 0
+					},
+					{
+						"symbol": "club_city_shield",
+						"sc": "#FFFFFF",
+						"scale": 0.9,
+						"x": 0,
+						"y": 0
+					},
+					{
+						"symbol": "club_rivers",
+						"sc": "#6CABDD",
+						"scale": 0.75,
+						"x": 0,
+						"y": 0.14
+					},
+					{
+						"symbol": "club_ship",
+						"sc": "#D2AE57",
+						"scale": 0.7,
+						"x": 0,
+						"y": -0.31,
+						"dc": "#172A47"
+					},
+					{
+						"symbol": "club_rose",
+						"sc": "#C6313C",
+						"scale": 0.24,
+						"x": 0,
+						"y": 0.47,
+						"dc": "#7B1624"
+					}
+				],
+				"ring_bg": "#FFFFFF"
 			},
 			"rivals": [
 				"ENG_MRD"
@@ -61,7 +105,7 @@
 				"c2": "#111111",
 				"c3": "#FBE122",
 				"sc": "#FBE122",
-				"chief_sym": "ship",
+				"chief_sym": "club_ship",
 				"chief_sc": "#DA020E",
 				"cc": "#FBE122",
 				"sym_scale": 0.9,
@@ -131,9 +175,21 @@
 			"crest": {
 				"shape": "shield",
 				"field": "plain",
-				"symbol": "tower",
+				"symbol": "club_tower",
 				"sc": "#FFFFFF",
-				"ribbon": "NIL SATIS NISI OPTIMUM"
+				"ribbon": "NIL SATIS NISI OPTIMUM",
+				"dc": "#1D397C",
+				"sym_scale": 0.9,
+				"charge_layers": [
+					{
+						"symbol": "laurel",
+						"sc": "#FFFFFF",
+						"scale": 1.1,
+						"x": 0,
+						"y": 0.02
+					}
+				],
+				"year": "1878"
 			},
 			"rivals": [
 				"ENG_MSR"
@@ -160,13 +216,18 @@
 			"crest": {
 				"shape": "shield",
 				"field": "plain",
-				"symbol": "cannon",
+				"symbol": "club_cannon",
 				"chief_text": "ARSENAL",
 				"cc": "#0B2A6B",
-				"c2": "#0B2A6B",
-				"c3": "#FFD100",
-				"sc": "#FFD100",
-				"border": "gold"
+				"c2": "#9D1024",
+				"c3": "#E7C35F",
+				"sc": "#E7C35F",
+				"border": "thin",
+				"dc": "#A87E2B",
+				"sym_scale": 1.22,
+				"c1": "#C8102E",
+				"bc": "#E7C35F",
+				"finish": false
 			},
 			"rivals": [
 				"ENG_NLW",
@@ -270,7 +331,10 @@
 				"c3": "#0070C0",
 				"sc": "#FFFFFF"
 			},
-			"rivals": ["ENG_WEA", "ENG_TEE"]
+			"rivals": [
+				"ENG_WEA",
+				"ENG_TEE"
+			]
 		},
 		{
 			"key": "ENG_AST",
@@ -324,9 +388,17 @@
 			"crest": {
 				"shape": "shield",
 				"field": "plain",
-				"symbol": "hammers",
-				"sc": "#F7C240",
-				"border": "thick"
+				"symbol": "club_hammers",
+				"sc": "#E6C360",
+				"border": "thin",
+				"dc": "#B68C2A",
+				"chief_text": "WEST HAM",
+				"chief_text2": "UNITED",
+				"cc": "#7A263A",
+				"c3": "#FFFFFF",
+				"bc": "#72B7D5",
+				"chief_h": 0.28,
+				"finish": false
 			},
 			"rivals": [
 				"ENG_NLW",
@@ -443,12 +515,14 @@
 			"crest": {
 				"shape": "ring",
 				"field": "plain",
-				"symbol": "bee",
+				"symbol": "club_bee",
 				"text": "BRENTFORD FC",
 				"year": "1889",
 				"c2": "#FFFFFF",
 				"c3": "#FFD100",
-				"sc": "#FFD100"
+				"sc": "#F2C64D",
+				"dc": "#191919",
+				"sym_scale": 1.08
 			},
 			"rivals": [
 				"ENG_RIV"
@@ -473,11 +547,24 @@
 			"capacity": 11300,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "modern",
+				"shape": "french",
 				"field": "stripes:3",
-				"symbol": "letter",
+				"symbol": "club_header",
 				"initials": "AFCB",
-				"sc": "#FFFFFF"
+				"sc": "#FFFFFF",
+				"c1": "#D71920",
+				"c2": "#151515",
+				"c3": "#FFFFFF",
+				"dc": "#151515",
+				"chief_text": "AFC BOURNEMOUTH",
+				"chief_text2": "",
+				"cc": "#151515",
+				"chief_h": 0.23,
+				"plate": "none",
+				"border": "thin",
+				"bc": "#D6D6D6",
+				"sym_scale": 1.05,
+				"finish": false
 			},
 			"rivals": [
 				"ENG_STS"
@@ -504,8 +591,10 @@
 			"crest": {
 				"shape": "modern",
 				"field": "plain",
-				"symbol": "wolf",
-				"sc": "#231F20"
+				"symbol": "club_wolf",
+				"sc": "#111111",
+				"dc": "#111111",
+				"sym_scale": 1.1
 			},
 			"rivals": [
 				"ENG_ALB"
@@ -532,10 +621,12 @@
 			"crest": {
 				"shape": "round",
 				"field": "plain",
-				"symbol": "tree",
+				"symbol": "club_forest",
 				"sc": "#FFFFFF",
 				"stars": 2,
-				"c3": "#FFFFFF"
+				"c3": "#FFFFFF",
+				"dc": "#FFFFFF",
+				"sym_scale": 1.12
 			},
 			"rivals": [
 				"ENG_RAM",
@@ -563,12 +654,14 @@
 			"crest": {
 				"shape": "ring",
 				"field": "plain",
-				"symbol": "rose",
+				"symbol": "club_rose",
 				"text": "LEEDS UNITED",
 				"c1": "#FFFFFF",
 				"c2": "#1D428A",
 				"c3": "#FFCD00",
-				"sc": "#FFCD00"
+				"sc": "#FFCD00",
+				"dc": "#A68B26",
+				"sym_scale": 1.1
 			},
 			"rivals": [
 				"ENG_MRD",

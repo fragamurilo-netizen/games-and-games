@@ -745,32 +745,49 @@ const SKIN_MIN := -1.0
 const SKIN_MAX := 11.0
 const FACE_SHAPES: Array[String] = ["Oval", "Redondo", "Quadrado", "Coração", "Losango", "Alongado", "Triangular", "Retangular",
 	"Estreito", "Largo", "Queixo forte", "Queixo recuado",
-	"Maçãs altas", "Mandíbula marcada", "Rosto curto", "Oval largo", "Oval estreito", "Pera"]
+	"Maçãs altas", "Mandíbula marcada", "Rosto curto", "Oval largo", "Oval estreito", "Pera",
+	"Oval de têmporas estreitas", "Mandíbula alta", "Maçãs largas e queixo fino", "Retangular suave",
+	"Queixo largo e testa alta", "Oval de queixo curto", "Mandíbula baixa", "Testa larga e lateral reta",
+	"Maçãs baixas", "Hexagonal suave", "Alongado de queixo largo", "Redondo de têmporas cheias"]
 const EYE_SHAPES: Array[String] = ["Amendoado", "Grande", "Estreito", "Caído", "Puxado", "Fundo", "Afastados", "Próximos",
 	"Encapuzado", "Saltado", "Pequenos", "Triste", "Felino", "Semicerrado",
 	"Amendoado grande", "Redondo", "Levemente caído", "Estreito e puxado", "Pálpebra pesada", "Fundo e pequeno",
 	"Abertos e afastados", "Amendoado fino",
 	"Pálpebra dupla marcada", "Prega no canto interno", "Olheira funda", "Branco embaixo", "Cílios marcados",
-	"Canto de fora encoberto", "Fundo e marcado", "Amendoado puxado"]
+	"Canto de fora encoberto", "Fundo e marcado", "Amendoado puxado",
+	"Amêndoa de arco interno alto", "Amêndoa de arco externo alto", "Pálpebra reta e canto aberto", "Pálpebra arredondada baixa",
+	"Olho longo de canto fino", "Olho curto de canto arredondado", "Prega alta com arco baixo", "Prega baixa com arco cheio",
+	"Canto interno profundo", "Canto externo alongado", "Pálpebra inferior cheia", "Pálpebra inferior plana",
+	"Íris ampla e pálpebra baixa", "Íris pequena e arco aberto", "Prega interna suave", "Olho profundo de arco assimétrico"]
 const EYE_SHAPE_W: Array[float] = [4.0, 1.2, 1.2, 0.8, 0.8, 0.8, 0.6, 0.6, 1.0, 0.5, 0.7, 0.5, 0.5, 0.6, 1.4, 0.9, 1.0, 0.8, 1.0, 0.7, 0.7, 1.2]
 const NOSE_TYPES: Array[String] = ["Reto", "Arrebitado", "Batatudo", "Aquilino", "Largo", "Fino", "Achatado", "Grego",
 	"Adunco", "Quebrado", "Pontudo", "Comprido", "Pequeno", "Narinas largas",
 	"Dorso largo", "Ponta caída", "Largo e alto", "Curto e largo", "Romano", "Arrebitado largo", "Estreito e comprido",
 	"Ponta redonda", "Asas altas", "Levemente torto",
 	"Ponta bulbosa", "Narinas à mostra", "Ponta afilada", "Asas abertas", "Ponte baixa", "Dorso com calombo",
-	"De boxeador", "Arrebitado fino"]
+	"De boxeador", "Arrebitado fino",
+	"Dorso reto e ponta dividida", "Ponta larga e asas estreitas", "Ponta estreita e asas arredondadas", "Columela aparente",
+	"Dorso estreito e base larga", "Dorso largo e ponta fina", "Ponta redonda projetada", "Narinas oblíquas",
+	"Asas baixas e ponta alta", "Asas altas e ponta baixa", "Dorso côncavo suave", "Dorso convexo suave",
+	"Ponta assimétrica suave", "Base curta arredondada", "Ponte alta e base compacta", "Ponte baixa e asas suaves"]
 const MOUTH_TYPES: Array[String] = ["Comum", "Lábio de cima fino", "Lábios cheios", "Boca larga", "Boca pequena",
 	"Lábio de baixo carnudo", "Cantos caídos", "Arco marcado", "Boca fina e reta", "Lábios grossos",
 	"Lábio de cima cheio", "Média carnuda", "Coração", "Estreita e cheia", "Larga e fina", "Lábio de baixo fino",
 	"Cantos para cima", "Arco suave",
 	"Filtro marcado", "Contorno definido", "Beicinho", "Assimétrica", "Larga e cheia", "Pequena e fina",
-	"Reta e cheia embaixo", "Cantos marcados"]
+	"Reta e cheia embaixo", "Cantos marcados",
+	"Arco duplo com centro cheio", "Arco largo de filtro suave", "Lábio superior reto e inferior redondo", "Centro estreito e laterais cheias",
+	"Arco alto e lábio inferior fino", "Arco baixo e centro proeminente", "Lábios largos de cantos finos", "Lábios curtos arredondados",
+	"Superior cheio de arco suave", "Inferior cheio com sulco central", "Lábios de contorno arredondado", "Lábios finos de centro definido",
+	"Cantos baixos e arco largo", "Cantos altos e arco estreito", "Centro assimétrico suave", "Arco marcado de lobos separados"]
 const BROW_TYPES: Array[String] = ["Comum", "Reta", "Arqueada", "Grossa", "Fina", "Caída", "Reta e grossa", "Rala",
 	"Angulosa", "Baixa e pesada", "Alta", "Desgrenhada",
 	"Curva suave", "Grossa arqueada", "Fina e reta", "Curta", "Longa", "Cheia e baixa", "Caída e grossa", "Pico suave",
 	"Levantada", "Espessa e irregular"]
 const EAR_TYPES: Array[String] = ["Comum", "Pequena e colada", "Grande", "De abano", "Lóbulo preso", "Pontuda", "Couve-flor",
-	"Média colada", "Lóbulo grande", "Estreita e comprida", "Arredondada", "Levemente de abano"]
+	"Média colada", "Lóbulo grande", "Estreita e comprida", "Arredondada", "Levemente de abano",
+	"Hélice larga", "Hélice fina", "Concha profunda", "Concha rasa", "Topo oval alto", "Topo redondo baixo",
+	"Lóbulo curto livre", "Lóbulo cheio livre", "Orelha inclinada para trás", "Orelha vertical estreita", "Anti-hélice marcada", "Trago pronunciado"]
 const CHIN_TYPES: Array[String] = ["Comum", "Partido", "Recuado", "Proeminente", "Pontudo", "Largo",
 	"Partido largo", "Curto e redondo", "Quadrado marcado", "Pontudo e longo", "Recuado suave", "Proeminente e largo"]
 const EXPRESSIONS: Array[String] = ["Neutro", "Sorriso leve", "Sorriso aberto", "Sério", "Bravo", "Confiante",
@@ -845,9 +862,11 @@ const GROUP_MOUTH_W2: Array = [
 	[0.4, 0.6, 0.8, 0.5, 1.2, 0.2, 0.7, 0.4],
 ]
 ## Parâmetros que cada tipo mexe: guardados antes do tipo antigo para o tipo novo partir do zero.
-const EYE_KEYS: Array[String] = ["eye_h", "eye_w", "eye_tilt", "deep", "hooded", "eye_dx", "lid", "bulge"]
-const NOSE_KEYS: Array[String] = ["nose_len", "nose_tip", "nose_w", "bridge_w", "bridge", "aquiline", "nose_hook", "nose_dx_t", "nose_up", "nostril"]
-const MOUTH_KEYS: Array[String] = ["lip_u", "lip_l", "mouth_w", "corner", "bow"]
+const EYE_KEYS: Array[String] = ["eye_h", "eye_w", "eye_tilt", "deep", "hooded", "eye_dx", "lid", "bulge", "crease2", "epicanthic", "under_line", "scleral", "lash_heavy", "hood_outer"]
+const NOSE_KEYS: Array[String] = ["nose_len", "nose_tip", "nose_w", "bridge_w", "bridge", "aquiline", "nose_hook", "nose_dx_t", "nose_up", "nostril", "nose_bulb", "nose_septum", "nose_pinch", "nose_flare", "bridge_low", "nose_bump"]
+const MOUTH_KEYS: Array[String] = ["lip_u", "lip_l", "mouth_w", "corner", "bow", "philtrum", "lip_line", "pout", "lip_asym", "corner_lines"]
+const FACE_KEYS: Array[String] = ["fw", "fh", "cheek_w", "jaw", "jaw_v", "chin_sq", "forehead", "fat", "cheekbone", "chin_len"]
+const EAR_KEYS: Array[String] = ["ear", "ear_out", "lobe", "ear_top", "cauli"]
 
 
 static func _snapshot(f: Dictionary, keys: Array[String]) -> Dictionary:
@@ -1176,6 +1195,11 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 		_restore(f, eye0)
 		f["eye_shape"] = eye2
 		_eye_v2(f, eye2)
+	var eye3 := _anatomy_type(hash([seed_value, "es3"]), 30, ANATOMY_EYES.size(), int(f["eye_shape"]), look.has("es"))
+	if eye3 >= 30:
+		_restore(f, eye0)
+		f["eye_shape"] = eye3
+		_traits(f, ANATOMY_EYES[eye3 - 30])
 	f["fw"] = float(f["fw"]) * vrng.randf_range(0.95, 1.06)
 	f["fh"] = float(f["fh"]) * vrng.randf_range(0.965, 1.045)
 	f["nose_w"] = float(f["nose_w"]) * vrng.randf_range(0.88, 1.16)
@@ -1400,6 +1424,7 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	_apply_mass(f, seed_value, age, look)
 	_apply_aging(f, seed_value, age)
 	_apply_expression(f, seed_value, age, look)
+	_anatomy_details(f, seed_value)
 	_proportion_floor(f)
 	return f
 
@@ -1560,6 +1585,7 @@ static func _apply_shape(f: Dictionary, r: RandomNumberGenerator, look: Dictiona
 	if look.has("fs"):
 		shape = clampi(int(look["fs"]), 0, FACE_SHAPES.size() - 1)
 	f["face_shape"] = shape
+	var face0 := _snapshot(f, FACE_KEYS)
 	match shape:
 		1: # redondo
 			f["cheek_w"] = float(f["cheek_w"]) * 1.03
@@ -1639,6 +1665,11 @@ static func _apply_shape(f: Dictionary, r: RandomNumberGenerator, look: Dictiona
 			f["forehead"] = r.randf_range(0.86, 0.9)
 			f["jaw"] = r.randf_range(0.9, 0.96)
 			f["fat"] = clampf(float(f["fat"]) + 0.06, 0.0, 1.0)
+	var face3 := _anatomy_type(hash([int(f["texture_seed"]), "fs3"]), 18, ANATOMY_FACES.size(), shape, look.has("fs"))
+	if face3 >= 18:
+		_restore(f, face0)
+		f["face_shape"] = face3
+		_traits(f, ANATOMY_FACES[face3 - 18])
 	var nose := RngUtil.weighted_index(r, GROUP_NOSE_W[g])
 	if look.has("ns"):
 		nose = clampi(int(look["ns"]), 0, NOSE_TYPES.size() - 1)
@@ -1734,6 +1765,11 @@ static func _apply_shape(f: Dictionary, r: RandomNumberGenerator, look: Dictiona
 		_restore(f, nose0)
 		f["nose_type"] = nose2
 		_nose_v2(f, nose2)
+	var nose3 := _anatomy_type(hash([int(f["texture_seed"]), "ns3"]), 32, ANATOMY_NOSES.size(), int(f["nose_type"]), look.has("ns"))
+	if nose3 >= 32:
+		_restore(f, nose0)
+		f["nose_type"] = nose3
+		_traits(f, ANATOMY_NOSES[nose3 - 32])
 	var brow := RngUtil.weighted_index(r, [3.0, 2.0, 1.5, 1.2, 0.8, 0.6, 0.9, 0.7, 0.7, 0.7, 0.5, 0.5,
 		1.4, 0.9, 0.8, 0.7, 0.7, 0.8, 0.6, 0.8, 0.6, 0.5])
 	if look.has("bw"):
@@ -1859,11 +1895,17 @@ static func _apply_shape(f: Dictionary, r: RandomNumberGenerator, look: Dictiona
 		_restore(f, mouth0)
 		f["mouth_type"] = mouth2
 		_mouth_v2(f, mouth2)
+	var mouth3 := _anatomy_type(hash([int(f["texture_seed"]), "mt3"]), 26, ANATOMY_MOUTHS.size(), int(f["mouth_type"]), look.has("mt"))
+	if mouth3 >= 26:
+		_restore(f, mouth0)
+		f["mouth_type"] = mouth3
+		_traits(f, ANATOMY_MOUTHS[mouth3 - 26])
 	# Orelhas
 	var ear := RngUtil.weighted_index(r, [5.0, 1.2, 0.8, 0.9, 1.0, 0.4, 0.15, 1.5, 0.8, 0.7, 1.0, 0.8])
 	if look.has("er"):
 		ear = clampi(int(look["er"]), 0, EAR_TYPES.size() - 1)
 	f["ear_type"] = ear
+	var ear0 := _snapshot(f, EAR_KEYS)
 	match ear:
 		1:
 			f["ear"] = float(f["ear"]) * 0.86
@@ -1889,6 +1931,11 @@ static func _apply_shape(f: Dictionary, r: RandomNumberGenerator, look: Dictiona
 			f["ear"] = float(f["ear"]) * 0.95
 		11: # levemente de abano
 			f["ear_out"] = r.randf_range(0.45, 0.7)
+	var ear3 := _anatomy_type(hash([int(f["texture_seed"]), "er3"]), 12, ANATOMY_EARS.size(), ear, look.has("er"))
+	if ear3 >= 12:
+		_restore(f, ear0)
+		f["ear_type"] = ear3
+		_traits(f, ANATOMY_EARS[ear3 - 12])
 	# Queixo
 	var chin := RngUtil.weighted_index(r, [5.0, 0.8, 0.7, 0.8, 0.6, 0.8, 0.5, 0.8, 0.7, 0.5, 0.8, 0.5])
 	if look.has("cn"):
@@ -1929,6 +1976,129 @@ static func _apply_shape(f: Dictionary, r: RandomNumberGenerator, look: Dictiona
 ## queixo fraco ou papada, olheiras e marcas na pele.
 ## Olhos novos: parâmetros que o PortraitView desenha (prega dupla, prega interna, olheira funda,
 ## branco embaixo da íris, cílios, pálpebra de fora caída).
+## Anatomia adicional: índices só acrescentados ao fim. Valores de medidas já
+## existentes são multiplicadores; *_add é deslocamento; novas medidas são diretas.
+## Cada perfil altera a curva desenhada, além da largura e altura do traço.
+const ANATOMY_EYES: Array = [
+	{"eye_upper": 0.62, "eye_lower": 1.2, "eye_h": 1.04, "eye_canthal": 0.12},
+	{"eye_upper": 1.18, "eye_lower": 0.95, "eye_h": 0.96, "eye_canthal": 0.2},
+	{"eye_upper": 0.9, "eye_lower_depth": 0.38, "eye_h": 0.85, "eye_w": 1.08},
+	{"eye_upper": 0.84, "eye_lower": 0.85, "eye_h": 1.08, "eye_w": 0.94},
+	{"eye_upper": 0.72, "eye_lower": 1.35, "eye_w": 1.13, "eye_h": 0.88, "eye_canthal": 0.06},
+	{"eye_upper": 0.95, "eye_lower": 0.9, "eye_w": 0.88, "eye_canthal": 0.32},
+	{"eye_upper": 0.78, "crease2": 0.8, "lid": 0.18, "eye_h": 0.94},
+	{"eye_upper": 0.92, "crease2": 0.3, "eye_h": 1.08, "hooded": false},
+	{"eye_upper": 0.65, "eye_canthal": 0.08, "deep": 1.22, "eye_tilt_add": 0.015},
+	{"eye_upper": 1.12, "eye_w": 1.1, "eye_tilt_add": 0.018, "hood_outer": 0.2},
+	{"eye_lower": 0.88, "eye_lower_depth": 0.64, "eye_h": 0.93, "under_line": 0.25},
+	{"eye_lower": 1.35, "eye_lower_depth": 0.35, "eye_w": 1.03, "eye_h": 0.96},
+	{"iris_scale": 1.08, "eye_upper": 0.88, "lid": 0.2, "eye_h": 0.94},
+	{"iris_scale": 0.88, "eye_upper": 0.82, "eye_h": 1.1, "scleral": 0.2},
+	{"epicanthic": 0.6, "eye_upper": 0.94, "eye_canthal": 0.04, "eye_h": 0.93},
+	{"eye_upper": 0.68, "eye_lower": 1.4, "deep": 1.24, "eye_w": 1.05, "crease2": 0.4},
+]
+const ANATOMY_NOSES: Array = [
+	{"nose_tip_split": 0.8, "nose_tip_width": 1.05, "bridge": 1.1},
+	{"nose_tip_width": 1.24, "nose_w": 0.93, "nose_bulb": 0.55},
+	{"nose_tip_width": 0.8, "nose_flare": 0.45, "alar_round": 1.2},
+	{"nose_columella": 0.85, "nose_septum": 0.45, "nose_up": 0.16},
+	{"bridge_w": 0.8, "nose_w": 1.12, "nose_tip_width": 0.9, "nose_flare": 0.4},
+	{"bridge_w": 1.2, "nose_tip_width": 0.8, "nose_pinch": 0.35},
+	{"nose_tip_width": 1.16, "nose_tip_projection": 1.25, "nose_bulb": 0.5},
+	{"nostril_angle": 0.35, "nose_tip_width": 0.95, "nostril": 1.12},
+	{"alar_height": 0.025, "nose_up": 0.3, "nose_len": 0.94},
+	{"alar_height": -0.02, "nose_hook": 0.2, "nose_len": 1.05},
+	{"bridge_low": 0.4, "nose_up": 0.15, "nose_tip_projection": 1.1},
+	{"nose_bump": 0.5, "bridge": 1.12, "nose_len": 1.05, "nose_hook": 0.1},
+	{"nose_tip_split": 0.3, "nose_asym": 0.22, "nose_dx_t": 0.015},
+	{"nose_len": 0.89, "nose_tip_width": 1.12, "alar_round": 1.15},
+	{"bridge": 1.2, "bridge_w": 0.88, "nose_w": 0.9, "nose_tip_projection": 1.15},
+	{"bridge_low": 0.6, "nose_flare": 0.3, "alar_round": 1.18, "nose_tip_projection": 0.85},
+]
+const ANATOMY_MOUTHS: Array = [
+	{"lip_lobes": 0.55, "lip_tubercle": 0.5, "bow": 1.15},
+	{"lip_upper_curve": 0.78, "bow": 0.6, "mouth_w": 1.04},
+	{"lip_upper_curve": 1.2, "lip_lower_curve": 0.8, "bow": 0.25, "lip_l": 1.1},
+	{"lip_lobes": 0.7, "lip_upper_curve": 0.7, "lip_tubercle": -0.2},
+	{"bow": 1.4, "lip_upper_curve": 1.1, "lip_l": 0.8, "lip_lobes": 0.3},
+	{"bow": 0.4, "lip_tubercle": 0.65, "lip_u": 1.08},
+	{"mouth_w": 1.12, "lip_upper_curve": 1.25, "lip_lower_curve": 1.2},
+	{"mouth_w": 0.88, "lip_upper_curve": 0.82, "lip_lower_curve": 0.8, "lip_l": 1.08},
+	{"lip_u": 1.2, "bow": 0.7, "lip_tubercle": 0.25},
+	{"lip_l": 1.2, "lip_lower_curve": 0.85, "lip_lower_groove": 0.4},
+	{"lip_upper_curve": 0.85, "lip_lower_curve": 0.85, "lip_lobes": 0.2},
+	{"lip_u": 0.78, "lip_l": 0.85, "bow": 1.25, "lip_tubercle": 0.5},
+	{"corner": 0.45, "bow": 0.7, "lip_upper_curve": 0.8},
+	{"corner": -0.35, "bow": 1.2, "lip_upper_curve": 1.1, "lip_lobes": 0.35},
+	{"lip_asym": 0.3, "lip_center_shift": 0.035, "lip_lobes": 0.35},
+	{"bow": 1.45, "lip_lobes": 0.75, "lip_tubercle": 0.2, "philtrum": 0.6},
+]
+const ANATOMY_EARS: Array = [
+	{"ear_helix": 1.3, "ear_width": 1.08, "ear_concha": 0.8},
+	{"ear_helix": 0.7, "ear_width": 0.95, "ear_concha": 0.9},
+	{"ear_concha": 1.3, "ear_antihelix": 1.15, "ear_width": 1.05},
+	{"ear_concha": 0.55, "ear_antihelix": 0.75, "ear_width": 1.08},
+	{"ear_height": 1.12, "ear_width": 0.95, "ear_top_full": 0.15},
+	{"ear_height": 0.91, "ear_width": 1.1, "ear_top_full": 0.3},
+	{"lobe": 0.65, "ear_lobe_width": 0.85, "ear_height": 0.95},
+	{"lobe": 1.25, "ear_lobe_width": 1.22, "ear_height": 1.04},
+	{"ear_rotate": -0.12, "ear_width": 1.04, "ear_helix": 1.1},
+	{"ear_rotate": 0.05, "ear_width": 0.82, "ear_height": 1.1},
+	{"ear_antihelix": 1.35, "ear_concha": 1.1, "ear_helix": 0.9},
+	{"ear_tragus": 1.4, "ear_concha": 1.1, "ear_width": 1.08},
+]
+const ANATOMY_FACES: Array = [
+	{"temple_width": 0.93, "forehead": 0.98, "jaw": 1.02},
+	{"jaw_v": 0.85, "jaw": 1.08, "chin_width": 1.08},
+	{"cheek_w": 1.05, "chin_width": 0.82, "cheekbone": 1.18},
+	{"jaw": 1.05, "chin_sq": 1.18, "fh": 1.03, "temple_width": 0.98},
+	{"forehead": 1.03, "chin_width": 1.15, "chin_sq": 1.2},
+	{"fh": 0.96, "chin_len": -0.02, "jaw": 1.02},
+	{"jaw_v": 1.1, "jaw": 1.06, "chin_width": 0.95},
+	{"forehead": 1.06, "temple_width": 1.04, "jaw": 1.04},
+	{"cheekbone": 0.85, "cheek_w": 1.02, "jaw_v": 1.08},
+	{"cheek_w": 1.04, "temple_width": 0.95, "jaw": 1.03, "chin_sq": 1.12},
+	{"fh": 1.05, "chin_width": 1.12, "jaw": 1.03},
+	{"fh": 0.97, "temple_width": 1.05, "cheek_w": 1.03, "fat": 1.08},
+]
+
+
+static func _anatomy_type(seed_h: int, first: int, count: int, current: int, chosen: bool) -> int:
+	if chosen:
+		return current
+	var r := RandomNumberGenerator.new()
+	r.seed = seed_h
+	# Sorteio separado e mesma chance em todos os grupos; as proporções naturais
+	# continuam vindo da pessoa. Não muda cabelo, tom de pele ou expressão.
+	return first + r.randi_range(0, count - 1) if r.randf() < 0.32 else current
+
+
+static func _traits(f: Dictionary, traits: Dictionary) -> void:
+	for key: String in traits:
+		var value: Variant = traits[key]
+		if key.ends_with("_add"):
+			var target := key.left(-4)
+			f[target] = float(f.get(target, 0.0)) + float(value)
+		elif value is bool:
+			f[key] = value
+		else:
+			f[key] = float(f[key]) * float(value) if f.has(key) else value
+
+
+static func _anatomy_details(f: Dictionary, seed_value: int) -> void:
+	var r := RandomNumberGenerator.new()
+	r.seed = hash([seed_value, "anatomia"])
+	# Medidas independentes, estáveis durante o envelhecimento. Cada orelha tem
+	# cartilagem e cada olho tem um arco próprio, mesmo dentro do mesmo tipo.
+	for measure: String in ["eye_upper", "eye_lower", "iris_scale", "ear_width", "ear_height", "ear_helix", "ear_antihelix", "ear_concha", "ear_tragus", "nose_tip_width", "nose_tip_projection", "alar_round", "lip_upper_curve", "lip_lower_curve", "chin_width", "temple_width"]:
+		var base := 0.78 if measure == "eye_upper" else (1.15 if measure == "eye_lower" else 1.0)
+		f[measure] = float(f.get(measure, base)) * r.randf_range(0.94, 1.06)
+	f["ear_rotate"] = float(f.get("ear_rotate", 0.0)) + r.randf_range(-0.045, 0.045)
+	f["eye_canthal"] = float(f.get("eye_canthal", 0.12)) * r.randf_range(0.8, 1.2)
+	f["nose_asym"] = float(f.get("nose_asym", 0.0)) + r.randf_range(-0.07, 0.07)
+	f["lip_lobes"] = float(f.get("lip_lobes", 0.2)) * r.randf_range(0.8, 1.2)
+
+
 static func _eye_v2(f: Dictionary, t: int) -> void:
 	match t:
 		22: # pálpebra dupla marcada

@@ -320,7 +320,7 @@
 			"crest": {
 				"shape": "round",
 				"field": "plain",
-				"symbol": "hammers",
+				"symbol": "club_hammers",
 				"sc": "#FFFFFF",
 				"border": "double"
 			},

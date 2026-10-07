@@ -108,7 +108,7 @@
 			"crest": {
 				"shape": "round",
 				"field": "plain",
-				"symbol": "ship",
+				"symbol": "club_ship",
 				"sc": "#111111"
 			}
 		},

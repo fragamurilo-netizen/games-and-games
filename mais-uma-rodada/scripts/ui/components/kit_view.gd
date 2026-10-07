@@ -109,6 +109,8 @@ const SLEEVE_TOP := 2
 const FULL_ASPECT := 0.55
 const FULL_SHIRT := 0.5
 
+static var _knit_texture: CanvasTexture
+
 ## Recortes já feitos (em coordenadas unitárias), por estampa e peça.
 static var _clip_cache: Dictionary = {}
 
@@ -283,6 +285,7 @@ func _draw_shirt(s: float, off: Vector2) -> void:
 		draw_polyline(_xf([Vector2(0.272, 0.915), Vector2(0.38, 0.933), Vector2(0.5, 0.94), Vector2(0.62, 0.933), Vector2(0.728, 0.915)], s, off), c3, maxf(1.5, s * 0.02), true)
 	# Luz e dobras do tecido
 	_draw_shading(s, off, long, c1)
+	_draw_fabric(s, off, long)
 	var show_logos := s >= 56.0
 	if back:
 		_place_crest(Rect2())
@@ -422,13 +425,74 @@ func _draw_shading(s: float, off: Vector2, long: bool, c1: Color) -> void:
 		var dl := _mirror([Vector2(0.72, 0.1), Vector2(0.775, 0.105), Vector2(0.81, 0.15), Vector2(0.79, 0.19), Vector2(0.75, 0.16)], left)
 		draw_polygon(_xf(dl, s, off), PackedColorArray([Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.06 * (1.6 if dark else 1.0)), Color(1, 1, 1, 0.0),
 			Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.03)]))
-	var fold := Color(0, 0, 0, 0.1 * k)
-	var fw := maxf(1.0, s * 0.012)
 	for sx in [false, true]:
-		# Repuxo da axila em direção ao peito e dobra na cintura
-		draw_polyline(_xf(_mirror([Vector2(0.738, 0.31), Vector2(0.705, 0.335), Vector2(0.67, 0.348)], sx), s, off), fold, fw, true)
-		draw_polyline(_xf(_mirror([Vector2(0.712, 0.64), Vector2(0.68, 0.66), Vector2(0.65, 0.685)], sx), s, off), Color(fold, fold.a * 0.8), fw, true)
-		draw_polyline(_xf(_mirror([Vector2(0.716, 0.8), Vector2(0.69, 0.81)], sx), s, off), Color(fold, fold.a * 0.6), fw, true)
+		# Dobras curvas com volume e pontas que desaparecem no tecido.
+		_cloth_fold(_mirror([Vector2(0.738, 0.31), Vector2(0.705, 0.34), Vector2(0.67, 0.348)], sx), 0.018, 0.13 * k, s, off)
+		_cloth_fold(_mirror([Vector2(0.712, 0.64), Vector2(0.68, 0.66), Vector2(0.65, 0.685)], sx), 0.022, 0.1 * k, s, off)
+		_cloth_fold(_mirror([Vector2(0.716, 0.8), Vector2(0.698, 0.813), Vector2(0.672, 0.812)], sx), 0.016, 0.07 * k, s, off)
+	# Costura dupla da barra, só quando há pixels suficientes para separá-la.
+	if s >= 150.0:
+		for dy in [0.0, -0.009]:
+			var hem := [Vector2(0.287, 0.922 + dy), Vector2(0.38, 0.94 + dy), Vector2(0.5, 0.947 + dy), Vector2(0.62, 0.94 + dy), Vector2(0.713, 0.922 + dy)]
+			draw_polyline(_xf(hem, s, off), Color(0, 0, 0, 0.12 * k), maxf(0.55, s * 0.002), true)
+
+
+## Três faixas de triângulos: crista, sombra e bordas transparentes. 48 triângulos
+## por dobra, retidos pelo CanvasItem; sem textura, shader ou trabalho por quadro.
+func _cloth_fold(curve: Array, width: float, alpha: float, s: float, off: Vector2) -> void:
+	var points := PackedVector2Array()
+	var colors := PackedColorArray()
+	for i in 9:
+		var t := float(i) / 8.0
+		var a: Vector2 = curve[0].lerp(curve[1], t)
+		var b: Vector2 = curve[1].lerp(curve[2], t)
+		var p := a.lerp(b, t)
+		var normal := (b - a).normalized().orthogonal()
+		var fade := sin(PI * t)
+		for j in 4:
+			points.append(off + (p + normal * width * (float(j) / 3.0 - 0.5) * fade) * s)
+			colors.append([Color(1, 1, 1, 0), Color(1, 1, 1, alpha * 0.55 * fade), Color(0, 0, 0, alpha * fade), Color(0, 0, 0, 0)][j])
+	var indices := PackedInt32Array()
+	for i in 8:
+		for j in 3:
+			var a := i * 4 + j
+			for idx in [a, a + 4, a + 5, a, a + 5, a + 1]:
+				indices.append(idx)
+	RenderingServer.canvas_item_add_triangle_array(get_canvas_item(), indices, points, colors)
+
+
+## Malha de poliéster fosco, compartilhada por todas as camisas. Some nas
+## miniaturas e usa mipmaps para não cintilar quando a peça muda de tamanho.
+static func _knit() -> CanvasTexture:
+	if _knit_texture == null:
+		var image := Image.create(64, 64, false, Image.FORMAT_RGBA8)
+		for y in 64:
+			for x in 64:
+				var stitch := (x + (2 if y % 8 >= 4 else 0)) % 4
+				var grain := float((x * 17 + y * 29) % 11) / 11.0
+				var light := stitch == 1 or (stitch == 2 and y % 4 >= 2)
+				image.set_pixel(x, y, Color(1, 1, 1, 0.035 + grain * 0.025) if light else Color(0, 0, 0, 0.025 + grain * 0.02))
+		image.generate_mipmaps()
+		_knit_texture = CanvasTexture.new()
+		_knit_texture.diffuse_texture = ImageTexture.create_from_image(image)
+		_knit_texture.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+		_knit_texture.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	return _knit_texture
+
+
+func _draw_fabric(s: float, off: Vector2, long: bool) -> void:
+	if s < 180.0:
+		return
+	var texture := _knit()
+	for piece: Array in [BODY, _sleeve_poly(long, false), _sleeve_poly(long, true)]:
+		var uv := PackedVector2Array()
+		for p: Vector2 in piece:
+			uv.append(p * 8.0)
+		draw_polygon(_xf(piece, s, off), PackedColorArray([Color.WHITE]), uv, texture)
+	# Costura de união das mangas, no mesmo tom do tecido.
+	for side in [false, true]:
+		var seam := _mirror([Vector2(0.682, 0.09), Vector2(0.719, 0.12), Vector2(0.737, 0.2), Vector2(0.74, 0.292)], side)
+		draw_polyline(_xf(seam, s, off), Color(0, 0, 0, 0.12), maxf(0.5, s * 0.002), true)
 
 
 ## Degradê vertical do corpo (e das mangas), da cor principal para a da estampa.
@@ -649,6 +713,11 @@ func _draw_patch(r: Rect2, sp: Dictionary, bg: Color, emblem: bool = false, ov_k
 	if ov_key != "" and String(kit.get(ov_key, "")) != "":
 		fg = Color(String(kit[ov_key])) # cor escolhida no editor de uniforme
 	var name := String(sp.get("n", "")).to_upper()
+	# A tinta cruza várias cores nas estampas. Um contorno de impressão fino
+	# preserva a marca e a escolha do editor sem uma placa tapando o desenho.
+	var outline := Color.TRANSPARENT
+	if String(kit.get("pattern", "plain")) != "plain" and absf(Color(String(kit.get("c1", "#FFFFFF"))).get_luminance() - Color(String(kit.get("c2", "#111111"))).get_luminance()) > 0.25:
+		outline = Color("#17191D") if fg.get_luminance() > 0.45 else Color("#F5F3EE")
 	var center := r.get_center()
 	var max_w := r.size.x
 	if emblem:
@@ -659,12 +728,12 @@ func _draw_patch(r: Rect2, sp: Dictionary, bg: Color, emblem: bool = false, ov_k
 			BrandMark.draw(self, "alvo", ec, e, fg, bg)
 		center.x += e
 		max_w -= e * 2.4
-	if not _draw_text_centered(name, center, max_w, int(r.size.y * 0.75), fg, &"Big"):
+	if not _draw_text_centered(name, center, max_w, int(r.size.y * 0.75), fg, &"Big", outline):
 		# Espaço pequeno (manga, calção): só as iniciais da marca.
 		var ini := ""
 		for word in name.split(" ", false):
 			ini += word.substr(0, 1)
-		_draw_text_centered(ini, center, max_w, int(r.size.y * 0.8), fg, &"Big")
+		_draw_text_centered(ini, center, max_w, int(r.size.y * 0.8), fg, &"Big", outline)
 
 
 ## Cor de "tinta" da marca que aparece sobre o tecido.
@@ -700,7 +769,7 @@ func _draw_text_centered(txt: String, center: Vector2, max_w: float, size_px: in
 	var desc := font.get_descent(fs)
 	var at := Vector2(center.x - tw * 0.5, center.y + (asc - desc) * 0.5)
 	if outline.a > 0.0:
-		draw_string_outline(font, at, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, maxi(2, fs / 7), outline)
+		draw_string_outline(font, at, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, maxi(1, fs / 10), outline)
 	draw_string(font, at, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, color)
 	return true
 

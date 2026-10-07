@@ -23,7 +23,7 @@
 			"crest": {
 				"shape": "ring",
 				"field": "stripes:3",
-				"symbol": "hammers",
+				"symbol": "club_hammers",
 				"text": "SHAKHTAR",
 				"text2": "DONETSK",
 				"sc": "#FFFFFF"

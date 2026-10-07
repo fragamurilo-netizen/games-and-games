@@ -126,7 +126,7 @@
 			"crest": {
 				"shape": "round",
 				"field": "plain",
-				"symbol": "ship"
+				"symbol": "club_ship"
 			}
 		},
 		{
@@ -202,7 +202,7 @@
 			"crest": {
 				"shape": "round",
 				"field": "plain",
-				"symbol": "ship",
+				"symbol": "club_ship",
 				"sc": "#FFFFFF",
 				"border": "thick"
 			},

@@ -434,7 +434,7 @@
 			"crest": {
 				"shape": "shield",
 				"field": "plain",
-				"symbol": "hammers",
+				"symbol": "club_hammers",
 				"sc": "#FFFFFF",
 				"ribbon": "1923"
 			},

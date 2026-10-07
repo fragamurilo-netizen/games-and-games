@@ -29,6 +29,9 @@ extends Control
 ##   ring_c  cor do aro fino por fora (padrão: sem aro)    accent  cor de detalhe (faixa, numeral)
 ##   num  numeral grande no canto (divisões de acesso: "2", "3")
 ##   wordmark  nome embaixo do desenho, dentro do formato (só em tamanho grande)
+##   charge_layers  símbolos sobrepostos [{symbol, sc, dc, bg, x, y, scale}], todos opcionais
+##   dc  tinta dos detalhes do símbolo (padrão: tom da tinta principal)
+##   ring_bg  tinta do anel com o nome (padrão: calculada pelas cores do escudo)
 
 @export var crest: Dictionary = {"shape": "shield", "symbol": "star", "c1": "#1B3A8C", "c2": "#FFFFFF", "border": "thin", "initials": "RA"}:
 	set(v):
@@ -147,6 +150,9 @@ static func spec(cr: Dictionary) -> Dictionary:
 	sp["wordmark"] = String(cr.get("wordmark", ""))
 	sp["flag"] = Array(cr.get("flag", [])) if cr.get("flag", null) is Array else []
 	sp["sym_top"] = String(cr.get("sym_top", ""))
+	sp["dc"] = _col_or_null(cr, "dc")
+	sp["ring_bg"] = _col_or_null(cr, "ring_bg")
+	sp["charge_layers"] = Array(cr.get("charge_layers", [])) if cr.get("charge_layers", null) is Array else []
 	return sp
 
 
@@ -174,7 +180,7 @@ func _render(s: float) -> void:
 	var c1: Color = sp["c1"]
 	var c2: Color = sp["c2"]
 	var c3: Color = sp["c3"]
-	var small := s < 40.0
+	var small := s < 48.0
 	var logo := bool(sp["logo"])
 	# Espaço fora do escudo: coroa e estrelas em cima, faixa embaixo, louros em volta
 	var top := 0.0
@@ -201,6 +207,8 @@ func _render(s: float) -> void:
 	if ring:
 		# Anel externo com o nome; o campo fica no disco de dentro
 		var band_col := c2 if absf(c2.get_luminance() - c1.get_luminance()) > 0.15 else c1.darkened(0.35)
+		if sp["ring_bg"] != null:
+			band_col = sp["ring_bg"]
 		_poly(poly, band_col)
 		inner = _xf(_shrink(unit, 0.27 if not small else 0.2), box)
 	_poly(inner, c1)
@@ -208,6 +216,9 @@ func _render(s: float) -> void:
 	if sp["canton"] != null:
 		_canton(sp, box, inner, s)
 	var charge_box := _inner_box(box, shape)
+	if ring and small:
+		# Sem microtexto, o símbolo ocupa o espaço que antes sobrava no anel.
+		charge_box = Rect2(box.position + box.size * 0.24, box.size * 0.52)
 	# Faixa com as cores da bandeira no alto (logos de liga)
 	var flag: Array = sp["flag"]
 	if flag.size() >= 2 and not ring:
@@ -242,7 +253,7 @@ func _render(s: float) -> void:
 		_rim(inner, sp, s)
 	# Placa atrás do monograma (faixa ou disco), para as letras não se perderem nas listras
 	var plate := plate_mode(sp)
-	if plate != "" and not small:
+	if plate != "":
 		_plate(plate, sp, charge_box, box, inner, s)
 	# Símbolo
 	match String(sp["sym_pos"]):
@@ -257,6 +268,24 @@ func _render(s: float) -> void:
 		var cc0 := charge_box.get_center()
 		charge_box = Rect2(cc0 - charge_box.size * 0.5 * float(sp["sym_scale"]), charge_box.size * float(sp["sym_scale"]))
 	_charge(sp, charge_box, inner, s, box)
+	# Composição heráldica em camadas: navio, rios e rosa podem ter tintas
+	# distintas. Ausente nos saves antigos; usa o mesmo cache de comandos.
+	for layer: Variant in sp["charge_layers"].slice(0, 8):
+		if not layer is Dictionary:
+			continue
+		var child := sp.duplicate()
+		child["symbol"] = String(layer.get("symbol", "none"))
+		child["sc"] = Color(String(layer.get("sc", "#FFFFFF")))
+		child["dc"] = _col_or_null(layer, "dc")
+		child["staff"] = false
+		child["line_art"] = false
+		child["field"] = "plain"
+		if layer.has("bg"):
+			child["c1"] = Color(String(layer["bg"]))
+		var scale := clampf(float(layer.get("scale", 1.0)), 0.05, 2.0)
+		var sz := charge_box.size * scale
+		var center := charge_box.get_center() + Vector2(float(layer.get("x", 0.0)), float(layer.get("y", 0.0))) * charge_box.size * 0.5
+		_charge(child, Rect2(center - sz * 0.5, sz), inner, s)
 	if String(sp["sym_top"]) != "" and CrestArt.has(String(sp["sym_top"])):
 		# Símbolo pequeno acima do principal (coroa sobre o leão, estrela sobre a bola)
 		var tc0 := Vector2(charge_box.get_center().x, charge_box.position.y - box.size.y * 0.09)
@@ -378,7 +407,7 @@ static func _logo_box(box: Rect2, shape: String, has_flag: bool, has_top: bool, 
 		sz *= 0.82
 	if has_word:
 		cy -= 0.1
-		sz *= 0.8
+		sz *= 0.9
 	return Rect2(box.position + box.size * Vector2(0.5 - sz * 0.5, cy - sz * 0.5), box.size * sz)
 
 
@@ -655,7 +684,7 @@ func _charge(sp: Dictionary, cb: Rect2, field_poly: PackedVector2Array, s: float
 		var lw := maxf(1.2, r * 0.075)
 		for p: PackedVector2Array in CrestArt.polys(sym):
 			_polyline_closed(_xf_c(p, cen, r), col, lw)
-		if CrestArt.has(det) and s >= 28.0:
+		if CrestArt.has(det) and r * 2.0 >= 24.0:
 			for p: PackedVector2Array in CrestArt.polys(det):
 				_poly(_xf_c(p, cen, r), col)
 		return
@@ -679,25 +708,92 @@ func _charge(sp: Dictionary, cb: Rect2, field_poly: PackedVector2Array, s: float
 			var pts := _xf_c(p, cen, r)
 			_polyline_closed(pts, c1.darkened(0.3) if c1.get_luminance() < 0.6 else Color(0, 0, 0, 0.6), maxf(1.0, r * 0.07))
 	for p: PackedVector2Array in polys:
-		_poly(_xf_c(p, cen, r), col)
+		var pts := _xf_c(_charge_contour(p, r), cen, r)
+		_poly(pts, col)
+		# O polígono preenchido não tem AA no CanvasItem. Meio pixel na mesma
+		# tinta suaviza a silhueta sem um contorno escuro em volta da marca.
+		if s >= 24.0:
+			_polyline_closed(pts, col, 0.65)
 	# Recortes ("_c"): partes vazadas, na cor do fundo (costuras da bola dos logos)
-	if CrestArt.has(sym + "_c") and s >= 20.0:
+	# Vãos estruturais continuam legíveis antes dos detalhes decorativos: sem
+	# eles, o B vira uma placa e a roda do canhão vira um disco cheio.
+	var cut_min := 12.0 if sym in ["ball", "match_b", "club_cannon", "club_wolf"] else 24.0
+	if CrestArt.has(sym + "_c") and r * 2.0 >= cut_min:
 		for p: PackedVector2Array in CrestArt.polys(sym + "_c"):
 			_poly(_xf_c(p, cen, r), c1)
 	# Recortes do liver bird usam o campo; em ícones pequenos vale a silhueta limpa.
-	var detail_min := 48.0 if sym == "liverbird" else 28.0
+	var detail_min := 12.0 if sym == "ball" else (40.0 if sym == "liverbird" else 24.0)
 	if sym == "liverbird":
 		shade = c1
 	var metal := sym.begins_with("trophy")
 	if metal:
 		# Taça: sombra metálica mais suave e um reflexo claro
 		shade = col.darkened(0.28) if col.get_luminance() > 0.35 else col.lightened(0.3)
-	if CrestArt.has(det) and s >= detail_min:
+	if bool(sp["logo"]) and metal:
+		shade = col.darkened(0.16)
+	if sp["dc"] != null:
+		shade = sp["dc"]
+	# LOD pelo tamanho do desenho, não pelo controle: coroas, louros e nomes
+	# podem reduzir muito a área útil de um escudo de 48 px.
+	if CrestArt.has(det) and r * 2.0 >= detail_min:
 		for p: PackedVector2Array in CrestArt.polys(det):
 			_poly(_xf_c(p, cen, r), shade if sym != "ball" else Color("#15171B"))
-	if CrestArt.has(sym + "_h") and s >= 28.0:
+	if CrestArt.has(sym + "_h") and r * 2.0 >= 28.0 and not bool(sp["logo"]):
 		for p: PackedVector2Array in CrestArt.polys(sym + "_h"):
 			_poly(_xf_c(p, cen, r), Color(col.lightened(0.6), 0.85))
+
+
+## Nas miniaturas, pontos separados por menos de meio pixel só serrilham a
+## borda. Conserva os cantos que definem o animal e valida antes de substituir.
+static func _charge_contour(poly: PackedVector2Array, radius: float) -> PackedVector2Array:
+	if radius >= 24.0 or poly.size() <= 4:
+		return poly
+	var tolerance := 0.4 / maxf(radius, 1.0)
+	var distance_sq := tolerance * tolerance
+	# Divide o contorno fechado em duas cadeias e limita o erro de TODOS os
+	# pontos, para a remoção de vizinhos não acumular uma mudança na silhueta.
+	var split := 1
+	for i in range(2, poly.size()):
+		if poly[0].distance_squared_to(poly[i]) > poly[0].distance_squared_to(poly[split]):
+			split = i
+	var clean := _simplify_chain(poly.slice(0, split + 1), distance_sq)
+	var other := poly.slice(split)
+	other.append(poly[0])
+	other = _simplify_chain(other, distance_sq)
+	clean.append_array(other.slice(1, other.size() - 1))
+	if clean.size() < 3 or Geometry2D.triangulate_polygon(clean).is_empty():
+		return poly
+	return clean
+
+
+static func _simplify_chain(points: PackedVector2Array, distance_sq: float) -> PackedVector2Array:
+	var keep := PackedByteArray()
+	keep.resize(points.size())
+	keep.fill(0)
+	keep[0] = 1
+	keep[-1] = 1
+	var pending: Array[Vector2i] = [Vector2i(0, points.size() - 1)]
+	while not pending.is_empty():
+		var span: Vector2i = pending.pop_back()
+		var a := points[span.x]
+		var edge := points[span.y] - a
+		var best := -1
+		var error := distance_sq
+		for i in range(span.x + 1, span.y):
+			var t := clampf((points[i] - a).dot(edge) / maxf(edge.length_squared(), 0.000001), 0.0, 1.0)
+			var d := points[i].distance_squared_to(a + edge * t)
+			if d > error:
+				error = d
+				best = i
+		if best >= 0:
+			keep[best] = 1
+			pending.append(Vector2i(span.x, best))
+			pending.append(Vector2i(best, span.y))
+	var out := PackedVector2Array()
+	for i in points.size():
+		if keep[i]:
+			out.append(points[i])
+	return out
 
 
 ## Placa do monograma: "band" (faixa atravessada) ou "disc" (disco central). "" = sem placa.
@@ -821,8 +917,11 @@ func _border(poly: PackedVector2Array, inner: PackedVector2Array, ring: bool, sp
 			_polyline_closed(poly, edge, maxf(2.0, s * 0.06))
 		"double":
 			_polyline_closed(poly, edge, maxf(1.0, s * 0.03))
-			for piece in Geometry2D.offset_polygon(poly, -s * 0.06):
-				_polyline_closed(piece, edge, maxf(1.0, s * 0.018))
+			# No anel, o segundo filete já é a borda do disco interno. Um
+			# terceiro traço a 6% da borda cruzava as letras do nome do clube.
+			if not ring:
+				for piece in Geometry2D.offset_polygon(poly, -s * 0.06):
+					_polyline_closed(piece, edge, maxf(1.0, s * 0.018))
 		"gold":
 			_polyline_closed(poly, c3, maxf(1.5, s * 0.045))
 			_polyline_closed(poly, c3.darkened(0.35), maxf(1.0, s * 0.012))

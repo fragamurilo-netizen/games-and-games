@@ -7,6 +7,7 @@ extends SceneTree
 ##   --syms=a,b  símbolos do CrestArt             --proc  escudos gerados por país
 ##   --logos  logos de ligas, copas e torneios (cada um também em 40 px, como aparece nas listas)
 ##   --comps=A,B  só essas competições
+##   --small=N  miniatura ao lado de cada desenho (também para clubes, 0 desliga)
 
 var _out := "user://crest_sheet.png"
 
@@ -22,6 +23,7 @@ func _initialize() -> void:
 	var only_names: Array = []
 	var only_syms: Array = []
 	var only_comps: Array = []
+	var small_override := -1
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--out="):
 			_out = a.substr(6)
@@ -31,6 +33,8 @@ func _initialize() -> void:
 			cols = int(a.substr(7))
 		elif a.begins_with("--h="):
 			max_h = int(a.substr(4))
+		elif a.begins_with("--small="):
+			small_override = clampi(int(a.substr(8)), 0, 96)
 		elif a.begins_with("--offset="):
 			offset = int(a.substr(9))
 		elif a.begins_with("--keys="):
@@ -114,7 +118,7 @@ func _initialize() -> void:
 				names.append(c.short_name)
 	specs = specs.slice(offset)
 	names = names.slice(offset)
-	var small := 40 if mode == "logos" else 0
+	var small := small_override if small_override >= 0 else (40 if mode == "logos" else 0)
 	var cell_w := px + (small + 6 if small > 0 else 0) + 10
 	var lh := 16
 	var shown := 0

@@ -77,4 +77,25 @@ O resto do jogo chama essas peças assim. Você pode trocar tudo por dentro, mas
 
 Escreva aqui o que fez, o que ficou pela metade e o que precisa do Claude: ajuste numa tela, regra nova no DESIGN.md, campo novo em dado. Ponha data e commit.
 
-- (vazio)
+### 2026-10-07 — revisão visual implementada no ramo do Codex
+
+- Escudos: `825a8f9`, `a09b1af`, `2fba351`. Redesenhei 38 escudos de clubes: canhão/roda, navio/rios/rosa, torre, árvore/ondas, martelos, lobo frontal, abelha, cabeceador e monogramas brasileiros. Arte vetorial própria. Contorno com antialiasing, anel do nome corrigido e miniaturas com simplificação limitada a 0,4 pixel. Vazados estruturais sobrevivem nas marcas pequenas.
+- Logos: `8a0231e`, `ca725fb`. Nove identidades de competição: ENG1, ESP1/2, GER1/2, ITA1/2, FRA1/2. Leão coroado, atleta em voleio e letras vetoriais, com cores e composição mais reconhecíveis. Apenas `identity.json.logos` mudou; 153 IDs preservados.
+- Uniformes: `38697d1`. Dobras curvas, trama fosca compartilhada (somente em peças grandes), barra dupla, junção das mangas e contraste na impressão. Listas públicas e índices iguais à base.
+- Rostos: `08ce629`, `c25f55b`, `4490000`. Mantive o renderizador 2D. Volume facial por normais analíticas, pálpebras, íris, lábios e fios mais suaves. Acrescentei ao fim 12 formatos de rosto, 16 olhos, 16 narizes, 16 bocas e 12 orelhas (72 perfis). Curvas independentes, microvariações estáveis por pessoa/idade e anatomia detalhada das orelhas. Catálogos agora: rosto 30, olhos 46, nariz 48, boca 42, orelhas 24. Os retratos continuam ilustrados; não são fotografias.
+- Compatibilidade: catálogos anteriores mantêm ordem e valores; cabelo/barba/pele mantêm sua sequência aleatória. Chamadas públicas, cache e preferência por imagens importadas preservados. Nos JSON de clubes só `crest` mudou; todos os demais campos iguais à base.
+- Campos opcionais de escudo: `charge_layers` (até oito símbolos com posição/escala), `dc` (tinta de detalhe) e `ring_bg` (tinta do anel). Todos têm padrão e não exigem migração de save. Nenhum campo novo de uniforme.
+- Ferramentas: `face_anatomy.gd` compara cada tipo na mesma pessoa, com ampliação nativa; `face_contract.gd` verifica determinismo/índices e aceita `--baseline=SCRIPT`; `face_bench.gd` mede geração e redesenho com cache. Geradores Python de arte e dados são idempotentes. `crest_sheet.gd --small=40` permite comparar clubes e miniaturas.
+
+Conferência concluída com Godot 4.7.2 / Compatibility / Windows RTX 3060:
+
+- `check_scripts.gd`: 434 scripts, **com erro: 0**.
+- `face_contract.gd`: **814 casos, com erro: 0**, incluindo comparação de todos os índices antigos contra FaceGen do commit `673e5d6` e estabilidade de cabelo/barba/pele nas novas combinações.
+- `tools/crest_gen/check.gd`: **2.656 contornos**, quatro tamanhos, zero falhas; 54.088 pontos passam a 21.657 em miniaturas, sem alterar o catálogo original.
+- Folhas de escudos ingleses/brasileiros, logos, uniformes frente/costas, 104 retratos de 13 grupos, 72 novas anatomias, cabelos, envelhecimento e seis moods de fotos capturados e inspecionados.
+- Hub, clube, jogador, elenco e uniforme capturados em **390×844, 844×390, 800×1280 e 1280×800**, sem erro de script. Passe com duas rodadas em 390×844 também concluído.
+- A ferramenta de TV gerou 12 capturas, mas falhou ao encerrar com `-1073741819`. Reproduzi a mesma falha no commit-base `673e5d6`, após importar o projeto corretamente. As duas últimas capturas ficam escuras na transição final; não considero essa parte validada. Os retratos dos titulares por setor foram conferidos. Não alterei telas ou sistemas para corrigir a ferramenta.
+- As ferramentas de telas deixam avisos de CanvasItem/ObjectDB/recurso ao encerrar; a mesma sequência aparece no commit-base. Sem erros GDScript.
+- Medição pareada de 12 retratos, em uma execução: 90 px, geração 589→620 ms e redesenho em cache 82→80 ms; 320 px, geração 1.079→1.313 ms e cache 167→134 ms. O custo inicial de retratos grandes aumentou cerca de 22%; não são medições de FPS. Cache continua limitado a 720 entradas. **Android médio ainda precisa de medição no aparelho.**
+
+Pendências para integração: revisão do dono antes de juntar a branch; medir Android e investigar o encerramento de `tv_shots.gd` fora desta frente visual. Não foi necessário pedir alteração de tela ou regra do DESIGN.md. Nada foi integrado na main ou no ramo do Claude.
