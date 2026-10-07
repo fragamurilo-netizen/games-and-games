@@ -42,6 +42,18 @@ var injured: bool = false
 var injury_weeks: int = 0
 var own_goals: int = 0
 var final_rating: float = 6.0
+# Ações contadas de verdade pelo motor (estatísticas e nota): xG das finalizações, passes que
+# viraram finalização, desarmes, interceptações, dribles certos, chutes travados, grandes chances
+# perdidas, bolas aéreas ganhas e impedimentos.
+var xg_sum: float = 0.0
+var key_passes: int = 0
+var tackles: int = 0
+var interceptions: int = 0
+var dribbles: int = 0
+var blocks: int = 0
+var big_missed: int = 0
+var aerials: int = 0
+var offsides: int = 0
 
 # Compostos cacheados
 var c_def: float = 50.0

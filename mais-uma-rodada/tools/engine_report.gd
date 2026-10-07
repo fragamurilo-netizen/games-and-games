@@ -55,7 +55,15 @@ func _initialize() -> void:
 		var b: Club = cl[rng.randi_range(0, cl.size() - 1)]
 		if a == b:
 			continue
-		var res := _detail_match(w, a, b, rng.randi()) if detail else MatchEngine.test_match(w, a, b, rng.randi(), quick)
+		var res: Dictionary
+		if quick:
+			res = MatchEngine.test_match(w, a, b, rng.randi(), true)
+			_ratings(res)
+			_team_stats(res)
+		else:
+			var sim := _detail_sim(w, a, b, rng.randi()) if detail else MatchEngine.quick_match(w, a, b, rng.randi())
+			res = sim.to_result()
+			_collect(sim)
 		n += 1
 		var hg := int(res["hg"])
 		var ag := int(res["ag"])
@@ -128,11 +136,118 @@ func _initialize() -> void:
 	print("total de gols: ", " ".join(ds))
 	var tg := maxf(1, pos_g[1] + pos_g[2] + pos_g[3])
 	print("amarelos %.2f | vermelhos %.3f | finalizações/time %.1f | xG/time %.2f | pênaltis %.1f%% dos gols | DEF %.1f%% MEI %.1f%% ATA %.1f%% (centroavante %.1f%%)" % [float(yc) / n, float(rc) / n, shots / (2.0 * n), xg / (2.0 * n), 100.0 * pens / maxf(1, goals), 100.0 * pos_g[1] / tg, 100.0 * pos_g[2] / tg, 100.0 * pos_g[3] / tg, 100.0 * st_g / tg])
+	var rs0 := []
+	for g in 4:
+		var nn0: float = maxf(1.0, ex["rn"][g])
+		var mean0: float = ex["rs"][g] / nn0
+		rs0.append("%s %.2f±%.2f" % [["GOL", "DEF", "MEI", "ATA"][g], mean0, sqrt(maxf(0.0, ex["rq"][g] / nn0 - mean0 * mean0))])
+	print("notas (titulares 60+ min): " + " | ".join(rs0))
+	if ex_n > 0:
+		var tn := 2.0 * ex_n
+		var sh_all := maxf(1.0, float(ex["shots"]))
+		print("POR TIME: escanteios %.1f (real ~5) | faltas %.1f (~11-12) | impedimentos %.1f (~2) | no alvo %.1f = %.0f%% das finalizações (~33%%) | travadas %.0f%% (~27%%) | defesas %.1f (~3) | grandes chances %.1f (~1,8) | rebotes %.2f" % [
+			ex["corners"] / tn, ex["fouls"] / tn, ex["offs"] / tn, ex["on"] / tn, 100.0 * ex["on"] / sh_all, 100.0 * ex["blocked"] / sh_all, ex["saves"] / tn, ex["big"] / tn, ex["reb"] / tn])
+	if not quick and ex_n > 0:
+		var tn := 2.0 * ex_n
+		print("DUELOS POR TIME: desarmes %.1f (~16) | interceptações %.1f (~10) | dribles %.1f (~9) | aéreas ganhas %.1f (~16) | passes %.0f (~450) a %.0f%% (~80%%)" % [
+			ex["tk"] / tn, ex["it"] / tn, ex["dr"] / tn, ex["ad"] / tn, ex["pa"] / tn, 100.0 * ex["pc"] / maxf(1.0, ex["pa"])])
+		var pm: float = ex["poss_sq"] / ex_n - pow(ex["poss_sum"] / ex_n, 2)
+		print("posse: mandante %.1f%%, desvio %.1f pontos (real ~9) | amarelos 1º tempo %.0f%% (real ~35%%) | lesões/jogo %.2f | trocas/time %.1f, minuto médio %.0f, 1ª troca %.0f (real ~58)" % [
+			100.0 * ex["poss_sum"] / ex_n, 100.0 * sqrt(maxf(0.0, pm)), 100.0 * ex["y1"] / maxf(1.0, ex["y1"] + ex["y2"]), ex["inj"] / ex_n, ex["subs"] / tn, ex["sub_min"] / maxf(1.0, ex["subs"]), ex["first_sub"] / maxf(1.0, ex["first_n"])])
 	var gs: Array = []
 	for k in 3:
 		gs.append("%s: favorito vence %.0f%% empata %.0f%% perde %.0f%% gols %.2f 5+ %.0f%% (%d)" % [["gap<3", "3-7", "7+"][k], 100.0 * gap_w[k] / maxf(1, gap_n[k]), 100.0 * gap_d[k] / maxf(1, gap_n[k]), 100.0 * (gap_n[k] - gap_w[k] - gap_d[k]) / maxf(1, gap_n[k]), float(gap_g[k]) / maxf(1, gap_n[k]), 100.0 * gap_big[k] / maxf(1, gap_n[k]), gap_n[k]])
 	print(" | ".join(gs))
 	quit()
+
+
+var ex := {"poss_sum": 0.0, "corners": 0.0, "fouls": 0.0, "offs": 0.0, "on": 0.0, "shots": 0.0, "blocked": 0.0, "saves": 0.0, "big": 0.0, "reb": 0.0,
+	"tk": 0.0, "it": 0.0, "dr": 0.0, "ad": 0.0, "pa": 0.0, "pc": 0.0, "poss_sq": 0.0, "y1": 0.0, "y2": 0.0, "inj": 0.0, "subs": 0.0,
+	"sub_min": 0.0, "first_sub": 0.0, "first_n": 0.0, "rs": [0.0, 0.0, 0.0, 0.0], "rq": [0.0, 0.0, 0.0, 0.0], "rn": [0.0, 0.0, 0.0, 0.0]}
+var ex_n := 0
+
+
+## Números do minuto a minuto que o resultado comum não traz (escanteios, duelos, notas...).
+func _collect(sim: MatchSimulation) -> void:
+	ex_n += 1
+	var res := sim.to_result()
+	for t: MatchTeam in sim.teams:
+		ex["corners"] += t.corners
+		ex["fouls"] += t.fouls
+		ex["offs"] += t.offsides
+		ex["on"] += t.on_target
+		ex["shots"] += t.shots
+		ex["blocked"] += t.blocked
+		ex["saves"] += t.saves
+		ex["big"] += t.big
+		ex["reb"] += t.rebounds
+		var first := 999
+		for mp: MatchPlayer in t.all:
+			if not mp.used:
+				continue
+			ex["tk"] += mp.tackles
+			ex["it"] += mp.interceptions
+			ex["dr"] += mp.dribbles
+			ex["ad"] += mp.aerials
+			var ps: Array = res["pstats"][mp.p.id]
+			ex["pa"] += int(ps[13])
+			ex["pc"] += int(ps[14])
+			if mp.start_min > 0:
+				ex["subs"] += 1
+				ex["sub_min"] += mp.start_min
+				first = mini(first, mp.start_min)
+		if first < 999:
+			ex["first_sub"] += first
+			ex["first_n"] += 1
+	_ratings(res)
+	var p0 := sim.possession_pct(0)
+	ex["poss_sq"] += p0 * p0
+	ex["poss_sum"] += p0
+	for ev in sim.events:
+		var t: int = ev["t"]
+		if t == MatchSimulation.EV_YELLOW:
+			if int(ev["h"]) == 1:
+				ex["y1"] += 1
+			else:
+				ex["y2"] += 1
+		elif t == MatchSimulation.EV_INJURY:
+			ex["inj"] += 1
+
+
+## Números por time que os dois modos exportam em res["team"] (o modo rápido não tem rebotes).
+func _team_stats(res: Dictionary) -> void:
+	ex_n += 1
+	for t: Dictionary in res.get("team", []):
+		ex["corners"] += int(t["corners"])
+		ex["fouls"] += int(t["fouls"])
+		ex["offs"] += int(t["offsides"])
+		ex["on"] += int(t["on"])
+		ex["shots"] += int(t["shots"])
+		ex["blocked"] += int(t["blocked"])
+		ex["saves"] += int(t["saves"])
+		ex["big"] += int(t["big"])
+		ex["reb"] += int(t.get("rebounds", 0))
+
+
+## Notas dos titulares que jogaram 60+ minutos, pelo formato comum das linhas (os dois modos).
+func _ratings(res: Dictionary) -> void:
+	for side in 2:
+		for ln: Array in res["lines"][side]:
+			if int(ln[QuickMatch.L_START]) == 0 and int(ln[19]) >= 60:
+				var g: int = Pos.GROUP[int(ln[1])]
+				var r := float(ln[20])
+				ex["rs"][g] += r
+				ex["rq"][g] += r * r
+				ex["rn"][g] += 1
+
+
+static func _detail_sim(world: GameWorld, home: Club, away: Club, seed_value: int) -> MatchSimulation:
+	var hs := ClubAI.prepare_ai_sheet(world, home, away, true)
+	var as_ := ClubAI.prepare_ai_sheet(world, away, home, false)
+	var sim := MatchSimulation.new()
+	sim.setup(world, home, away, hs, as_, MatchEngine._test_ctx(home), seed_value, true)
+	sim.run_to_end()
+	return sim
 
 
 ## Mesmo jogo de teste do MatchEngine.quick_match, mas com detail = true (eventos de apresentação).
