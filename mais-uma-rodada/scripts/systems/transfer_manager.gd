@@ -66,7 +66,10 @@ static func asking_price(world: GameWorld, p: Player, memo: Dictionary = {}) -> 
 
 
 ## Probabilidade (0..1) de o jogador topar se mudar para `buyer` com salário justo.
-static func interest(world: GameWorld, p: Player, buyer: Club) -> float:
+## `squad`: o elenco do comprador, quando quem chama já o tem (a busca da IA avalia vários
+## jogadores para o mesmo clube); vazio = monta aqui.
+static func interest(world: GameWorld, p: Player, buyer: Club, squad: Array = []) -> float:
+	var bsq := squad if not squad.is_empty() else world.squad(buyer)
 	var cur := world.club(p.club_id) if p.club_id >= 0 else null
 	var rep_diff := buyer.reputation - (cur.reputation if cur != null else buyer.reputation - 8.0)
 	var amb := 1.0 + p.trait_sum("ambition") / 40.0
@@ -87,7 +90,7 @@ static func interest(world: GameWorld, p: Player, buyer: Club) -> float:
 		# país, se adapta mais rápido e topa mais fácil.
 		v += Languages.ease(p, buyer, p.age(world.year)) # quem fala (ou entende) a língua topa mais fácil
 		var mates := 0
-		for q in world.squad(buyer):
+		for q in bsq:
 			if q.nationality == p.nationality:
 				mates += 1
 		if mates >= 2:
@@ -99,7 +102,7 @@ static func interest(world: GameWorld, p: Player, buyer: Club) -> float:
 		v += 0.1
 	# Minutos: teria espaço no novo time?
 	var better := 0
-	for q in world.squad(buyer):
+	for q in bsq:
 		if q.position == p.position and q.ovr_f > p.ovr_f + 2.0:
 			better += 1
 	v += 0.1 if better == 0 else (-0.08 * better)
@@ -986,8 +989,10 @@ static func respond_offer(world: GameWorld, o: TransferOffer, action: String, co
 ## Processa mercado da IA (MarketAI) e as propostas pelo elenco do usuário. Retorna as Transfer feitas.
 static func process_matchday(world: GameWorld) -> Array:
 	var done := MarketAI.matchday(world)
+	var tt := Time.get_ticks_usec()
 	if world.transfer_window_open():
 		_generate_offers_for_user(world)
+	tt = SeasonManager._time("mk_ofertas_usuario", tt)
 	_expire_offers(world)
 	return done
 

@@ -57,14 +57,15 @@ static func club_km(a: Club, b: Club) -> float:
 ## jogos, que rodam em threads, Geo só lê.
 static func prepare(world: GameWorld) -> void:
 	_data()
-	if int(_league_avg.get("_y", -1)) == world.year:
+	var key := hash([world.get_instance_id(), world.year]) # outro mundo aberto refaz as médias
+	if int(_league_avg.get("_y", -1)) == key:
 		return
 	var by := {}
 	for c: Club in world.clubs:
 		if not by.has(c.league_id):
 			by[c.league_id] = []
 		by[c.league_id].append(c)
-	var out := {"_y": world.year}
+	var out := {"_y": key}
 	for lid in by:
 		var arr: Array = by[lid]
 		var tot := 0.0

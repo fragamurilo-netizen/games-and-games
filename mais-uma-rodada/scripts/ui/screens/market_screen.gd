@@ -449,12 +449,22 @@ func _search_base(w: GameWorld, club: Club, weakest: Array, budget: float, scout
 	if key == _base_key:
 		return _base
 	_base_key = key
-	_base = []
-	for p: Player in w.players.values():
-		if p.club_id < 0 or p.club_id == club.id or p.retiring:
-			continue
-		var est := int(round(PlayerAssessment.score(w,p)))
-		_base.append([p, est, _relevance(w, p, float(est) - float(weakest[Pos.group(p.position)]), budget)])
+	# Avaliação dos ~27 mil jogadores dividida entre os núcleos (só leitura; a ordem é a do mundo).
+	# A régua do elenco e a comissão ficam prontas antes, nesta thread.
+	People.data(w)
+	for pos in Pos.COUNT:
+		PlayerAssessment.squad_reference(w, pos)
+	var all: Array = w.players.values()
+	var uid := club.id
+	_base = Parallel.map_chunks(all.size(), func(a: int, b: int) -> Array:
+		var out: Array = []
+		for i in range(a, b):
+			var p: Player = all[i]
+			if p.club_id < 0 or p.club_id == uid or p.retiring:
+				continue
+			var est := int(round(PlayerAssessment.score(w, p)))
+			out.append([p, est, _relevance(w, p, float(est) - float(weakest[Pos.group(p.position)]), budget)])
+		return out, 512)
 	return _base
 
 
@@ -1079,11 +1089,14 @@ func _move_row(w: GameWorld, t: Transfer, club: Club) -> Control:
 
 ## Relevância: o quanto melhora o time (ou promete, se for jovem), com desconto pelo que custa
 ## além da verba. Jogador que não melhora nada ainda aparece, mas lá embaixo.
-func _relevance(w: GameWorld, p: Player, gain: float, budget: float) -> float:
+static func _relevance(w: GameWorld, p: Player, gain: float, budget: float) -> float:
 	var v := clampf(gain, -12.0, 12.0) * 2.0
 	var age := p.age(w.year)
 	if age <= 22:
-		v += clampf((PlayerAssessment.stars(w,p,-1,true)-PlayerAssessment.stars(w,p))*10.0, 0.0, 15.0) * 0.4
+		var r := PlayerAssessment.report(w, p) # o mesmo relatório das duas estrelas (agora e futuro)
+		var now := (float(r["low"]) + float(r["high"])) * 0.5
+		var fut := (float(r["future_low"]) + float(r["future_high"])) * 0.5
+		v += clampf((fut - now) * 10.0, 0.0, 15.0) * 0.4
 	elif age >= 32:
 		v -= float(age - 31) * 1.5
 	var ratio := float(p.value) / budget

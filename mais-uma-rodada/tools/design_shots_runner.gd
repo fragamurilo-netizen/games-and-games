@@ -508,6 +508,18 @@ func _dialog_shot(w: GameWorld, kind: String) -> void:
 					break
 		"toast":
 			UIManager.toast("Proposta enviada. A resposta chega na próxima rodada.", UIColors.GREEN)
+		"renew", "renew_terms":
+			# Renovação com o melhor do elenco (documento do contrato com o retrato no topo)
+			var best: Player = null
+			for p0: Player in w.squad(u):
+				if best == null or p0.ovr_f > best.ovr_f:
+					best = p0
+			Negotiation.open(w, best, "renew", func(): pass)
+			await _frames(2)
+			var rn: Negotiation = Negotiation.last
+			if rn != null and kind == "renew_terms":
+				rn.terms_tab = "extra"
+				rn._render()
 		"buy_cond", "buy_terms", "buy_loan", "buy_talk":
 			for c: Club in w.clubs_in_league(u.league_id):
 				if c.id != u.id and not u.is_rival(c.id):

@@ -72,19 +72,24 @@ static func record(world: GameWorld, f: Fixture, res: Dictionary, home_sheet: Te
 # ---------------------------------------------------------------------------
 
 static var _pcache: Dictionary = {}
+static var _pmutex := Mutex.new() # as escalações da IA leem perfis em várias threads
 
 
 ## Como o time joga e onde sofre, pelo diário. Sem jogos, usa a filosofia e o elenco.
 ## Guardado em cache até o diário mudar (é lido centenas de vezes por rodada).
 static func profile(world: GameWorld, club: Club) -> Dictionary:
 	var stamp := [world.get_instance_id(), club.tac_log.size(), hash(club.tac_log.back()) if not club.tac_log.is_empty() else 0]
+	_pmutex.lock()
 	var hit: Array = _pcache.get(club.id, [])
+	_pmutex.unlock()
 	if hit.size() == 2 and hit[0] == stamp:
 		return hit[1]
 	var prof := _build_profile(world, club)
+	_pmutex.lock()
 	if _pcache.size() > 4000:
 		_pcache.clear()
 	_pcache[club.id] = [stamp, prof]
+	_pmutex.unlock()
 	return prof
 
 

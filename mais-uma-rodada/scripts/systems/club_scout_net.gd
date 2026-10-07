@@ -33,6 +33,13 @@ static func of(world: GameWorld, club_id: int) -> Dictionary:
 	return d[key]
 
 
+## Apaga o que o departamento do clube acompanha (o próximo `ensure_known` monta a lista de novo).
+static func forget(world: GameWorld, c: Club) -> void:
+	var mem := of(world, c.id)
+	(mem["k"] as Dictionary).clear()
+	(mem["t"] as Dictionary).clear()
+
+
 ## Quantos olheiros o clube tem.
 static func scouts(c: Club) -> int:
 	var base: int = int({"domestico": 1, "regional": 2, "continental": 3, "global": 5}.get(ClubDNA.mkt(c), 2))
@@ -48,9 +55,10 @@ static func quality(c: Club) -> float:
 
 ## Ligas que o departamento cobre (recalculado a cada temporada).
 static func covered(world: GameWorld, c: Club) -> Array:
-	if _cover_key != world.year:
+	var ck := hash([world.get_instance_id(), world.year]) # outro save carregado não usa a lista deste
+	if _cover_key != ck:
 		_cover_cache.clear()
-		_cover_key = world.year
+		_cover_key = ck
 	if _cover_cache.has(c.id):
 		return _cover_cache[c.id]
 	var out: Array = [c.league_id]
@@ -216,7 +224,7 @@ static var _pool_key := -1
 
 
 static func _pool(world: GameWorld, lid: String) -> Array:
-	var key := world.year * 1000 + world.current_turn()
+	var key := hash([world.get_instance_id(), world.year, world.current_turn()])
 	if _pool_key != key:
 		_league_pool.clear()
 		_pool_key = key
@@ -228,6 +236,19 @@ static func _pool(world: GameWorld, lid: String) -> Array:
 		for k in _league_pool:
 			_league_pool[k].sort_custom(func(a, b): return a[0] < b[0])
 	return _league_pool.get(lid, [])
+
+
+## Primeiro índice da lista (ordenada pelo nível) com nível >= v.
+static func _lower_bound(arr: Array, v: float) -> int:
+	var lo := 0
+	var hi := arr.size()
+	while lo < hi:
+		var mid := (lo + hi) >> 1
+		if float(arr[mid][0]) < v:
+			lo = mid + 1
+		else:
+			hi = mid
+	return lo
 
 
 ## Primeira janela (ou save antigo): o departamento já acompanhava gente das ligas que cobre nas
@@ -249,13 +270,31 @@ static func ensure_known(world: GameWorld, c: Club) -> void:
 		if arr.is_empty():
 			continue
 		var home := String(DatabaseManager.league_cfg(String(lid)).get("nation", "")) == c.nation
-		var band: Array = []
-		for e in arr:
+		var kv := (55.0 if home else 38.0) * q
+		# A lista da liga já vem ordenada pelo nível: parte do nível procurado (lvl + 3) e vai
+		# abrindo para os dois lados, sempre pegando o mais próximo, até `per` jogadores dentro da
+		# faixa (lvl - 9 a lvl + 14). Mesmo resultado de ordenar a faixa inteira, sem ordenar nada.
+		var target := lvl + 3.0
+		var hi := _lower_bound(arr, target)
+		var lo := hi - 1
+		var taken := 0
+		while taken < per and (lo >= 0 or hi < arr.size()):
+			var use_hi := lo < 0 or (hi < arr.size() and float(arr[hi][0]) - target < target - float(arr[lo][0]))
+			var e: Array = arr[hi] if use_hi else arr[lo]
 			var est: float = e[0]
-			if est >= lvl - 9.0 and est <= lvl + 14.0 and e[1].club_id != c.id:
-				band.append(e)
-		band.sort_custom(func(a, b): return absf(float(a[0]) - lvl - 3.0) < absf(float(b[0]) - lvl - 3.0))
-		for e in band.slice(0, per):
+			if use_hi:
+				hi += 1
+				if est > lvl + 14.0:
+					hi = arr.size() # passou da faixa por cima
+					continue
+			else:
+				lo -= 1
+				if est < lvl - 9.0:
+					lo = -1 # passou da faixa por baixo
+					continue
 			var p: Player = e[1]
-			mem["k"][p.id] = (55.0 if home else 38.0) * q
+			if p.club_id == c.id:
+				continue
+			mem["k"][p.id] = kv
 			mem["t"][p.id] = turn
+			taken += 1

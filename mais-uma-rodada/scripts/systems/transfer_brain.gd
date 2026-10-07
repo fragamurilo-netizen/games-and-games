@@ -173,12 +173,43 @@ static func profile(world: GameWorld, c: Club) -> Dictionary:
 # 4. Plano da janela
 # ---------------------------------------------------------------------------
 
-static func plan_window(world: GameWorld, st: Dictionary, c: Club, summer: bool) -> void:
+## Prepara, numa thread só, o que os olheiros, o diagnóstico e a pressão preenchem na primeira
+## consulta (memória dos olheiros, ligas cobertas, presidente, listas das ligas): depois disso
+## `precompute` só lê o mundo e pode rodar em várias threads.
+static func warm_for_plans(world: GameWorld, clubs: Array) -> void:
+	for c: Club in clubs:
+		if c.tier <= ClubScoutNet.MAX_TIER:
+			ClubScoutNet.of(world, c.id)
+			ClubScoutNet.covered(world, c)
+		People.president(world, c.id)
+		if c.sheet != null:
+			DatabaseManager.formation(c.sheet.formation) # formação própria: montada uma vez só
+	ClubScoutNet._pool(world, "")
+	Aftermath.marks_of(world, -1)
+	Aftermath.last_title(world, -1)
+
+
+## Olheiros, diagnóstico e pressão de um clube, para o plano da janela. Só lê o mundo e grava só
+## na memória do próprio clube: roda em paralelo. [necessidades, pressão, conhecimento novo?]
+static func precompute(world: GameWorld, c: Club, summer: bool) -> Array:
+	var filled := c.tier <= ClubScoutNet.MAX_TIER and not world.is_user_club(c.id) and (ClubScoutNet.of(world, c.id)["k"] as Dictionary).is_empty()
+	ClubScoutNet.ensure_known(world, c)
+	return [diagnose(world, c, summer), pressure(world, c), filled]
+
+
+## Plano da janela do clube. `pre`: o que `precompute` já calculou (vazio = calcula aqui).
+static func plan_window(world: GameWorld, st: Dictionary, c: Club, summer: bool, pre: Array = []) -> void:
 	if not st.has("plans"):
 		st["plans"] = {}
-	ClubScoutNet.ensure_known(world, c)
-	var needs := diagnose(world, c, summer)
-	var pr := pressure(world, c)
+	var needs: Array
+	var pr: Dictionary
+	if pre.is_empty():
+		ClubScoutNet.ensure_known(world, c)
+		needs = diagnose(world, c, summer)
+		pr = pressure(world, c)
+	else:
+		needs = pre[0]
+		pr = pre[1]
 	# Dinheiro curto corta a lista; dinheiro sobrando e pressão alongam.
 	var keep := needs.size()
 	if c.transfer_budget <= 0 and FinanceManager.in_trouble(c):
@@ -240,6 +271,17 @@ static func targets(world: GameWorld, c: Club, need: Dictionary, index: Dictiona
 	var budget := float(c.transfer_budget) * (1.0 + float(pr["amb"]) * 0.25)
 	var wage_room := float(c.wage_budget - FinanceManager.wage_bill(world, c))
 	var lvl := PlayerGenerator.club_level(c)
+	# O que não muda de um candidato para outro, lido uma vez só.
+	var fam := int(need.get("fam", -1))
+	var ages: Array = need.get("ages", [18, 32])
+	var young: bool = need.get("young", false)
+	var npos := int(need.get("pos", -1))
+	var nmin := float(need["min"])
+	var pot_w := float(prof["pot_w"])
+	var lang := String(prof["lang"])
+	var moneyball: bool = prof["rec"] == "moneyball"
+	var my_power := MarketAI.power(c)
+	var wage_boost := float(MarketAI.profile(c.nation).get("wage_boost", 1.0))
 	var scored: Array = []
 	for pid in pool:
 		var p: Player = world.players.get(pid)
@@ -247,30 +289,30 @@ static func targets(world: GameWorld, c: Club, need: Dictionary, index: Dictiona
 			continue
 		if p.club_id >= 0 and (free_only or world.is_user_club(p.club_id) or p.joined_year == world.year):
 			continue
-		var fam := int(need.get("fam", -1))
 		if fam >= 0 and TransferManager._family_of(p.position) != fam:
+			continue
+		var age := p.age(world.year)
+		if young and age > int(ages[1]):
+			continue
+		# O nível vem antes das regras de origem e permissão: é a conta mais barata e a que mais
+		# corta (os filtros só eliminam; a ordem não muda quem passa).
+		var kn := float(pool[pid])
+		var est := ClubScoutNet.estimate(world, c, p, kn)
+		if npos >= 0:
+			est -= maxf(0.0, p.ovr_f - p.rating_at(npos)) # fora de posição rende menos
+		var pot := float(p.potential) + p.scout_noise * (1.0 - kn / 100.0)
+		var eff := est + maxf(0.0, pot - est) * pot_w * (0.6 if age <= 23 else 0.0)
+		if eff < nmin:
 			continue
 		if not ClubPolicy.ai_wants(world, c, p):
 			continue
-		var age := p.age(world.year)
-		var ages: Array = need.get("ages", [18, 32])
-		if need.get("young", false) and age > int(ages[1]):
-			continue
-		if TransferRules.minor_blocked(world, p, c) and not need.get("young", false):
+		if TransferRules.minor_blocked(world, p, c) and not young:
 			continue
 		if TransferRules.permit_block(world, p, c) != "":
 			continue # sem permissão de trabalho (Reino Unido)
 		var ow := MarketAI.origin_weight(c, p)
 		if ow < 0.25:
 			continue # o clube não contrata desse lugar (sul-americano raramente traz europeu)
-		var kn := float(pool[pid])
-		var est := ClubScoutNet.estimate(world, c, p, kn)
-		if int(need.get("pos", -1)) >= 0:
-			est -= maxf(0.0, p.ovr_f - p.rating_at(int(need["pos"]))) # fora de posição rende menos
-		var pot := float(p.potential) + p.scout_noise * (1.0 - kn / 100.0)
-		var eff := est + maxf(0.0, pot - est) * float(prof["pot_w"]) * (0.6 if age <= 23 else 0.0)
-		if eff < float(need["min"]):
-			continue
 		# Preço e salário que o clube consegue bancar.
 		var price := 0.0
 		var seller: Club = null
@@ -279,26 +321,26 @@ static func targets(world: GameWorld, c: Club, need: Dictionary, index: Dictiona
 			price = float(p.value) * MarketAI._seller_mult(world, seller, p, c, false, index["memo"])
 			if price > budget and not MarketAI._loanable(world, p, c):
 				continue
-			if MarketAI.power(seller) > MarketAI.power(c) * 1.5 and p.squad_status <= Player.STATUS_STARTER and age < 30:
+			if MarketAI.power(seller) > my_power * 1.5 and p.squad_status <= Player.STATUS_STARTER and age < 30:
 				continue # titular de clube muito mais rico não sai para um menor
-		var wage := float(Valuation.wage_demand(p, c, world.year)) * float(MarketAI.profile(c.nation).get("wage_boost", 1.0))
+		var wage := float(Valuation.wage_demand(p, c, world.year)) * wage_boost
 		if wage > maxf(wage_room, 0.0) * 1.1 and need["why"] != "carencia":
 			continue
 		if wage > float(prof["top_wage"]) * 1.3 and not bool(pr["marquee"]) and int(prof["top_wage"]) > 0:
 			continue # estrutura salarial: ninguém chega ganhando muito acima do mais bem pago
 		# Nota rápida (barata): nível, idade, preço, origem, situação de contrato.
-		var s := eff - float(need["min"])
+		var s := eff - nmin
 		if age < int(ages[0]) or age > int(ages[1]):
 			s -= 2.5 + absf(age - clampi(age, int(ages[0]), int(ages[1]))) * 1.2
 		s -= price / maxf(50000.0, budget + 1.0) * 2.5
 		s -= (1.0 - ow) * 3.0
 		if p.nationality == c.nation:
 			s += 1.0
-		elif Languages.level(p, String(prof["lang"])) >= 60.0:
+		elif Languages.level(p, lang) >= 60.0:
 			s += 0.8 # fala a língua: adapta rápido
-		if kn < 50.0 and prof["rec"] != "moneyball":
+		if kn < 50.0 and not moneyball:
 			s -= 0.8 # pouco visto: risco
-		if prof["rec"] == "moneyball":
+		if moneyball:
 			s += (est - p.ovr_f + 3.0) * 0.2 - price / maxf(1.0, float(p.value)) * 0.5
 		if p.transfer_listed or p.club_id < 0:
 			s += 1.0
@@ -311,18 +353,23 @@ static func targets(world: GameWorld, c: Club, need: Dictionary, index: Dictiona
 	# Avaliação completa (cara) só para os 16 melhores da nota rápida: vontade do jogador, ambiente
 	# no elenco, homens de confiança do técnico, fama e o DNA do clube.
 	var coach := Relations.coach_id_of(world, c.id)
+	var csq := world.squad(c) # o elenco do clube, montado uma vez para os 16
+	var nat_n := {}
+	for q: Player in csq:
+		nat_n[q.nationality] = int(nat_n.get(q.nationality, 0)) + 1
 	var full: Array = []
 	for e in scored.slice(0, 16):
 		var p: Player = e[1]
 		var s2 := float(e[0])
-		if _compatriots(world, c, p) >= 2:
+		if int(nat_n.get(p.nationality, 0)) >= 2: # compatriotas no elenco
 			s2 += 0.6
 		if bool(pr["marquee"]):
 			s2 += clampf(Reputation.player_rep(world, p) - 60.0, 0.0, 30.0) * 0.08
 		s2 += ClubDNA.candidate_bonus(world, c, p, p.ovr_f, lvl, float(p.value), maxf(1.0, budget), 0)
-		s2 += (MarketAI.player_interest(world, p, c) - 0.5) * 2.0
+		s2 += (MarketAI.player_interest(world, p, c, csq) - 0.5) * 2.0
 		s2 += Relations.trust_bonus(p, coach)
-		s2 += minf(1.0, Relations.friends_in(world, p, c).size() * 0.4) - Relations.enemies_in(world, p, c).size() * 1.0
+		var ties := Relations.ties_in(world, p, c)
+		s2 += minf(1.0, ties.x * 0.4) - ties.y * 1.0
 		if bool(prof["mism"]):
 			s2 = s2 * 0.5 + Reputation.player_rep(world, p) * 0.05 # diretoria bagunçada vai pelo nome
 		full.append([s2, p])
@@ -355,14 +402,6 @@ static func _agents_pool(world: GameWorld, c: Club, need: Dictionary, index: Dic
 				if out.size() >= 40:
 					return out
 	return out
-
-
-static func _compatriots(world: GameWorld, c: Club, p: Player) -> int:
-	var n := 0
-	for q: Player in world.squad(c):
-		if q.nationality == p.nationality:
-			n += 1
-	return n
 
 
 ## Registra o resultado de uma tentativa: carência resolvida ou alvo riscado.

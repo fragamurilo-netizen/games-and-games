@@ -14,6 +14,7 @@ static func random_seed() -> int:
 
 
 static func generate(seed_value: int, world_type: String = "padrao") -> GameWorld:
+	forget_static_state()
 	DatabaseManager.load_all()
 	Valuation.load_scale()
 	Valuation.shift = 0.0
@@ -57,6 +58,16 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 	LeagueReputation.ensure(w) # coeficientes de partida das ligas
 	compact_all(w)
 	return w
+
+
+## Caches estáticos com algo do mundo que estava aberto antes (outra carreira, no mesmo processo):
+## sem isso, um mundo novo criado depois de jogar outra carreira sairia diferente do mesmo mundo
+## criado com o app recém-aberto (coeficientes das ligas, valor por liga, jogos grandes da semana).
+static func forget_static_state() -> void:
+	LeagueReputation.reset()
+	Valuation._club_factor.clear()
+	PlayerDevelopment.big_games.clear()
+	PlayerAssessment.invalidate()
 
 
 ## Histórico compactado na memória (o celular agradece), em paralelo: cada jogador é independente.

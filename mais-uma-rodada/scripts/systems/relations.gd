@@ -111,6 +111,20 @@ static func friends_in(world: GameWorld, p: Player, club: Club) -> Array:
 	return out
 
 
+## [amigos, desafetos] do jogador no clube (as contas de friends_in e enemies_in num passe só).
+static func ties_in(world: GameWorld, p: Player, club: Club) -> Vector2i:
+	var out := Vector2i.ZERO
+	for oid in p.bonds:
+		var q: Player = world.players.get(oid)
+		if q != null and q.club_id == club.id:
+			var v := float(p.bonds[oid][1])
+			if v > 15.0:
+				out.x += 1
+			elif v < -15.0:
+				out.y += 1
+	return out
+
+
 static func enemies_in(world: GameWorld, p: Player, club: Club) -> Array:
 	var out: Array = []
 	for oid in p.bonds:
@@ -220,8 +234,14 @@ static func coach_name(world: GameWorld, coach_id: int) -> String:
 
 static func generate(world: GameWorld) -> void:
 	_brothers(world)
-	for c: Club in world.clubs:
-		_club_bonds(world, c, true)
+	# Os laços de cada elenco só mexem nos jogadores daquele clube (ninguém está emprestado no
+	# mundo novo) e a química do par é fixa: os clubes são processados em paralelo, mesmo resultado.
+	Languages.primary("BRA") # tabela de línguas carregada antes das threads
+	var clubs: Array = world.clubs
+	Parallel.map_chunks(clubs.size(), func(a: int, b: int) -> Array:
+		for i in range(a, b):
+			_club_bonds(world, clubs[i], true)
+		return [], 32)
 	assign_idols(world)
 	world.stats["rel_v"] = 1
 

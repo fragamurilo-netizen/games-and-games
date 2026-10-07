@@ -339,11 +339,28 @@ static func strength_of(code: String, squad: Array) -> float:
 
 
 static func _initial_elo(world: GameWorld, code: String) -> float:
-	var pool: Array = []
-	for p: Player in world.players.values():
-		if NationalityManager.team(p) == code and p.club_id >= 0:
-			pool.append(p)
-	return ELO_START + (strength_of(code, call_up(pool)) - 62.0) * 22.0
+	return ELO_START + (strength_of(code, call_up(_elo_pool(world).get(code, []))) - 62.0) * 22.0
+
+
+## Jogadores com clube por seleção, para o ranking inicial. Montado num passe só pelo mundo e
+## guardado enquanto for o mesmo momento (o começo do jogo pede o ranking de todas as seleções
+## de uma vez; varrer o mundo inteiro para cada uma levava mais de dez segundos).
+static var _elo_pool_cache: Dictionary = {}
+static var _elo_pool_key := 0
+
+
+static func _elo_pool(world: GameWorld) -> Dictionary:
+	var key := hash([world.get_instance_id(), world.year, world.season.day if world.season != null else -1, world.players.size()])
+	if key != _elo_pool_key:
+		_elo_pool_key = key
+		_elo_pool_cache = {}
+		for p: Player in world.players.values():
+			if p.club_id >= 0:
+				var team := NationalityManager.team(p)
+				if not _elo_pool_cache.has(team):
+					_elo_pool_cache[team] = []
+				_elo_pool_cache[team].append(p)
+	return _elo_pool_cache
 
 
 static func _ensure_elo(world: GameWorld, pool: Dictionary) -> void:

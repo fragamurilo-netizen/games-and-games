@@ -331,10 +331,11 @@ static var parallel := true  # igual ao sequencial: tests "simulação paralela 
 const PARALLEL_MIN := 12
 
 
-## Joga todas as partidas ainda sem resultado da data. As escalações da IA são montadas uma a
-## uma, na mesma ordem de sempre (mexem nos clubes e em caches do mundo); só as partidas rápidas,
-## que leem o mundo e sorteiam com a semente do próprio jogo, rodam em paralelo. O resultado é
-## idêntico ao de rodar em sequência (conferido em tests: "simulação paralela").
+## Joga todas as partidas ainda sem resultado da data. Usa os núcleos do aparelho em duas etapas:
+## as escalações da IA (cada clube joga uma vez na data e só mexe na própria ficha; o mandante é
+## montado antes do visitante, como em sequência) e depois as partidas rápidas, que leem o mundo e
+## sorteiam com a semente do próprio jogo. Os caches que são de todos ficam prontos antes, numa
+## thread só. O resultado é idêntico ao de rodar em sequência (tests: "simulação paralela").
 static func run_entries(world: GameWorld, entries: Array) -> void:
 	Geo.prepare(world) # distâncias prontas antes das threads dos jogos
 	var quick: Array = []
@@ -345,23 +346,21 @@ static func run_entries(world: GameWorld, entries: Array) -> void:
 			run_entry(world, e)
 			continue
 		quick.append(e)
-	var cores := mini(4, OS.get_processor_count() - 1)
+	var cores := mini(Parallel.MAX_THREADS, OS.get_processor_count() - 1)
 	if not parallel or quick.size() < PARALLEL_MIN or cores < 2:
 		for e in quick:
 			run_entry(world, e)
 		return
 	var mark := Time.get_ticks_usec()
+	_prepare_sheets(world, quick)
+	mark = _time("ai_esc_fichas", mark)
 	for e in quick:
 		var f: Fixture = e["f"]
 		var home := world.club(f.home)
 		var away := world.club(f.away)
-		var hs := ClubAI.prepare_ai_sheet(world, home, away, true)
-		var as_ := ClubAI.prepare_ai_sheet(world, away, home, false)
-		e["_hs"] = hs
-		e["_as"] = as_
 		# Caches preguiçosos preenchidos aqui, na thread atual: nas threads só há leitura.
-		QuickMatch._tactics(hs)
-		QuickMatch._tactics(as_)
+		QuickMatch._tactics(e["_hs"])
+		QuickMatch._tactics(e["_as"])
 		Referees.factors(world, Array(e["ctx"].get("ref", [])))
 		LeagueCulture.for_match(world, String(e["ctx"].get("competition", "")), home)
 		# Perfil tático do rival (cache estático _pcache e o "_v" dentro do perfil) e o estudo
@@ -370,7 +369,7 @@ static func run_entries(world: GameWorld, entries: Array) -> void:
 		TacticalScout.vulnerability(world, away)
 		TacticalScout.study(world, home)
 		TacticalScout.study(world, away)
-	mark = _time("ai_escalacao", mark)
+	mark = _time("ai_esc_caches", mark)
 	var threads: Array[Thread] = []
 	for t in cores:
 		var th := Thread.new()
@@ -382,6 +381,37 @@ static func run_entries(world: GameWorld, entries: Array) -> void:
 		e.erase("_hs")
 		e.erase("_as")
 	_time("ai_partida", mark)
+
+
+## Escalações da IA de todos os jogos da data (e["_hs"], e["_as"]). Em paralelo quando cada clube
+## aparece num jogo só; senão, uma a uma na ordem dos jogos.
+static func _prepare_sheets(world: GameWorld, quick: Array) -> void:
+	var t0 := Time.get_ticks_usec()
+	var seen := {}
+	var once := true
+	Warmup.run()
+	People.data(world)
+	DatabaseManager.tactics()
+	for e in quick:
+		var f: Fixture = e["f"]
+		for cid: int in [f.home, f.away]:
+			if seen.has(cid):
+				once = false
+			seen[cid] = true
+			ClubAI.team_strength(world, world.club(cid)) # cache do mundo (world.stats["strc"])
+	_time("ai_esc_aquece", t0)
+	var sheets := Parallel.map_chunks(quick.size(), func(a: int, b: int) -> Array:
+		var out: Array = []
+		for i in range(a, b):
+			var f: Fixture = quick[i]["f"]
+			var home := world.club(f.home)
+			var away := world.club(f.away)
+			var hs := ClubAI.prepare_ai_sheet(world, home, away, true)
+			out.append([hs, ClubAI.prepare_ai_sheet(world, away, home, false)])
+		return out, 8 if once else 1 << 30)
+	for i in quick.size():
+		quick[i]["_hs"] = sheets[i][0]
+		quick[i]["_as"] = sheets[i][1]
 
 
 static func _play_slice(world: GameWorld, quick: Array, first: int, step: int) -> void:

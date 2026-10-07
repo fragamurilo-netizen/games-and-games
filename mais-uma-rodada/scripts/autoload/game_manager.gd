@@ -256,6 +256,7 @@ func _load_core(save_slot: int) -> GameWorld:
 	var w := SaveManager.load_world(save_slot)
 	if w == null:
 		return null
+	WorldGenerator.forget_static_state() # nada da carreira que estava aberta antes
 	# Entropia nova a cada abertura: reabrir o save não repete os mesmos jogos, gols e minutos.
 	var fresh := RandomNumberGenerator.new()
 	fresh.randomize()

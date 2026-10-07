@@ -25,6 +25,7 @@ const JEWEL_POT := 74.0 # potencial que faz um garoto de 16-17 anos ser vendido 
 const JEWEL_PRESELL := 0.35 # chance por janela de uma dessas joias ser vendida (sobe com o potencial)
 
 static var _cfg: Dictionary = {}
+static var _prof: Dictionary = {} # país → perfil pronto (montado junto com o cfg, só leitura depois)
 
 
 # ---------------------------------------------------------------------------
@@ -35,16 +36,32 @@ static func cfg() -> Dictionary:
 	if _cfg.is_empty():
 		var data: Variant = DatabaseManager.read_json(CFG_PATH)
 		_cfg = data if data is Dictionary else {"default": {}, "nations": {}}
+		# Perfis de todos os países de uma vez: consultados milhares de vezes por data (e em
+		# threads), não podem ser montados na primeira consulta.
+		var prof := {}
+		for n in DatabaseManager.nations():
+			prof[n] = _build_profile(String(n))
+		for n in _cfg.get("nations", {}):
+			if not prof.has(n):
+				prof[n] = _build_profile(String(n))
+		_prof = prof
 	return _cfg
 
 
-## Perfil de mercado do país (valores ausentes vêm do padrão).
+## Perfil de mercado do país (valores ausentes vêm do padrão). Só leitura.
 static func profile(nation: String) -> Dictionary:
-	var c := cfg()
+	cfg()
+	var hit: Variant = _prof.get(nation)
+	return hit if hit != null else _build_profile(nation)
+
+
+static func _build_profile(nation: String) -> Dictionary:
+	var c := _cfg
 	var out: Dictionary = (c.get("default", {}) as Dictionary).duplicate()
 	var n: Dictionary = c.get("nations", {}).get(nation, {})
 	for k in n:
 		out[k] = n[k]
+	out.make_read_only()
 	return out
 
 
@@ -139,16 +156,20 @@ static func academy_fee(world: GameWorld, p: Player, buyer: Club, rng: RandomNum
 
 ## Mercado da IA num fim de semana (janela aberta ou não). Retorna as Transfer feitas.
 static func matchday(world: GameWorld) -> Array:
+	var tt := Time.get_ticks_usec()
 	var window := world.transfer_window_open()
 	var index := TransferManager._build_index(world)
 	index["memo"] = new_memo()
+	tt = SeasonManager._time("mk_indice", tt)
 	var done: Array = []
 	var st := _state(world, window)
+	tt = SeasonManager._time("mk_plano", tt)
 	st["rumors"] = 0
 	var deadline := window and _is_deadline(world)
 	var wi := window_index(world)
 	if window:
 		done.append_array(_resume_talks(world, st, deadline))
+	tt = SeasonManager._time("mk_conversas", tt)
 	var order := _ai_clubs(world)
 	for c: Club in order:
 		var rules := DatabaseManager.squad_rules()
@@ -179,6 +200,7 @@ static func matchday(world: GameWorld) -> Array:
 			if t.to_id == c.id:
 				left -= 1
 		st["left"][key] = left
+	SeasonManager._time("mk_clubes", tt)
 	return done
 
 
@@ -254,16 +276,37 @@ static func is_main_window(world: GameWorld, c: Club, wi: int) -> bool:
 
 
 static func _plan_window(world: GameWorld, st: Dictionary, wi: int) -> void:
+	var tt := Time.get_ticks_usec()
 	_presell_jewels(world)
+	var clubs: Array = []
+	var summers: Array = []
 	for c: Club in world.clubs:
-		if world.is_user_club(c.id):
-			continue
-		var summer := is_main_window(world, c, wi)
-		# Diagnóstico do elenco, pressão e perfil viram a lista de prioridades da janela.
-		TransferBrain.plan_window(world, st, c, summer)
-		_plan_sales(world, c, summer)
-		if summer or world.rng.randf() < 0.35:
-			_plan_loans(world, c)
+		if not world.is_user_club(c.id):
+			clubs.append(c)
+			summers.append(is_main_window(world, c, wi))
+	# Olheiros, diagnóstico do elenco e pressão de todos os clubes em paralelo (só leem o mundo).
+	TransferBrain.warm_for_plans(world, clubs)
+	var pre := Parallel.map_chunks(clubs.size(), func(a: int, b: int) -> Array:
+		var part: Array = []
+		for i in range(a, b):
+			part.append(TransferBrain.precompute(world, clubs[i], summers[i]))
+		return part, 24 if SeasonManager.parallel else 1 << 30)
+	tt = SeasonManager._time("pl_paralelo", tt)
+	# Em ordem (vendas e empréstimos sorteiam): o plano de cada clube. Quem recebeu um emprestado
+	# nesta volta refaz o diagnóstico na hora, como antes (o elenco dele mudou).
+	var touched := {}
+	for i in clubs.size():
+		var c: Club = clubs[i]
+		var p: Array = pre[i]
+		if touched.has(c.id):
+			if bool(p[2]):
+				ClubScoutNet.forget(world, c)
+			p = []
+		TransferBrain.plan_window(world, st, c, summers[i], p)
+		_plan_sales(world, c, summers[i])
+		if summers[i] or world.rng.randf() < 0.35:
+			_plan_loans(world, c, touched)
+	SeasonManager._time("pl_ordem", tt)
 
 
 ## Anuncia quem sobra: excesso na posição, insatisfeitos sem espaço e veteranos caros demais.
@@ -301,7 +344,7 @@ static func _plan_sales(world: GameWorld, c: Club, summer: bool) -> void:
 
 
 ## Clubes fortes emprestam promessas sem espaço para times onde elas vão jogar.
-static func _plan_loans(world: GameWorld, owner: Club) -> void:
+static func _plan_loans(world: GameWorld, owner: Club, touched: Dictionary = {}) -> void:
 	var level := PlayerGenerator.club_level(owner)
 	if level < 64.0:
 		return
@@ -323,6 +366,7 @@ static func _plan_loans(world: GameWorld, owner: Club) -> void:
 			continue
 		TransferManager._move_loan(world, p, owner, to)
 		TransferManager._set_status_on_arrival(world, p, to)
+		touched[to.id] = true
 		world.stat_add("loans")
 		sent += 1
 
@@ -388,7 +432,9 @@ static func _try_signing(world: GameWorld, c: Club, index: Dictionary, st: Dicti
 		var tf := TransferManager.complete_transfer(world, best, c, 0, wage2, TransferManager.preferred_years(world, best))
 		TransferBrain.record(st, c, need, best, true)
 		return tf
+	var tc := Time.get_ticks_usec()
 	var t := _close_deal(world, st, c, best, urgency, deadline, mismanaged, 0)
+	SeasonManager._time("mk_fechar", tc)
 	TransferBrain.record(st, c, need, best, best.club_id == c.id)
 	return t
 
@@ -668,8 +714,8 @@ static func decision_bar(p: Player) -> float:
 
 
 ## Vontade do jogador de ir (0..1): a base do jogo + dinheiro do Golfo/EUA para veteranos + voltar para casa.
-static func player_interest(world: GameWorld, p: Player, buyer: Club) -> float:
-	var v := TransferManager.interest(world, p, buyer)
+static func player_interest(world: GameWorld, p: Player, buyer: Club, squad: Array = []) -> float:
+	var v := TransferManager.interest(world, p, buyer, squad)
 	var age := p.age(world.year)
 	var prof := profile(buyer.nation)
 	if age >= 29:

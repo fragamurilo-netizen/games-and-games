@@ -48,6 +48,12 @@ static func ensure(world: GameWorld) -> void:
 	_apply(d)
 
 
+## Volta aos valores dos dados (mundo novo: nada do mundo que estava aberto antes).
+static func reset() -> void:
+	_coef = {}
+	Reputation.clear_cache()
+
+
 static func _apply(d: Dictionary) -> void:
 	_coef = (d["c"] as Dictionary).duplicate()
 	Reputation.clear_cache()
