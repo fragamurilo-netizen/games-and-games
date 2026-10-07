@@ -170,11 +170,16 @@ func _actions(p: Player) -> void:
 func _fill_kid(v: VBoxContainer, p: Player) -> void:
 	var w := world()
 	UIKit.clear(v)
-	var head := UIKit.hbox(12)
-	head.add_child(UIKit.portrait(p, w.user_club(), w.year, 84))
+	# Mesmo cabeçalho de documento do contrato: retrato de ficha no alto, ao lado do nome.
+	var head := UIKit.hbox(UITokens.S4)
+	var pv := UIKit.portrait(p, w.user_club(), w.year, 104)
+	pv.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	head.add_child(pv)
 	var col := UIKit.vbox(2)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.add_child(UIKit.label(p.full_name(), "Title", true))
+	col.add_child(UIKit.label(p.display_name(), "Title", true))
+	if p.full_name() != p.display_name():
+		col.add_child(UIKit.label(p.full_name(), "Small", true))
 	col.add_child(UIKit.label("%s · %d anos · %s · %s" % [Pos.name_of(p.position), p.age(w.year), YouthManager.category_name(YouthManager.category(p, w.year)), p.playstyle()], "Small", true))
 	col.add_child(UIKit.label("Estimativa da base: %s" % YouthManager.potential_text(w, p), "Small", true))
 	col.add_child(_stars(w, p, 20))

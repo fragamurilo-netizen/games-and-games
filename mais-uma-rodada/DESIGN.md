@@ -273,6 +273,14 @@ estado alternável.
   segunda cor no canto oposto e pontilhado fino (sem degraus). Cor clara demais (branco, amarelo)
   escurece para o giz continuar legível. **Sem faixas diagonais.** No perfil do jogador o
   recorte sai do degradê, encostado na base, como no FM.
+- **Retrato** (`UIKit.portrait`, `CoachScreen.portrait`): quadrado do tamanho pedido, que nunca
+  estica com a linha. A cabeça fica sempre na mesma altura e escala, com os olhos a 47% do quadro.
+  E sempre tem chão: o busto encosta na base de um quadro de foto de ficha, sem raio. Até 64 px
+  (linhas de lista) o quadro é `surface-raised` liso. Acima disso (cabeçalho, documento, comparação),
+  o degradê do clube nasce atrás da cabeça e some para a base. Busto recortado solto, com o corte
+  reto dos ombros flutuando, não existe. A exceção é o campo da seleção da rodada, onde a faixa do
+  nome é o chão. Tamanhos: 56 nas linhas, 72 em diálogo de conversa, 104 no documento de contrato,
+  118–132 em cabeçalho e comparação.
 - **Bloco de jogo** (`MatchHero`): faixa da competição nas cores da transmissão; o corpo em
   degradê duplo (mandante nasce na borda esquerda, visitante na direita, escuro no meio onde fica
   o texto), escudos, ação principal de giz.

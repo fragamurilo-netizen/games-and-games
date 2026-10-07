@@ -98,17 +98,22 @@ func _render() -> void:
 	_money = null
 	_money_summary = null
 	UIKit.clear(box)
-	var head := UIKit.hbox(12)
+	# Cabeçalho do documento: retrato de ficha (busto na base do quadro, degradê do clube) com a
+	# mesma altura do bloco do nome, e o fechar no alto.
+	var head := UIKit.hbox(UITokens.S4)
 	var club := w.club(p.club_id) if p.club_id >= 0 else null
-	head.add_child(UIKit.portrait(p, club, w.year, 72))
+	head.add_child(UIKit.portrait(p, club, w.year, 104))
 	var t := UIKit.vbox(0)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	t.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var titles := {"buy": "Proposta por", "free": "Contratar", "renew": "Renovar com", "sell": "Colocar à venda", "pre": "Pré-contrato com", "buyback": "Recompra de"}
 	t.add_child(UIKit.eyebrow(titles.get(mode, "")))
 	t.add_child(UIKit.label(p.display_name(), "Title", true))
 	t.add_child(UIKit.label("%s, %d anos\nValor: %s" % [Pos.code(p.position), p.age(w.year), Fmt.money(p.value)], "Small", true))
 	head.add_child(t)
-	head.add_child(UIKit.icon_button("close", func(): UIManager.close_modal()))
+	var close := UIKit.icon_button("close", func(): UIManager.close_modal())
+	close.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	head.add_child(close)
 	box.add_child(head)
 	var user := w.user_club()
 	if picking_swap:
@@ -510,7 +515,7 @@ func _render_terms(caption: String) -> void:
 			yrow.add_child(chip)
 		box.add_child(yrow)
 		var monthly := maxi(wage, 1)
-		box.add_child(_choice("Luvas (pagas na assinatura)", [["Nenhuma", 0], ["3 salários", 3], ["6 salários", 6], ["12 salários", 12]], int(deal["bonus"]) / monthly, func(v): deal["bonus"] = int(v) * wage))
+		box.add_child(_choice("Luvas (pagas na assinatura)", [["Sem", 0], ["3 salários", 3], ["6 salários", 6], ["12 salários", 12]], int(deal["bonus"]) / monthly, func(v): deal["bonus"] = int(v) * wage))
 		box.add_child(_choice("Multa rescisória", [["Sem multa", 0], ["2× valor", 2], ["3× valor", 3], ["5× valor", 5]], int(deal["clause"]), func(v): deal["clause"] = int(v)))
 	else:
 		var abo := DealTerms.bonus_options("ab", wage)

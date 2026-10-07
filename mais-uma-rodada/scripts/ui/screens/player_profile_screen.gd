@@ -178,7 +178,7 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	ph.transparent = true
 	ph.mood = PhotoPortrait.for_moment("perfil")
 	ph.set_player(p, club, w.year)
-	ph.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	ph.size_flags_vertical = Control.SIZE_SHRINK_END # os ombros sempre na base, mesmo com o nome em duas linhas
 	row.add_child(ph)
 	var names := UIKit.vbox(UITokens.S1)
 	names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -221,7 +221,15 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	assessment.add_child(confidence_label)
 	names.add_child(assessment)
 	row.add_child(names)
-	card.add_child(row)
+	# A base da ficha: o recorte termina numa linha, não no ar.
+	var stage := UIKit.vbox(0)
+	stage.add_child(row)
+	var base := ColorRect.new()
+	base.color = UIColors.LINE
+	base.custom_minimum_size.y = 2
+	base.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stage.add_child(base)
+	card.add_child(stage)
 	# Clube e papel no elenco (toque abre o clube)
 	if club != null:
 		var cr := UIKit.hbox(UITokens.S1)

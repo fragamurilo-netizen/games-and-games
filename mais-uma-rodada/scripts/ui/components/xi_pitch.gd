@@ -73,7 +73,7 @@ func _chip(i: int) -> Control:
 	face_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	face_row.add_theme_constant_override(&"separation", -10)
 	if p != null:
-		face_row.add_child(UIKit.portrait(p, club, world.year, 70))
+		face_row.add_child(UIKit.portrait(p, club, world.year, 70, false)) # a faixa do nome é o chão
 	if club != null:
 		var cr := UIKit.crest(club, 30)
 		cr.size_flags_vertical = Control.SIZE_SHRINK_END

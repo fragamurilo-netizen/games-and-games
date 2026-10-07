@@ -329,12 +329,46 @@ static func pos_badge(pos: int) -> RatingBadge:
 	return text_badge(Pos.code(pos), Pos.group_color(pos), 58, 34, 20)
 
 
-static func portrait(p: Player, club: Club, year: int, px: int) -> PortraitView:
+## Retrato (DESIGN.md › Retrato): quadrado do tamanho pedido, que não estica com a linha (a cabeça
+## fica sempre na mesma altura e escala), com chão: o busto encosta na base de um quadro de foto de
+## ficha. `ground` falso só onde outra coisa faz de chão (a faixa do nome no campo da rodada).
+static func portrait(p: Player, club: Club, year: int, px: int, ground: bool = true) -> PortraitView:
 	var v := PortraitView.new()
 	v.custom_minimum_size = Vector2(px, px)
+	v.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	v.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.set_player(p, club, year)
+	if ground:
+		portrait_ground(v, club)
 	return v
+
+
+## Quadro atrás do busto: `surface-raised` liso nas linhas de lista (até 64 px); acima disso, o
+## degradê do clube nascendo atrás da cabeça. Desenhado atrás do retrato (o próprio retrato corta
+## nas bordas). No enquadramento clássico o retrato já traz o seu círculo.
+static func portrait_ground(v: PortraitView, club: Club) -> void:
+	if not v.is_fm():
+		return
+	var g: Control
+	if v.custom_minimum_size.x > 64.0 and club != null:
+		var cg := ClubGradient.new()
+		cg.mode = ClubGradient.TOP
+		cg.reach = 0.95
+		cg.strength = 0.85
+		cg.base_color = UIColors.SURFACE_2
+		var cc := ClubGradient.club_colors(club)
+		cg.color1 = cc[0]
+		cg.color2 = cc[1]
+		g = cg
+	else:
+		var r := ColorRect.new()
+		r.color = UIColors.SURFACE_2
+		g = r
+	g.show_behind_parent = true
+	g.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	g.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	v.add_child(g)
 
 
 ## Retrato com cara de foto (PhotoPortrait): o cenário vem do momento do jogo ("perfil",
