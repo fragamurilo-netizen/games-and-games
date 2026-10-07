@@ -4,12 +4,27 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 
 ## Onde está o jogo
 
-- **Rodada de 07/10 (tarde e noite): `claude/youthful-newton-hey7og`** = `claude/hopeful-newton-8avbo4` (já com o Codex) + o que vem abaixo. APK consolidado, sem trava de compra: `mais-uma-rodada/builds/MaisUmaRodada-1.0.0-consolidado-uniformes-logos-2026-10-07.apk` (release, certificado de sempre, instala por cima). Conferido: `check_scripts` 0 erros, `smoke_boot` e `mobile_regression`.
+- **Rodada de 07/10 (tarde e noite): `claude/youthful-newton-hey7og` (já dentro de `claude/hopeful-newton-8avbo4`)** = `claude/hopeful-newton-8avbo4` (já com o Codex) + o que vem abaixo. APK consolidado, sem trava de compra: `mais-uma-rodada/builds/MaisUmaRodada-1.0.0-consolidado-uniformes-logos-2026-10-07.apk` (release, certificado de sempre, instala por cima). Conferido: `check_scripts` 0 erros, `smoke_boot` e `mobile_regression`.
   - **Jogo fechando ao iniciar a partida:** a abertura da TV criava os SubViewports em 512×512 e montava todas as páginas de uma vez (pico de ~105 MB de vídeo e ~1 s travado). Agora o `PhotoPortrait` nasce em 2×2 e se desliga ao sair da árvore, e o `BroadcastIntro` monta cada página só quando ela aparece. Medição: `tools/match_start_stress.gd`.
   - **Uniformes:** luz e sombra por malha (`KitShade` + `KitGeom`: grade recortada em cada peça, normal de um modelo do corpo, oclusão onde as peças se encostam e dobras do tecido), frisos e listras que seguem o contorno, mangas listradas nas camisas listradas, escudo e patrocínio bordados, peito mais estreito e mangas mais longas. A cor do patrocínio depende do fundo: contraste WCAG ≥ 3 sobre todas as cores embaixo dele; se nenhuma cor serve, entra uma placa na cor da camisa.
   - **Marcas:** `LogoGeom` (formas, booleanas, contornos de letras da fonte), `BrandMark` (símbolo para as 573 marcas e 31 fornecedores desenhados um a um) e `BrandLogo` (tipografia por setor e logotipo completo em camisas, placas, sala de imprensa e retratos). Folhas para conferir: `tools/brand_sheet.gd`.
   - **Partida:** botão "Pular replay" e a opção "Replay automático dos gols" (`AppSettings.goal_replays`). Instruções individuais por jogador em Tática › Instruções individuais e na Beira do campo.
   - **Em andamento, fora do APK:** teste da luz por malha nos rostos (`FaceShade`).
+- **Motor de partida mais realista (07/10, noite): `claude/hopeful-newton-8avbo4`** = o ramo acima (adiantado até ele) + o motor novo. Medição: `tools/engine_report.gd` (minuto a minuto) e `-- --quick` (modo rápido, os jogos da IA); os dois agora imprimem os números por time.
+  - **Chances:** a qualidade de cada chance varia (log-normal de média 1, `XG_SIGMA`): poucas chances claras e muitas meias-chances, com o mesmo xG médio. Chance clara é xG ≥ `BIG_CHANCE` (0,25).
+  - **Finalizações:** o desfecho depende do tipo de lance (`SHOT_PROFILE`: de longe é muito travado, de cabeça vai mais para fora, cara a cara o goleiro trabalha) e da finalização de quem chuta. O goleiro segura, espalma, tira com a ponta dos dedos ou soca. Espalmada e bola travada geram rebote (nova finalização no mesmo minuto) ou escanteio.
+  - **Bola parada:** falta pelo lado vira bola levantada na área, com o cobrador como garçom.
+  - **Duelos de verdade nos minutos sem perigo** (`_duels`): desarmes, interceptações, dribles e bolas aéreas contam na nota. A narração do minuto cita esses mesmos jogadores.
+  - **Ritmo do jogo:** posse em sequências (`POSS_KEEP`) e embalo somado (gol, trave, defesa difícil, escanteio; teto `MOM_MAX`). Faltas, amarelos e lesões crescem ao longo do jogo. Escanteios saem de quem domina.
+  - **Substituições da IA** com hora própria: no intervalo só sai quem está mal ou pendurado; depois, trocas entre 58 e 66 minutos, uns 10 minutos depois e perto do fim.
+  - **Posse mostrada:** é a posse esperada acumulada, não o sorteio de quem ataca no minuto.
+  - **Resultado:** `pstats` tem 15 números por jogador (chutes, no alvo, defesas, xG×100, passes decisivos, desarmes, interceptações, dribles, travadas, faltas, impedimentos, chances claras perdidas, bolas aéreas, passes tentados e certos). `team` traz escanteios, faltas, impedimentos, posse, chutes, no alvo, travados, xG, chances claras e defesas.
+  - **Modo rápido:** preenche os mesmos campos com um gerador próprio, sem mudar placar nem cartões. Usa -1 onde não simula; o `MatchStats` completa. O `BASE_CHANCE` do modo rápido é próprio (0,196) e o do minuto a minuto caiu para 0,181, por causa dos rebotes e das faltas cruzadas.
+  - **Números (minuto a minuto / rápido):** 2,82 / 2,68 gols por jogo; 12,8 / 12,4 finalizações por time, 35% / 34% no alvo, 25% / 26% travadas; 1,0 chance clara por time; 5,1 escanteios; 12,0 / 11,4 faltas; 1,9 impedimento; 3 defesas; posse com desvio de 8,3 pontos. Por time no minuto a minuto: 16,9 desarmes, 10,7 interceptações, 9,3 dribles e 428 passes com 78% de acerto. 37% dos amarelos saem no 1º tempo; a 1ª troca sai em média aos 54 minutos.
+  - `MatchSimulation.live_rating(mp)` dá a nota parcial durante o jogo.
+  - **Save mais rápido:** histórico, passagens e troféus de cada jogador vão para o save já serializados (`Player._saved`), o mesmo bloco que fica na memória. Antes, cada save abria esses blocos e cada load montava e serializava de novo. Abrir os 26,8 mil jogadores caiu de ~3,6 s para ~2,7 s (em sequência, no servidor). Saves antigos abrem normalmente. Medição por etapa: `tools/load_profile.gd` (usa o slot 19).
+  - APK: `mais-uma-rodada/builds/MaisUmaRodada-1.0.0-motor-realista-2026-10-07.apk` (release sem trava de compra, certificado de sempre, instala por cima).
+  - **Em andamento, em worktrees (ainda não juntados):** narração, bolinhas e campinho, estatísticas, seleções e comissão técnica. Os pedidos completos estão no fim desta nota, em "Frentes abertas".
 
 - **Frente paralela do Codex (visual: escudos, logos, uniformes, rostos):** pedido completo em `docs/handoff/codex-visual.md`. O Codex trabalha num ramo próprio, `codex/visual-escudos-uniformes-rostos`, a partir de `claude/hopeful-newton-8avbo4`, e só mexe nos arquivos listados lá. Do lado do Claude, **não mexa** nesses arquivos enquanto a frente estiver aberta (`crest_view.gd`, `crest_art.gd`, `kit_view.gd`, `kit_stage.gd`, `portrait_view.gd`, `face_gen.gd`, `photo_portrait.gd`, `photo_look.gdshader`, `decal_cache.gd`, `data/world/kits/`, os campos `crest`/`colors`/`kit` dos clubes e `identity.json` → `logos`). Juntar só com o OK do dono.
 - **Rodada de 06/10 à noite (continuação): `claude/hopeful-newton-8avbo4`.** APK com tudo: `builds/MaisUmaRodada-1.0.0-transmissao-tv-2026-10-06-debug.apk` (certificado de sempre, instala por cima). Detalhes em "Transmissão de TV, escudos reais e mundo vivo" logo abaixo.
@@ -362,6 +377,26 @@ A ordem combinada:
    - **Estatísticas.** Duelos aéreos ganhos, faltas e gols sofridos pelo goleiro (`Player.S_AERIAL`, `S_FOULS`, `S_CONCEDED`; saves antigos completam com zero). Recordes do clube em `club.marks` (sequências de vitórias, invencibilidade e sem sofrer gol, maior vitória e maior derrota). Perfil > Números ganhou por 90 minutos, chutes no alvo, minutos por gol e o bloco do goleiro; Carreira ganhou gols por jogo, G+A por jogo, craque do jogo e jogos sem sofrer gol. Estatísticas da equipe ganhou novos destaques e o cartão de recordes; Tabela > Números ganhou duelos aéreos, jogos sem sofrer gol (goleiros) e craque do jogo. Os números novos são sorteados depois dos antigos, então placares e o realismo não mudam.
    - Capturas em `/mnt/project-files/conteudo-2026-10/`. Para capturar um evento específico: `--only=~event=tipo`.
    - Traduções en/es dos textos novos incluídas.
+
+## Frentes abertas (pedido de 07/10)
+
+O dono pediu, sobre o motor novo, melhorar muito estas frentes:
+- **Narração:** cada linha coerente com o lance (cabeça só quando a finalização foi de cabeça, pênalti coerente, placar e minuto certos). Usar os campos novos dos eventos (`zone`, `body`, `atype`, `big`, `reb`, `gka`, `next`, `by`, `kind`/`spot` das faltas). Arquivos: `commentary.gd` e `commentary.json`.
+- **Bolinhas e campinho:**
+  - O campo mostra o que a narração diz: o jogador nomeado está na bola, a bola entra no gol só no gol, cartão vermelho aparece, lesão e troca não teleportam.
+  - Encenar rebote, defesa (segura, espalma, tira ou soca), travada e falta cruzada.
+  - Menos custo por quadro.
+  - Arquivos: `match_screen.gd`, `pitch_motion.gd` e `pitch_view.gd`.
+- **Estatísticas:** quadro do jogo guardado no `Fixture` e números reais do motor (`pstats` de 15 índices, `team`) nas telas. Estatísticas nas copas, líderes e histórico. O `MatchStats` só completa os campos -1 do modo rápido.
+- **Seleções:**
+  - Convocação inteligente por posição e forma, XI e força por jogo.
+  - Eliminatórias com formato real: nada de grupo único de 46 times na Ásia, no máximo 2 jogos por data FIFA.
+  - Tela com forma, minutos, próxima data, ranking com movimento e recordes.
+  - Corrigir a seleção do jogador para usar `NationalityManager.team`.
+- **Comissão técnica e gestão:**
+  - Salários da comissão cobrados de verdade, capitão único que vale no jogo, promessas visíveis.
+  - Relatórios que dependem da qualidade de quem faz e fim da exploração do "Pedir relatório".
+  - Atributos por área, contratos e quem leva o auxiliar ao trocar de clube.
 
 ## Decisões pendentes com o dono
 

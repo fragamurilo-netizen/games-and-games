@@ -163,7 +163,7 @@ static func _load_v3(path: String) -> GameWorld:
 		var out: Array = []
 		for i in range(a, b):
 			var pd: Variant = bytes_to_var((blobs[i] as PackedByteArray).decompress(sizes[i], FileAccess.COMPRESSION_ZSTD))
-			out.append(Player.from_dict(pd) if pd is Dictionary else null)
+			out.append(Player.from_dict(pd, true) if pd is Dictionary else null)
 		return out, 128)
 	blobs.clear()
 	if players.size() != n_players or players.has(null):

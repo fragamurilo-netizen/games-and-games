@@ -589,8 +589,8 @@ func to_dict() -> Dictionary:
 		"cond": condition, "mor": morale, "rr": recent_ratings, "iw": injury_weeks, "in": injury_name,
 		"sus": suspension, "nd": intl_duty, "ya": yellow_acc, "ret": retiring, "uw": unhappy_weeks,
 		"acc": dev_acc, "arc": snappedf(arc, 0.001), "min": minutes_season, "o0": ovr_start, "pl": persona_log,
-		"stats": stats, "cs": cup_stats, "hist": _packed(_raw_out(_history_raw), _history), "spells": _packed(_raw_out(_spells_raw), _spells),
-		"ca": career_apps, "cg": career_goals, "cas": career_assists, "tt": titles, "aw": awards, "tro": _packed(_raw_out(_trophies_raw), _trophies),
+		"stats": stats, "cs": cup_stats, "hist": _saved(_history_raw, _history), "spells": _saved(_spells_raw, _spells),
+		"ca": career_apps, "cg": career_goals, "cas": career_assists, "tt": titles, "aw": awards, "tro": _saved(_trophies_raw, _trophies),
 	}
 	# Campos vazios ou no padrão ficam de fora (from_dict usa o mesmo padrão): save menor e mais rápido
 	for k in d.keys():
@@ -637,7 +637,7 @@ func compact() -> void:
 
 ## Na memória, a lista compactada (dicionário de colunas do SaveCodec) fica serializada num
 ## PackedByteArray: um bloco só por lista em vez de dezenas de arrays e textos por jogador
-## (~150 MB a menos no mundo inteiro). No save continua o dicionário de sempre.
+## (~150 MB a menos no mundo inteiro). No save vai o mesmo PackedByteArray (_saved).
 static func _raw_in(v: Variant) -> Variant:
 	return var_to_bytes(v) if v is Dictionary else v
 
@@ -651,11 +651,19 @@ static func _packed(raw: Variant, rows: Array) -> Variant:
 	return raw if raw != null else SaveCodec.pack_rows(rows)
 
 
+## No save, a lista compactada vai já serializada (o mesmo PackedByteArray da memória): salvar não
+## precisa abrir o bloco e carregar não precisa remontá-lo (bytes_to_var copia os bytes e pronto).
+## Saves antigos trazem o dicionário de colunas; from_dict serializa uma vez (_raw_in).
+static func _saved(raw: Variant, rows: Array) -> Variant:
+	return raw if raw is PackedByteArray else _packed(_raw_out(raw), rows)
+
+
 ## Campos numéricos cujo padrão no from_dict é zero.
 const ZERO_DEFAULT: Array[String] = ["sh", "ask", "rc", "iw", "sus", "ya", "uw", "min", "acc", "arc", "sn", "val", "ca", "cg", "cas", "tt", "wage", "ce", "jy"]
 
 
-static func from_dict(d: Dictionary) -> Player:
+## `own`: o dicionário veio do save e não é usado por mais ninguém (não precisa copiar a origem).
+static func from_dict(d: Dictionary, own: bool = false) -> Player:
 	var p := Player.new()
 	p.id = int(d.get("id", 0))
 	p.first_name = d.get("fn", "")
@@ -664,12 +672,12 @@ static func from_dict(d: Dictionary) -> Player:
 	p.known_as = d.get("ka", "")
 	p.birth_year = int(d.get("by", 2000))
 	p.nationality = d.get("nat", "")
-	p.origin = d.get("origin", {}).duplicate(true)
+	p.origin = d.get("origin", {}) if own else d.get("origin", {}).duplicate(true)
 	p.eth = int(d.get("eth", 1))
 	p.height = int(d.get("h", 178))
 	p.foot = int(d.get("ft", FOOT_RIGHT))
 	p.position = int(d.get("pos", Pos.CM))
-	p.weight = int(d.get("wt", Physique.default_weight(p.height, p.position)))
+	p.weight = int(d["wt"]) if d.has("wt") else Physique.default_weight(p.height, p.position)
 	p.adult_h = int(d.get("ah", 0))
 	p.secondary = Array(d.get("sec", []))
 	p.shirt = int(d.get("sh", 0))

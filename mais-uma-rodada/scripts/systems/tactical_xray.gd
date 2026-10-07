@@ -63,9 +63,8 @@ static func _totals(sim: MatchSimulation, chances: Array, s: int, mine: bool) ->
 		lanes[int(c["ul"])] += 1
 		xg_l[int(c["ul"])] += float(c["xg"])
 	var t: MatchTeam = sim.teams[s]
-	var total_poss := maxi(1, sim.teams[0].poss_ticks + sim.teams[1].poss_ticks)
 	return {"lanes": lanes, "xg_l": xg_l, "shots": t.shots, "on": t.on_target, "xg": snappedf(t.xg, 0.01), "goals": sim.score[s],
-		"box": sim.xr_box[s], "ft": sim.xr_ft[s], "poss": int(round(100.0 * t.poss_ticks / total_poss))}
+		"box": sim.xr_box[s], "ft": sim.xr_ft[s], "poss": int(round(100.0 * sim.possession_pct(s)))}
 
 
 static func _segments(sim: MatchSimulation, side: int) -> Array:

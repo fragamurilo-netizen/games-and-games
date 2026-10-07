@@ -166,6 +166,10 @@ var pick_total: PackedFloat32Array = PackedFloat32Array()
 # --- Estatísticas ---
 var shots: int = 0
 var on_target: int = 0
+var blocked: int = 0 # finalizações travadas pela defesa rival
+var big: int = 0 # grandes chances (xG >= 0,3, sem pênalti)
+var rebounds: int = 0 # finalizações de rebote
+var sub_plan: Array[int] = [] # minutos em que o técnico mexe (sorteados no começo do jogo)
 var corners: int = 0
 var fouls: int = 0
 var yellows: int = 0
