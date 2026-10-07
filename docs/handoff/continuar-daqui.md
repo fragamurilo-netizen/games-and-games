@@ -44,7 +44,7 @@ O que ficou para depois:
 - **"negociações do usuário".** Corrigido no próprio teste: o alvo caía na permissão de trabalho do Reino Unido.
 - **Busca de alvos em paralelo.** Foi estudada e não foi feita: o risco de travar no celular é alto. Há muitos caches preguiçosos por jogador (`_trait_mult`, `_trait_sum`, `hid()`, `langs`, `trophies`), escritos de várias threads.
 - **Geração dos elencos** (cerca de 14 s): um sorteio único em sequência. Paralelizar muda o mundo gerado por semente e pede deduplicação de nomes entre threads.
-- **Ramo do Codex** (`codex/visual-escudos-uniformes-rostos`): pronto e sem conflito, mas ainda não juntado. Depende do OK explícito do dono.
+- **Ramo do Codex** (`codex/visual-escudos-uniformes-rostos`): juntado em 07/10 com o OK do dono ("sync codex changes"). Não houve conflito. `face_contract.gd` (814 casos) e `crest_gen/check.gd` (2.656 contornos) passam sem erro. O APK `MaisUmaRodada-1.0.0-codex-otimizado-fotos-2026-10-07-debug.apk` já traz o visual dele.
 
 ### Gerações, escolas de técnicos e mercado de técnicos (07/10, ramo `claude/hopeful-newton-8avbo4`)
 
