@@ -88,6 +88,12 @@ var framing: int = -1:
 	set(v):
 		framing = v
 		queue_redraw()
+## Teste da luz por malha no rosto (FaceShade, a mesma técnica dos uniformes). -1 = segue o padrão.
+static var mesh_light_default := false
+var mesh_light: int = -1:
+	set(v):
+		mesh_light = v
+		queue_redraw()
 ## No recorte FM a cabeça é desenhada como num busto deste tamanho relativo, com os olhos a 47%
 ## da altura do quadro (medidas tiradas de cutouts de 250 px).
 const FM_ZOOM := 1.42
@@ -344,6 +350,7 @@ var _fw := 0.0
 var _fh := 0.0
 var _R := 0.0
 var _fm := false
+var _ml := false
 var _rect := Rect2()
 var _det := 1.0
 var _light := Vector3.ZERO
@@ -447,6 +454,7 @@ func _draw() -> void:
 	var o := Vector2((size.x - s) * 0.5, (size.y - s) * 0.5)
 	var c := o + Vector2(s * 0.5, s * 0.5)
 	_fm = is_fm()
+	_ml = mesh_light == 1 or (mesh_light < 0 and mesh_light_default)
 	_rect = Rect2(o, Vector2(s, s))
 	if photo != null:
 		_draw_photo(c, s)
@@ -461,7 +469,7 @@ func _draw() -> void:
 	var k_back := hash(["back", face_key])
 	var k_body := hash(["body", face_key, shirt_color, trim_color, suit, kit_collar, kit_pattern, kit, crest,
 		_crest_tex != null, _sponsor_tex != null])
-	var k_front := hash(["front", face_key])
+	var k_front := hash(["front", face_key, _ml])
 	var ready := false
 	for pair: Array in [[k_back, 0], [k_body, 1], [k_front, 2]]:
 		var key: int = pair[0]
@@ -531,6 +539,9 @@ func _layer_front() -> void:
 	_mouth()
 	if int(f["beard"]) != FaceGen.B_NONE:
 		_beard_hairs(rng)
+	if _ml and _s >= 50.0:
+		# Luz por malha por cima de pele, olhos, boca e barba: tudo no mesmo volume
+		FaceShade.paint(self)
 	# Cabelo da frente
 	if style != FaceGen.H_BALD:
 		_front_hair(rng, hair)
@@ -1068,6 +1079,8 @@ func _th(u: float, v: float) -> float:
 func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	var u := (p.x - _hc.x) / _fw
 	var v := (p.y - _hc.y) / _fh
+	if _ml and _s >= 50.0:
+		return _skin_flat(u, v)
 	var au := absf(u)
 	# Normal de uma "cúpula" com o formato do rosto
 	var dx := 0.0
@@ -1312,6 +1325,48 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	b = (v - 0.08) / 0.1
 	spec *= k[13] * (0.6 + 0.8 * (fore * 0.9 + ridge_hl + exp(-a * a - b * b)))
 	return Color(minf(col.r + spec, 1.0), minf(col.g + spec * 0.97, 1.0), minf(col.b + spec * 0.93, 1.0))
+
+
+## Pele sem luz (só o tom, as manchas, o rubor e a sombra da barba): com a luz por malha
+## (FaceShade) a forma do rosto vem toda da camada de luz por cima.
+func _skin_flat(u: float, v: float) -> Color:
+	var au := absf(u)
+	var k := _k
+	var a := 0.0
+	var b := 0.0
+	var lum := FaceShade.BASE
+	# Pigmento, não volume: olheiras escuras e o tom que muda com a idade embaixo dos olhos
+	if k[14] > 0.05:
+		lum -= 0.08 * k[14] * _g2(au - _X * 0.9, v - (_E + 0.11), 0.2, 0.045)
+	if k[10] > 0.0:
+		lum -= 0.04 * k[10] * _g2(au - _X, v - (_E + 0.13), 0.18, 0.035)
+	for bl: Array in _blotches:
+		a = (u - float(bl[0])) / float(bl[2])
+		b = (v - float(bl[1])) / float(bl[2])
+		lum += float(bl[3]) * exp(-a * a - b * b) * (1.0 - k[21] * 0.7)
+	if lum > _lum_knee:
+		var room := _lum_top - _lum_knee
+		lum = _lum_knee + room * (1.0 - exp(-(lum - _lum_knee) / room))
+	var col := _shade(_skin, lum)
+	# Rubor nas bochechas, nariz e queixo
+	a = (au - 0.52) / 0.22
+	b = (v - 0.25) / 0.13
+	var blush := 0.55 * exp(-a * a - b * b)
+	a = u / _NW
+	b = (v - (_N - 0.05)) / 0.06
+	blush += 0.35 * exp(-a * a - b * b)
+	a = u / 0.2
+	b = (v - 0.9) / 0.08
+	blush += 0.2 * exp(-a * a - b * b)
+	col = col.lerp(Color(0.85, 0.32, 0.3), clampf(blush * k[11] * 0.18, 0.0, 0.3))
+	if k[12] > 0.02 and v > _N - 0.05:
+		var line := lerpf(_N + 0.02, (_N + _M) * 0.5 + 0.04, smoothstep(_MW * 0.8, _MW * 1.5, au)) - 0.3 * smoothstep(0.6, 1.0, au)
+		var dens := smoothstep(line - 0.12, line + 0.14, v)
+		a = u / _MW
+		b = (v - _M) / (k[8] * 2.2 + 0.03)
+		dens *= smoothstep(0.8, 1.1, sqrt(a * a + b * b))
+		col = col.lerp(_shadow_col, dens * k[12] * 0.24)
+	return col
 
 
 static func _hash2(x: int, y: int) -> float:
