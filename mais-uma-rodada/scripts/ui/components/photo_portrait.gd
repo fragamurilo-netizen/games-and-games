@@ -19,6 +19,11 @@ const NAMES: Array[String] = ["Estúdio", "Coletiva", "Túnel", "Filme 35 mm", "
 
 const SHADER_PATH := "res://scripts/ui/components/photo_look.gdshader"
 const MAX_PX := 900
+## Tamanho dos SubViewports fora da tela. O SubViewport nasce com 512x512 e já reserva a
+## textura na placa: telas que montam muitos retratos de uma vez (a abertura da transmissão
+## tem 24) passavam de 90 MB de vídeo antes de mostrar qualquer um. A memória só é usada quando
+## o retrato está na árvore (_layout) e volta para cá quando ele sai.
+const IDLE_PX := Vector2i(2, 2)
 
 static var _shader: Shader = null
 
@@ -87,12 +92,14 @@ func _init() -> void:
 	_vp_cut.transparent_bg = true
 	_vp_cut.disable_3d = true
 	_vp_cut.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	_vp_cut.size = IDLE_PX
 	_vp_cut.add_child(_pv)
 	add_child(_vp_cut)
 	_vp_fx = SubViewport.new()
 	_vp_fx.transparent_bg = true
 	_vp_fx.disable_3d = true
 	_vp_fx.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	_vp_fx.size = IDLE_PX
 	_fx = ColorRect.new()
 	_fx.color = Color.WHITE
 	var mat := ShaderMaterial.new()
@@ -146,6 +153,12 @@ func _colors(club: Club) -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_ENTER_TREE or what == NOTIFICATION_VISIBILITY_CHANGED:
 		_layout()
+	elif what == NOTIFICATION_EXIT_TREE and _vp_cut != null:
+		_gen += 1 # passes pendentes ficam sem efeito
+		_vp_cut.render_target_update_mode = SubViewport.UPDATE_DISABLED
+		_vp_fx.render_target_update_mode = SubViewport.UPDATE_DISABLED
+		_vp_cut.size = IDLE_PX
+		_vp_fx.size = IDLE_PX
 
 
 func _scale() -> float:

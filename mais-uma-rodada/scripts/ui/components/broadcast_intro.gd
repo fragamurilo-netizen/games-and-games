@@ -125,18 +125,63 @@ static func show(w: GameWorld, sim: MatchSimulation, fx: Fixture, stadium: Dicti
 		var lb := LineupBoard.make(t, th["accent"], th["bg"], colors[0 if t.side == 0 else 2], colors[1 if t.side == 0 else 3], People.coach_name(w, t.club.id))
 		pages.append(lb)
 		if AppSettings.tv_graphics >= 1:
-			var sp := UIKit.vbox(8)
-			var hr2 := UIKit.hbox(10)
-			hr2.add_child(UIKit.crest(t.club, 44))
-			var tl := UIKit.label("Titulares", "Title", true)
-			tl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			hr2.add_child(tl)
-			hr2.add_child(UIKit.label(t.formation_name, "H3"))
-			sp.add_child(hr2)
-			for sec in TvGraphics.sectors(t):
-				sp.add_child(TvGraphics.sector_card(pk, w, t.club, String(sec[0]), sec[1]))
-			pages.append(sp)
+			# As páginas com recortes só são montadas quando aparecem: são 11 fotos por time e
+			# montar todas no apito travava a tela e enchia a memória de vídeo do celular.
+			var team := t
+			pages.append(func() -> Control: return _starters_page(w, pk, team))
 	# 5. Fique de olho
+	pages.append(func() -> Control: return _watch_page(w, sim))
+	var next_btn := UIKit.button("Próximo", "PrimaryButton", Callable(), "forward")
+	next_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	next_btn.custom_minimum_size.y = 84
+	var skip_btn := UIKit.button("Pular", "GhostButton", func():
+		UIManager.close_modal()
+		on_done.call(), "skip")
+	skip_btn.custom_minimum_size = Vector2(180, 84)
+	next_btn.pressed.connect(func():
+		step[0] += 1
+		if step[0] >= pages.size():
+			UIManager.close_modal()
+			on_done.call()
+			return
+		if step[0] == pages.size() - 1:
+			next_btn.text = "Apito inicial"
+		# Mantém as páginas vivas fora da árvore enquanto não aparecem
+		for pg in pages:
+			if pg is Control and pg.get_parent() == body:
+				body.remove_child(pg)
+		if pages[step[0]] is Callable:
+			pages[step[0]] = (pages[step[0]] as Callable).call()
+		body.add_child(pages[step[0]])
+		if pages[step[0]] is VBoxContainer and pages[step[0]].get_child_count() > 1 and pages[step[0]].get_child(1) is WalkoutView:
+			Sfx.crowd_clip(0, "entrada"))
+	nav.add_child(skip_btn)
+	nav.add_child(next_btn)
+	body.add_child(pages[0])
+	frame.tree_exited.connect(func():
+		for pg in pages:
+			if pg is Control and is_instance_valid(pg) and pg.get_parent() == null:
+				pg.queue_free())
+	UIManager.show_modal(frame, true, false)
+
+
+## Titulares por setor com os recortes (grafismo de TV).
+static func _starters_page(w: GameWorld, pk: Dictionary, t: MatchTeam) -> Control:
+	var sp := UIKit.vbox(8)
+	var hr2 := UIKit.hbox(10)
+	hr2.add_child(UIKit.crest(t.club, 44))
+	var tl := UIKit.label("Titulares", "Title", true)
+	tl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hr2.add_child(tl)
+	hr2.add_child(UIKit.label(t.formation_name, "H3"))
+	sp.add_child(hr2)
+	for sec in TvGraphics.sectors(t):
+		sp.add_child(TvGraphics.sector_card(pk, w, t.club, String(sec[0]), sec[1]))
+	return sp
+
+
+## Quem merece atenção em cada time, com a foto no túnel.
+static func _watch_page(w: GameWorld, sim: MatchSimulation) -> Control:
 	var last := UIKit.vbox(12)
 	last.add_child(UIKit.label("Fique de olho", "Title", true))
 	for t: MatchTeam in sim.teams:
@@ -154,37 +199,7 @@ static func show(w: GameWorld, sim: MatchSimulation, fx: Fixture, stadium: Dicti
 			col.add_child(UIKit.label("%s · %d gols · %d assistências na temporada" % [Pos.code(star.position), sg, sa], "Small", true))
 			row.add_child(col)
 			last.add_child(UIKit.card_panel(_wrap(row)))
-	pages.append(last)
-	var next_btn := UIKit.button("Próximo", "PrimaryButton", Callable(), "forward")
-	next_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	next_btn.custom_minimum_size.y = 84
-	var skip_btn := UIKit.button("Pular", "GhostButton", func():
-		UIManager.close_modal()
-		on_done.call(), "skip")
-	skip_btn.custom_minimum_size = Vector2(180, 84)
-	next_btn.pressed.connect(func():
-		step[0] += 1
-		if step[0] >= pages.size():
-			UIManager.close_modal()
-			on_done.call()
-			return
-		if step[0] == pages.size() - 1:
-			next_btn.text = "Apito inicial"
-		# Mantém as páginas vivas fora da árvore enquanto não aparecem
-		for pg: Control in pages:
-			if pg.get_parent() == body:
-				body.remove_child(pg)
-		body.add_child(pages[step[0]])
-		if pages[step[0]] is VBoxContainer and pages[step[0]].get_child_count() > 1 and pages[step[0]].get_child(1) is WalkoutView:
-			Sfx.crowd_clip(0, "entrada"))
-	nav.add_child(skip_btn)
-	nav.add_child(next_btn)
-	body.add_child(pages[0])
-	frame.tree_exited.connect(func():
-		for pg: Control in pages:
-			if is_instance_valid(pg) and pg.get_parent() == null:
-				pg.queue_free())
-	UIManager.show_modal(frame, true, false)
+	return last
 
 
 static func _wrap(c: Control) -> VBoxContainer:
