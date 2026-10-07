@@ -67,16 +67,16 @@ FLAGS = {
 logos = {}
 
 # ---------------------------------------------------------------------------------------- Ligas
-logos["ENG1"] = L("round", "#FFFFFF", "lion_crowned", "#37003C", c2="#37003C", ring_c="#37003C", wordmark="PREMIER LEAGUE")
+logos["ENG1"] = L("round", "#37003C", "match_crown", "#FFFFFF", c2="#37003C", ring_c="#00FF85", wordmark="PREMIER LEAGUE")
 logos["ENG2"] = L("badge", "#0B1C3F", "lion_passant", "#D4AF37", ring_c="#D4AF37", sym_scale=1.15, wordmark="CHAMPIONSHIP")
-logos["ESP1"] = L("tile", "#FF4B44", "ball_swirl", "#FFFFFF", wordmark="LALIGA")
-logos["ESP2"] = L("tile", "#1B1B1B", "ball_swirl", "#00D0FF", num="2", accent="#00D0FF", wordmark="LALIGA")
-logos["GER1"] = L("tile", "#D20515", "player_kick", "#FFFFFF", wordmark="BUNDESLIGA")
-logos["GER2"] = L("tile", "#1B1B1B", "player_kick", "#FFFFFF", num="2", accent="#D20515", wordmark="BUNDESLIGA")
-logos["ITA1"] = L("badge", "#0A2E6E", "letter", "#FFFFFF", initials="A", flag=FLAGS["ITA"], wordmark="SERIE A")
-logos["ITA2"] = L("badge", "#0B7B3E", "letter", "#FFFFFF", initials="B", flag=FLAGS["ITA"], wordmark="SERIE B")
-logos["FRA1"] = L("tile", "#091C3E", "letter", "#DAE025", initials="L1", wordmark="LIGUE 1")
-logos["FRA2"] = L("tile", "#0E3B7D", "letter", "#F28C28", initials="L2", wordmark="LIGUE 2")
+logos["ESP1"] = L("tile", "#FF4B44", "match_orbit", "#FFFFFF", wordmark="LALIGA")
+logos["ESP2"] = L("tile", "#1B1B1B", "match_orbit", "#00D0FF", num="2", accent="#00D0FF", wordmark="LALIGA")
+logos["GER1"] = L("tile", "#D20515", "match_pitch", "#FFFFFF", wordmark="BUNDESLIGA")
+logos["GER2"] = L("tile", "#1B1B1B", "match_pitch", "#FFFFFF", num="2", accent="#D20515", wordmark="BUNDESLIGA")
+logos["ITA1"] = L("badge", "#0A1E50", "match_gate", "#3CC7F0", flag=FLAGS["ITA"], wordmark="SERIE A")
+logos["ITA2"] = L("badge", "#0B7B3E", "match_gate", "#FFFFFF", num="B", accent="#FFFFFF", flag=FLAGS["ITA"], wordmark="SERIE B")
+logos["FRA1"] = L("tile", "#091C3E", "match_hex", "#DAE025", num="1", accent="#DAE025", wordmark="LIGUE 1")
+logos["FRA2"] = L("tile", "#0E3B7D", "match_hex", "#F28C28", num="2", accent="#F28C28", wordmark="LIGUE 2")
 logos["POR1"] = L("round", "#00205B", "caravel", "#00C1D5", ring_c="#00C1D5", wordmark="LIGA PORTUGAL")
 logos["POR2"] = L("round", "#1D3F91", "caravel", "#FFCC00", num="2", accent="#FFCC00", wordmark="LIGA PORTUGAL")
 logos["NED1"] = L("tile", "#F36C21", "ball", "#FFFFFF", wordmark="EREDIVISIE")
@@ -227,9 +227,6 @@ for k, v in old.items():
         logos[k] = v
         print("mantido:", k)
 data["logos"] = logos
-data["_doc"] = ("Identidade visual das competições, inspirada nas reais (sem copiar marcas). logos: desenho no formato do "
-                "CrestView com \"logo\": true (marca chapada: tile, badge ou disco, taça/bola/jogador, faixa com as cores da "
-                "bandeira, numeral da divisão e nome embaixo em tamanho grande). Competições sem logo aqui ganham um selo "
-                "gerado com as cores oficiais. scoreboard: [fundo, fundo 2, destaque] do placar da TV; sem entrada, o placar usa as cores da liga.")
+# Este gerador é dono só de "logos". Preserva documentação, placares e pacotes de TV.
 open(p, "w").write(json.dumps(data, ensure_ascii=False, indent='\t') + '\n')
 print("logos:", len(logos))

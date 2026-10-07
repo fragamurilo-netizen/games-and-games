@@ -1,6 +1,7 @@
 """Taças, bola em espiral, jogador e globo dos logos de competição.
 
 Uso (em mais-uma-rodada/): python3 tools/crest_gen/logo_art.py scripts/ui/components/crest_art.gd
+Acrescente --broadcast-only para atualizar só as marcas match_ sem reemitir as taças legadas.
 """
 import sys, math
 sys.path.insert(0, sys.path[0])
@@ -160,6 +161,39 @@ S['lion_passant_c'] = J(
     stroke([(0.5, -0.06), (0.6, 0.14), (0.54, 0.34)], 0.03, 0.03, False),
     stroke([(-0.42, 0.08), (-0.45, 0.3)], 0.025, 0.025, False))
 
+# ---------- Marcas próprias para TV: poucas massas, vãos largos, sem reflexos.
+# Os quatro desenhos são construídos aqui; não vêm de escudos ou bancos de heráldica.
+def arc_band(radius, width, start, end, n=24):
+    outer = [(math.cos(start + (end-start)*i/n) * radius,
+              math.sin(start + (end-start)*i/n) * radius) for i in range(n+1)]
+    inner = [(math.cos(start + (end-start)*i/n) * (radius-width),
+              math.sin(start + (end-start)*i/n) * (radius-width)) for i in range(n, -1, -1)]
+    return outer + inner
+
+# Bola em movimento: três arcos sólidos, centro vazado e uma estrela de encontro.
+S['match_orbit'] = J(*[arc_band(.92, .23, i*math.tau/3+.13, (i+1)*math.tau/3-.13) for i in range(3)],
+                     jag(0, 0, .19, .41, 5, rot=-math.pi/2-math.pi/5))
+# Hexágono em três módulos: referência geográfica francesa, separado da bola curva espanhola.
+hex_parts = []
+for i in range(3):
+    a = -math.pi/2 + i*math.tau/3
+    angles = [a+.12, a+math.pi/3, a+math.tau/3-.12]
+    hex_parts.append([(math.cos(t)*.94, math.sin(t)*.94) for t in angles] +
+                     [(math.cos(t)*.64, math.sin(t)*.64) for t in angles[::-1]])
+S['match_hex'] = J(*hex_parts, jag(0,0,.28,.28,6,rot=math.pi/6))
+# Campo visto de cima com bola: cantos cortados mantêm a abertura legível a 24 px.
+pitch_edge = [(-.9,.42),(-.9,-.7),(.62,-.7),(.9,-.42),(.67,-.32),(.52,-.47),(-.67,-.47),(-.67,.32)]
+S['match_pitch'] = J(pitch_edge, [(-x,-y) for x,y in pitch_edge],
+                     rect(-.08,-.47,.08,.47), ell(0,0,.28,.28,n=28))
+# Pórtico e bola em ascensão, uma marca vertical que funciona no selo de divisão.
+S['match_gate'] = J([(-.88,.76),(-.88,-.84),(.88,-.84),(.88,.76),(.61,.76),(.61,-.56),(-.61,-.56),(-.61,.76)],
+                    ell(0,-.02,.28,.28,n=28), [(-.4,.76),(0,.38),(.4,.76)])
+# Coroa de três arquibancadas com centro vazado: sem leão nem marca real.
+S['match_crown'] = J([(-.9,-.8),(-.5,-.42),(0,-.9),(.5,-.42),(.9,-.8),(.68,.45),(-.68,.45)],
+                     rect(-.68,.64,.68,.86))
+S['match_crown_c'] = J(jag(0,.12,.23,.32,5,rot=-math.pi/2-math.pi/5))
+
 if __name__ == '__main__':
-    emit(sys.argv[1], S)
-    print('ok', len(S))
+    shapes = {k: v for k, v in S.items() if k.startswith('match_')} if '--broadcast-only' in sys.argv[2:] else S
+    emit(sys.argv[1], shapes)
+    print('ok', len(shapes))
