@@ -22,13 +22,23 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 - **Gerações dos países** (`scripts/systems/generations.gd`, tela `generations`, menu ☰ › Carreira e mundo › Gerações, chip no perfil do jogador): sorteio raro por país com liga (2%/temporada), 4 anos de nascimento, ~6 joias por geração (piso de potencial para futebol pequeno) e empurrão leve no resto; descoberta aos 17 anos com manchete, auge anunciado aos 25; herança na formação do país (`stats.gen.nb`, índice da base que some devagar) e vitrine na reputação da liga (`Generations.league_push` em `LeagueReputation`). Categorias por ano de nascimento (garotos que entraram numa base, profissionais com 15+ jogos, convocados). Calibrar sem jogar: `tools/generations_report.gd -- --years=25`.
 - **Escolas de técnicos** (`scripts/systems/coach_schools.gd`, tela `coach_schools`, cartão "Escola" no perfil do técnico): fundadores no começo (um por grande escola de futebol + os melhores), auxiliar interino herda a escola do técnico que saiu, ex-jogador aprende com o técnico favorito, técnico novo às vezes vem de um mestre; traços herdados com mutação; escolas novas de quem ganha títulos grandes; traços mudam com quem vence; o auxiliar do usuário pode sair para ser técnico (começa a escola do usuário). Nomes sempre do mundo do jogo. `tools/coach_schools_report.gd`.
 - **Mercado de técnicos realista** (`scripts/systems/coach_market.gd`, dados em `data/gameplay/coach_market.json` por liga: estrangeiros no banco, de onde vêm, rapidez para demitir, duração do contrato): pressão pelo resultado contra o esperado e pela tabela contra a meta; demissão com lua de mel, espera das férias perto do fim e rescisão cara que segura quem tem caixa curto (cobrada do clube e citada na notícia); contrato e salário (`ct`, `wg`) com renovação ou saída no fim; substituto dos livres (rodízio da liga), de clube menor (multa) ou de fora, com recusa; técnicos novos entram no mercado todo ano e a lista de livres tem teto. Medição: `tools/coach_market_report.gd -- --seasons=1` (trocas por liga, interinos, origem do contratado, estrangeiros no banco).
+  - Calibrado contra a vida real (trocas no meio da temporada): Itália 9, Portugal 7, Turquia 11, Argentina 11, Inglaterra 2ª divisão 12, Série B 13, Premier 4, Espanha 5, Alemanha 4.
+  - Estrangeiros no banco: Premier 60–80%, Arábia ~95%, México ~60%, Brasil 35–45%, Itália ~15%.
+  - O México fica com quase nenhuma troca porque a Liga MX do jogo tem um turno só (17 rodadas + Liguilla); na vida real são dois torneios por ano.
 - **Frente do Codex** (visual): `docs/handoff/codex-visual.md`.
 
 ### Próximos sistemas pedidos pelo dono (projeto para quem pegar)
 
 O dono quer o jogo **realista** e **sem "pay to win"**: nada de recompensa artificial, tudo vem do futebol acontecendo.
 
-**1. Empresários** (hoje não há entidade: só a comissão em `DealTerms`, o `agent` de eventos e o assédio na base de `YouthLife`).
+**1. Empresários** — **primeira versão feita** (`scripts/systems/agents.gd`):
+- empresários por país (2 a 12) e 18 superagentes, guardados em `world.stats["ag"]`;
+- empresário do jogador sorteado de forma fixa na primeira consulta (saves antigos funcionam);
+- comissão pelo estilo e pela reputação (`DealTerms.agent_pct`);
+- relação com os clubes, que muda a cada negócio (`DealTerms.on_signed`) e trava a conversa quando está ruim (`DealTerms.agent_block`);
+- ficha do empresário no perfil do jogador, na aba Contrato.
+
+Falta (projeto abaixo): o empresário oferecer clientes, levar cliente para quem paga mais, base e renovação. Antes, só havia a comissão em `DealTerms`, o `agent` de eventos e o assédio na base de `YouthLife`.
 - Dados em `world.agents` (salvar com padrão vazio): `{id, n, nat, rep 1..100, style (parceiro|agressivo|discreto), clubs {club_id: relação -100..100}, pids [carteira]}`. Uns 4 a 8 por país grande e uns 20 "superagentes" com carteira internacional. Atribuir na geração do mundo: craque e jovem promissor ficam com os de mais reputação. Campo `Player.agent` ("agt", padrão -1).
 - Efeitos:
   - comissão (`DealTerms.agent_pct`) pela reputação e pelo estilo;
