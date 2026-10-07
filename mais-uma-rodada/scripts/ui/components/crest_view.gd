@@ -31,6 +31,7 @@ extends Control
 ##   wordmark  nome embaixo do desenho, dentro do formato (só em tamanho grande)
 ##   charge_layers  símbolos sobrepostos [{symbol, sc, dc, bg, x, y, scale}], todos opcionais
 ##   dc  tinta dos detalhes do símbolo (padrão: tom da tinta principal)
+##   ring_bg  tinta do anel com o nome (padrão: calculada pelas cores do escudo)
 
 @export var crest: Dictionary = {"shape": "shield", "symbol": "star", "c1": "#1B3A8C", "c2": "#FFFFFF", "border": "thin", "initials": "RA"}:
 	set(v):
@@ -714,7 +715,10 @@ func _charge(sp: Dictionary, cb: Rect2, field_poly: PackedVector2Array, s: float
 		if s >= 24.0:
 			_polyline_closed(pts, col, 0.65)
 	# Recortes ("_c"): partes vazadas, na cor do fundo (costuras da bola dos logos)
-	if CrestArt.has(sym + "_c") and r * 2.0 >= (12.0 if sym == "ball" else 24.0):
+	# Vãos estruturais continuam legíveis antes dos detalhes decorativos: sem
+	# eles, o B vira uma placa e a roda do canhão vira um disco cheio.
+	var cut_min := 12.0 if sym in ["ball", "match_b", "club_cannon", "club_wolf"] else 24.0
+	if CrestArt.has(sym + "_c") and r * 2.0 >= cut_min:
 		for p: PackedVector2Array in CrestArt.polys(sym + "_c"):
 			_poly(_xf_c(p, cen, r), c1)
 	# Recortes do liver bird usam o campo; em ícones pequenos vale a silhueta limpa.
