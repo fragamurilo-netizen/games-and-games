@@ -147,7 +147,7 @@
 			"crest": {
 				"shape": "round",
 				"field": "plain",
-				"symbol": "ship",
+				"symbol": "club_ship",
 				"sc": "#FFFFFF"
 			},
 			"rivals": [
@@ -201,7 +201,7 @@
 			"crest": {
 				"shape": "shield",
 				"field": "plain",
-				"symbol": "hammers",
+				"symbol": "club_hammers",
 				"sc": "#8A1538",
 				"border": "thick"
 			},

@@ -26,7 +26,9 @@
 				"symbol": "sunrise",
 				"sc": "#006437"
 			},
-			"rivals": ["RSA_BUC"]
+			"rivals": [
+				"RSA_BUC"
+			]
 		},
 		{
 			"key": "RSA_AMA",
@@ -81,7 +83,10 @@
 				"symbol": "skull",
 				"sc": "#FFFFFF"
 			},
-			"rivals": ["RSA_AMA", "RSA_BRZ"]
+			"rivals": [
+				"RSA_AMA",
+				"RSA_BRZ"
+			]
 		},
 		{
 			"key": "RSA_STE",
@@ -347,7 +352,7 @@
 			"crest": {
 				"shape": "round",
 				"field": "plain",
-				"symbol": "ship",
+				"symbol": "club_ship",
 				"sc": "#FFD100",
 				"border": "double"
 			},

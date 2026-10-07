@@ -11,6 +11,10 @@ func _initialize() -> void:
 	for name: String in CrestArt.PATHS:
 		for poly: PackedVector2Array in CrestArt.polys(name):
 			if Geometry2D.triangulate_polygon(poly).is_empty():
+				if name.begins_with("club_") or name.begins_with("match_"):
+					push_error("desenho novo não triangulável: " + name)
+					quit(1)
+					return
 				continue # desenhos legados que o renderer já ignora
 			var original_hash := hash(poly)
 			for radius: float in [6.0, 10.0, 16.0, 23.0]:

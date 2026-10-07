@@ -24,7 +24,7 @@
 			"crest": {
 				"shape": "shield",
 				"field": "hoops:4",
-				"symbol": "letter",
+				"symbol": "club_mono_crf",
 				"initials": "CRF",
 				"mono": true,
 				"sym_pos": "tl",
@@ -33,7 +33,8 @@
 				"c2": "#111111",
 				"c3": "#F2C230",
 				"stars": 1,
-				"border": "thin"
+				"border": "thin",
+				"plate": "none"
 			},
 			"rivals": [
 				"BRA_TRL",
@@ -63,13 +64,18 @@
 			"crest": {
 				"shape": "ring",
 				"field": "plain",
-				"symbol": "letter",
+				"symbol": "club_mono_p",
 				"initials": "P",
-				"text": "SOCIEDADE ESPORTIVA",
-				"text2": "PALMEIRAS",
+				"text": "PALMEIRAS",
+				"text2": "",
 				"c2": "#006437",
 				"c3": "#FFFFFF",
-				"sc": "#FFFFFF"
+				"sc": "#FFFFFF",
+				"plate": "none",
+				"year": "1914",
+				"tc": "#FFFFFF",
+				"c1": "#006437",
+				"border": "double"
 			},
 			"rivals": [
 				"BRA_TIM",
@@ -105,7 +111,24 @@
 				"c1": "#FFFFFF",
 				"c2": "#111111",
 				"c3": "#E30613",
-				"sc": "#111111"
+				"sc": "#111111",
+				"charge_layers": [
+					{
+						"symbol": "club_city_shield",
+						"sc": "#FFFFFF",
+						"scale": 0.49,
+						"x": 0,
+						"y": 0.01
+					},
+					{
+						"symbol": "club_saint",
+						"sc": "#171717",
+						"scale": 0.38,
+						"x": 0,
+						"y": 0.01
+					}
+				],
+				"sym_scale": 1.15
 			},
 			"rivals": [
 				"BRA_VPA",
@@ -208,14 +231,18 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "french",
-				"field": "tricolor_v",
-				"symbol": "none",
-				"chief_text": "FFC",
+				"field": "halves",
+				"symbol": "club_mono_ffc",
+				"chief_text": "",
 				"cc": "#FFFFFF",
-				"c1": "#7A0F2A",
-				"c2": "#FFFFFF",
-				"fc": "#FFFFFF",
-				"c3": "#00613C"
+				"c1": "#78152C",
+				"c2": "#00613C",
+				"fc": "#00613C",
+				"c3": "#FFFFFF",
+				"sc": "#FFFFFF",
+				"border": "double",
+				"plate": "none",
+				"sym_scale": 1.12
 			},
 			"rivals": [
 				"BRA_RNC",
@@ -277,8 +304,26 @@
 			"crest": {
 				"shape": "shield",
 				"field": "sash",
-				"symbol": "cross_pattee",
-				"sc": "#E30613"
+				"symbol": "none",
+				"sc": "#E30613",
+				"charge_layers": [
+					{
+						"symbol": "club_ship",
+						"sc": "#FFFFFF",
+						"scale": 0.9,
+						"x": 0,
+						"y": 0.04,
+						"dc": "#D6D6D6"
+					},
+					{
+						"symbol": "cross_pattee",
+						"sc": "#D91928",
+						"scale": 0.32,
+						"x": 0,
+						"y": -0.1
+					}
+				],
+				"sym_scale": 1.05
 			},
 			"rivals": [
 				"BRA_RNC",
@@ -307,8 +352,8 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "ring",
-				"field": "stripes_tri:9",
-				"symbol": "none",
+				"field": "stripes_tri:3",
+				"symbol": "letter",
 				"text": "GRÊMIO FOOT-BALL",
 				"text2": "PORTO ALEGRENSE",
 				"c1": "#FFFFFF",
@@ -317,7 +362,13 @@
 				"c2": "#0D80BF",
 				"stars": 1,
 				"star_c": "#E4B43A",
-				"border": "double"
+				"border": "double",
+				"initials": "GRÊMIO",
+				"mono": false,
+				"plate": "band",
+				"pc": "#111111",
+				"sc": "#FFFFFF",
+				"year": "1903"
 			},
 			"rivals": [
 				"BRA_COL"
@@ -343,16 +394,21 @@
 			"capacity": 50000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
-				"symbol": "letter",
+				"symbol": "club_mono_sci",
 				"initials": "SCI",
 				"mono": true,
-				"sym_scale": 1.1,
-				"c1": "#E30613",
-				"c2": "#FFFFFF",
+				"sym_scale": 1.12,
+				"c1": "#C71029",
+				"c2": "#C71029",
 				"sc": "#FFFFFF",
-				"border": "double"
+				"border": "double",
+				"text": "SPORT CLUB INTERNACIONAL",
+				"text2": "",
+				"year": "1909",
+				"c3": "#FFFFFF",
+				"tc": "#FFFFFF"
 			},
 			"rivals": [
 				"BRA_IMT"
@@ -1519,7 +1575,9 @@
 				"symbol": "letter",
 				"initials": "SER"
 			},
-			"rivals": ["BRA_JUV"]
+			"rivals": [
+				"BRA_JUV"
+			]
 		},
 		{
 			"key": "BRA_DSE",

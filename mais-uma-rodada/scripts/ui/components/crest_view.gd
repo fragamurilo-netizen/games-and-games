@@ -29,6 +29,8 @@ extends Control
 ##   ring_c  cor do aro fino por fora (padrão: sem aro)    accent  cor de detalhe (faixa, numeral)
 ##   num  numeral grande no canto (divisões de acesso: "2", "3")
 ##   wordmark  nome embaixo do desenho, dentro do formato (só em tamanho grande)
+##   charge_layers  símbolos sobrepostos [{symbol, sc, dc, bg, x, y, scale}], todos opcionais
+##   dc  tinta dos detalhes do símbolo (padrão: tom da tinta principal)
 
 @export var crest: Dictionary = {"shape": "shield", "symbol": "star", "c1": "#1B3A8C", "c2": "#FFFFFF", "border": "thin", "initials": "RA"}:
 	set(v):
@@ -147,6 +149,9 @@ static func spec(cr: Dictionary) -> Dictionary:
 	sp["wordmark"] = String(cr.get("wordmark", ""))
 	sp["flag"] = Array(cr.get("flag", [])) if cr.get("flag", null) is Array else []
 	sp["sym_top"] = String(cr.get("sym_top", ""))
+	sp["dc"] = _col_or_null(cr, "dc")
+	sp["ring_bg"] = _col_or_null(cr, "ring_bg")
+	sp["charge_layers"] = Array(cr.get("charge_layers", [])) if cr.get("charge_layers", null) is Array else []
 	return sp
 
 
@@ -201,6 +206,8 @@ func _render(s: float) -> void:
 	if ring:
 		# Anel externo com o nome; o campo fica no disco de dentro
 		var band_col := c2 if absf(c2.get_luminance() - c1.get_luminance()) > 0.15 else c1.darkened(0.35)
+		if sp["ring_bg"] != null:
+			band_col = sp["ring_bg"]
 		_poly(poly, band_col)
 		inner = _xf(_shrink(unit, 0.27 if not small else 0.2), box)
 	_poly(inner, c1)
@@ -260,6 +267,24 @@ func _render(s: float) -> void:
 		var cc0 := charge_box.get_center()
 		charge_box = Rect2(cc0 - charge_box.size * 0.5 * float(sp["sym_scale"]), charge_box.size * float(sp["sym_scale"]))
 	_charge(sp, charge_box, inner, s, box)
+	# Composição heráldica em camadas: navio, rios e rosa podem ter tintas
+	# distintas. Ausente nos saves antigos; usa o mesmo cache de comandos.
+	for layer: Variant in sp["charge_layers"].slice(0, 8):
+		if not layer is Dictionary:
+			continue
+		var child := sp.duplicate()
+		child["symbol"] = String(layer.get("symbol", "none"))
+		child["sc"] = Color(String(layer.get("sc", "#FFFFFF")))
+		child["dc"] = _col_or_null(layer, "dc")
+		child["staff"] = false
+		child["line_art"] = false
+		child["field"] = "plain"
+		if layer.has("bg"):
+			child["c1"] = Color(String(layer["bg"]))
+		var scale := clampf(float(layer.get("scale", 1.0)), 0.05, 2.0)
+		var sz := charge_box.size * scale
+		var center := charge_box.get_center() + Vector2(float(layer.get("x", 0.0)), float(layer.get("y", 0.0))) * charge_box.size * 0.5
+		_charge(child, Rect2(center - sz * 0.5, sz), inner, s)
 	if String(sp["sym_top"]) != "" and CrestArt.has(String(sp["sym_top"])):
 		# Símbolo pequeno acima do principal (coroa sobre o leão, estrela sobre a bola)
 		var tc0 := Vector2(charge_box.get_center().x, charge_box.position.y - box.size.y * 0.09)
@@ -702,6 +727,8 @@ func _charge(sp: Dictionary, cb: Rect2, field_poly: PackedVector2Array, s: float
 		shade = col.darkened(0.28) if col.get_luminance() > 0.35 else col.lightened(0.3)
 	if bool(sp["logo"]) and metal:
 		shade = col.darkened(0.16)
+	if sp["dc"] != null:
+		shade = sp["dc"]
 	# LOD pelo tamanho do desenho, não pelo controle: coroas, louros e nomes
 	# podem reduzir muito a área útil de um escudo de 48 px.
 	if CrestArt.has(det) and r * 2.0 >= detail_min:
@@ -886,8 +913,11 @@ func _border(poly: PackedVector2Array, inner: PackedVector2Array, ring: bool, sp
 			_polyline_closed(poly, edge, maxf(2.0, s * 0.06))
 		"double":
 			_polyline_closed(poly, edge, maxf(1.0, s * 0.03))
-			for piece in Geometry2D.offset_polygon(poly, -s * 0.06):
-				_polyline_closed(piece, edge, maxf(1.0, s * 0.018))
+			# No anel, o segundo filete já é a borda do disco interno. Um
+			# terceiro traço a 6% da borda cruzava as letras do nome do clube.
+			if not ring:
+				for piece in Geometry2D.offset_polygon(poly, -s * 0.06):
+					_polyline_closed(piece, edge, maxf(1.0, s * 0.018))
 		"gold":
 			_polyline_closed(poly, c3, maxf(1.5, s * 0.045))
 			_polyline_closed(poly, c3.darkened(0.35), maxf(1.0, s * 0.012))

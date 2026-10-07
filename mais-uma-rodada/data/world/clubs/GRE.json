@@ -32,7 +32,11 @@
 				"text2": "PIRAEUS",
 				"border": "thin"
 			},
-			"rivals": ["GRE_ATH", "GRE_AEN", "GRE_DIK"]
+			"rivals": [
+				"GRE_ATH",
+				"GRE_AEN",
+				"GRE_DIK"
+			]
 		},
 		{
 			"key": "GRE_ATH",
@@ -196,7 +200,7 @@
 			"crest": {
 				"shape": "round",
 				"field": "halves",
-				"symbol": "ship",
+				"symbol": "club_ship",
 				"sc": "#FFFFFF"
 			},
 			"rivals": []
