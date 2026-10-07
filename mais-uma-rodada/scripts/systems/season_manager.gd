@@ -1072,6 +1072,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 	progress = 50
 	PressRoom.on_season_end(world, summary)
 	CoachCareer.on_titles(world, hist_leagues, hist_cups) # títulos na carreira de quem está no banco
+	CoachSchools.season_close(world, hist_leagues, hist_cups) # escolas de técnicos: títulos, escolas novas, seu auxiliar
 	CoachStories.season_awards(world, hist_leagues, wcoach)
 	People.on_season_end(world, summary)
 	CoachStories.on_season_end(world, moves, hist_leagues, hist_cups) # arcos, despedidas e o mercado de técnicos

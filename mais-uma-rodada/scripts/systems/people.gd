@@ -107,6 +107,7 @@ static func ensure(world: GameWorld) -> void:
 		var coach := _new_coach(world, r, c.nation, c.reputation - r.randf_range(0.0, 15.0), "")
 		pp["free"].append(coach)
 	CoachCareer.ensure(world)
+	CoachSchools.data(world) # primeiras escolas de técnicos
 	if world.has_user():
 		_setup_user(world)
 
@@ -333,6 +334,7 @@ static func replace_coach(world: GameWorld, club: Club, reason: String, note: St
 		it["since"] = world.year
 		it["job"] = 55.0
 		CoachCareer.fresh_past(world, r, it, club, true)
+		CoachSchools.on_new_coach(world, it, old) # o auxiliar do técnico que saiu leva a escola dele
 		CoachCareer.open_spell(world, it, club, "int")
 		pp["coaches"][club.id] = it
 		ClubDNA.on_coach_change(club) # o interino também é uma troca no banco
@@ -387,6 +389,7 @@ static func replace_coach(world: GameWorld, club: Club, reason: String, note: St
 	elif forced.is_empty() and (best.is_empty() or r.randf() < 0.25):
 		best = _new_coach(world, r, club.nation, club.reputation, club.archetype)
 		CoachCareer.fresh_past(world, r, best, club)
+		CoachSchools.on_new_coach(world, best)
 	else:
 		pp["free"].erase(best)
 	best["c"] = club.id

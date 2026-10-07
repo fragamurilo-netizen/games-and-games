@@ -75,6 +75,7 @@ func refresh() -> void:
 		if club != null:
 			c.add_child(_work(w, co, club))
 		c.add_child(_style_card(w, co))
+		c.add_child(_school_card(w, co))
 	else:
 		c.add_child(_career(w, co))
 		c.add_child(_stories(w, co))
@@ -160,6 +161,46 @@ func _style_card(w: GameWorld, co: Dictionary) -> Control:
 	card.add_child(UIKit.section("Estilo de trabalho"))
 	card.add_child(UIKit.label(String(st.get("name", "")), "H3"))
 	card.add_child(UIKit.label("Temperamento: " + CoachStories.temper_name(w, co), "H3"))
+	return UIKit.card_panel(card)
+
+
+## Escola do técnico: de quem aprendeu, o jeito de jogar (traços) e quem aprendeu com ele.
+func _school_card(w: GameWorld, co: Dictionary) -> Control:
+	var card := UIKit.card("Card", 6)
+	card.add_child(UIKit.section("Escola"))
+	var s := CoachSchools.school_of(w, co)
+	if not s.is_empty():
+		var sid := int(s["id"])
+		var b := UIKit.button(String(s["n"]), "ChipButton", func(): UIManager.push("coach_schools", {"school": sid}), "star")
+		b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		card.add_child(b)
+		if int(s["f"]) == int(co.get("id", -1)):
+			card.add_child(UIKit.label("Fundador da escola, em %d." % int(s["y"]), "Small", true))
+	else:
+		card.add_child(UIKit.label("Sem escola: jeito próprio.", "Small", true))
+	var mt := int(co.get("mt", 0))
+	if mt == -2:
+		card.add_child(UIKit.kv("Aprendeu com", w.manager_name, UIColors.ACCENT))
+	elif mt > 0:
+		var m := CoachCareer.find(w, mt)
+		var mn := String(m.get("n", ""))
+		if mn == "":
+			for e in s.get("e", []):
+				if int(e[0]) == mt:
+					mn = String(e[1])
+					break
+		if mn != "":
+			card.add_child(UIKit.kv("Aprendeu com", mn))
+	var pills := UIKit.flow(6)
+	for n in CoachSchools.trait_names(co.get("tr", [])):
+		pills.add_child(UIKit.pill(String(n), UIColors.ACCENT, 18))
+	card.add_child(pills)
+	var ds := CoachSchools.disciples(w, int(co.get("id", 0)))
+	if not ds.is_empty():
+		var names: Array = []
+		for d: Dictionary in ds.slice(0, 5):
+			names.append(String(d["n"]))
+		card.add_child(UIKit.kv("Discípulos", ", ".join(PackedStringArray(names)) + (" e mais %d" % (ds.size() - 5) if ds.size() > 5 else "")))
 	return UIKit.card_panel(card)
 
 

@@ -77,6 +77,7 @@ static func open() -> void:
 		["Seleções", "national", {}, 0],
 		["Mercado de técnicos", "jobs", {}, 0],
 		["Dança das cadeiras", "coach_moves", {}, 0],
+		["Escolas de técnicos", "coach_schools", {}, 0],
 		["História", "history", {}, 0],
 		["Joias", "nextgen", {}, 0],
 		["Gerações", "generations", {}, 0],

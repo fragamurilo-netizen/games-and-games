@@ -512,6 +512,9 @@ static func _maybe_coach(world: GameWorld, m: Dictionary, p: Player) -> void:
 	coach["pid"] = p.id
 	coach["idol"] = main
 	coach["since"] = world.year
+	# Escola: aprendeu com o técnico de quem mais gostou na carreira (você, inclusive)
+	var fav := Relations.fav_coach(p)
+	CoachSchools.on_new_coach(world, coach, CoachCareer.find(world, fav) if fav >= 0 else {}, fav == -2)
 	pp["free"].append(coach)
 	m["lc"][p.id] = int(coach["id"])
 

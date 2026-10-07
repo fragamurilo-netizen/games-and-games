@@ -33,6 +33,7 @@ const SCREENS := {
 	"contracts": "res://scenes/screens/contracts.tscn",
 	"nextgen": "res://scenes/screens/nextgen.tscn",
 	"generations": "res://scenes/screens/generations.tscn",
+	"coach_schools": "res://scenes/screens/coach_schools.tscn",
 	"dressing_room": "res://scenes/screens/dressing_room.tscn",
 	"past_squads": "res://scenes/screens/past_squads.tscn",
 	"paywall": "res://scenes/screens/paywall.tscn",
