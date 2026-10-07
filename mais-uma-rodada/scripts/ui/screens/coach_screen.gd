@@ -137,6 +137,8 @@ func _work(w: GameWorld, co: Dictionary, club: Club) -> Control:
 	card.add_child(UIKit.kv("Situação no cargo", jl, jc))
 	var bar := UIKit.bar(job, 100.0, jc, 10)
 	card.add_child(bar)
+	if int(co.get("ct", 0)) > 0 and not bool(co.get("int", false)):
+		card.add_child(UIKit.kv("Contrato", "até o fim de %d" % int(co["ct"])))
 	var fired := int(co.get("fired", 0))
 	if fired > 0:
 		card.add_child(UIKit.kv("Demissões na carreira", str(fired)))

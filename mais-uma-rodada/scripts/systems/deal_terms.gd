@@ -37,7 +37,8 @@ static func agent_pct(world: GameWorld, p: Player) -> float:
 	if p.value >= 40_000_000:
 		pct -= 0.01
 	pct += (float(absi(hash([p.id, "agent"])) % 5) - 2.0) * 0.005
-	return clampf(pct, 0.03, 0.10)
+	pct += Agents.pct_bonus(world, p) # superagente e agressivo cobram mais; discreto, menos
+	return clampf(pct, 0.03, 0.12)
 
 
 ## Comissão de contrato sem transferência (livre, pré-contrato, renovação): alguns salários.
@@ -58,6 +59,11 @@ static func agent_cost(world: GameWorld, p: Player, fee: int, mode: String, wage
 
 ## Empresário que se sente passado para trás trava o acordo. "" = segue a conversa.
 static func agent_block(world: GameWorld, p: Player, deal: Dictionary) -> String:
+	# Empresário que brigou com o clube nem senta para conversar.
+	var bc := Agents.block_chance(world, p, world.user_club_id)
+	if bc > 0.0 and absi(hash([p.id, world.year, world.current_day(), "agent_rel"])) % 100 < int(bc * 100.0):
+		var ag := Agents.agent_of(world, p)
+		return "%s, empresário de %s, não quer negociar com o %s depois das últimas desavenças." % [String(ag.get("n", "O empresário")), p.display_name(), world.user_club().short_name]
 	var frac := float(deal.get("agent", 1.0))
 	if frac >= 0.75:
 		return ""
@@ -175,6 +181,7 @@ static func on_signed(world: GameWorld, p: Player, club: Club, seller_id: int, f
 		var cost := agent_cost(world, p, fee, mode, p.wage, deal)
 		if cost > 0:
 			club.add_ledger("compras" if fee > 0 else "luvas", -cost)
+		Agents.on_deal(world, p, club.id, float(deal.get("agent", 1.0)))
 	var addon := addon_amount(fee, deal)
 	if addon > 0 and seller_id >= 0:
 		register_addon(world, p, club.id, seller_id, addon)

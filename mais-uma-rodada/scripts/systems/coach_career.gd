@@ -23,11 +23,11 @@ const VERSION := 1
 const PAST_YEARS := 14
 const MOVES_MAX := 800
 ## Código de saída pelo motivo da troca (People.replace_coach).
-const END_BY_REASON := {"resultados": "dem", "temporada": "dem", "ferida": "dem", "": "apo", "proposta": "sai", "res": "res", "efetivo": "int", "perdeu": "sai", "ciclo": "fim"}
+const END_BY_REASON := {"resultados": "dem", "temporada": "dem", "ferida": "dem", "": "apo", "proposta": "sai", "res": "res", "efetivo": "int", "perdeu": "sai", "ciclo": "fim", "contrato": "ctr"}
 const END_TEXT := {"dem": "Demitido", "sai": "Saiu para o %s", "res": "Pediu demissão", "fim": "Fim de ciclo", "apo": "Aposentou-se",
-	"usr": "Deu lugar a %s", "int": "Interino", "prom": "Promovido a técnico"}
+	"usr": "Deu lugar a %s", "int": "Interino", "prom": "Promovido a técnico", "ctr": "Fim de contrato"}
 const WHY_TEXT := {"resultados": "demitido", "temporada": "demitido", "ferida": "demitido", "": "aposentado", "proposta": "saiu", "res": "pediu demissão",
-	"efetivo": "fim da interinidade", "perdeu": "tirado por outro clube", "usuario": "saída do técnico", "efe": "interino efetivado", "usr": "chegada de %s", "ciclo": "fim de ciclo"}
+	"efetivo": "fim da interinidade", "perdeu": "tirado por outro clube", "usuario": "saída do técnico", "efe": "interino efetivado", "usr": "chegada de %s", "ciclo": "fim de ciclo", "contrato": "fim de contrato"}
 const PLAYER_POS: Array[String] = ["goleiro", "zagueiro", "lateral", "volante", "meia", "ponta", "atacante"]
 
 

@@ -1,0 +1,758 @@
+{
+	"_doc": "Mercado de técnicos por liga (CoachMarket), da vida real (temporadas 2023-25, aproximado): f = parcela de técnicos estrangeiros no banco; from = de onde vêm os estrangeiros (peso); sack = rapidez para demitir (1 = média europeia; Brasil quase o dobro); ct = duração do contrato em anos [mínimo, máximo]. Liga sem entrada usa a da 1ª divisão do país com metade dos estrangeiros, ou o padrão.",
+	"default": {
+		"f": 0.15,
+		"from": {},
+		"sack": 1.0,
+		"ct": [
+			1,
+			2
+		]
+	},
+	"leagues": {
+		"ENG1": {
+			"f": 0.65,
+			"from": {
+				"ESP": 4,
+				"POR": 3,
+				"ITA": 2,
+				"GER": 2,
+				"NED": 2,
+				"FRA": 1,
+				"DEN": 1,
+				"AUT": 1,
+				"ARG": 1,
+				"AUS": 0.5,
+				"NOR": 0.5
+			},
+			"sack": 1.2,
+			"ct": [
+				2,
+				4
+			]
+		},
+		"ENG2": {
+			"f": 0.22,
+			"from": {
+				"IRL": 2,
+				"SCO": 2,
+				"WAL": 1,
+				"NED": 1,
+				"GER": 1,
+				"ESP": 1
+			},
+			"sack": 1.35,
+			"ct": [
+				1,
+				3
+			]
+		},
+		"ESP1": {
+			"f": 0.25,
+			"from": {
+				"ARG": 3,
+				"ITA": 2,
+				"POR": 1,
+				"GER": 1,
+				"URU": 1,
+				"CHI": 1
+			},
+			"sack": 1.1,
+			"ct": [
+				1,
+				3
+			]
+		},
+		"ESP2": {
+			"f": 0.08,
+			"from": {
+				"ARG": 2,
+				"POR": 1,
+				"URU": 1
+			},
+			"sack": 1.3,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"ITA1": {
+			"f": 0.18,
+			"from": {
+				"POR": 2,
+				"CRO": 2,
+				"ESP": 1,
+				"FRA": 1,
+				"GER": 1,
+				"ARG": 1
+			},
+			"sack": 1.5,
+			"ct": [
+				1,
+				3
+			]
+		},
+		"ITA2": {
+			"f": 0.05,
+			"from": {
+				"CRO": 1,
+				"ARG": 1
+			},
+			"sack": 1.4,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"GER1": {
+			"f": 0.38,
+			"from": {
+				"AUT": 3,
+				"DEN": 2,
+				"SUI": 2,
+				"NED": 2,
+				"BEL": 1,
+				"CRO": 1,
+				"NOR": 1
+			},
+			"sack": 1.2,
+			"ct": [
+				2,
+				3
+			]
+		},
+		"GER2": {
+			"f": 0.2,
+			"from": {
+				"AUT": 3,
+				"SUI": 1,
+				"DEN": 1
+			},
+			"sack": 1.1,
+			"ct": [
+				1,
+				3
+			]
+		},
+		"FRA1": {
+			"f": 0.35,
+			"from": {
+				"ESP": 2,
+				"ITA": 2,
+				"POR": 2,
+				"BEL": 1,
+				"SUI": 1,
+				"SEN": 1,
+				"ARG": 1
+			},
+			"sack": 0.9,
+			"ct": [
+				2,
+				3
+			]
+		},
+		"FRA2": {
+			"f": 0.1,
+			"from": {
+				"BEL": 1,
+				"SUI": 1,
+				"TUN": 1
+			},
+			"sack": 1.0,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"POR1": {
+			"f": 0.2,
+			"from": {
+				"ESP": 2,
+				"BRA": 2,
+				"ARG": 1,
+				"SRB": 1
+			},
+			"sack": 1.8,
+			"ct": [
+				1,
+				3
+			]
+		},
+		"POR2": {
+			"f": 0.15,
+			"from": {
+				"BRA": 2,
+				"ESP": 1
+			},
+			"sack": 1.4,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"NED1": {
+			"f": 0.28,
+			"from": {
+				"BEL": 2,
+				"GER": 2,
+				"DEN": 1,
+				"NOR": 1,
+				"ENG": 1
+			},
+			"sack": 0.85,
+			"ct": [
+				2,
+				3
+			]
+		},
+		"TUR1": {
+			"f": 0.4,
+			"from": {
+				"POR": 2,
+				"ITA": 2,
+				"ESP": 1,
+				"NED": 1,
+				"GER": 1,
+				"BIH": 1,
+				"ROU": 1
+			},
+			"sack": 2.3,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"BEL1": {
+			"f": 0.45,
+			"from": {
+				"NED": 3,
+				"GER": 1,
+				"FRA": 1,
+				"DEN": 1,
+				"ESP": 1
+			},
+			"sack": 1.1,
+			"ct": [
+				1,
+				3
+			]
+		},
+		"SCO1": {
+			"f": 0.25,
+			"from": {
+				"ENG": 3,
+				"IRL": 1,
+				"AUS": 1,
+				"WAL": 1
+			},
+			"sack": 1.1,
+			"ct": [
+				1,
+				3
+			]
+		},
+		"GRE1": {
+			"f": 0.6,
+			"from": {
+				"ESP": 3,
+				"POR": 2,
+				"SRB": 1,
+				"NED": 1,
+				"ITA": 1
+			},
+			"sack": 2.0,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"AUT1": {
+			"f": 0.3,
+			"from": {
+				"GER": 4,
+				"SUI": 1
+			},
+			"sack": 1.0,
+			"ct": [
+				1,
+				3
+			]
+		},
+		"SUI1": {
+			"f": 0.45,
+			"from": {
+				"GER": 3,
+				"ITA": 1,
+				"FRA": 1,
+				"AUT": 1
+			},
+			"sack": 1.1,
+			"ct": [
+				1,
+				3
+			]
+		},
+		"UKR1": {
+			"f": 0.15,
+			"from": {
+				"POR": 1,
+				"ITA": 1,
+				"ESP": 1
+			},
+			"sack": 1.1,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"CRO1": {
+			"f": 0.15,
+			"from": {
+				"BIH": 2,
+				"SRB": 1
+			},
+			"sack": 1.4,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"SRB1": {
+			"f": 0.15,
+			"from": {
+				"MNE": 2,
+				"BIH": 2,
+				"CRO": 1
+			},
+			"sack": 1.5,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"CZE1": {
+			"f": 0.12,
+			"from": {
+				"SVK": 4
+			},
+			"sack": 1.0,
+			"ct": [
+				1,
+				3
+			]
+		},
+		"DEN1": {
+			"f": 0.15,
+			"from": {
+				"NOR": 2,
+				"SWE": 2,
+				"GER": 1
+			},
+			"sack": 0.9,
+			"ct": [
+				1,
+				3
+			]
+		},
+		"BRA1": {
+			"f": 0.4,
+			"from": {
+				"POR": 5,
+				"ARG": 4,
+				"URU": 2,
+				"PAR": 1,
+				"ESP": 0.5,
+				"COL": 0.5
+			},
+			"sack": 1.9,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"BRA2": {
+			"f": 0.05,
+			"from": {
+				"POR": 2,
+				"ARG": 1
+			},
+			"sack": 2.2,
+			"ct": [
+				1,
+				1
+			]
+		},
+		"BRA3": {
+			"f": 0.02,
+			"from": {
+				"ARG": 1
+			},
+			"sack": 2.0,
+			"ct": [
+				1,
+				1
+			]
+		},
+		"BRA4": {
+			"f": 0.01,
+			"from": {
+				"ARG": 1
+			},
+			"sack": 1.8,
+			"ct": [
+				1,
+				1
+			]
+		},
+		"ARG1": {
+			"f": 0.1,
+			"from": {
+				"URU": 3,
+				"CHI": 1,
+				"PAR": 1,
+				"COL": 1
+			},
+			"sack": 2.3,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"ARG2": {
+			"f": 0.05,
+			"from": {
+				"URU": 2,
+				"PAR": 1
+			},
+			"sack": 2.2,
+			"ct": [
+				1,
+				1
+			]
+		},
+		"URU1": {
+			"f": 0.08,
+			"from": {
+				"ARG": 3
+			},
+			"sack": 1.4,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"COL1": {
+			"f": 0.25,
+			"from": {
+				"ARG": 5,
+				"URU": 2,
+				"ESP": 1
+			},
+			"sack": 1.8,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"CHI1": {
+			"f": 0.45,
+			"from": {
+				"ARG": 6,
+				"URU": 2
+			},
+			"sack": 1.6,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"ECU1": {
+			"f": 0.55,
+			"from": {
+				"ARG": 5,
+				"URU": 2,
+				"COL": 1,
+				"ESP": 1
+			},
+			"sack": 1.8,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"PER1": {
+			"f": 0.55,
+			"from": {
+				"ARG": 5,
+				"URU": 3,
+				"COL": 1,
+				"ESP": 1
+			},
+			"sack": 1.9,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"PAR1": {
+			"f": 0.4,
+			"from": {
+				"ARG": 4,
+				"URU": 2
+			},
+			"sack": 1.4,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"BOL1": {
+			"f": 0.55,
+			"from": {
+				"ARG": 4,
+				"URU": 2,
+				"ESP": 1,
+				"PAR": 1
+			},
+			"sack": 1.4,
+			"ct": [
+				1,
+				1
+			]
+		},
+		"VEN1": {
+			"f": 0.3,
+			"from": {
+				"ARG": 3,
+				"URU": 1,
+				"COL": 1
+			},
+			"sack": 1.3,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"MEX1": {
+			"f": 0.6,
+			"from": {
+				"ARG": 6,
+				"URU": 3,
+				"ESP": 1,
+				"BRA": 1,
+				"COL": 1,
+				"CHI": 0.5
+			},
+			"sack": 2.1,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"USA1": {
+			"f": 0.45,
+			"from": {
+				"ENG": 2,
+				"ARG": 2,
+				"GER": 1,
+				"ESP": 1,
+				"NED": 1,
+				"MEX": 1
+			},
+			"sack": 1.0,
+			"ct": [
+				2,
+				3
+			]
+		},
+		"KSA1": {
+			"f": 0.95,
+			"from": {
+				"POR": 3,
+				"ESP": 2,
+				"ARG": 2,
+				"CRO": 2,
+				"ITA": 1,
+				"NED": 1,
+				"FRA": 1,
+				"ROU": 1,
+				"TUN": 1,
+				"SRB": 1,
+				"BRA": 1,
+				"URU": 1
+			},
+			"sack": 2.3,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"QAT1": {
+			"f": 0.85,
+			"from": {
+				"ESP": 3,
+				"POR": 2,
+				"TUN": 2,
+				"FRA": 1,
+				"SRB": 1
+			},
+			"sack": 1.9,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"UAE1": {
+			"f": 0.85,
+			"from": {
+				"ROU": 2,
+				"POR": 2,
+				"SRB": 2,
+				"CRO": 1,
+				"ESP": 1,
+				"NED": 1,
+				"ARG": 1
+			},
+			"sack": 2.1,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"CHN1": {
+			"f": 0.5,
+			"from": {
+				"ESP": 2,
+				"POR": 1,
+				"SRB": 1,
+				"KOR": 1,
+				"GER": 1,
+				"CRO": 1
+			},
+			"sack": 1.3,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"JPN1": {
+			"f": 0.2,
+			"from": {
+				"BRA": 2,
+				"AUS": 1,
+				"KOR": 1,
+				"ESP": 1,
+				"SRB": 1
+			},
+			"sack": 0.9,
+			"ct": [
+				1,
+				3
+			]
+		},
+		"KOR1": {
+			"f": 0.12,
+			"from": {
+				"BRA": 1,
+				"POR": 1,
+				"AUS": 1
+			},
+			"sack": 1.0,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"AUS1": {
+			"f": 0.3,
+			"from": {
+				"ENG": 3,
+				"SCO": 1,
+				"NED": 1,
+				"ESP": 1
+			},
+			"sack": 1.0,
+			"ct": [
+				1,
+				3
+			]
+		},
+		"EGY1": {
+			"f": 0.4,
+			"from": {
+				"POR": 2,
+				"ESP": 1,
+				"CRO": 1,
+				"SRB": 1,
+				"NED": 1,
+				"TUN": 1
+			},
+			"sack": 1.9,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"MAR1": {
+			"f": 0.4,
+			"from": {
+				"FRA": 2,
+				"TUN": 1,
+				"POR": 1,
+				"ESP": 1,
+				"SRB": 1
+			},
+			"sack": 1.4,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"TUN1": {
+			"f": 0.3,
+			"from": {
+				"FRA": 1,
+				"POR": 1,
+				"SRB": 1
+			},
+			"sack": 1.6,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"RSA1": {
+			"f": 0.45,
+			"from": {
+				"POR": 1,
+				"ESP": 1,
+				"ENG": 1,
+				"SRB": 1,
+				"ZIM": 1
+			},
+			"sack": 1.3,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"NGA1": {
+			"f": 0.05,
+			"from": {},
+			"sack": 1.3,
+			"ct": [
+				1,
+				2
+			]
+		},
+		"SEN1": {
+			"f": 0.05,
+			"from": {},
+			"sack": 1.1,
+			"ct": [
+				1,
+				2
+			]
+		}
+	}
+}

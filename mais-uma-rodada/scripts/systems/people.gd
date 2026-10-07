@@ -97,9 +97,10 @@ static func ensure(world: GameWorld) -> void:
 	pp["uc"] = -1
 	var r := rng(world, 1)
 	for c: Club in world.clubs:
-		var coach := _new_coach(world, r, c.nation, c.reputation, c.archetype)
+		var coach := _new_coach(world, r, c.nation, c.reputation, c.archetype, CoachMarket.coach_nation(r, c))
 		coach["c"] = c.id
 		coach["since"] = world.year - r.randi_range(0, 3)
+		CoachMarket.sign_existing(world, r, coach, c) # contratos vencendo em anos diferentes
 		pp["coaches"][c.id] = coach
 		pp["pres"][c.id] = _new_president(world, r, c)
 	for i in maxi(12, world.clubs.size() / 12):
@@ -191,9 +192,12 @@ static func _person_name(r: RandomNumberGenerator, nation: String) -> String:
 	return "%s %s" % [first, main]
 
 
-static func _new_coach(world: GameWorld, r: RandomNumberGenerator, nation: String, level: float, arch: String) -> Dictionary:
+## `nat_override`: nacionalidade já escolhida (CoachMarket.coach_nation, pelas rotas da liga).
+static func _new_coach(world: GameWorld, r: RandomNumberGenerator, nation: String, level: float, arch: String, nat_override: String = "") -> Dictionary:
 	var nat := nation
-	if r.randf() < 0.18:
+	if nat_override != "":
+		nat = nat_override
+	elif r.randf() < 0.18:
 		nat = RngUtil.pick(r, ["ARG", "POR", "ESP", "ITA", "BRA", "URU", "GER", "NED", "FRA"])
 	var style: String = RngUtil.pick(r, COACH_STYLES.keys())
 	if arch.find("formador") >= 0 and r.randf() < 0.5:
@@ -318,6 +322,11 @@ static func replace_coach(world: GameWorld, club: Club, reason: String, note: St
 		else:
 			var code: String = CoachCareer.END_BY_REASON.get(reason, "dem")
 			CoachCareer.close_spell(world, old, code)
+			if code == "dem" and not world.is_user_club(club.id):
+				# Rescisão: os salários que faltam do contrato (com acordo)
+				var sev := CoachMarket.sack_cost(world, club, old)
+				club.balance -= sev
+				old["sev"] = sev
 			if code == "dem":
 				old["fired"] = int(old.get("fired", 0)) + 1
 				old["rep"] = maxf(5.0, float(old.get("rep", 40.0)) - 4.0)
@@ -341,57 +350,41 @@ static func replace_coach(world: GameWorld, club: Club, reason: String, note: St
 		CoachCareer.log_move(world, club, old, it, reason)
 		_announce_change(world, club, old, it, reason, note)
 		return it
+	# Quem vem: livres (o rodízio da liga), um técnico de clube menor (com multa) ou alguém de fora,
+	# pelas rotas de cada liga (CoachMarket); o escolhido pode recusar.
 	var best: Dictionary = forced
-	var best_score := INF if not forced.is_empty() else -INF
-	for f: Dictionary in pp["free"]:
-		if not forced.is_empty():
-			break
-		if int(f.get("id", -1)) == int(old.get("id", -2)):
-			continue
-		if float(f["rep"]) > club.reputation + 18.0:
-			continue
-		var score := -absf(float(f["rep"]) - club.reputation * 0.9) + (8.0 if String(f["nat"]) == club.nation else 0.0) + r.randf() * 10.0
-		score += minf(20.0, FootballMemory.coach_bond(world, f, club.id) / 8.0) # ídolos da casa têm preferência
-		if score > best_score:
-			best_score = score
-			best = f
-	# Quem está bem num clube menor chama atenção: o clube maior paga a multa e leva.
 	var from_club: Club = null
+	var fee := 0
 	if not forced.is_empty():
 		from_club = world.club(int(forced.get("c", -1)))
 		if from_club != null and not is_same(pp["coaches"].get(from_club.id, {}), forced):
 			from_club = null
-	elif _chain < 2 and reason != "usuario" and r.randf() < 0.35:
-		for cid in pp["coaches"]:
-			var co: Dictionary = pp["coaches"][cid]
-			var t := world.club(int(cid))
-			if t == null or t.id == club.id or bool(co.get("int", false)) or world.is_user_club(t.id):
-				continue
-			if t.reputation > club.reputation - 6.0 or float(co.get("job", 60.0)) < 62.0 or float(co["rep"]) > club.reputation + 12.0:
-				continue
-			if t.nation != club.nation and (float(co["rep"]) < 60.0 or r.randf() < 0.85):
-				continue
-			var score := -absf(float(co["rep"]) - club.reputation * 0.9) + (8.0 if String(co["nat"]) == club.nation else 0.0) + r.randf() * 10.0
-			score += (float(co.get("job", 60.0)) - 60.0) * 0.25 + 3.0
-			if score > best_score:
-				best_score = score
-				best = co
-				from_club = t
-	var fee := 0
+		if from_club != null:
+			fee = maxi(50000, CoachMarket.sack_cost(world, from_club, forced))
+	else:
+		# No meio do ano, tirar técnico de outro clube é raro; nas férias é o normal.
+		var off_season := world.season == null or world.season.finished
+		var poach := _chain < 2 and reason != "usuario" and r.randf() < (0.6 if off_season else 0.3)
+		var pick := CoachMarket.choose(world, r, club, old, poach)
+		if not pick.is_empty():
+			best = pick["co"]
+			from_club = pick["from"]
+			fee = int(pick["fee"])
 	if from_club != null:
 		pp["coaches"].erase(from_club.id)
 		FootballMemory.on_coach_left(world, from_club, best)
 		CoachCareer.close_spell(world, best, "sai", club.short_name)
-		fee = Valuation.round_value(maxf(50000.0, from_club.wage_budget * 2.5))
 		club.balance -= fee
 		from_club.balance += fee
 		best["rep"] = minf(99.0, float(best["rep"]) + 2.0)
-	elif forced.is_empty() and (best.is_empty() or r.randf() < 0.25):
-		best = _new_coach(world, r, club.nation, club.reputation, club.archetype)
+	elif best.is_empty():
+		# Ninguém topou: aposta num nome da casa (auxiliar, técnico da base, de divisão menor).
+		best = _new_coach(world, r, club.nation, club.reputation - r.randf_range(4.0, 12.0), club.archetype, club.nation)
 		CoachCareer.fresh_past(world, r, best, club)
 		CoachSchools.on_new_coach(world, best)
 	else:
 		pp["free"].erase(best)
+	CoachMarket.sign_contract(world, r, best, club)
 	best["c"] = club.id
 	best["since"] = world.year
 	best["job"] = 65.0
@@ -404,8 +397,7 @@ static func replace_coach(world: GameWorld, club: Club, reason: String, note: St
 	best["l"] = 0
 	CoachCareer.open_spell(world, best, club)
 	pp["coaches"][club.id] = best
-	while pp["free"].size() > maxi(40, world.clubs.size() / 8):
-		pp["free"].pop_front()
+	CoachMarket.trim_pool(world)
 	CoachCareer.log_move(world, club, old, best, reason, from_club.id if from_club != null else -1, fee)
 	_announce_change(world, club, old, best, reason, note, from_club, fee)
 	CoachStories.on_hired(world, club, best, reason, from_club)
@@ -427,7 +419,7 @@ static func _announce_change(world: GameWorld, club: Club, old: Dictionary, new_
 	var why: String = {"resultados": "após a sequência ruim", "temporada": "depois de uma temporada abaixo da meta", "proposta": "que aceitou outro desafio",
 		"usuario": "após a saída de %s" % world.manager_name, "res": "que pediu demissão", "efetivo": "que era interino",
 		"perdeu": "que foi contratado pelo %s" % note, "ciclo": "que encerrou o ciclo no clube",
-		"ferida": "que não resistiu depois de %s" % note}.get(reason, "")
+		"ferida": "que não resistiu depois de %s" % note, "contrato": "que não teve o contrato renovado"}.get(reason, "")
 	var nm := String(new_coach["n"])
 	var title := ""
 	var body := ""
@@ -442,6 +434,10 @@ static func _announce_change(world: GameWorld, club: Club, old: Dictionary, new_
 			("no lugar de %s, %s" % [String(old.get("n", "")), why]) if not old.is_empty() else ("no lugar do técnico %s" % why if why != "" else ""), style_name(String(new_coach["st"])).to_lower()]
 		if from_club != null:
 			body += " Para liberá-lo, o clube pagou %s de multa ao %s." % [Fmt.money(fee), from_club.short_name]
+		if int(old.get("sev", 0)) > 0 and reason in ["resultados", "temporada", "ferida"]:
+			body += " A rescisão com %s custa %s aos cofres." % [String(old.get("n", "")), Fmt.money(int(old["sev"]))]
+		if int(new_coach.get("ct", 0)) > 0:
+			body += " Contrato até o fim de %d." % int(new_coach["ct"])
 		var tt := CoachCareer.totals(new_coach)
 		if int(tt["t"]) > 0:
 			body += " No currículo, %d título(s) em %d clube(s)." % [int(tt["t"]), int(tt["clubs"])]
@@ -1007,20 +1003,23 @@ static func after_matchday(world: GameWorld, entries: Array) -> void:
 			var pres_pat := float(PRES_STYLES.get(String(pp["pres"].get(cid, {}).get("st", "paciente")), PRES_STYLES["paciente"])["patience"])
 			if not stakes.is_empty():
 				res = "V" if int(stakes["w"]) == cid else "D" # mata-mata: vale o confronto, não o placar do dia
-			var d := 2.0 if res == "V" else (0.2 if res == "E" else -2.6)
+			# Resultado contra o esperado (perder para o pequeno pesa muito) e a tabela contra a meta.
+			var d := CoachMarket.result_delta(world, c, f, res)
 			if not stakes.is_empty():
 				d *= 1.0 + 2.0 * float(stakes["weight"])
+			if f.is_league():
+				d += CoachMarket.table_delta(world, c)
 			if derby:
 				d *= 1.6
 			if d < 0.0:
 				d /= pres_pat * (0.6 + bp / 125.0)
-				d *= float(TRIGGER_HAPPY.get(c.nation, 1.0))
+				d *= sqrt(float(CoachMarket.profile(c).get("sack", 1.0))) # ligas impacientes perdem a paciência mais rápido
 			co["job"] = clampf(float(co.get("job", 60.0)) + d + (60.0 - float(co.get("job", 60.0))) * 0.02, 0.0, 100.0)
 			var games := int(co.get("w", 0)) + int(co.get("d", 0)) + int(co.get("l", 0))
 			if bool(co.get("int", false)):
 				_interim_game(world, r, c, co)
 				continue
-			if float(co["job"]) < 25.0 and c.streak_winless >= 3 and games >= 5 and r.randf() < 0.35 * float(TRIGGER_HAPPY.get(c.nation, 1.0)):
+			if r.randf() < CoachMarket.sack_chance(world, c, co):
 				replace_coach(world, c, "resultados")
 				_maybe_offer_user(world, r, c)
 			elif float(co["job"]) < 22.0 and games >= 6 and r.randf() < 0.03:
@@ -1469,9 +1468,15 @@ static func on_season_end(world: GameWorld, summary: Dictionary) -> void:
 			replace_coach(world, c, "")
 		elif sdiff <= -3 and r.randf() < 0.55 / pres_pat:
 			replace_coach(world, c, "ferida" if diff > -3 else "temporada", String(sting["why"]))
+		elif int(co.get("ct", world.year + 1)) <= world.year and r.randf() < (0.7 if sdiff <= -2 else (0.35 if sdiff < 0 else 0.12)):
+			# Contrato no fim: bem abaixo da meta não renova; na meta, quase sempre renova.
+			replace_coach(world, c, "contrato")
 		else:
 			co["job"] = clampf(float(co["job"]) * 0.5 + 35.0 + sdiff * 2.0, 20.0, 90.0)
+			if int(co.get("ct", world.year + 1)) <= world.year:
+				CoachMarket.sign_contract(world, r, co, c) # renovação
 	CoachCareer.retire_free(world, r)
+	CoachMarket.season_supply(world, r)
 	# Presidentes: fim de mandato e eleições
 	for cid in pp["pres"]:
 		var pr: Dictionary = pp["pres"][cid]

@@ -309,6 +309,54 @@ func _rep_card(w: GameWorld, p: Player) -> Control:
 	return UIKit.card_panel(card)
 
 
+## Ficha do empresário: estilo, reputação, clientes e os clubes com quem se dá bem ou mal.
+func _agent_sheet(w: GameWorld, aid: int) -> void:
+	var a := Agents.get_agent(w, aid)
+	if a.is_empty():
+		return
+	var st: Dictionary = Agents.STYLES.get(String(a["st"]), Agents.STYLES["parceiro"])
+	var v := UIKit.vbox(10)
+	var head := UIKit.hbox(10)
+	head.add_child(UIKit.flag(String(a["nat"]), 40))
+	var t := UIKit.label(String(a["n"]), "Title", true)
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(t)
+	v.add_child(head)
+	v.add_child(UIKit.label("%s%s · %s" % ["Superagente · " if bool(a["intl"]) else "", String(st["name"]), Reputation.label(float(a["rep"]))], "H3", true))
+	v.add_child(UIKit.label(String(st["hint"]), "Small", true))
+	var cl: Dictionary = a["cl"]
+	var good: Array = []
+	var bad: Array = []
+	for cid in cl:
+		var c := w.club(int(cid))
+		if c == null:
+			continue
+		if float(cl[cid]) >= 15.0:
+			good.append(c.short_name)
+		elif float(cl[cid]) <= -15.0:
+			bad.append(c.short_name)
+	if not good.is_empty():
+		v.add_child(UIKit.kv("Boa relação", ", ".join(PackedStringArray(good.slice(0, 5)))))
+	if not bad.is_empty():
+		v.add_child(UIKit.kv("Relação ruim", ", ".join(PackedStringArray(bad.slice(0, 5))), UIColors.RED))
+	v.add_child(UIKit.section("Principais clientes"))
+	for cp: Player in Agents.clients(w, aid, 10):
+		var row := UIKit.hbox(10)
+		var cc := w.club(cp.club_id)
+		if cc != null:
+			row.add_child(UIKit.crest(cc, 32))
+		var nl := UIKit.label("%s · %s" % [cp.display_name(), cc.short_name if cc != null else "sem clube"], "", true)
+		nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(nl)
+		row.add_child(UIKit.player_stars(w, cp, 14))
+		var pid := cp.id
+		v.add_child(UIKit.tap_row(row, func():
+			UIManager.close_modal()
+			UIManager.push("player", {"id": pid}), "CardFlat"))
+	v.add_child(UIKit.button("Fechar", "GhostButton", func(): UIManager.close_modal()))
+	UIManager.show_modal(v, true)
+
+
 ## Contrato e dinheiro: o que pesa numa negociação, em linhas chave-valor.
 func _summary(w: GameWorld, p: Player, own: bool) -> Control:
 	var card := UIKit.card("Card", 4)
@@ -320,6 +368,14 @@ func _summary(w: GameWorld, p: Player, own: bool) -> Control:
 		card.add_child(UIKit.kv("Papel no elenco", Player.STATUS_NAMES[p.squad_status]))
 	else:
 		card.add_child(UIKit.kv("Situação", "Livre, sem taxa"))
+	var ag := Agents.agent_of(w, p)
+	if ag.is_empty():
+		card.add_child(UIKit.kv("Empresário", "Sem empresário"))
+	else:
+		var aid := int(ag["id"])
+		var ab := UIKit.button("Empresário: %s" % String(ag["n"]), "ChipButton", func(): _agent_sheet(w, aid), "user")
+		ab.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		card.add_child(ab)
 	var rc := MarketAI._clause_of(w.club(p.club_id), p) if p.club_id >= 0 else 0
 	if rc > 0:
 		card.add_child(UIKit.kv("Multa rescisória", Fmt.money(rc)))

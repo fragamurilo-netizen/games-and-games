@@ -17,6 +17,42 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 
 - **Ramo de 06/10 à noite: `claude/hopeful-newton-8avbo4`.** Partiu de `claude/youthful-newton-hey7og`. APK: `builds/MaisUmaRodada-1.0.0-base-idiomas-geografia-2026-10-06-debug.apk` (certificado de depuração de sempre, instala por cima). Três rodadas de pedidos do dono, todas aqui (detalhes na seção "Mundo vivo, carreira de técnico e base profunda" logo abaixo).
 
+### Gerações, escolas de técnicos e mercado de técnicos (07/10, ramo `claude/hopeful-newton-8avbo4`)
+
+- **Gerações dos países** (`scripts/systems/generations.gd`, tela `generations`, menu ☰ › Carreira e mundo › Gerações, chip no perfil do jogador): sorteio raro por país com liga (2%/temporada), 4 anos de nascimento, ~6 joias por geração (piso de potencial para futebol pequeno) e empurrão leve no resto; descoberta aos 17 anos com manchete, auge anunciado aos 25; herança na formação do país (`stats.gen.nb`, índice da base que some devagar) e vitrine na reputação da liga (`Generations.league_push` em `LeagueReputation`). Categorias por ano de nascimento (garotos que entraram numa base, profissionais com 15+ jogos, convocados). Calibrar sem jogar: `tools/generations_report.gd -- --years=25`.
+- **Escolas de técnicos** (`scripts/systems/coach_schools.gd`, tela `coach_schools`, cartão "Escola" no perfil do técnico): fundadores no começo (um por grande escola de futebol + os melhores), auxiliar interino herda a escola do técnico que saiu, ex-jogador aprende com o técnico favorito, técnico novo às vezes vem de um mestre; traços herdados com mutação; escolas novas de quem ganha títulos grandes; traços mudam com quem vence; o auxiliar do usuário pode sair para ser técnico (começa a escola do usuário). Nomes sempre do mundo do jogo. `tools/coach_schools_report.gd`.
+- **Mercado de técnicos realista** (`scripts/systems/coach_market.gd`, dados em `data/gameplay/coach_market.json` por liga: estrangeiros no banco, de onde vêm, rapidez para demitir, duração do contrato): pressão pelo resultado contra o esperado e pela tabela contra a meta; demissão com lua de mel, espera das férias perto do fim e rescisão cara que segura quem tem caixa curto (cobrada do clube e citada na notícia); contrato e salário (`ct`, `wg`) com renovação ou saída no fim; substituto dos livres (rodízio da liga), de clube menor (multa) ou de fora, com recusa; técnicos novos entram no mercado todo ano e a lista de livres tem teto. Medição: `tools/coach_market_report.gd -- --seasons=1` (trocas por liga, interinos, origem do contratado, estrangeiros no banco).
+- **Frente do Codex** (visual): `docs/handoff/codex-visual.md`.
+
+### Próximos sistemas pedidos pelo dono (projeto para quem pegar)
+
+O dono quer o jogo **realista** e **sem "pay to win"**: nada de recompensa artificial, tudo vem do futebol acontecendo.
+
+**1. Empresários** (hoje não há entidade: só a comissão em `DealTerms`, o `agent` de eventos e o assédio na base de `YouthLife`).
+- Dados em `world.agents` (salvar com padrão vazio): `{id, n, nat, rep 1..100, style (parceiro|agressivo|discreto), clubs {club_id: relação -100..100}, pids [carteira]}`. Uns 4 a 8 por país grande e uns 20 "superagentes" com carteira internacional. Atribuir na geração do mundo: craque e jovem promissor ficam com os de mais reputação. Campo `Player.agent` ("agt", padrão -1).
+- Efeitos:
+  - comissão (`DealTerms.agent_pct`) pela reputação e pelo estilo;
+  - relação boa com o clube comprador facilita, e o agressivo leva o cliente para quem paga mais (`TransferBrain`);
+  - empresário oferece clientes aos clubes (`TransferManager._build_index` › avail);
+  - jovem da base com empresário forte assina profissional mais caro (`YouthLife.pro_wage`);
+  - briga com o clube trava renovação.
+- Tela do empresário (carteira, clubes amigos), no perfil do jogador e na mesa de negociação.
+
+**2. Vestiário com grupos** (hoje: `DressingRoom.cliques` só calcula na hora e só para o clube do usuário; nada é salvo; há dois capitães que não conversam, `people.captain` × `club.sheet.captain`).
+- Calcular os grupos para todos os clubes uma vez por mês (`Languages.monthly` é o gancho): panelas por idioma/nacionalidade, garotos (≤21), veteranos (≥30), cria da casa, isolados (sem amigo e sem idioma). Usar `Player.bonds` de `Relations`, não só os de `People`.
+- Guardar só o líder e a força de cada grupo no clube (`club.groups`, padrão vazio).
+- Efeitos:
+  - grupo forte insatisfeito derruba a moral e a coesão (`Club.cohesion`);
+  - líder que sai mexe no vestiário;
+  - isolado rende menos e pede para sair;
+  - técnico da IA que perde o vestiário cai mais rápido (`CoachMarket.sack_chance`).
+- Unificar o capitão.
+
+**3. Estatísticas históricas completas** (hoje: `world.history`, `SeasonArchive`, `ClubRecords`, `FootballMemory`; o ranking de artilheiros de todos os tempos é calculado na hora e só com quem está vivo ou aposentado notável).
+- No fim de cada temporada, somar por liga em `world.stats["alltime"][liga]`, que guarda `{j: {pid: [jogos, gols, assist, títulos]}, c: {cid: [títulos, vices, pontos, jogos]}, rec: {...}}`. Os recordes (`rec`) são: maior campanha, maior goleada, mais gols numa temporada, maior sequência, artilheiro mais jovem e mais velho. Vale também para quem se aposenta sem ser notável (só os números).
+- **Comparação entre eras:** gols por jogo do jogador ÷ média da liga naquele ano (o motor varia de liga para liga). Ranking "ajustado à era".
+- Tela "Recordes e rankings" com abas (jogadores, clubes, técnicos, seleções) e filtros por liga e período.
+
 ### Transmissão de TV, escudos reais e mundo vivo (06/10 à noite, ramo `claude/hopeful-newton-8avbo4`)
 
 - **Pacotes de transmissão por liga** (`scripts/ui/components/tv_package.gd`): Premier, EFL, FA Cup, LaLiga, Serie A, Bundesliga, Ligue 1, Liga Portugal, Eredivisie, Süper Lig, Brasileirão, Liga Profesional, MLS, J.League, Champions, Liga Europa, Conference, Libertadores, Sul-Americana e Mundial; as outras competições herdam o do país (`NATIONS`) ou um genérico nas cores do placar. Inspirados na TV real de cada liga (paleta, forma, "papel" branco na Bundesliga/LaLiga/Brasileirão, a palavra do gol na língua da TV: GOAL, GOL, TOR, BUT, GOLO), desenho próprio, sem logos das ligas. `identity.json` → `"tv": {comp: pacote}` troca.
