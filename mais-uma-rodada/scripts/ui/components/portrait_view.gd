@@ -88,9 +88,9 @@ var framing: int = -1:
 	set(v):
 		framing = v
 		queue_redraw()
-## Teste da luz de estúdio por malha sobre o retrato inteiro (FaceShade): 0 desligada, 1 ligada.
-## -1 = segue o padrão.
-static var mesh_light_default := 0
+## Luz de estúdio por malha sobre o retrato inteiro (FaceShade): 0 desligada, 1 ligada. Só entra
+## a partir do retrato médio (as miniaturas das listas ficam como antes). -1 = segue o padrão.
+static var mesh_light_default := 1
 var mesh_light: int = -1:
 	set(v):
 		mesh_light = v
@@ -380,6 +380,8 @@ var _k := PackedFloat32Array()
 var _half := Vector3.ZERO
 var _shadow_col := Color.BLACK
 var _beard_data: Array = []
+## Grade da malha da barba (u0, u1, v0, v1, nu, nv): a luz por malha lê a cobertura dela direto.
+var _beard_grid := PackedFloat32Array()
 # Gravação dos comandos de desenho: o retrato pronto fica num cache global e é só reproduzido
 # quando a tela o recria (listas de elenco, mercado, etc.).
 var _rec: Array = []
@@ -533,7 +535,7 @@ func _layer_front() -> void:
 	var head := _head_contour(_contour_k())
 	# De perto, o dorso do nariz e os sulcos precisam de amostras menores que a íris.
 	# A malha continua radial e entra no mesmo cache; miniaturas mantêm o custo anterior.
-	_mlon = _ml > 0 and _s >= 50.0
+	_mlon = _ml > 0 and _s >= 110.0
 	_ml_masks = []
 	var face := _radial(_hc, head, _rings(20 if _s >= 140.0 else 11), _skin_px)
 	_rim(face, head.size())
@@ -2398,16 +2400,18 @@ func _eyes() -> void:
 	var f := _f
 	var ew := _fw * float(f["eye_w"])
 	var eh := _fw * float(f["eye_h"])
-	var tilt := _fw * float(f["eye_tilt"])
-	var iris_main: Color = f["eye"]
-	var ring: float = f.get("eye_ring", 0.0)
-	var ring_col: Color = f.get("eye_in", Color("#8A5A26"))
+	# Inclinação natural: o canto de fora um pouco acima do de dentro. Forte demais vira "olho de
+	# gato" (cara de réptil), então entra pouco mais da metade.
+	var tilt := _fw * float(f["eye_tilt"]) * 0.55
+	var iris_main := _iris_natural(f["eye"])
+	var ring: float = float(f.get("eye_ring", 0.0)) * 0.6
+	var ring_col := _iris_natural(f.get("eye_in", Color("#8A5A26")))
 	var limbal: float = f.get("limbal", 0.7)
 	var het: int = f.get("hetero", 0)
 	var het_side: float = f.get("hetero_side", 1.0)
 	var het_ang: float = f.get("hetero_ang", 0.0)
-	var eye_b: Color = f.get("eye_b", iris_main)
-	var lw := maxf(0.65, _s * 0.0055)
+	var eye_b := _iris_natural(f.get("eye_b", f["eye"]))
+	var lw := maxf(0.6, _s * 0.005)
 	var mono: bool = f["monolid"]
 	var hooded: bool = f["hooded"]
 	var asym: float = f["asym"]
@@ -2430,10 +2434,14 @@ func _eyes() -> void:
 		# Pálpebra de cima baixa (encapuzado, cansado, semicerrado) e de baixo subindo no sorriso
 		var up_k := (1.0 - lid * 0.55) * (1.0 - squint * 0.25)
 		var lo_k := (1.0 + bulge * 0.4 + scleral * 0.3) * (1.0 - squint * 0.5)
-		var inner := Vector2(cx - sx * ew, cy + tilt * 0.35 + (eh * 0.12 if mono else 0.0))
-		var outer := Vector2(cx + sx * ew, cy - tilt)
+		var inner := Vector2(cx - sx * ew, cy + tilt * 0.4 + (eh * 0.12 if mono else 0.0))
+		var outer := Vector2(cx + sx * ew * 0.98, cy - tilt * 0.6)
 		var upper := PackedVector2Array()
 		var lower := PackedVector2Array()
+		# Olho de gente: a pálpebra de cima é um arco cheio (sem as pontas finas de amêndoa) e o olho
+		# abre um pouco mais que antes; a de baixo é rasa.
+		var h_up := eh * 1.02 * (0.85 if mono else 1.0) * up_k
+		var h_lo := eh * float(f.get("eye_lower_depth", 0.52)) * 0.86 * lo_k
 		for i in 15:
 			var t := float(i) / 14.0
 			var base := inner.lerp(outer, t)
@@ -2441,8 +2449,8 @@ func _eyes() -> void:
 			# Canto de fora encoberto: a pele da pálpebra desce sobre o terço de fora do olho
 			var hood := 1.0 - 0.35 * hood_o * smoothstep(0.5, 0.95, t)
 			var canthal := 1.0 - float(f.get("eye_canthal", 0.0)) * exp(-pow((t - 0.12) / 0.12, 2.0))
-			upper.append(base + Vector2(0, -sin(PI * peak) * eh * (0.85 if mono else 1.0) * up_k * hood * canthal))
-			lower.append(base + Vector2(0, sin(PI * pow(t, float(f.get("eye_lower", 1.15)))) * eh * float(f.get("eye_lower_depth", 0.52)) * lo_k * canthal))
+			upper.append(base + Vector2(0, -pow(sin(PI * peak), 0.8) * h_up * hood * canthal))
+			lower.append(base + Vector2(0, pow(sin(PI * pow(t, float(f.get("eye_lower", 1.15)))), 1.0) * h_lo * canthal))
 		var sclera := PackedVector2Array(upper)
 		for i in range(lower.size() - 2, 0, -1):
 			sclera.append(lower[i])
@@ -2462,15 +2470,31 @@ func _eyes() -> void:
 				lid_outer.append(lower[i] + Vector2(0, eh * 0.6 * sin(PI * float(i) / 14.0)))
 			_strip(lower, lid_outer, 3, func(_p: Vector2, t: float, w: float) -> Color:
 				return Color(_skin.lightened(0.1), sin(PI * t) * sin(PI * w) * 0.28))
-		var sc_base := Color("#D9D2C8").lerp(_skin, 0.16)
+		# Branco do olho nunca é branco na foto: um pouco acinzentado e quente, mais ainda na pele escura
+		var sc_base := Color("#DDD4CA").lerp(_skin, 0.16 + 0.14 * clampf(float(f["skin_i"]) / 9.0, 0.0, 1.0))
+		var top_y := upper[6].y
+		var bot_y := lower[8].y
 		_radial(ecen, sclera, 2 if _s < 90.0 else 3, func(p: Vector2, t: float, _i: int) -> Color:
-			var lum := 1.0 - 0.32 * t * t - (0.28 if p.y < cy else 0.0) * t
+			# O globo vira nos cantos e a pálpebra com os cílios faz sombra no alto
+			var lum := 0.93 - 0.3 * t * t
+			var k := clampf((p.y - top_y) / maxf(1.0, bot_y - top_y), 0.0, 1.0)
+			lum -= 0.24 * (1.0 - smoothstep(0.0, 0.5, k))
 			return _shade(sc_base, lum))
 		# Íris com anel escuro, centro claro e sombra da pálpebra
 		var iris_col := eye_b if het == 1 and sx == het_side else iris_main
 		var sector := het == 2 and sx == het_side
-		var ic := Vector2(cx + float(f["gaze"]) * ew * 0.3, cy + eh * 0.12 - bulge * eh * 0.08 - scleral * eh * 0.1)
-		var ir := minf(eh * 1.3, ew * 0.47) * float(f.get("iris_scale", 1.0))
+		# A pálpebra de cima cobre um pouco do alto da íris (olhar relaxado); embaixo a íris encosta
+		# na pálpebra. Íris solta no meio do branco é olhar assustado (ou de réptil).
+		var ir := ew * 0.41 * float(f.get("iris_scale", 1.0))
+		var icx := cx + float(f["gaze"]) * ew * 0.25
+		var lid_y := upper[6].y
+		for i in upper.size() - 1:
+			var a0 := upper[i]
+			var b0 := upper[i + 1]
+			if (icx - a0.x) * (icx - b0.x) <= 0.0 and absf(b0.x - a0.x) > 0.001:
+				lid_y = lerpf(a0.y, b0.y, (icx - a0.x) / (b0.x - a0.x))
+				break
+		var ic := Vector2(icx, lid_y + ir * 0.8 - bulge * eh * 0.05 - scleral * eh * 0.08)
 		for piece in Geometry2D.intersect_polygons(_ellipse(ic, ir, ir, 12 if _s < 90.0 else 20), sclera):
 			if not Geometry2D.is_point_in_polygon(ic, piece):
 				_fill(piece, iris_col.darkened(0.3))
@@ -2479,9 +2503,9 @@ func _eyes() -> void:
 				var d := p - ic
 				var r := d.length() / ir
 				var ang := atan2(d.y, d.x)
-				var lum := 1.0 + 0.28 * (1.0 - smoothstep(0.3, 0.7, r)) - (0.25 + 0.4 * limbal) * smoothstep(0.72, 1.0, r)
-				lum -= 0.4 * (1.0 - smoothstep(-ir * 0.9, -ir * 0.1, d.y))
-				lum += (0.08 * sin(ang * 17.0 + sx * 3.0) + 0.05 * sin(ang * 31.0 + 1.7)) * (1.0 - r)
+				var lum := 0.94 + 0.16 * (1.0 - smoothstep(0.35, 0.75, r)) - (0.16 + 0.26 * limbal) * smoothstep(0.78, 1.0, r)
+				lum -= 0.42 * (1.0 - smoothstep(-ir * 0.95, -ir * 0.05, d.y))
+				lum += (0.05 * sin(ang * 17.0 + sx * 3.0) + 0.035 * sin(ang * 31.0 + 1.7)) * (1.0 - r)
 				var base := iris_col
 				if sector:
 					base = base.lerp(eye_b, (1.0 - smoothstep(0.35, 0.65, absf(angle_difference(ang, het_ang)))) * smoothstep(0.3, 0.45, r))
@@ -2495,47 +2519,66 @@ func _eyes() -> void:
 				for q in ipts:
 					iuv.append((q - ic) / (ir * 2.0) + Vector2(0.5, 0.5))
 				_detail(im, iuv, "iris", 0.85)
-		for piece in Geometry2D.intersect_polygons(_ellipse(ic, ir * 0.4, ir * 0.4, 14), sclera):
-			_fill(piece, Color("#070505"))
+		for piece in Geometry2D.intersect_polygons(_ellipse(ic, ir * 0.36, ir * 0.36, 16), sclera):
+			_fill(piece, Color("#0A0706"))
 		# Anel límbico: a borda da íris escurece e fica suave (só onde a íris aparece)
 		if _s >= 90.0:
 			var run := PackedVector2Array()
-			var ring_c := Color(iris_col.darkened(0.55), 0.35 + 0.35 * limbal)
+			var ring_c := Color(iris_col.darkened(0.5), 0.22 + 0.22 * limbal)
 			for j in 29:
 				var a := TAU * j / 28.0
 				var rp := ic + Vector2(cos(a), sin(a)) * ir * 0.97
 				if Geometry2D.is_point_in_polygon(rp, sclera):
 					run.append(rp)
 				elif run.size() > 1:
-					_r_polyline(run, ring_c, maxf(0.7, ir * 0.12), true)
+					_r_polyline(run, ring_c, maxf(0.6, ir * 0.09), true)
 					run = PackedVector2Array()
 				else:
 					run = PackedVector2Array()
 			if run.size() > 1:
-				_r_polyline(run, ring_c, maxf(0.7, ir * 0.12), true)
-		# Reflexo da luz do estúdio, recortado pela pálpebra. O ponto branco grande e
-		# redondo dava aparência de boneco, sobretudo nos olhos semicerrados.
-		var glint_center := ic + Vector2(-ir * 0.28, -ir * 0.32)
-		if _s >= 140.0:
-			var glint := _ellipse(glint_center, maxf(0.35, ir * 0.12), maxf(0.25, ir * 0.08), 8)
+				_r_polyline(run, ring_c, maxf(0.6, ir * 0.09), true)
+		# Sombra dos cílios e da pálpebra no globo, logo abaixo da linha (some nos cantos)
+		var lash := Color("#22170F").lerp(_skin.darkened(0.75), 0.2)
+		var shade_in := PackedVector2Array()
+		for p in upper:
+			shade_in.append(p + Vector2(0, eh * 0.3))
+		_strip(upper, shade_in, 2, func(_p: Vector2, t: float, w: float) -> Color:
+			return Color(0.09, 0.05, 0.04, 0.3 * pow(sin(PI * t), 1.6) * (1.0 - w)))
+		# Reflexo da janela de luz (softbox) do estúdio na córnea, recortado pela pálpebra
+		var glint_center := ic + Vector2(-ir * 0.3, -ir * 0.3)
+		if _s >= 70.0:
+			var glint := _ellipse(glint_center, maxf(0.45, ir * 0.15), maxf(0.4, ir * 0.12), 10)
 			for piece in Geometry2D.intersect_polygons(glint, sclera):
-				_fill(piece, Color(1, 0.98, 0.94, 0.7))
+				_fill(piece, Color(1, 0.98, 0.95, 0.82))
+			if _s >= 140.0:
+				var g2 := _ellipse(ic + Vector2(ir * 0.38, ir * 0.3), maxf(0.3, ir * 0.06), maxf(0.3, ir * 0.05), 8)
+				for piece in Geometry2D.intersect_polygons(g2, sclera):
+					_fill(piece, Color(1, 1, 1, 0.3))
 		elif Geometry2D.is_point_in_polygon(glint_center, sclera):
-			_r_circle(glint_center, maxf(0.25, ir * 0.1), Color(1, 0.98, 0.94, 0.65))
-		# Carúncula (a prega do canto interno cobre)
-		_r_circle(inner + Vector2(sx * ew * 0.1, eh * 0.05), maxf(0.6, eh * 0.18), Color(0.85, 0.5, 0.5, 0.55 * (1.0 - 0.8 * epi)))
-		# Linha dos cílios (mais grossa por fora) e cílios
-		var lash := Color("#2B1D15").lerp(_skin.darkened(0.7), 0.25)
-		_r_polyline(upper, Color(lash, minf(1.0, 0.62 + 0.25 * lash_k)), lw * (0.9 + 0.6 * lash_k), true)
-		_r_polyline(upper.slice(7), Color(lash, 0.5 + 0.25 * lash_k), lw * (1.25 + 0.7 * lash_k), true)
+			_r_circle(glint_center, maxf(0.3, ir * 0.12), Color(1, 0.98, 0.94, 0.7))
+		# Carúncula: o rosado do canto de dentro fica dentro do olho (antes era uma bolinha por fora)
+		for piece in Geometry2D.intersect_polygons(_ellipse(inner + Vector2(sx * ew * 0.1, eh * 0.04), ew * 0.13, eh * 0.34, 12), sclera):
+			_fill(piece, Color(0.85, 0.55, 0.52, 0.5 * (1.0 - 0.8 * epi)))
+		# Linha dos cílios: uma faixa macia, mais grossa no lado de fora, não um contorno de desenho
+		var lash_top := PackedVector2Array()
+		for i in upper.size():
+			var t := float(i) / 14.0
+			lash_top.append(upper[i] + Vector2(0, -lw * lerpf(0.9, 2.2, smoothstep(0.15, 0.9, t)) * (1.0 + 0.6 * lash_k)))
+		_strip(upper, lash_top, 2, func(_p: Vector2, t: float, w: float) -> Color:
+			return Color(lash, (0.82 + 0.12 * lash_k) * pow(sin(PI * lerpf(0.03, 0.97, t)), 0.35) * (1.0 - 0.75 * w)))
 		var ln := float(f["lashes"]) * (0.7 + 0.35 * lash_k)
 		for k in ((5 if lash_k > 0.0 else 3) if _s > (90.0 if lash_k > 0.0 else 110.0) else 0):
 			var t := 0.62 + k * 0.08
 			var i := int(t * 14.0)
 			var p0: Vector2 = upper[mini(i, 14)]
-			_r_line(p0, p0 + Vector2(sx * 0.6, -1.0).normalized() * eh * 0.45 * ln, Color(lash, 0.75), lw * 0.7, true)
-		_r_line(outer, outer + Vector2(sx * ew * 0.08, -eh * 0.12), Color(lash, 0.4), lw * 0.9, true)
-		_r_polyline(lower, Color(lash, 0.22 + 0.12 * lash_k), lw * 0.7, true)
+			_r_line(p0, p0 + Vector2(sx * 0.6, -1.0).normalized() * eh * 0.4 * ln, Color(lash, 0.55), lw * 0.6, true)
+		_r_line(outer, outer + Vector2(sx * ew * 0.07, -eh * 0.1), Color(lash, 0.3), lw * 0.8, true)
+		# Pálpebra de baixo: borda úmida clara (linha d'água) e cílios de baixo fracos
+		var wet := PackedVector2Array()
+		for p in lower.slice(2, 13):
+			wet.append(p + Vector2(0, -lw * 0.45))
+		_fade_line(wet, Color(0.96, 0.8, 0.76, 0.32), lw * 0.75)
+		_fade_line(lower, Color(lash, 0.24 + 0.12 * lash_k), lw * 0.7)
 		if epi > 0.0:
 			# Prega no canto interno: a pele da pálpebra de cima desce e cobre o canto
 			var fold := PackedVector2Array([upper[4] + Vector2(0, -eh * 0.22), inner + Vector2(-sx * ew * 0.02, -eh * 0.16), inner + Vector2(sx * ew * 0.03, eh * 0.12)])
@@ -2555,7 +2598,7 @@ func _eyes() -> void:
 		var wl := PackedVector2Array()
 		for p in lower.slice(2, 13):
 			wl.append(p + Vector2(0, lw * 0.6))
-		_r_polyline(wl, Color(_skin.lightened(0.25), 0.25), lw * 0.6, true)
+		_r_polyline(wl, Color(_skin.lightened(0.2), 0.16), lw * 0.6, true)
 		# Dobra da pálpebra
 		# Sombra da pálpebra pesada sobre a íris
 		if lid > 0.15:
@@ -2595,6 +2638,14 @@ func _eyes() -> void:
 			for p in upper.slice(0, 7):
 				fold.append(p + Vector2(0, -eh * 0.12))
 			_r_polyline(fold, Color(_skin.darkened(0.3), 0.3), lw * 0.8, true)
+
+
+## Íris com cor de gente: amarelos e oliva muito vivos (que davam cara de réptil) puxam para um
+## castanho esverdeado, e nenhuma íris fica saturada demais.
+static func _iris_natural(c: Color) -> Color:
+	var yellow := smoothstep(0.05, 0.1, c.h) * (1.0 - smoothstep(0.2, 0.26, c.h))
+	var sat := minf(c.s * (1.0 - 0.3 * yellow), 0.62)
+	return Color.from_hsv(c.h, sat, c.v * (1.0 - 0.12 * yellow), c.a)
 
 
 func _brows(rng: RandomNumberGenerator) -> void:
@@ -2987,8 +3038,30 @@ func _beard_dens(u: float, v: float, P: Dictionary, patches: bool = true) -> flo
 	var ln: float = P["ln"]
 	var lip_u: float = f["lip_u"] * 2.0
 	var lip_l: float = f["lip_l"] * 2.0
+	if th > 1.0 and v > 0.55 and int(P["tx"]) != 0 and ln < 0.3 and not _bd_rec:
+		# Por baixo da mandíbula: a mesma barba do rosto continua por baixo do queixo, com o desenho
+		# que ela tem na borda do rosto, e some aos poucos seguindo a curva (U) da mandíbula. Nada
+		# de uma peça própria pintada no pescoço (faixa reta, quadrado embaixo do queixo). Só a
+		# barba comprida pende na frente.
+		var jaw := _jaw_y(au)
+		if jaw.y > 0.5:
+			var dv := v - jaw.x
+			_bd_rec = true
+			var d_edge := _beard_dens(u, jaw.x - 0.02, P, patches)
+			_bd_rec = false
+			var nh := _neck_half()
+			var in_neck := 1.0 - smoothstep(nh * 0.85, nh * 1.05, au)
+			var nd := lerpf(0.02 + ln * 0.1, 0.05 + ln * 0.4, in_neck)
+			return d_edge * (1.0 - smoothstep(nd * 0.35, nd, dv))
+		# Ao lado da mandíbula: só a espessura da barba na borda
+		var k := 0.975 / th
+		_bd_rec = true
+		var d_side := _beard_dens(u * k, v * k, P, patches)
+		_bd_rec = false
+		return d_side * (1.0 - smoothstep(0.005, 0.02 + ln * 0.1, th - 1.0))
 	var d := 0.0
 	var d_chin := 0.0
+	var walrus := 0.0
 	# Bochechas
 	var ch: float = P["ch"]
 	var cn: float = P["cn"]
@@ -3085,11 +3158,19 @@ func _beard_dens(u: float, v: float, P: Dictionary, patches: bool = true) -> flo
 			var hang := (1.0 - smoothstep(hw7, hw7 + soft, absf(au - _MW * 1.07 - (v - _M) * 0.08))) * smoothstep(_M - 0.05, _M - 0.01, v) * (1.0 - smoothstep(1.25, 1.33, v))
 			dm = maxf(dm, hang)
 		if mu == 8:
-			# Morsa: bigode cheio que cobre o lábio de cima, com a borda de baixo arredondada
-			var k8 := clampf(au / wx, 0.0, 1.0)
-			var edge8 := bot_y + 0.04 * (1.0 - k8 * k8)
-			var top8 := top_y + 0.05 * k8 * k8
-			dm = (1.0 - smoothstep(wx * 0.88, wx + soft, au)) * smoothstep(top8 - soft, top8 + soft, v) * (1.0 - smoothstep(edge8 - soft * 0.5, edge8 + soft * 0.5, v))
+			# Morsa: bigode cheio que nasce colado na base do nariz, acompanha o sulco da bochecha,
+			# cobre o lábio de cima e cai nas pontas, que afinam e arredondam (não uma caixa)
+			var w8 := _MW * 1.18 * float(P.get("mw", 1.0))
+			var k8 := clampf(au / w8, 0.0, 1.2)
+			var top8 := _N + 0.012 + 0.11 * pow(minf(k8, 1.0), 1.6)
+			var bot8 := _M + lip_l * 0.3 + 0.025 * (1.0 - k8 * k8) + 0.07 * pow(minf(k8, 1.0), 2.2)
+			var mid8 := (top8 + bot8) * 0.5
+			var half8 := (bot8 - top8) * 0.5 * sqrt(maxf(0.0, 1.0 - pow(minf(k8, 1.0), 4.0)))
+			var dist8 := absf(v - mid8) / maxf(half8, 0.004)
+			dm = (1.0 - smoothstep(0.75, 1.15, dist8)) * (1.0 - smoothstep(0.92, 1.05, k8))
+			# Riscado no meio, embaixo do filtro, como o pelo que se divide
+			dm *= 1.0 - 0.25 * _g(au, 0.02) * smoothstep(mid8, bot8, v)
+			walrus = dm
 		d = maxf(d, dm)
 	# Cavanhaque fechado: ligação dos cantos da boca ao queixo
 	if float(P.get("ci", 0.0)) > 0.0:
@@ -3107,7 +3188,10 @@ func _beard_dens(u: float, v: float, P: Dictionary, patches: bool = true) -> flo
 	var neck_half := _neck_half() * (1.0 + float(P.get("hw", 0.0)))
 	var over_neck := smoothstep(0.62, 0.9, v) * (1.0 - smoothstep(neck_half * 0.8, neck_half * 1.02, au))
 	if nk > 0.0 and v > 0.6:
-		d = maxf(d, nk * over_neck * smoothstep(0.98, 1.04, th) * (1.0 - smoothstep(1.1 + ln, 1.3 + ln, v)))
+		# Embaixo da mandíbula: a barba continua por baixo do queixo e acompanha a curva dele (U),
+		# em vez de uma faixa reta pintada no pescoço
+		var nd := 0.06 + ln * 0.35
+		d = maxf(d, nk * over_neck * smoothstep(0.98, 1.02, th) * (1.0 - smoothstep(nd * 0.45, nd, th - 1.0)))
 	# Fora do rosto: a barba tem espessura própria e some aos poucos a partir do contorno. Nas
 	# laterais da mandíbula (fundo atrás) quase não passa da pele; embaixo do queixo, sobre o
 	# pescoço, a barba comprida desce
@@ -3116,9 +3200,10 @@ func _beard_dens(u: float, v: float, P: Dictionary, patches: bool = true) -> flo
 		if float(P.get("cl", 0.0)) > 0.0:
 			# Embaixo do queixo a barba desce em toda a largura do queixo (não numa faixa da largura
 			# do pescoço) e, se for curta, só arredonda o contorno
-			reach = lerpf(0.012 + ln * 0.55, 0.015 + ln * 1.3, smoothstep(0.62, 0.9, v))
+			var hangs := ln >= 0.3
+			reach = lerpf(0.012 + ln * 0.55, (0.015 + ln * 1.3) if hangs else (0.04 + ln * 0.45), smoothstep(0.62, 0.9, v))
 			# Abaixo da ponta do queixo vale só o formato do queixo (arredondado), nunca um bloco reto
-			if v > 0.9 and ln >= 0.12 and cn > 0.0:
+			if v > 0.9 and hangs and cn > 0.0:
 				# Barba comprida: embaixo do queixo continua da largura da mandíbula e só afina
 				# perto da ponta (formato de U/V), em vez de pendurar uma faixa estreita
 				var bot := 1.02 + ln * 0.9
@@ -3153,11 +3238,8 @@ func _beard_dens(u: float, v: float, P: Dictionary, patches: bool = true) -> flo
 	# Nunca sobre os lábios (o bigode morsa cobre o lábio de cima de propósito)
 	var lip_c := _M + (lip_l - lip_u) * 0.5
 	var le := sqrt(pow(u / (_MW * 1.0), 2.0) + pow((v - lip_c) / ((lip_u + lip_l) * 0.62), 2.0))
-	var over_lip := 0.0
-	if mu == 8:
-		over_lip = (1.0 - smoothstep(_MW * 1.3 - soft, _MW * 1.3 + soft, au)) * smoothstep(_N + 0.02 - soft, _N + 0.02 + soft, v) * (1.0 - smoothstep(_M + lip_l * 0.25 + 0.02, _M + lip_l * 0.25 + 0.05, v))
 	d *= smoothstep(0.85, 1.05, le)
-	d = maxf(d, over_lip)
+	d = maxf(d, walrus)
 	# Nunca acima da linha das maçãs
 	d *= smoothstep(_E + 0.08, _E + 0.2, v) if au < 0.8 else 1.0
 	# Falhas
@@ -3168,6 +3250,26 @@ func _beard_dens(u: float, v: float, P: Dictionary, patches: bool = true) -> flo
 		var on_cheek := smoothstep(0.15, 0.45, au) * (1.0 - smoothstep(0.8, 1.0, v))
 		d *= lerpf(1.0, smoothstep(pt - 0.12, pt + 0.1, nz), on_cheek * minf(1.0, pt * 1.6))
 	return clampf(d, 0.0, 1.0)
+
+
+## Trava da conta da barba por baixo da mandíbula (ela chama a própria função uma vez).
+var _bd_rec := false
+
+
+## Linha da mandíbula embaixo do ponto: a altura (v) do contorno do rosto na coluna `au` e se a
+## coluna passa por baixo do rosto (1) ou fica ao lado da mandíbula (0).
+func _jaw_y(au: float) -> Vector2:
+	var lo := 0.55
+	var hi := 1.0
+	if au >= _hw(lo):
+		return Vector2(_chin_v(lo), 0.0)
+	for i in 14:
+		var mid := (lo + hi) * 0.5
+		if _hw(mid) > au:
+			lo = mid
+		else:
+			hi = mid
+	return Vector2(_chin_v((lo + hi) * 0.5), 1.0)
 
 
 ## Meia largura do pescoço em unidades do rosto (mesma conta do corpo, sem depender dele).
@@ -3222,7 +3324,10 @@ func _beard_mesh() -> void:
 			return Color(col, 0.0)
 		var px: Color = _beard_px(p, P, col, gray, short, patchy, op)
 		return Color(px, px.a * edge)
-	_beard_data = _grid(-1.4, 1.4, -0.42, vmax + 0.04, int(54 * clampf(_det, 0.35, 1.3)), int(60 * clampf(_det, 0.35, 1.3)), shade)
+	var bnu := int(54 * clampf(_det, 0.35, 1.3))
+	var bnv := int(60 * clampf(_det, 0.35, 1.3))
+	_beard_data = _grid(-1.4, 1.4, -0.42, vmax + 0.04, bnu, bnv, shade)
+	_beard_grid = PackedFloat32Array([-1.4, 1.4, -0.42, vmax + 0.04, bnu, bnv])
 	if _s >= DETAIL_MIN:
 		_beard_detail(P, op)
 
@@ -3271,9 +3376,13 @@ func _beard_px(p: Vector2, P: Dictionary, col: Color, gray: float, short: bool, 
 	dens *= 1.0 - 0.5 * patchy * smoothstep(0.15, 0.45, absf(q.x))
 	var lum := 0.95 - 0.22 * clampf(q.x, -1.0, 1.0) - 0.2 * smoothstep(0.6, 1.3, q.y) + 0.12 * _g2(q.x + 0.3, q.y - 0.5, 0.3, 0.2)
 	lum += 0.05 * sin(q.x * 23.0 + q.y * 7.0) * sin(q.y * 19.0 - q.x * 5.0)
+	# Por baixo da mandíbula (fora do rosto, sobre o pescoço) a barba fica na sombra do queixo
+	var under := _beard_under(q) if q.y > 0.6 else 0.0
+	lum -= 0.25 * under
 	var c := col.lerp(Color.BLACK, (1.0 - lum) * 0.6) if lum < 1.0 else col.lerp(col.lightened(0.3), lum - 1.0)
-	# Pontas mais claras e mais quentes no queixo e nas bochechas
-	c = c.lerp(col.lightened(0.18).lerp(Color("#8A5A3A"), 0.15), 0.25 * smoothstep(0.7, 1.2, q.y) + 0.1 * smoothstep(0.4, 0.8, absf(q.x)))
+	# Pontas mais claras e mais quentes no queixo e nas bochechas (só no rosto: embaixo do queixo
+	# elas viravam uma faixa clara no pescoço)
+	c = c.lerp(col.lightened(0.18).lerp(Color("#8A5A3A"), 0.15), (0.25 * smoothstep(0.7, 1.2, q.y) + 0.1 * smoothstep(0.4, 0.8, absf(q.x))) * (1.0 - under))
 	# Os primeiros fios brancos aparecem nos cantos do queixo
 	c = c.lerp(Color("#D9D6D0"), gray * _g2(absf(q.x) - 0.3, q.y - 0.95, 0.16, 0.22))
 	var k2 := clampf(d2 / maxf(dens * op + d2, 0.001), 0.0, 1.0) if d2 > 0.0 else 0.0
@@ -3283,6 +3392,15 @@ func _beard_px(p: Vector2, P: Dictionary, col: Color, gray: float, short: bool, 
 	# A massa dá profundidade, os pelos dão a cobertura. Uma base opaca transformava
 	# bigode, barba branca e barba curta em peças coladas sobre a pele.
 	return Color(c, maxf(dens * op, d2) * (0.62 if short else 0.78))
+
+
+## Quanto o ponto (u, v) está por baixo da mandíbula: 0 no rosto, 1 já um pouco abaixo do contorno
+## (a barba ali é a parte de baixo dela, na sombra do queixo). A barba comprida que pende na
+## frente do pescoço não conta.
+func _beard_under(q: Vector2) -> float:
+	if float(_beard_p.get("ln", 0.0)) >= 0.3:
+		return 0.0
+	return smoothstep(0.985, 1.05, _th(q.x, q.y)) * smoothstep(0.55, 0.75, q.y)
 
 
 ## Tabela raio-por-ângulo de um contorno "estrelado" a partir de `center`.
@@ -3421,8 +3539,9 @@ func _beard_strands(rng: RandomNumberGenerator, P: Dictionary) -> void:
 			length *= 0.4
 			bend *= 0.4
 			tip = p + dir * length + bend * 0.4
-		var light := rng.randf() < 0.4
-		var c := col.lightened(rng.randf_range(0.05, 0.2)) if light else col.darkened(rng.randf_range(0.05, 0.25))
+		var under := _beard_under(qp) if v > 0.6 else 0.0
+		var light := rng.randf() < 0.4 * (1.0 - under)
+		var c := col.lightened(rng.randf_range(0.05, 0.2)) if light else col.darkened(rng.randf_range(0.05, 0.25) + 0.3 * under)
 		var mid := p + dir * length * 0.5 + bend
 		var a := rng.randf_range(0.22, 0.5) * op * (0.45 + 0.55 * minf(dp, maxf(dt, 0.2)))
 		if float(P.get("cr", 0.0)) > 0.0:
@@ -4198,11 +4317,18 @@ func _front_piece(rng: RandomNumberGenerator, kind: String, hair: Color, gloss: 
 			var crop := kind == "crop"
 			var top_y := hl - (0.3 if not crop else 0.2) * float(_hs("fc", 1.0))
 			var sx := float(f["part_side"])
-			var sh := PackedVector2Array()
-			for i in 12:
-				var t := float(i) / 11.0
-				sh.append(_px(lerpf(-0.68, 0.68, t), hl + 0.04 + 0.03 * sin(PI * t)))
-			_r_polyline(sh, Color(0, 0, 0, 0.09), _fh * 0.06, true)
+			# Sombra macia logo embaixo das pontas, sumindo para baixo e nas laterais (a faixa grossa
+			# e reta que ficava solta mais abaixo parecia uma tira na testa)
+			var sh_top := PackedVector2Array()
+			var sh_bot := PackedVector2Array()
+			for i in 13:
+				var t := float(i) / 12.0
+				var uu := lerpf(-0.66, 0.66, t)
+				var yy := hl - 0.01 - pow(absf(uu) / 0.72, 2.0) * 0.06
+				sh_top.append(_px(uu, yy))
+				sh_bot.append(_px(uu, yy + 0.07))
+			_strip(sh_top, sh_bot, 3, func(_p: Vector2, t: float, w: float) -> Color:
+				return Color(_shadow_col.darkened(0.3), 0.16 * pow(sin(PI * t), 0.8) * pow(1.0 - w, 1.6)))
 			for row in 2:
 				var tuft_count := (9 if not crop else 11) - row
 				for i in tuft_count:

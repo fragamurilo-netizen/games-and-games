@@ -6,6 +6,7 @@ extends SceneTree
 ## --catalog=hs ou --catalog=bd: um retrato por penteado ou por barba, na ordem da lista.
 ## --beauty: com --aging, as colunas vão da pessoa mais feia à mais bonita.
 ## --list=3,18,60: com --catalog, mostra só esses índices (em sequência).
+## --ml=1 liga a luz de estúdio por malha (FaceShade).
 
 var _out := "user://faces.png"
 
@@ -39,6 +40,8 @@ func _initialize() -> void:
 			only = Array(a.substr(7).split(",")).map(func(x): return int(x))
 		elif a.begins_with("--offset="):
 			offset = int(a.substr(9))
+		elif a.begins_with("--ml="):
+			PortraitView.mesh_light_default = int(a.substr(5))
 		elif a == "--kits":
 			kits = true
 		elif a == "--beauty":

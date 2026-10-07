@@ -48,4 +48,6 @@ func _run() -> void:
 		samples.append((Time.get_ticks_usec() - started) / 1000.0)
 	samples.sort()
 	print(JSON.stringify({"size": px, "count": count, "cold_ms": cold_ms, "cached_median_ms": samples[6]}))
+	if not FaceShade.profile.is_empty():
+		print("luz por malha (ms, soma dos retratos): ", FaceShade.profile)
 	quit()

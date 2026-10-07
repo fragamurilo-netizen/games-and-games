@@ -43,6 +43,8 @@ func _initialize() -> void:
 			ids = Array(a.substr(7).split(",")).map(func(x): return int(x))
 		elif a.begins_with("--modes="):
 			modes = Array(a.substr(8).split(",")).map(func(x): return int(x))
+		elif a.begins_with("--debug="):
+			FaceShade.debug = int(a.substr(8))
 		elif a == "--classic":
 			PortraitView.default_framing = PortraitView.FRAME_CLASSIC
 	if ids.is_empty():

@@ -32,8 +32,18 @@ const R_CLOTH := 5
 const R_BACK := 6
 ## Quanto da forma (luz direta) cada parte recebe por cima do sombreado que já tem desenhado.
 const FORM := [0.0, 0.5, 1.0, 0.55, 0.85, 0.85, 0.8]
+## Ferramentas: 1 mostra só a luz em cinza (opaca), 2 mostra as partes do busto em cores.
+static var debug := 0
+## Ferramentas: soma o tempo de cada etapa (ms) para medir o custo.
+static var profile: Dictionary = {}
+
+
+static func _tick(key: String, t0: int) -> int:
+	var t1 := Time.get_ticks_usec()
+	profile[key] = float(profile.get(key, 0.0)) + (t1 - t0) / 1000.0
+	return t1
 ## Luz de recorte (fria, do lado da sombra) por parte.
-const RIM := [0.0, 0.08, 0.2, 0.12, 0.12, 0.16, 0.14]
+const RIM := [0.0, 0.08, 0.12, 0.12, 0.12, 0.16, 0.12]
 
 var _pv: PortraitView
 var _a := 1.4
@@ -358,7 +368,14 @@ var _body := PackedVector2Array()
 var _top_r := PackedVector2Array()
 var _back: Array = []
 var _last_d := 0.0
+var _last_soft := 0.0
 var _edge := PackedFloat32Array()
+## Peso das normais suavizadas (cabelo, barba, corpo): o pelo e o tecido não têm quina.
+var _soft := PackedFloat32Array()
+## Raio do volume do cabelo (calota e cabelo de trás juntos) por ângulo, a partir do centro da cabeça
+var _hair_r := PackedFloat32Array()
+var _beard_on := false
+var _beard_ln := 0.0
 
 
 func _parts(back: Array) -> Array:
@@ -389,8 +406,17 @@ func _parts(back: Array) -> Array:
 	polys.append(_body)
 	for b: PackedVector2Array in back:
 		if b.size() > 2:
-			_back.append([b, PortraitView._centroid(b), pv._angle_radius_table(PortraitView._centroid(b), b, 64)])
+			_back.append(b)
 			polys.append(b)
+	# Cabelo de cima e de trás formam um volume só (antes eram dois, com emenda entre eles)
+	var hp: Array = []
+	if not _cap.is_empty():
+		hp.append(_cap)
+	hp.append_array(_back)
+	_hair_r = _radius_table(pv._hc, hp, 128)
+	_beard_on = int(f["beard"]) != FaceGen.B_NONE
+	if _beard_on:
+		_beard_ln = float(pv._beard_p.get("ln", 0.0))
 	# União das partes, recortada no quadro do retrato (buracos ficam de fora)
 	var shapes: Array = []
 	for p: PackedVector2Array in polys:
@@ -442,6 +468,28 @@ func _top_y(adx: float) -> float:
 	return t[t.size() - 1].y
 
 
+## Maior raio de cada ângulo (a partir de c) entre os contornos; ângulos sem nenhum ponto pegam
+## o vizinho.
+static func _radius_table(c: Vector2, polys: Array, bins: int) -> PackedFloat32Array:
+	var tab := PackedFloat32Array()
+	tab.resize(bins)
+	tab.fill(0.0)
+	for poly: PackedVector2Array in polys:
+		var n := poly.size()
+		for i in n:
+			var a := poly[i] - c
+			var b := poly[(i + 1) % n] - c
+			for k in 9:
+				var d := a.lerp(b, k / 8.0)
+				var bi := int(floor(fposmod(d.angle(), TAU) / TAU * bins)) % bins
+				tab[bi] = maxf(tab[bi], d.length())
+	for pass_i in 4:
+		for i in bins:
+			if tab[i] <= 0.0:
+				tab[i] = maxf(tab[(i + bins - 1) % bins], tab[(i + 1) % bins])
+	return tab
+
+
 static func _star(c: Vector2, tab: PackedFloat32Array, p: Vector2) -> float:
 	var d := p - c
 	var bins := tab.size()
@@ -458,28 +506,58 @@ func _sample(p: Vector2) -> Vector2:
 	var zh := 1.3 * F
 	var u := (p.x - pv._hc.x) / F
 	var v := (p.y - pv._hc.y) / pv._fh
-	var best := -1.0
-	var reg := R_NONE
 	var d := _dome(u, v)
 	_last_d = d
+	_last_soft = 0.0
+	# Barba: camada de pelo por cima da pele (e, fora do rosto, um volume próprio sobre o pescoço)
+	var cov := 0.0
+	if _beard_on and v > _N - 0.25:
+		cov = _beard_cov(u, v)
+	var hair := _in_hair(p)
 	if d > 0.0:
-		best = zh + F * (DEPTH * d + _relief(u, v) * smoothstep(0.0, 0.4, d))
-		reg = R_FACE
-	if not _cap.is_empty() and Geometry2D.is_point_in_polygon(p, _cap):
-		# Casca do cabelo em volta do crânio; onde cobre a pele, uma camada com espessura por cima
-		var rr := _star(pv._hc, _cap_r, p)
-		var zc := zh + F * (DEPTH + 0.12) * maxf(0.0, _prof(minf(rr, 1.0), 2.0))
-		if reg == R_NONE:
-			return Vector2(zc, R_HAIR)
-		if Geometry2D.is_point_in_polygon(p, _band):
-			return Vector2(maxf(best + 0.05 * F, zc), R_HAIR)
-	if reg != R_NONE:
-		return Vector2(best, reg)
+		var zf := zh + F * (DEPTH * d + _relief(u, v) * smoothstep(0.0, 0.4, d))
+		if hair and Geometry2D.is_point_in_polygon(p, _band):
+			# Cabelo sobre a cabeça: nasce colado na pele (sem degrau na linha do cabelo) e vai
+			# ganhando o volume do cabelo para cima e para os lados. Onde ainda está colado, a luz
+			# é a da pele (senão a linha do cabelo vira uma faixa cinza)
+			var hz := _hair_z(p)
+			# Máximo suave: o cabelo encontra a testa sem quina
+			var zz := _smax(zf + 0.01 * F, hz, 0.08 * F)
+			if hz > zf + 0.03 * F:
+				_last_soft = 1.0
+				return Vector2(zz, R_HAIR)
+			_last_soft = 0.6
+			return Vector2(zz, R_FACE)
+		if cov > 0.0:
+			# Barba: uma camada que segue o rosto; a comprida forma uma cortina na frente da
+			# mandíbula (o contorno do queixo não aparece através dela)
+			_last_soft = cov
+			zf = maxf(zf + F * (0.04 + 0.1 * _beard_ln) * cov, _beard_plane(cov, v))
+		return Vector2(zf, R_FACE)
+	if hair:
+		_last_soft = 1.0
+		return Vector2(_hair_z(p), R_HAIR)
+	var under := _sample_body(p)
+	if cov > 0.05:
+		# Barba sobre o pescoço: sai da altura do que está embaixo aos poucos (sem degrau na borda)
+		_last_soft = 1.0
+		var top := maxf(_beard_plane(cov, v), 1.3 * F) if _beard_ln >= 0.3 else under.x + F * 0.06 * cov
+		var zb := lerpf(under.x, top, smoothstep(0.05, 0.6, cov))
+		return Vector2(zb, R_HAIR if cov > 0.3 or under.y == R_NONE else under.y)
+	return under
+
+
+func _sample_body(p: Vector2) -> Vector2:
+	var pv := _pv
+	var F := pv._fw
+	var zh := 1.3 * F
 	for e: Array in _ears:
 		var q: Vector2 = (p - (e[0] as Vector2)) / (e[1] as Vector2)
 		if q.length_squared() < 1.04:
+			_last_soft = 0.5
 			return Vector2(zh + F * 0.28 * maxf(0.0, _prof(minf(q.length(), 1.0), 2.0)), R_EAR)
 	if Geometry2D.is_point_in_polygon(p, _body):
+		_last_soft = 1.0
 		var dx := absf(p.x - pv._hc.x)
 		var zn := -1.0
 		var nw := pv._nwt
@@ -495,22 +573,78 @@ func _sample(p: Vector2) -> Vector2:
 		if zn >= zt:
 			return Vector2(maxf(zn, 0.0), R_NECK)
 		return Vector2(zt, R_CLOTH)
-	for b: Array in _back:
-		if Geometry2D.is_point_in_polygon(p, b[0]):
-			var rr := _star(b[1], b[2], p)
-			return Vector2(zh - 0.25 * F + 0.45 * F * maxf(0.0, _prof(minf(rr, 1.0), 2.0)), R_BACK)
 	return Vector2(0.0, R_NONE)
+
+
+## Cobertura da barba em (u, v), lida da malha da barba que o retrato já desenhou.
+func _beard_cov(u: float, v: float) -> float:
+	var g := _pv._beard_grid
+	var bd: Array = _pv._beard_data
+	if g.size() < 6 or bd.size() < 3:
+		return 0.0
+	var nu := int(g[4])
+	var nv := int(g[5])
+	var x := (u - g[0]) / (g[1] - g[0]) * nu
+	var y := (v - g[2]) / (g[3] - g[2]) * nv
+	if x < 0.0 or y < 0.0 or x > nu or y > nv:
+		return 0.0
+	var i := mini(int(x), nu - 1)
+	var j := mini(int(y), nv - 1)
+	var fx := x - i
+	var fy := y - j
+	var cols: PackedColorArray = bd[2]
+	var row := nu + 1
+	var a := lerpf(lerpf(cols[j * row + i].a, cols[j * row + i + 1].a, fx), lerpf(cols[(j + 1) * row + i].a, cols[(j + 1) * row + i + 1].a, fx), fy)
+	return clampf(a * 1.6, 0.0, 1.0)
+
+
+## Frente da barba: nasce na frente do queixo e da mandíbula (a barba comprida não fica na sombra
+## do queixo) e recua aos poucos para baixo, sobre o pescoço.
+func _beard_plane(cov: float, v: float) -> float:
+	var F := _pv._fw
+	var front := 0.12 + 3.0 * _beard_ln
+	var drop := 0.5 * smoothstep(0.9, 1.45 + _beard_ln, v)
+	return 1.3 * F + F * maxf(0.1, front - drop) * cov
+
+
+static func _smax(a: float, b: float, k: float) -> float:
+	var h := maxf(k - absf(a - b), 0.0) / k
+	return maxf(a, b) + h * h * k * 0.25
+
+
+func _in_hair(p: Vector2) -> bool:
+	if not _cap.is_empty() and Geometry2D.is_point_in_polygon(p, _cap):
+		return true
+	for b: PackedVector2Array in _back:
+		if Geometry2D.is_point_in_polygon(p, b):
+			return true
+	return false
+
+
+## Altura do volume do cabelo: uma cúpula só sobre o contorno de todo o cabelo. Da linha dos
+## olhos para baixo o cabelo que cai ao lado do rosto fica atrás dele (no plano das laterais da
+## cabeça), não na frente: senão o rosto parece afundado dentro do cabelo.
+func _hair_z(p: Vector2) -> float:
+	var F := _pv._fw
+	var rr := _star(_pv._hc, _hair_r, p)
+	var v := (p.y - _pv._hc.y) / _pv._fh
+	var dome := (DEPTH + 0.1) * maxf(0.0, _prof(minf(rr, 1.0), 2.0))
+	var side := 0.25 * maxf(0.0, _prof(minf(rr, 1.0), 2.0))
+	return 1.3 * F + F * lerpf(dome, side, smoothstep(_E - 0.15, _E + 0.25, v))
 
 
 func _run(masks: Array, beard: Array, back: Array) -> void:
 	var pv := _pv
+	var tk := Time.get_ticks_usec()
 	var shapes := _parts(back)
+	tk = _tick("partes", tk)
 	if shapes.is_empty():
 		return
 	var F := pv._fw
-	# Células de ~3 px no retrato grande; nas miniaturas, de ~2 px
-	_st = clampf(pv._s / 140.0, 1.8, 4.0)
+	# Uns 60 pontos por lado no retrato grande e 42 no médio: a luz é suave, e o custo cresce com
+	# o quadrado disso
 	var r := pv._rect if pv._fm else Rect2(pv._c - Vector2(pv._R, pv._R), Vector2(pv._R, pv._R) * 2.0)
+	_st = maxf(r.size.x / (60.0 if pv._s >= 300.0 else 42.0), 2.2)
 	var m := 3
 	_o = r.position - Vector2(m, m) * _st
 	_nx = ceili(r.size.x / _st) + 2 * m + 2
@@ -519,13 +653,26 @@ func _run(masks: Array, beard: Array, back: Array) -> void:
 	_h.resize(n)
 	_reg.resize(n)
 	_edge.resize(n)
+	_soft.resize(n)
 	for j in _ny:
 		for i in _nx:
 			var s := _sample(_o + Vector2(i, j) * _st)
 			_h[j * _nx + i] = s.x
 			_reg[j * _nx + i] = int(s.y)
 			_edge[j * _nx + i] = _last_d
+			_soft[j * _nx + i] = _last_soft
+	tk = _tick("alturas", tk)
 	var hb := _blur(_h, maxi(1, int(round(0.1 * F / _st))))
+	# Oclusão do rosto só com o relevo do próprio rosto: o cabelo em volta não cava um sulco na
+	# borda da testa e das bochechas
+	var hface := PackedFloat32Array(_h)
+	for k in n:
+		if _reg[k] != R_FACE:
+			hface[k] = 1.3 * F + F * DEPTH * _edge[k]
+	var hbf := _blur(hface, maxi(1, int(round(0.1 * F / _st))))
+	# Altura suavizada: cabelo, barba e corpo são macios, e as emendas entre as partes somem
+	var hs := _blur(_h, maxi(1, int(round(0.06 * F / _st))))
+	tk = _tick("desfoques", tk)
 	_lit.resize(n)
 	_lum.resize(n)
 	_rim.resize(n)
@@ -539,7 +686,11 @@ func _run(masks: Array, beard: Array, back: Array) -> void:
 	var dir := Vector2(L.x, L.y).normalized()
 	var rise := L.z / Vector2(L.x, L.y).length()
 	_front = 0.5 + 0.55 * clampf((L.z + WRAP) / (1.0 + WRAP), 0.0, 1.0)
-	var steps := 16 if pv._s >= 140.0 else 9
+	var steps := 10 if pv._s >= 200.0 else 7
+	var hairm := PackedFloat32Array()
+	hairm.resize(n)
+	for k in n:
+		hairm[k] = 1.0 if _reg[k] == R_HAIR else 0.0
 	var reach := 1.6 * F
 	for j in range(1, _ny - 1):
 		for i in range(1, _nx - 1):
@@ -567,6 +718,10 @@ func _run(masks: Array, beard: Array, back: Array) -> void:
 			elif up:
 				hy = (_h[id] - _h[id - _nx]) / _st
 			var g := Vector2(hx, hy)
+			var wsoft := _soft[id]
+			if wsoft > 0.0:
+				var gs := Vector2(hs[id + 1] - hs[id - 1], hs[id + _nx] - hs[id - _nx]) / (2.0 * _st)
+				g = g.lerp(gs, wsoft)
 			if g.length_squared() > 9.0:
 				g = g.normalized() * 3.0
 			var nrm := Vector3(-g.x, -g.y, 1.0).normalized()
@@ -579,14 +734,19 @@ func _run(masks: Array, beard: Array, back: Array) -> void:
 				var lit := 1.0
 				for s in steps:
 					var t := reach * (0.02 + 0.98 * pow(float(s + 1) / steps, 1.6))
-					var hq := _at(_h, p + dir * t)
-					lit = minf(lit, (h0 + rise * t + 0.01 * F - hq) / (PENUMBRA * t) + 0.5)
+					var q := p + dir * t
+					var hq := _at(_h, q)
+					var occ := 1.0 - clampf((h0 + rise * t + 0.01 * F - hq) / (PENUMBRA * t) + 0.5, 0.0, 1.0)
+					# Cabelo e barba deixam passar parte da luz entre os fios
+					if rg != R_HAIR and occ > 0.0:
+						occ *= 1.0 - 0.65 * _at(hairm, q)
+					lit = minf(lit, 1.0 - occ)
 					if lit <= 0.0:
 						break
 				sh = 1.0 - clampf(lit, 0.0, 1.0)
-			var ao := clampf((hb[id] - h0) / F * 4.0, 0.0, 0.4)
+			var ao := clampf(((hbf[id] if rg == R_FACE else hb[id]) - h0) / F * 4.0, 0.0, 0.4)
 			# Rebatedor embaixo: a camisa devolve luz para o queixo e a base do nariz
-			var fill := (0.12 if rg == R_FACE else 0.05) * maxf(0.0, nrm.y)
+			var fill := (0.12 if rg == R_FACE else (0.1 if rg == R_HAIR else 0.05)) * maxf(0.0, nrm.y)
 			_lit[id] = 0.5 + 0.55 * diff + fill
 			_lum[id] = (0.5 + 0.55 * diff * (1.0 - 0.8 * sh)) * (1.0 - ao) + fill
 			# Recorte: luz fria de trás à direita na borda que vira para longe
@@ -595,10 +755,15 @@ func _run(masks: Array, beard: Array, back: Array) -> void:
 				var u := (p.x - pv._hc.x) / F
 				var v := (p.y - pv._hc.y) / pv._fh
 				_spc[id] = pow(maxf(0.0, nrm.dot(Hv)), 24.0) * (1.0 - sh) * (1.0 - ao) * _oil(u, v)
+	tk = _tick("luz", tk)
 	_smooth_mult()
 	_colors()
+	tk = _tick("suavizar", tk)
 	_draw_layers(shapes)
-	_draw_features(masks, beard)
+	tk = _tick("camadas", tk)
+	if debug == 0:
+		_draw_features(masks, beard)
+	tk = _tick("peças", tk)
 
 
 func _colors() -> void:
@@ -611,8 +776,11 @@ func _colors() -> void:
 	var s_deep := PortraitView._shade(skin, 0.1)
 	var s_warm := PortraitView._shade(skin, 0.55).lerp(Color(0.62, 0.14, 0.1), 0.3)
 	var s_lift := PortraitView._shade(skin, 1.3).lerp(Color(1.0, 0.95, 0.88), 0.2)
-	var h_deep := Color(0.03, 0.025, 0.025)
-	var h_lift: Color = (pv._f["hair"] as Color).lightened(0.45)
+	var hc0: Color = pv._f["hair"]
+	# Sombra do cabelo no tom do próprio cabelo (o preto neutro deixava a borda cinzenta)
+	var h_deep := Color(hc0.r * 0.28, hc0.g * 0.26, hc0.b * 0.24)
+	var hc: Color = pv._f["hair"]
+	var h_lift := Color(minf(1.0, hc.r * 1.7 + 0.08), minf(1.0, hc.g * 1.7 + 0.06), minf(1.0, hc.b * 1.7 + 0.04))
 	var c_deep := Color(0.02, 0.03, 0.06)
 	_deep = [s_deep, s_deep, h_deep, s_deep, s_deep, c_deep, h_deep]
 	_warm = [s_warm, s_warm, h_deep, s_warm, s_warm, c_deep, h_deep]
@@ -674,42 +842,134 @@ func _dark(rg: int, a: float) -> Color:
 	return Color(c, a)
 
 
-func _draw_layers(shapes: Array) -> void:
-	var pv := _pv
+## Cores das camadas em cada ponto da grade (sombra, luz e recorte + brilho), uma vez só.
+func _node_colors() -> Array:
+	var n := _nx * _ny
+	var cd := PackedColorArray()
+	var cl := PackedColorArray()
+	var cr := PackedColorArray()
+	cd.resize(n)
+	cl.resize(n)
+	cr.resize(n)
 	var rim_c := Color(0.8, 0.88, 1.0)
 	var spec_c := Color(1.0, 0.98, 0.95)
-	for sh: PackedVector2Array in shapes:
-		var mesh := KitGeom.grid_mesh(sh, _st)
-		var pts: PackedVector2Array = mesh[0]
-		var idx: PackedInt32Array = mesh[1]
-		if idx.is_empty():
-			continue
-		var cd := PackedColorArray()
-		var cl := PackedColorArray()
-		var cr := PackedColorArray()
-		cd.resize(pts.size())
-		cl.resize(pts.size())
-		cr.resize(pts.size())
-		for i in pts.size():
-			var q := pts[i]
-			var rg := maxi(1, _region_at(q))
-			var mm := _mult(q, rg)
-			cd[i] = _dark(rg, clampf((1.0 - mm) * 1.25, 0.0, 0.85))
-			cl[i] = Color(_lift[rg], clampf((mm - 1.0) * 1.6, 0.0, 0.15 if rg == R_HAIR or rg == R_BACK else 0.3))
-			var sp := clampf(_at(_spc, q) * _spec_k, 0.0, 0.5) if rg == R_FACE else 0.0
-			var rm := clampf(_at(_rim, q), 0.0, 0.5)
-			cr[i] = Color(spec_c.lerp(rim_c, rm / maxf(rm + sp, 0.001)), rm + sp)
-		pv._r_tri(idx, pts, cd)
+	for j in _ny:
+		for i in _nx:
+			var id := j * _nx + i
+			var rg := _reg[id]
+			if rg == R_NONE:
+				# Fora do busto: a cor da parte vizinha (para a borda interpolar sem clarear)
+				for d: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+					var k := clampi(j + d.y, 0, _ny - 1) * _nx + clampi(i + d.x, 0, _nx - 1)
+					if _reg[k] != R_NONE:
+						rg = _reg[k]
+						break
+				rg = maxi(rg, R_FACE)
+			var mm := _mul[id]
+			if debug == 1:
+				var gv := clampf(mm * 0.6, 0.0, 1.0)
+				cd[id] = Color(gv, gv, gv, 1.0)
+				continue
+			if debug == 2:
+				cd[id] = [Color.BLACK, Color(0.9, 0.6, 0.5), Color(0.3, 0.2, 0.1), Color(0.9, 0.3, 0.6), Color(0.6, 0.4, 0.3), Color(0.2, 0.4, 0.9), Color(0.5, 0.5, 0.1)][rg]
+				continue
+			cd[id] = _dark(rg, clampf((1.0 - mm) * 1.25, 0.0, 0.85))
+			cl[id] = Color(_lift[rg], clampf((mm - 1.0) * 1.6, 0.0, 0.15 if rg == R_HAIR or rg == R_BACK else 0.3))
+			var sp := clampf(_spc[id] * _spec_k, 0.0, 0.5) if rg == R_FACE else 0.0
+			var rm := clampf(_rim[id], 0.0, 0.5)
+			cr[id] = Color(spec_c.lerp(rim_c, rm / maxf(rm + sp, 0.001)), rm + sp)
+	return [cd, cl, cr]
+
+
+func _col_at(arr: PackedColorArray, q: Vector2) -> Color:
+	var x := (q.x - _o.x) / _st
+	var y := (q.y - _o.y) / _st
+	var i := clampi(int(floor(x)), 0, _nx - 2)
+	var j := clampi(int(floor(y)), 0, _ny - 2)
+	var fx := clampf(x - i, 0.0, 1.0)
+	var fy := clampf(y - j, 0.0, 1.0)
+	var b := j * _nx + i
+	return arr[b].lerp(arr[b + 1], fx).lerp(arr[b + _nx].lerp(arr[b + _nx + 1], fx), fy)
+
+
+## Malha das camadas direto da grade: as células inteiras dentro do busto usam os pontos da
+## grade (vértices compartilhados, cores já prontas); só as da borda são recortadas no contorno.
+func _draw_layers(shapes: Array) -> void:
+	var pv := _pv
+	var nc := _node_colors()
+	var ncd: PackedColorArray = nc[0]
+	var ncl: PackedColorArray = nc[1]
+	var ncr: PackedColorArray = nc[2]
+	var n := _nx * _ny
+	var inside := PackedByteArray()
+	inside.resize(n)
+	for j in _ny:
+		for i in _nx:
+			var p := _o + Vector2(i, j) * _st
+			var k := 0
+			for sh: PackedVector2Array in shapes:
+				if Geometry2D.is_point_in_polygon(p, sh):
+					k = 1
+					break
+			inside[j * _nx + i] = k
+	var vid := PackedInt32Array()
+	vid.resize(n)
+	vid.fill(-1)
+	var pts := PackedVector2Array()
+	var cd := PackedColorArray()
+	var cl := PackedColorArray()
+	var cr := PackedColorArray()
+	var idx := PackedInt32Array()
+	for j in _ny - 1:
+		for i in _nx - 1:
+			var a := j * _nx + i
+			var c4 := [a, a + 1, a + _nx + 1, a + _nx]
+			var cnt := inside[a] + inside[a + 1] + inside[a + _nx] + inside[a + _nx + 1]
+			if cnt == 0:
+				continue
+			if cnt == 4:
+				for k in c4:
+					if vid[k] < 0:
+						vid[k] = pts.size()
+						pts.append(_o + Vector2(k % _nx, k / _nx) * _st)
+						cd.append(ncd[k])
+						cl.append(ncl[k])
+						cr.append(ncr[k])
+				idx.append_array([vid[c4[0]], vid[c4[1]], vid[c4[2]], vid[c4[0]], vid[c4[2]], vid[c4[3]]])
+				continue
+			# Borda: recorta a célula no contorno do busto
+			var x0 := _o.x + i * _st
+			var y0 := _o.y + j * _st
+			var cell := PackedVector2Array([Vector2(x0, y0), Vector2(x0 + _st, y0), Vector2(x0 + _st, y0 + _st), Vector2(x0, y0 + _st)])
+			for sh: PackedVector2Array in shapes:
+				for piece: PackedVector2Array in Geometry2D.intersect_polygons(cell, sh):
+					if piece.size() < 3:
+						continue
+					var tri := Geometry2D.triangulate_polygon(piece)
+					var base := pts.size()
+					for q in piece:
+						pts.append(q)
+						cd.append(_col_at(ncd, q))
+						cl.append(_col_at(ncl, q))
+						cr.append(_col_at(ncr, q))
+					for t in tri:
+						idx.append(base + t)
+	if idx.is_empty():
+		return
+	for k in pts.size():
+		pts[k] = pv._cl(pts[k])
+	pv._r_tri(idx, pts, cd)
+	if debug == 0:
 		pv._r_tri(idx, pts, cl)
 		pv._r_tri(idx, pts, cr)
-		# Borda antisserrilhada da sombra (o GLES3 não faz MSAA em 2D)
+	# Borda antisserrilhada da sombra (o GLES3 não faz MSAA em 2D)
+	for sh: PackedVector2Array in shapes:
 		var line := PackedVector2Array(sh)
 		line.append(sh[0])
 		var lc := PackedColorArray()
 		for q in line:
-			var rg := maxi(1, _region_at(q))
-			var a := clampf((1.0 - _mult(q, rg)) * 1.1, 0.0, 0.85)
-			lc.append(_dark(rg, a * 0.8))
+			var c := _col_at(ncd, q)
+			lc.append(Color(c, c.a * 0.8))
 		pv._r_polyline_colors(line, lc, maxf(1.0, pv._s * 0.003), true)
 
 
