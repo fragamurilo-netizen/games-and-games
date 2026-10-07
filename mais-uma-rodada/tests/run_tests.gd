@@ -1078,7 +1078,8 @@ func _test_transfers() -> void:
 	for p: Player in w.players.values():
 		if p.club_id < 0 or p.club_id == user.id or w.club(p.club_id).is_rival(user.id):
 			continue
-		if p.age(w.year) <= 29 and p.squad_status >= Player.STATUS_ROTATION and TransferManager.interest(w, p, user) >= 0.55:
+		if p.age(w.year) <= 29 and p.squad_status >= Player.STATUS_ROTATION and TransferManager.interest(w, p, user) >= 0.55 \
+				and TransferRules.permit_block(w, p, user) == "": # clube inglês: só quem tem permissão de trabalho
 			target = p
 			break
 	check(target != null, "nenhum alvo de teste encontrado")

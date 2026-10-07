@@ -17,6 +17,35 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 
 - **Ramo de 06/10 à noite: `claude/hopeful-newton-8avbo4`.** Partiu de `claude/youthful-newton-hey7og`. APK: `builds/MaisUmaRodada-1.0.0-base-idiomas-geografia-2026-10-06-debug.apk` (certificado de depuração de sempre, instala por cima). Três rodadas de pedidos do dono, todas aqui (detalhes na seção "Mundo vivo, carreira de técnico e base profunda" logo abaixo).
 
+### Otimização usando os núcleos do celular e retratos padronizados (07/10, ramo `claude/hopeful-newton-8avbo4`)
+
+**Pedido do dono:** usar melhor os recursos do celular, sem diminuir a capacidade do jogo. A simulação não perdeu profundidade. Tudo o que roda em paralelo dá o mesmo resultado que em sequência.
+
+O que foi feito:
+- **Janela de transferências.** Olheiros, diagnóstico e pressão de cada clube são calculados em paralelo (`TransferBrain.precompute`, `MarketAI._plan_window`). A lista inicial dos olheiros sai por busca binária, com o mesmo resultado. Abrir a janela caiu de 14,6 s para cerca de 2 s no servidor.
+- **Busca de alvos da IA** (`TransferBrain.targets`). O elenco do comprador é montado uma vez por busca (`TransferManager.interest(..., squad)`). Os perfis de mercado por país ficam prontos e só de leitura (`MarketAI.profile`). O filtro de nível roda antes das regras de origem e permissão, que custam mais. A assinatura do mercado é idêntica à da versão anterior.
+- **Partidas.** As escalações da IA são montadas em paralelo (`SeasonManager._prepare_sheets`) e os jogos rápidos usam até 6 núcleos. O cache de perfil tático tem trava (`TacticalScout._pmutex`).
+- **Mundo novo.**
+  - O ranking inicial das seleções varria o mundo inteiro para cada país; agora é uma varredura só (`NationalTeamManager._elo_pool`). Ganho de cerca de 13 s.
+  - Os laços dos elencos são calculados em paralelo (`Relations.generate`).
+- **Caches de outro mundo.** `WorldGenerator.forget_static_state()` roda ao criar e ao carregar. Os caches de olheiros, distâncias e seleções agora levam o id do mundo. Sem isso, um mundo novo criado depois de jogar outra carreira saía diferente do mesmo mundo criado com o app recém-aberto (coeficientes das ligas). Era também o que fazia "simulação paralela = sequencial" falhar.
+- **Mercado (tela).** A avaliação dos cerca de 27 mil jogadores é dividida entre os núcleos.
+- **Ferramenta.** `tools/market_par_check.gd -- --days=6 [--modes=01|00]` compara duas execuções: planos, olheiros, transferências e o estado de todos os jogadores.
+- **Retratos.** Seguem a regra nova "Retrato" do DESIGN.md:
+  - Quadrado que não estica, cabeça na mesma altura e escala, busto com chão. Quadro de ardósia nas listas e degradê do clube nos cabeçalhos.
+  - Documento de contrato e ficha da base com o retrato de 104 px.
+  - Perfil com linha de base sob o recorte.
+
+O que ficou para depois:
+- **Testes que já falhavam antes desta rodada** (mesmo resultado no commit `d06d0ef`):
+  - "mundo aleatório e determinismo" (dois mundos alternando datas);
+  - "save/load … datas seguintes divergem".
+  - Os dois rodam dois mundos no mesmo processo. Ainda há estado estático compartilhado a achar. Comece por `tools/market_par_check.gd -- --modes=00`, que já fica igual; a diferença está fora do mercado.
+- **"negociações do usuário".** Corrigido no próprio teste: o alvo caía na permissão de trabalho do Reino Unido.
+- **Busca de alvos em paralelo.** Foi estudada e não foi feita: o risco de travar no celular é alto. Há muitos caches preguiçosos por jogador (`_trait_mult`, `_trait_sum`, `hid()`, `langs`, `trophies`), escritos de várias threads.
+- **Geração dos elencos** (cerca de 14 s): um sorteio único em sequência. Paralelizar muda o mundo gerado por semente e pede deduplicação de nomes entre threads.
+- **Ramo do Codex** (`codex/visual-escudos-uniformes-rostos`): pronto e sem conflito, mas ainda não juntado. Depende do OK explícito do dono.
+
 ### Gerações, escolas de técnicos e mercado de técnicos (07/10, ramo `claude/hopeful-newton-8avbo4`)
 
 - **Gerações dos países** (`scripts/systems/generations.gd`, tela `generations`, menu ☰ › Carreira e mundo › Gerações, chip no perfil do jogador): sorteio raro por país com liga (2%/temporada), 4 anos de nascimento, ~6 joias por geração (piso de potencial para futebol pequeno) e empurrão leve no resto; descoberta aos 17 anos com manchete, auge anunciado aos 25; herança na formação do país (`stats.gen.nb`, índice da base que some devagar) e vitrine na reputação da liga (`Generations.league_push` em `LeagueReputation`). Categorias por ano de nascimento (garotos que entraram numa base, profissionais com 15+ jogos, convocados). Calibrar sem jogar: `tools/generations_report.gd -- --years=25`.
