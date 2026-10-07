@@ -1,11 +1,9 @@
 extends SceneTree
-## Teste da luz por malha nos rostos (FaceShade): o mesmo rosto antes (luz pintada), com a luz
-## integrada (pele de sempre + sombra projetada, oclusão, brilho e peças no volume) e no relevo
-## completo, lado a lado.
+## Teste da luz de estúdio por malha nos retratos (FaceShade): o mesmo boneco antes (luz pintada
+## em cada peça) e com a luz do busto inteiro por cima de rosto, cabelo, barba, pescoço e camisa.
 ## xvfb-run -a -s "-screen 0 1400x1400x24" godot --path . --resolution 1300x1000 --script res://tools/face_light_test.gd -- --out=/tmp/faces.png
 ## --set=clean|beard|all, --size=N (lado de cada retrato), --pairs=N (pares por linha),
-## --only=a,b (casos), --modes=0,1,2 (colunas: 0 antes, 1 integrada, 2 relevo), --debug (o relevo
-## mostra só a luz em cinza), --classic (busto no círculo)
+## --only=a,b (casos), --modes=0,1 (colunas: 0 antes, 1 luz por malha), --classic (busto no círculo)
 
 var _out := "user://face_light.png"
 var _frames := 0
@@ -30,9 +28,8 @@ func _initialize() -> void:
 	var px := 300
 	var pairs := 2
 	var ids: Array = []
-	var debug := false
 	var set_name := "clean"
-	var modes: Array = [0, 1, 2]
+	var modes: Array = [0, 1]
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--out="):
 			_out = a.substr(6)
@@ -46,8 +43,6 @@ func _initialize() -> void:
 			ids = Array(a.substr(7).split(",")).map(func(x): return int(x))
 		elif a.begins_with("--modes="):
 			modes = Array(a.substr(8).split(",")).map(func(x): return int(x))
-		elif a == "--debug":
-			debug = true
 		elif a == "--classic":
 			PortraitView.default_framing = PortraitView.FRAME_CLASSIC
 	if ids.is_empty():
@@ -58,7 +53,6 @@ func _initialize() -> void:
 				ids = [6, 7, 8, 9, 10, 11]
 			_:
 				ids = range(CASES.size())
-	FaceShade.debug = 1 if debug else 0
 	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
 	var bg := ColorRect.new()
 	bg.color = Color("#141414")
@@ -92,7 +86,7 @@ func _initialize() -> void:
 			pv.mesh_light = int(modes[side])
 			root.add_child(pv)
 			var lb := Label.new()
-			lb.text = ["antes", "luz integrada", "relevo completo"][int(modes[side])] + ("  ·  caso %d" % int(ids[slot]) if side == 0 else "")
+			lb.text = ["antes", "luz de estúdio por malha"][int(modes[side])] + ("  ·  caso %d" % int(ids[slot]) if side == 0 else "")
 			lb.position = Vector2(x0 + side * (px + gap), y0)
 			lb.add_theme_font_size_override("font_size", 14)
 			lb.add_theme_color_override("font_color", Color("#C8CCD4") if int(modes[side]) == 0 else Color("#F2C14E"))
