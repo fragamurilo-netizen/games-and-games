@@ -88,8 +88,10 @@ var framing: int = -1:
 	set(v):
 		framing = v
 		queue_redraw()
-## Teste da luz por malha no rosto (FaceShade, a mesma técnica dos uniformes). -1 = segue o padrão.
-static var mesh_light_default := false
+## Teste da luz por malha no rosto (FaceShade, a mesma técnica dos uniformes): 0 desligada,
+## 1 integrada (pele de sempre + sombra projetada, oclusão, brilho e peças no volume), 2 relevo
+## (toda a luz vem do relevo). -1 = segue o padrão.
+static var mesh_light_default := 0
 var mesh_light: int = -1:
 	set(v):
 		mesh_light = v
@@ -350,7 +352,9 @@ var _fw := 0.0
 var _fh := 0.0
 var _R := 0.0
 var _fm := false
-var _ml := false
+var _ml := 0
+var _fs: FaceShade = null
+var _ml_masks: Array = []
 var _rect := Rect2()
 var _det := 1.0
 var _light := Vector3.ZERO
@@ -454,7 +458,7 @@ func _draw() -> void:
 	var o := Vector2((size.x - s) * 0.5, (size.y - s) * 0.5)
 	var c := o + Vector2(s * 0.5, s * 0.5)
 	_fm = is_fm()
-	_ml = mesh_light == 1 or (mesh_light < 0 and mesh_light_default)
+	_ml = mesh_light if mesh_light >= 0 else mesh_light_default
 	_rect = Rect2(o, Vector2(s, s))
 	if photo != null:
 		_draw_photo(c, s)
@@ -522,8 +526,13 @@ func _layer_front() -> void:
 	var head := _head_contour(_contour_k())
 	# De perto, o dorso do nariz e os sulcos precisam de amostras menores que a íris.
 	# A malha continua radial e entra no mesmo cache; miniaturas mantêm o custo anterior.
+	_fs = FaceShade.make(self, _ml) if _ml > 0 and _s >= 50.0 else null
+	_ml_masks = []
 	var face := _radial(_hc, head, _rings(20 if _s >= 140.0 else 11), _skin_px)
-	_rim(face, head.size())
+	if _fs != null and _ml == FaceShade.RELIEF:
+		_rim_lit(face, head.size())
+	else:
+		_rim(face, head.size())
 	if _s >= DETAIL_MIN:
 		# Pele: manchas, granulado e poros (mais marcados com a idade, menos na pele lisa)
 		var ka := 0.08 + 0.1 * float(f["aging"]) - 0.03 * float(f.get("skin_clear", 0.0))
@@ -539,9 +548,10 @@ func _layer_front() -> void:
 	_mouth()
 	if int(f["beard"]) != FaceGen.B_NONE:
 		_beard_hairs(rng)
-	if _ml and _s >= 50.0:
+	if _fs != null:
 		# Luz por malha por cima de pele, olhos, boca e barba: tudo no mesmo volume
-		FaceShade.paint(self)
+		_fs.paint(_ml_masks, _beard_data if int(f["beard"]) != FaceGen.B_NONE else [])
+		_fs = null
 	# Cabelo da frente
 	if style != FaceGen.H_BALD:
 		_front_hair(rng, hair)
@@ -1079,7 +1089,7 @@ func _th(u: float, v: float) -> float:
 func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	var u := (p.x - _hc.x) / _fw
 	var v := (p.y - _hc.y) / _fh
-	if _ml and _s >= 50.0:
+	if _fs != null and _ml == FaceShade.RELIEF:
 		return _skin_flat(u, v)
 	var au := absf(u)
 	# Normal de uma "cúpula" com o formato do rosto
@@ -1323,7 +1333,7 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	var spec := pow(maxf(0.0, nx * hx + ny * hy + nz * hz), 26.0)
 	a = (u + 0.5) / 0.2
 	b = (v - 0.08) / 0.1
-	spec *= k[13] * (0.6 + 0.8 * (fore * 0.9 + ridge_hl + exp(-a * a - b * b)))
+	spec *= k[13] * (0.6 + 0.8 * (fore * 0.9 + ridge_hl + exp(-a * a - b * b))) * (0.5 if _fs != null else 1.0)
 	return Color(minf(col.r + spec, 1.0), minf(col.g + spec * 0.97, 1.0), minf(col.b + spec * 0.93, 1.0))
 
 
@@ -2475,6 +2485,8 @@ func _eyes() -> void:
 		var sclera := PackedVector2Array(upper)
 		for i in range(lower.size() - 2, 0, -1):
 			sclera.append(lower[i])
+		if _fs != null:
+			_ml_masks.append(sclera)
 		var ecen := Vector2(cx, cy)
 		# Pele com espessura em volta do globo ocular, com bordas transparentes.
 		# A pálpebra se integra à pele já iluminada, em vez de virar outro contorno.
@@ -2893,6 +2905,17 @@ func _mouth() -> void:
 				_r_polygon(tpoly, tcols)
 				for i in range(4, 11, 2):
 					_r_line(line[i], tb[i - 2], Color(0.55, 0.45, 0.4, 0.25), maxf(0.5, _s * 0.002), true)
+	if _fs != null:
+		var lu := PackedVector2Array(up)
+		var rl := line.duplicate()
+		rl.reverse()
+		lu.append_array(rl)
+		var lb := PackedVector2Array(bot)
+		var rlo := lo.duplicate()
+		rlo.reverse()
+		lb.append_array(rlo)
+		_ml_masks.append(lu)
+		_ml_masks.append(lb)
 	# Faixas seguem a anatomia em vez de triangular um polígono inteiro: os
 	# triângulos grandes cruzavam o lábio e formavam placas planas de cor.
 	_strip(up, line, 3 if _s >= 140.0 else 1, func(_p: Vector2, t: float, w: float) -> Color:
@@ -4881,6 +4904,25 @@ func _rim(m: Array, n: int, alpha: float = 1.0, w: float = -1.0) -> void:
 	for i in lc.size():
 		lc[i] = Color(lc[i], lc[i].a * alpha)
 	_r_polyline_colors(line, lc, w if w > 0.0 else maxf(1.0, _s * 0.004), true)
+
+
+## Borda do rosto com a luz por malha no modo relevo: a cor final de cada ponto (pele chapada +
+## camadas), toda do lado de fora do contorno (por dentro quem pinta é a própria camada).
+func _rim_lit(m: Array, n: int) -> void:
+	var pts: PackedVector2Array = m[1]
+	var cols: PackedColorArray = m[2]
+	if n < 3 or pts.size() < n + 1:
+		return
+	var w := maxf(1.0, _s * 0.004)
+	var start := pts.size() - n
+	var line := PackedVector2Array()
+	var lc := PackedColorArray()
+	for k in n + 1:
+		var i := start + k % n
+		var p := pts[i]
+		line.append(_cl(p + (p - _hc).normalized() * w * 0.5))
+		lc.append(_fs.composite(cols[i], p))
+	_r_polyline_colors(line, lc, w, true)
 
 
 static func _centroid(poly: PackedVector2Array) -> Vector2:

@@ -24,9 +24,16 @@ const SKULL_N := 2.35
 ## Quanto a luz "enrola" além do terminador (espalhamento sob a pele).
 const WRAP := 0.38
 ## Penumbra da sombra projetada (fonte de luz grande, como um softbox).
-const PENUMBRA := 0.3
-## Modo de depuração das ferramentas: 0 normal, 1 só a luz em cinza.
+const PENUMBRA := 0.4
+## Modo de depuração das ferramentas: 0 normal, 1 só a luz em cinza (modo relevo).
 static var debug := 0
+## Integrado: a pele de sempre, mais sombra projetada, oclusão, brilho e as peças (olhos, lábios,
+## sobrancelhas, barba) no volume do rosto. Relevo: a pele vira um tom chapado e toda a luz vem
+## do relevo.
+const INTEGRATED := 1
+const RELIEF := 2
+
+var mode := INTEGRATED
 
 var _pv: PortraitView
 var _a := 1.4
@@ -53,13 +60,25 @@ var _nx := 0
 var _ny := 0
 var _h := PackedFloat32Array()
 var _in := PackedByteArray()
+var _poly := PackedVector2Array()
+# Luz por ponto da grade: direta (sem sombra projetada nem oclusão), final e brilho
+var _lit := PackedFloat32Array()
+var _lum := PackedFloat32Array()
+var _spc := PackedFloat32Array()
+var _front := 0.0
+var _deep := Color.BLACK
+var _warm := Color.BLACK
+var _lift := Color.WHITE
+var _spec_k := 0.2
 
 
-## Desenha a luz por malha no retrato `pv` (com _setup feito), por cima do que já está no rosto.
-static func paint(pv: PortraitView) -> void:
+## Prepara a luz por malha do retrato `pv` (com _setup feito) no modo `mode`.
+static func make(pv: PortraitView, mode_: int) -> FaceShade:
 	var fs := FaceShade.new()
+	fs.mode = mode_
 	fs._setup(pv)
-	fs._run()
+	fs._prepare()
+	return fs
 
 
 func _setup(pv: PortraitView) -> void:
@@ -101,25 +120,31 @@ static func _tab(t: PackedFloat32Array, x: float) -> float:
 # Relevo
 # ---------------------------------------------------------------------------
 
-## Perfil da cabeça: 1 na frente do rosto, 0 no contorno (a borda vira para longe da câmera).
+## Perfil da cabeça: 1 na frente do rosto, 0 no contorno (a borda vira para longe da câmera) e
+## negativo fora dele, continuando a curva: a borda é uma parede suave, sem degrau para o fundo.
+static func _prof(th: float, p: float) -> float:
+	var q := 1.0 - pow(th, p)
+	return pow(q, 1.0 / p) if q >= 0.0 else -pow(-q, 1.0 / p)
+
+
 func _dome(u: float, v: float) -> float:
 	var au := absf(u)
 	var top := 0.0
 	var low := 0.0
 	if v < 0.06:
 		var up := maxf(0.0, -v) / 1.02
-		if up < 1.0:
-			var rx := _tab(_rx_tab, up)
-			var th := pow(pow(au / rx, SKULL_N) + pow(up, SKULL_N), 1.0 / SKULL_N)
-			if th < 1.0:
-				top = pow(1.0 - pow(th, PROFILE), 1.0 / PROFILE)
+		var rx := _tab(_rx_tab, up)
+		var th := pow(pow(au / rx, SKULL_N) + pow(up, SKULL_N), 1.0 / SKULL_N)
+		top = _prof(th, PROFILE)
 	if v > -0.12:
 		var vv := maxf(v, 0.0) / (1.0 + _chin_len * smoothstep(0.7, 1.0, v))
-		if vv < 1.0:
-			var x := au / maxf(_tab(_hw_tab, vv), 0.001)
-			if x < 1.0:
-				# Na vertical o rosto é quase reto da testa à boca e o queixo vira para baixo
-				low = pow(1.0 - pow(x, PROFILE), 1.0 / PROFILE) * pow(1.0 - pow(vv, 4.0), 0.25)
+		var x := au / maxf(_tab(_hw_tab, minf(vv, 1.0)), 0.02)
+		# Na vertical o rosto é quase reto da testa à boca e o queixo vira para baixo
+		var cx := _prof(x, PROFILE)
+		var cy := _prof(vv, 4.0)
+		low = cx * cy if cx > 0.0 or cy > 0.0 else -absf(cx * cy)
+		if cx < 0.0 and cy < 0.0:
+			low = minf(cx, cy)
 	if v <= -0.12:
 		return top
 	if v >= 0.06:
@@ -127,11 +152,11 @@ func _dome(u: float, v: float) -> float:
 	return lerpf(top, low, smoothstep(-0.12, 0.06, v))
 
 
-## Altura do rosto em (u, v), em meias larguras do rosto. 0 fora da cabeça.
+## Altura do rosto em (u, v), em meias larguras do rosto (negativa fora da cabeça).
 func _height(u: float, v: float) -> float:
 	var d := _dome(u, v)
 	if d <= 0.0:
-		return 0.0
+		return DEPTH * d
 	return DEPTH * d + _relief(u, v) * smoothstep(0.0, 0.4, d)
 
 
@@ -191,14 +216,14 @@ func _nose(u: float, v: float) -> float:
 	var anu := absf(nu)
 	# Dorso: a projeção cresce da raiz (entre os olhos) até a ponta e cai embaixo dela
 	var t := clampf((v - (E - 0.08)) / ((N - 0.05) - (E - 0.08)), 0.0, 1.0)
-	var proj := (0.11 + 0.19 * k[3]) * pow(t, 0.85)
+	var proj := (0.09 + 0.17 * k[3]) * pow(t, 0.85)
 	proj *= 1.0 - 0.45 * k[25] * (1.0 - t)
 	proj += (0.03 * k[2] + 0.045 * k[26]) * exp(-pow((t - 0.5) / 0.17, 2.0))
-	var w := lerpf(_BW * 1.3, _NW * 0.52 * _tipw, smoothstep(0.3, 1.0, t))
-	var under := 1.0 - smoothstep(N - 0.05, N + 0.02, v)
+	var w := lerpf(_BW * 1.7, _NW * 0.62 * _tipw, smoothstep(0.3, 1.0, t))
+	var under := 1.0 - smoothstep(N - 0.07, N + 0.045, v)
 	var h := proj * exp(-pow(nu / w, 2.0)) * under
 	# Ponta (lóbulo), maior na ponta bulbosa e menor na afilada
-	h += (0.06 * k[4] + 0.04 * k[22]) * _g2(nu + 0.005, v - (N - 0.055), _NW * (0.42 + 0.12 * k[22] - 0.08 * k[23]) * _tipw, 0.055)
+	h += (0.05 * k[4] + 0.04 * k[22]) * _g2(nu + 0.005, v - (N - 0.055), _NW * (0.42 + 0.12 * k[22] - 0.08 * k[23]) * _tipw, 0.055)
 	# Asas e o sulco que as separa da bochecha
 	var wing := _NW * (0.8 + 0.16 * k[24])
 	h += (0.1 + 0.03 * k[24]) * _g2(anu - wing, v - (N - 0.035), _NW * 0.3, 0.045)
@@ -256,10 +281,10 @@ func _nasolabial(au: float, v: float) -> float:
 	# Lado de fora (bochecha) positivo
 	if ab.x * (p.y - pa.y) - ab.y * (p.x - pa.x) > 0.0:
 		d = -d
-	var w := 0.045
+	var w := 0.06
 	var x := d / w
 	var fade := pow(sin(PI * t), 0.6)
-	return 0.55 * k5 * x * exp(0.5 - 0.5 * x * x) * fade
+	return 0.3 * k5 * x * exp(0.5 - 0.5 * x * x) * fade
 
 
 ## Pele oleosa: onde o brilho aparece (zona T, maçãs, queixo, lábio de baixo).
@@ -318,15 +343,17 @@ func _blur(src: PackedFloat32Array, r: int) -> PackedFloat32Array:
 	return cur
 
 
-func _run() -> void:
+## Monta a grade e a luz de cada ponto (antes de desenhar o rosto: o modo relevo precisa da luz
+## já na borda da pele).
+func _prepare() -> void:
 	var pv := _pv
 	var head: PackedVector2Array = pv._head_contour(pv._contour_k())
-	var poly := PackedVector2Array()
+	_poly = PackedVector2Array()
 	for p in head:
-		poly.append((p - pv._hc) / pv._fw)
+		_poly.append((p - pv._hc) / pv._fw)
 	# Células de ~2,4 px no retrato grande; nas miniaturas a grade fica mais grossa
-	_st = clampf(2.4 / pv._fw, 0.028, 0.09)
-	var bb := KitGeom.bounds(poly)
+	_st = clampf(2.4 / pv._fw, 0.022, 0.09)
+	var bb := KitGeom.bounds(_poly)
 	var m := 10
 	_o = bb.position - Vector2(m, m) * _st
 	_nx = ceili(bb.size.x / _st) + 2 * m + 2
@@ -339,23 +366,20 @@ func _run() -> void:
 		for i in _nx:
 			var u := _o.x + i * _st
 			var id := j * _nx + i
-			if _dome(u, v) > 0.0:
-				_in[id] = 1
-				_h[id] = _height(u, v)
-			else:
-				_in[id] = 0
-				_h[id] = 0.0
+			_h[id] = _height(u, v)
+			_in[id] = 1 if _dome(u, v) > 0.0 else 0
 	var hb := _blur(_h, maxi(1, int(round(0.07 / _st))))
-	var val := PackedFloat32Array()
-	var spc := PackedFloat32Array()
-	val.resize(n)
-	spc.resize(n)
-	val.fill(0.0)
-	spc.fill(0.0)
+	_lit.resize(n)
+	_lum.resize(n)
+	_spc.resize(n)
+	_lit.fill(BASE)
+	_lum.fill(BASE)
+	_spc.fill(0.0)
 	var L := LIGHT.normalized()
 	var Hv := (L + Vector3(0, 0, 1)).normalized()
 	var dir := Vector2(L.x, L.y).normalized()
 	var rise := L.z / Vector2(L.x, L.y).length()
+	_front = 0.5 + 0.55 * clampf((L.z + WRAP) / (1.0 + WRAP), 0.0, 1.0)
 	var steps := 14 if pv._s >= 140.0 else 8
 	var inv2 := 1.0 / (2.0 * _st)
 	for j in range(1, _ny - 1):
@@ -363,44 +387,65 @@ func _run() -> void:
 			var id := j * _nx + i
 			var hx := (_h[id + 1] - _h[id - 1]) * inv2
 			var hy := (_h[id + _nx] - _h[id - _nx]) * inv2
-			var nrm := Vector3(-hx, -hy, 1.0).normalized()
+			var g := Vector2(hx, hy)
+			if g.length_squared() > 6.25:
+				g = g.normalized() * 2.5
+			var nrm := Vector3(-g.x, -g.y, 1.0).normalized()
 			var ndl := nrm.dot(L)
 			var diff := clampf((ndl + WRAP) / (1.0 + WRAP), 0.0, 1.0)
 			var sh := 0.0
+			var ao := 0.0
 			var h0 := _h[id]
 			var p := Vector2(_o.x + i * _st, _o.y + j * _st)
-			if _in[id] == 1 and ndl > -WRAP:
-				var lit := 1.0
-				for s in steps:
-					var t := 0.015 + 0.5 * pow(float(s + 1) / steps, 1.6)
-					var hq := _at(_h, p + dir * t)
-					lit = minf(lit, (h0 + rise * t + 0.004 - hq) / (PENUMBRA * t) + 0.5)
-					if lit <= 0.0:
-						break
-				sh = 1.0 - clampf(lit, 0.0, 1.0)
-			var direct := diff * (1.0 - 0.85 * sh)
-			var ao := clampf((hb[id] - h0) * 6.0, 0.0, 0.55) if _in[id] == 1 else 0.0
-			var lum := (0.5 + 0.55 * direct) * (1.0 - ao)
-			# Rebote frio na borda do lado da sombra, que separa o rosto do fundo
-			lum += 0.07 * pow(1.0 - nrm.z, 2.0) * maxf(0.0, nrm.x)
-			val[id] = lum - BASE
 			if _in[id] == 1:
-				spc[id] = pow(maxf(0.0, nrm.dot(Hv)), 36.0) * (1.0 - sh) * (1.0 - ao) * _oil(p.x, p.y / _a)
-	_draw(poly, val, spc)
-
-
-func _draw(poly: PackedVector2Array, val: PackedFloat32Array, spc: PackedFloat32Array) -> void:
-	var pv := _pv
-	var skin: Color = pv._skin
+				if ndl > -WRAP:
+					var lit := 1.0
+					for s in steps:
+						var t := 0.015 + 0.5 * pow(float(s + 1) / steps, 1.6)
+						var hq := _at(_h, p + dir * t)
+						lit = minf(lit, (h0 + rise * t + 0.004 - hq) / (PENUMBRA * t) + 0.5)
+						if lit <= 0.0:
+							break
+					sh = 1.0 - clampf(lit, 0.0, 1.0)
+				ao = clampf((hb[id] - h0) * 5.0, 0.0, 0.35)
+				_spc[id] = pow(maxf(0.0, nrm.dot(Hv)), 24.0) * (1.0 - sh) * (1.0 - ao) * _oil(p.x, p.y / _a)
+			# Rebatedor embaixo (a camisa e o peito devolvem luz para o queixo e a base do nariz) e
+			# rebote frio na borda do lado da sombra, que separa o rosto do fundo
+			var fill := 0.06 * maxf(0.0, nrm.y) + 0.05 * pow(1.0 - nrm.z, 2.0) * maxf(0.0, nrm.x)
+			_lit[id] = 0.5 + 0.55 * diff + fill
+			_lum[id] = (0.5 + 0.55 * diff * (1.0 - 0.6 * sh)) * (1.0 - ao) + fill
 	var dark_k := clampf(float(pv._f["skin_i"]) / 9.0, 0.0, 1.0)
+	var skin: Color = pv._skin
 	# Sombra quente: perto do terminador puxa para o vermelho (sangue sob a pele), no fundo é um
 	# marrom profundo do próprio tom
-	var deep := PortraitView._shade(skin, 0.12)
-	var warm := PortraitView._shade(skin, 0.42).lerp(Color(0.55, 0.12, 0.08), 0.22)
-	var lift := PortraitView._shade(skin, 1.38)
-	var spec_c := Color(1.0, 0.98, 0.95)
-	var spec_k := 0.24 + 0.12 * dark_k
-	var mesh := KitGeom.grid_mesh(poly, _st)
+	_deep = PortraitView._shade(skin, 0.1)
+	_warm = PortraitView._shade(skin, 0.55).lerp(Color(0.62, 0.14, 0.1), 0.3)
+	_lift = PortraitView._shade(skin, 1.3).lerp(Color(1.0, 0.95, 0.88), 0.2)
+	_spec_k = 0.14 + 0.14 * dark_k
+
+
+func _dark(a: float) -> Color:
+	return Color(_warm.lerp(_deep, smoothstep(0.2, 0.8, a)), a)
+
+
+## Modo relevo: cor final de um ponto da borda (pele chapada `base` mais as camadas de luz), para a
+## borda antisserrilhada do rosto.
+func composite(base: Color, p: Vector2) -> Color:
+	var q := (p - _pv._hc) / _pv._fw
+	var v := _at(_lum, q) - BASE
+	var c := base
+	var ad := clampf(-v / (BASE - 0.1), 0.0, 0.95)
+	var dk := _dark(ad)
+	c = c.lerp(Color(dk, 1.0), dk.a)
+	c = c.lerp(_lift, clampf(v / 0.4, 0.0, 0.7))
+	return Color(c, base.a)
+
+
+## Desenha as camadas. `masks`: contornos (em pixels) de olhos, lábios e sobrancelhas; `beard`: a
+## malha da barba ([índices, pontos, cores]), que no modo integrado recebem o volume do rosto.
+func paint(masks: Array, beard: Array) -> void:
+	var pv := _pv
+	var mesh := KitGeom.grid_mesh(_poly, _st)
 	var pts: PackedVector2Array = mesh[0]
 	var idx: PackedInt32Array = mesh[1]
 	var px := PackedVector2Array()
@@ -411,33 +456,68 @@ func _draw(poly: PackedVector2Array, val: PackedFloat32Array, spc: PackedFloat32
 	c_dark.resize(pts.size())
 	c_lift.resize(pts.size())
 	c_spec.resize(pts.size())
+	var spec_c := Color(1.0, 0.98, 0.95)
 	for i in pts.size():
 		var q := pts[i]
 		px[i] = pv._cl(pv._hc + q * pv._fw)
-		var vv := _at(val, q)
-		if debug == 1:
-			var g := clampf(BASE + vv, 0.0, 1.2) * 0.8
-			c_dark[i] = Color(g, g, g, 1.0)
-			c_lift[i] = Color(0, 0, 0, 0)
-			c_spec[i] = Color(1, 1, 1, clampf(_at(spc, q) * spec_k, 0.0, 0.6))
-			continue
-		var ad := clampf(-vv / (BASE - 0.12), 0.0, 0.95)
-		c_dark[i] = Color(warm.lerp(deep, smoothstep(0.08, 0.45, ad)), ad)
-		c_lift[i] = Color(lift, clampf(vv / 0.4, 0.0, 0.7))
-		c_spec[i] = Color(spec_c, clampf(_at(spc, q) * spec_k, 0.0, 0.6))
-	pv._r_tri(idx, px, c_dark)
-	pv._r_tri(idx, px, c_lift)
-	pv._r_tri(idx, px, c_spec)
-	# Borda antisserrilhada da camada de sombra (o GLES3 não faz MSAA em 2D)
-	var line := PackedVector2Array()
-	var lc := PackedColorArray()
-	for i in poly.size() + 1:
-		var q := poly[i % poly.size()]
-		line.append(pv._cl(pv._hc + q * pv._fw))
-		if debug == 1:
-			var g := clampf(BASE + _at(val, q), 0.0, 1.2) * 0.8
-			lc.append(Color(g, g, g, 1.0))
+		var lum := _at(_lum, q)
+		var sp := clampf(_at(_spc, q) * _spec_k, 0.0, 0.6)
+		if mode == RELIEF:
+			var v := lum - BASE
+			if debug == 1:
+				var g := clampf(lum, 0.0, 1.2) * 0.8
+				c_dark[i] = Color(g, g, g, 1.0)
+				c_lift[i] = Color(0, 0, 0, 0)
+			else:
+				c_dark[i] = _dark(clampf(-v / (BASE - 0.1), 0.0, 0.95))
+				c_lift[i] = Color(_lift, clampf(v / 0.4, 0.0, 0.7))
+			c_spec[i] = Color(spec_c, sp)
 		else:
-			var ad := clampf(-_at(val, q) / (BASE - 0.12), 0.0, 0.95)
-			lc.append(Color(warm.lerp(deep, smoothstep(0.08, 0.45, ad)), ad))
-	pv._r_polyline_colors(line, lc, maxf(1.0, pv._s * 0.004), true)
+			# Integrado: a pele já tem a luz direta; aqui entram só a sombra projetada e a oclusão
+			var r := lum / maxf(_at(_lit, q), 0.05)
+			c_dark[i] = _dark(clampf((1.0 - r) * 1.12, 0.0, 0.85))
+			c_lift[i] = Color(0, 0, 0, 0)
+			c_spec[i] = Color(spec_c, sp)
+	pv._r_tri(idx, px, c_dark)
+	if mode == RELIEF:
+		pv._r_tri(idx, px, c_lift)
+	pv._r_tri(idx, px, c_spec)
+	if mode == RELIEF:
+		return
+	# Integrado: olhos, lábios, sobrancelhas e barba ganham o volume que a pele já tem
+	for poly: PackedVector2Array in masks:
+		if poly.size() < 3:
+			continue
+		var pf := PackedVector2Array()
+		for p in poly:
+			pf.append((p - pv._hc) / pv._fw)
+		var mm := KitGeom.grid_mesh(pf, _st * 0.7)
+		var mp: PackedVector2Array = mm[0]
+		if mp.is_empty():
+			continue
+		var mpx := PackedVector2Array()
+		var md := PackedColorArray()
+		var ml := PackedColorArray()
+		for q in mp:
+			mpx.append(pv._cl(pv._hc + q * pv._fw))
+			var v := _at(_lit, q) / _front - 1.0
+			md.append(_dark(clampf(-v * 1.1, 0.0, 0.45)))
+			ml.append(Color(_lift, clampf(v * 0.8, 0.0, 0.15)))
+		pv._r_tri(mm[1], mpx, md)
+		pv._r_tri(mm[1], mpx, ml)
+	if beard.size() >= 3 and not (beard[0] as PackedInt32Array).is_empty():
+		var bp: PackedVector2Array = beard[1]
+		var bc: PackedColorArray = beard[2]
+		var bd := PackedColorArray()
+		var bl := PackedColorArray()
+		bd.resize(bp.size())
+		bl.resize(bp.size())
+		for i in bp.size():
+			var q := (bp[i] - pv._hc) / pv._fw
+			var cov := clampf(bc[i].a * 1.4, 0.0, 1.0)
+			var v := _at(_lit, q) / _front - 1.0
+			var d := _dark(clampf(-v * 1.2, 0.0, 0.6))
+			bd[i] = Color(d, d.a * cov)
+			bl[i] = Color(_lift, clampf(v, 0.0, 0.25) * cov)
+		pv._r_tri(beard[0], bp, bd)
+		pv._r_tri(beard[0], bp, bl)

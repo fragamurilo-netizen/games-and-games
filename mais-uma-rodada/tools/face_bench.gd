@@ -2,6 +2,7 @@ extends SceneTree
 ## Custo de geração e repetição do cache dos retratos, sem gerar um mundo.
 ## godot --path . --resolution 1280x960 --script res://tools/face_bench.gd -- --size=320 --count=12
 ## --portrait=res://...gd permite comparar a mesma cena com uma revisão anterior do desenho.
+## --ml=N liga a luz por malha nos rostos (1 integrada, 2 relevo).
 ## O teste força queue_redraw; a mediana mede repetição dos comandos, não o FPS do jogo parado.
 
 
@@ -20,6 +21,8 @@ func _run() -> void:
 			px = clampi(int(arg.substr(7)), 24, 640)
 		elif arg.begins_with("--count="):
 			count = clampi(int(arg.substr(8)), 1, 48)
+		elif arg.begins_with("--ml="):
+			PortraitView.mesh_light_default = int(arg.substr(5))
 		elif arg.begins_with("--portrait="):
 			portrait = load(arg.substr(11))
 	var views: Array[Control] = []

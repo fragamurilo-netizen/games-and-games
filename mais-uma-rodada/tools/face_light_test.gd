@@ -1,9 +1,11 @@
 extends SceneTree
-## Teste da luz por malha nos rostos (FaceShade): o mesmo rosto antes (luz pintada) e depois
-## (relevo com sombra projetada, oclusão e brilho), lado a lado.
+## Teste da luz por malha nos rostos (FaceShade): o mesmo rosto antes (luz pintada), com a luz
+## integrada (pele de sempre + sombra projetada, oclusão, brilho e peças no volume) e no relevo
+## completo, lado a lado.
 ## xvfb-run -a -s "-screen 0 1400x1400x24" godot --path . --resolution 1300x1000 --script res://tools/face_light_test.gd -- --out=/tmp/faces.png
 ## --set=clean|beard|all, --size=N (lado de cada retrato), --pairs=N (pares por linha),
-## --only=a,b (casos), --debug (o "depois" mostra só a luz em cinza), --classic (busto no círculo)
+## --only=a,b (casos), --modes=0,1,2 (colunas: 0 antes, 1 integrada, 2 relevo), --debug (o relevo
+## mostra só a luz em cinza), --classic (busto no círculo)
 
 var _out := "user://face_light.png"
 var _frames := 0
@@ -30,6 +32,7 @@ func _initialize() -> void:
 	var ids: Array = []
 	var debug := false
 	var set_name := "clean"
+	var modes: Array = [0, 1, 2]
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--out="):
 			_out = a.substr(6)
@@ -41,6 +44,8 @@ func _initialize() -> void:
 			set_name = a.substr(6)
 		elif a.begins_with("--only="):
 			ids = Array(a.substr(7).split(",")).map(func(x): return int(x))
+		elif a.begins_with("--modes="):
+			modes = Array(a.substr(8).split(",")).map(func(x): return int(x))
 		elif a == "--debug":
 			debug = true
 		elif a == "--classic":
@@ -66,9 +71,9 @@ func _initialize() -> void:
 		var cs: Dictionary = CASES[int(ids[slot])]
 		var col := slot % pairs
 		var row := slot / pairs
-		var x0 := gap + col * (2 * px + 3 * gap)
+		var x0 := gap + col * (modes.size() * px + (modes.size() + 1) * gap)
 		var y0 := gap + row * (px + label_h + gap)
-		for side in 2:
+		for side in modes.size():
 			var c1 := String(cs["kit"][0])
 			var c2 := String(cs["kit"][1])
 			var pv := PortraitView.new()
@@ -84,13 +89,13 @@ func _initialize() -> void:
 			pv.kit = {"pattern": "plain", "c1": c1, "c2": c2, "c3": c2, "collar": "round", "sleeve": "same",
 				"sp": {"n": "Banco Sul", "c": "#FFFFFF", "t": "#111111"}}
 			pv.crest = crest
-			pv.mesh_light = side
+			pv.mesh_light = int(modes[side])
 			root.add_child(pv)
 			var lb := Label.new()
-			lb.text = ("depois (luz por malha)" if side == 1 else "antes") + ("  ·  caso %d" % int(ids[slot]) if side == 0 else "")
+			lb.text = ["antes", "luz integrada", "relevo completo"][int(modes[side])] + ("  ·  caso %d" % int(ids[slot]) if side == 0 else "")
 			lb.position = Vector2(x0 + side * (px + gap), y0)
 			lb.add_theme_font_size_override("font_size", 14)
-			lb.add_theme_color_override("font_color", Color("#C8CCD4") if side == 0 else Color("#F2C14E"))
+			lb.add_theme_color_override("font_color", Color("#C8CCD4") if int(modes[side]) == 0 else Color("#F2C14E"))
 			root.add_child(lb)
 
 
