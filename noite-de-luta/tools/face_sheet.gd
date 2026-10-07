@@ -51,7 +51,7 @@ func _initialize() -> void:
 			if fem:
 				look["fem"] = 1
 			var wc: int = weights[k % weights.size()] if not weights.is_empty() else (k * 7) / maxi(1, cols - 1)
-			look["wc"] = wc
+			look["wt"] = wc / 7.0
 			v.set_face(seed_base + e * 97 + k * 7919 + (31 if fem else 0), e, ages[k % ages.size()], look)
 			root.add_child(v)
 	process_frame.connect(_shot, CONNECT_ONE_SHOT)

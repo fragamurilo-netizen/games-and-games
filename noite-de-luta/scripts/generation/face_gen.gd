@@ -1429,8 +1429,9 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	f["fem"] = int(look.get("fem", 0)) == 1
 	if f["fem"]:
 		_apply_female(f, seed_value, age, look)
-	if look.has("bw"):
-		_apply_weight(f, seed_value, clampf(float(look["bw"]), 0.0, 1.0))
+	# Categoria de peso em `wt` (0 a 1). `bw` já é o tipo de sobrancelha escolhido no editor.
+	if look.has("wt"):
+		_apply_weight(f, seed_value, clampf(float(look["wt"]), 0.0, 1.0))
 	return f
 
 
@@ -1527,7 +1528,7 @@ static func _apply_female(f: Dictionary, seed_value: int, age: int, look: Dictio
 	f["fw"] = clampf(float(f["fw"]), float(f["fh"]) * 0.74, float(f["fh"]) * 0.84)
 
 
-## Físico pela categoria de peso (`bw`: 0 o mais leve, 1 o pesado): ombros, trapézio e pescoço
+## Físico pela categoria de peso (`wt`: 0 o mais leve, 1 o pesado): ombros, trapézio e pescoço
 ## crescem com a categoria; nos pesados aparece mais gordura no rosto e no corpo.
 static func _apply_weight(f: Dictionary, seed_value: int, bw: float) -> void:
 	var r := RandomNumberGenerator.new()
