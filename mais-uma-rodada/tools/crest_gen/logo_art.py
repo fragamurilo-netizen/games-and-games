@@ -193,6 +193,38 @@ S['match_crown'] = J([(-.9,-.8),(-.5,-.42),(0,-.9),(.5,-.42),(.9,-.8),(.68,.45),
                      rect(-.68,.64,.68,.86))
 S['match_crown_c'] = J(jag(0,.12,.23,.32,5,rot=-math.pi/2-math.pi/5))
 
+# Leão de perfil com coroa: reaproveita o desenho original do projeto,
+# com vãos maiores e uma juba mais limpa na escala de transmissão.
+S['match_lion'] = S['lion_crowned']
+S['match_lion_c'] = J(ell(-.4, -.23, .065, .035, -.3, 16),
+    stroke([(-.6,.19),(-.47,.23),(-.35,.2)],.04,.025,False),
+    stroke([(-.13,-.43),(-.04,-.12),(-.12,.2),(-.27,.46)],.07,.05,False),
+    stroke([(.24,-.4),(.39,-.08),(.36,.28),(.23,.57)],.055,.07,False))
+
+# Atleta em voleio. Anatomia própria: braços contrabalançam o tronco,
+# perna de apoio dobrada, chute alto e bola separada da chuteira.
+S['match_striker'] = J(ell(-.36,-.62,.135,.16,-.2,24),
+    [(-.42,-.47),(-.22,-.48),(.02,-.1),(-.15,.13),(-.4,-.05),(-.5,-.31)],
+    stroke([(-.38,-.38),(-.66,-.2),(-.83,-.31)],.12,.08),
+    stroke([(-.22,-.36),(.04,-.43),(.2,-.6)],.12,.075),
+    [(-.09,-.1),(.2,-.27),(.59,-.57),(.75,-.51),(.27,-.08),(.04,.18),(-.15,.14)],
+    [(-.28,.02),(-.13,.14),(-.4,.5),(-.29,.78),(-.43,.88),(-.61,.5)],
+    [(.57,-.59),(.71,-.67),(.86,-.62),(.83,-.5),(.7,-.48)],
+    ell(.87,-.84,.115,.115,n=24))
+S['match_striker_c'] = J(stroke([(-.35,-.03),(-.23,.02)],.018,.025,False))
+
+# A e B desenhados, com espaço negativo amplo; facetas são tintas chapadas.
+S['match_a'] = J([(-.84,.86),(-.22,-.9),(.1,-.9),(-.42,.86)],
+    [(.1,-.9),(.35,-.72),(.88,.86),(.45,.86)], rect(-.39,.23,.46,.5))
+S['match_a_d'] = J([(.1,-.9),(.35,-.72),(.88,.86),(.6,.86),(.04,-.7)])
+S['match_b'] = J([(-.62,-.86),(.17,-.86),(.58,-.61),(.58,-.2),(.34,-.02),(.66,.24),(.66,.63),(.29,.86),(-.62,.86)],
+    rect(-.76,-.86,-.57,.86))
+S['match_b_c'] = J(rect(-.25,-.52,.16,-.24),rect(-.25,.18,.25,.52))
+
+# Duas iniciais com cantos abertos e ritmo inclinado, em vez da bola genérica.
+S['match_ll'] = J([(-.78,-.8),(-.38,-.8),(-.63,.26),(-.08,.26),(-.18,.64),(-.9,.64)],
+    [(.02,-.64),(.42,-.64),(.17,.42),(.84,.42),(.72,.8),(-.33,.8)])
+
 if __name__ == '__main__':
     shapes = {k: v for k, v in S.items() if k.startswith('match_')} if '--broadcast-only' in sys.argv[2:] else S
     emit(sys.argv[1], shapes)

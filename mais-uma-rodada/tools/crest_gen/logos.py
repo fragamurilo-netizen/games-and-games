@@ -67,14 +67,14 @@ FLAGS = {
 logos = {}
 
 # ---------------------------------------------------------------------------------------- Ligas
-logos["ENG1"] = L("round", "#37003C", "match_crown", "#FFFFFF", c2="#37003C", ring_c="#00FF85", wordmark="PREMIER LEAGUE")
+logos["ENG1"] = L("round", "#FFFFFF", "match_lion", "#37003C", c2="#FFFFFF", ring_c="#37003C", sym_scale=1.1, wordmark="PREMIER LEAGUE")
 logos["ENG2"] = L("badge", "#0B1C3F", "lion_passant", "#D4AF37", ring_c="#D4AF37", sym_scale=1.15, wordmark="CHAMPIONSHIP")
-logos["ESP1"] = L("tile", "#FF4B44", "match_orbit", "#FFFFFF", wordmark="LALIGA")
-logos["ESP2"] = L("tile", "#1B1B1B", "match_orbit", "#00D0FF", num="2", accent="#00D0FF", wordmark="LALIGA")
-logos["GER1"] = L("tile", "#D20515", "match_pitch", "#FFFFFF", wordmark="BUNDESLIGA")
-logos["GER2"] = L("tile", "#1B1B1B", "match_pitch", "#FFFFFF", num="2", accent="#D20515", wordmark="BUNDESLIGA")
-logos["ITA1"] = L("badge", "#0A1E50", "match_gate", "#3CC7F0", flag=FLAGS["ITA"], wordmark="SERIE A")
-logos["ITA2"] = L("badge", "#0B7B3E", "match_gate", "#FFFFFF", num="B", accent="#FFFFFF", flag=FLAGS["ITA"], wordmark="SERIE B")
+logos["ESP1"] = L("tile", "#FF4B44", "match_ll", "#FFFFFF", wordmark="LALIGA")
+logos["ESP2"] = L("tile", "#1B1B1B", "match_ll", "#FF4B44", num="2", accent="#FF4B44", wordmark="LALIGA")
+logos["GER1"] = L("tile", "#D20515", "match_striker", "#FFFFFF", wordmark="BUNDESLIGA")
+logos["GER2"] = L("tile", "#1B1B1B", "match_striker", "#FFFFFF", num="2", accent="#D20515", wordmark="BUNDESLIGA")
+logos["ITA1"] = L("badge", "#FFFFFF", "match_a", "#187BD1", dc="#0A2D73", c2="#0A2D73", flag=FLAGS["ITA"], wordmark="SERIE A")
+logos["ITA2"] = L("badge", "#0B7B3E", "match_b", "#FFFFFF", flag=FLAGS["ITA"], wordmark="SERIE B")
 logos["FRA1"] = L("tile", "#091C3E", "match_hex", "#DAE025", num="1", accent="#DAE025", wordmark="LIGUE 1")
 logos["FRA2"] = L("tile", "#0E3B7D", "match_hex", "#F28C28", num="2", accent="#F28C28", wordmark="LIGUE 2")
 logos["POR1"] = L("round", "#00205B", "caravel", "#00C1D5", ring_c="#00C1D5", wordmark="LIGA PORTUGAL")
