@@ -79,6 +79,8 @@ var _aux_timer := 0.0
 var _clips: Dictionary = {}
 var _goal_rows: Dictionary = {}
 var _replay_on := false
+## Botão "Pular replay" sobre o campo, visível só durante o replay.
+var _replay_skip_btn: Button
 var _replay_after: Callable = Callable()
 var _pressure_side := -1
 
@@ -298,6 +300,10 @@ func _build() -> void:
 	_pitch.away_label = away.abbr
 	_pitch.mouse_filter = Control.MOUSE_FILTER_PASS # toque no campo pula o replay
 	_pitch.replay_skipped.connect(_on_replay_skipped)
+	_replay_skip_btn = UIKit.button("Pular replay", "ChipButton", _skip_replay, "skip")
+	_replay_skip_btn.visible = false
+	_pitch.add_child(_replay_skip_btn)
+	_replay_skip_btn.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_MINSIZE, UITokens.S2)
 	_pitch.home_color = _colors[0]
 	_pitch.home_color2 = _colors[1]
 	_pitch.away_color = _colors[2]
@@ -794,6 +800,8 @@ func _process(delta: float) -> void:
 	if not _pitch.motion.frozen:
 		_gate_clock += delta
 	_tv.paused = UIManager.has_modal() or _halftime or _paused
+	if _replay_skip_btn != null and _replay_skip_btn.visible != _replay_on:
+		_replay_skip_btn.visible = _replay_on
 	if _replay_on and not _pitch.motion.replaying:
 		_replay_on = false
 		_hold = minf(_hold, 0.25)
@@ -1092,6 +1100,9 @@ func _after_goal(ev: Dictionary) -> void:
 	var key := _goal_key(ev)
 	_clips[key] = clip
 	_add_replay_button(key)
+	if not AppSettings.goal_replays:
+		resume.call()
+		return
 	_play_replay(clip, resume)
 
 
@@ -1105,11 +1116,23 @@ func _play_replay(clip: Dictionary, after: Callable) -> void:
 	_replay_on = true
 	_replay_after = after
 	_hold = maxf(_hold, dur + 0.3)
+	if _replay_skip_btn != null:
+		_replay_skip_btn.visible = true
 
 
 func _on_replay_skipped() -> void:
 	# O PitchView já encerrou o replay; o _process devolve o jogo no próximo quadro.
 	_hold = minf(_hold, 0.25)
+	if _replay_skip_btn != null:
+		_replay_skip_btn.visible = false
+
+
+## Botão "Pular replay": encerra o replay e volta ao vivo.
+func _skip_replay() -> void:
+	if not _replay_on:
+		return
+	_pitch.motion.stop_replay()
+	_on_replay_skipped()
 
 
 ## "Rever gol" na linha do gol da narração.

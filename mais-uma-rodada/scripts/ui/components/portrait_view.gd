@@ -599,7 +599,7 @@ func _prepare_decals(s: float) -> void:
 			_crest_tex = t
 	var sp: Variant = kit.get("sp", {})
 	if sp is Dictionary and String((sp as Dictionary).get("n", "")) != "" and s >= 90.0:
-		var t2 := DecalCache.text_texture(String((sp as Dictionary)["n"]).to_upper(), self)
+		var t2 := DecalCache.brand_texture(sp as Dictionary, self)
 		if t2 != null and DecalCache.is_ready(t2):
 			_sponsor_tex = t2
 

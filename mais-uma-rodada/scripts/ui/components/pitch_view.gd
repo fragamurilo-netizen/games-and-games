@@ -709,22 +709,9 @@ func _draw_boards(boards: Rect2, inner: Rect2, bt: float, kind: String) -> void:
 
 ## Nome da marca com o símbolo dela à esquerda, centrados numa placa de `along` x `thick`
 ## (coordenadas locais, centro em 0,0).
-func _board_logo(b: Dictionary, along: float, thick: float, fs: int, font: Font, tcol: Color, bg: Color) -> void:
-	var txt := String(b.get("n", "")).to_upper()
-	var mark := String(b.get("m", ""))
-	if mark == "":
-		mark = String(b.get("logo", ""))
-	var mu := thick * 0.3
-	var has_mark := mark != "" and BrandMark.has(mark) and mu >= 2.5
-	var mark_w := mu * 2.6 if has_mark else 0.0
-	var maxw := along - 6.0 - mark_w
-	var tw := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-	var f2 := fs if tw <= maxw else maxi(6, int(fs * maxw / tw))
-	tw = font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, f2).x
-	var x0 := -(tw + mark_w) * 0.5
-	if has_mark:
-		BrandMark.draw(self, mark, Vector2(x0 + mu, 0), mu, tcol, bg)
-	draw_string(font, Vector2(x0 + mark_w, f2 * 0.36), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, f2, tcol)
+func _board_logo(b: Dictionary, along: float, thick: float, _fs: int, _font: Font, tcol: Color, _bg: Color) -> void:
+	var pad := Vector2(thick * 0.5, thick * 0.16)
+	BrandLogo.draw(self, b, Rect2(Vector2(-along * 0.5, -thick * 0.5) + pad, Vector2(along, thick) - pad * 2.0), tcol)
 
 
 ## Tapetes de publicidade deitados na grama ao lado dos gols (estádios modernos).
@@ -1056,11 +1043,19 @@ func _draw_chips(r: Rect2) -> void:
 		var sz := rad * 2.3
 		if i == selected:
 			draw_circle(p, sz * 0.78, Color(UIColors.D_TEXT, 0.22))
-		_draw_mini_shirt(p, sz, c1, c2, i == selected)
+		var kd: Dictionary = ch.get("kit", {})
+		_draw_mini_shirt(p, sz, c1, c2, i == selected, kd)
 		var num := str(ch.get("number", ""))
 		var fs := int(sz * 0.36)
 		var nw := font.get_string_size(num, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-		draw_string(font, p + Vector2(-nw * 0.5, fs * 0.5), num, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UIColors.on_color(c1))
+		var nfg := UIColors.on_color(c1)
+		var at := p + Vector2(-nw * 0.5, fs * 0.5)
+		if _mini_patterned(kd):
+			# Camisa listrada: número na cor que contrasta com as duas, com contorno (como na camisa).
+			var pc: Color = _mini_cols(kd, c1, c2)[0]
+			nfg = Color.WHITE if (c1.get_luminance() + pc.get_luminance()) * 0.5 < 0.55 else Color("#111111")
+			draw_string_outline(font, at, num, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, maxi(2, fs / 6), Color(0, 0, 0, 0.8) if nfg.get_luminance() > 0.5 else Color(1, 1, 1, 0.9))
+		draw_string(font, at, num, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, nfg)
 		var rating: int = int(ch.get("rating", 0))
 		var nfs := int(maxf(15.0, rad * 0.62))
 		# Nome de camisa: sobrenome composto vira a última palavra; se ainda não couber no espaço
@@ -1101,7 +1096,47 @@ func _shirt_name(full: String, font: Font, fs: int, max_w: float) -> String:
 
 ## Camisa de futebol vista de frente: corpo na cor principal, mangas e gola na segunda cor,
 ## contorno escuro fino para ler sobre a grama; selecionada ganha contorno de giz.
-func _draw_mini_shirt(c: Vector2, s: float, c1: Color, c2: Color, sel: bool) -> void:
+## Tronco da mini camisa (sem as mangas), em unidades do tamanho dela, centrado.
+const MINI_TORSO := [Vector2(-0.30, -0.44), Vector2(-0.13, -0.47), Vector2(0.0, -0.37), Vector2(0.13, -0.47),
+	Vector2(0.30, -0.44), Vector2(0.29, -0.13), Vector2(0.29, 0.47), Vector2(-0.29, 0.47), Vector2(-0.29, -0.13)]
+## Estampas já recortadas no tronco da mini camisa: padrão -> [peças da cor 2, peças da cor 3].
+static var _mini_cache: Dictionary = {}
+
+
+static func _mini_pattern(pat: String) -> Array:
+	if _mini_cache.has(pat):
+		return _mini_cache[pat]
+	var torso := PackedVector2Array(MINI_TORSO)
+	var out: Array = [[], []]
+	for k in 2:
+		var bands: Array = KitView.pattern_bands(pat) if k == 0 else KitView.pattern_bands3(pat)
+		for b: PackedVector2Array in bands:
+			# Do quadrado da camisa grande (frente entre 0,242 e 0,758) para o tronco da mini.
+			var m := PackedVector2Array()
+			for q in b:
+				m.append(Vector2((q.x - 0.5) * 1.124, (q.y - 0.5085) * 1.0526))
+			for piece in Geometry2D.intersect_polygons(m, torso):
+				if piece.size() >= 3:
+					(out[k] as Array).append(piece)
+	_mini_cache[pat] = out
+	return out
+
+
+static func _mini_patterned(kd: Dictionary) -> bool:
+	var pat := String(kd.get("pattern", "plain"))
+	return pat != "plain" and not (pat in KitView.GRADIENTS) and not bool(kd.get("tonal", false))
+
+
+## Cores da estampa da mini camisa: a secundária e a terceira (tom sobre tom vira um tom da principal).
+static func _mini_cols(kd: Dictionary, c1: Color, c2: Color) -> Array:
+	if bool(kd.get("tonal", false)):
+		return [KitView.tone_of(c1), KitView.tone_of(c1).lerp(c1, 0.5)]
+	return [c2, Color(String(kd.get("c3", kd.get("c2", c2.to_html(false)))))]
+
+
+## Mini camisa do campinho. Com o uniforme (`kd`), leva a estampa do clube (listras, faixas,
+## metades), as mangas como na camisa e a gola na cor dos detalhes.
+func _draw_mini_shirt(c: Vector2, s: float, c1: Color, c2: Color, sel: bool, kd: Dictionary = {}) -> void:
 	var u := func(x: float, y: float) -> Vector2: return c + Vector2(x * s, y * s)
 	var body := PackedVector2Array([u.call(-0.30, -0.44), u.call(-0.13, -0.47), u.call(0.0, -0.37), u.call(0.13, -0.47),
 		u.call(0.30, -0.44), u.call(0.52, -0.26), u.call(0.40, -0.06), u.call(0.29, -0.13), u.call(0.29, 0.47),
@@ -1109,9 +1144,32 @@ func _draw_mini_shirt(c: Vector2, s: float, c1: Color, c2: Color, sel: bool) -> 
 	draw_colored_polygon(body, c1)
 	var same := absf(c1.r - c2.r) + absf(c1.g - c2.g) + absf(c1.b - c2.b) < 0.15
 	var trim := c2 if not same else c1.darkened(0.35)
-	draw_colored_polygon(PackedVector2Array([u.call(-0.30, -0.44), u.call(-0.52, -0.26), u.call(-0.40, -0.06), u.call(-0.29, -0.13)]), trim)
-	draw_colored_polygon(PackedVector2Array([u.call(0.30, -0.44), u.call(0.52, -0.26), u.call(0.40, -0.06), u.call(0.29, -0.13)]), trim)
-	draw_polyline(PackedVector2Array([u.call(-0.13, -0.47), u.call(0.0, -0.37), u.call(0.13, -0.47)]), trim, maxf(2.0, s * 0.05), true)
+	var collar_col := trim
+	var sleeves := trim
+	if not kd.is_empty():
+		var c3 := Color(String(kd.get("c3", kd.get("c2", c2.to_html(false)))))
+		collar_col = c3 if c3 != c1 else c1.darkened(0.4)
+		var sl := String(kd.get("sleeve", "same"))
+		sleeves = c2 if sl in ["contrast", "raglan"] else c1
+		# Camisa listrada: a manga sai na cor da listra (a listra desce pelo braço)
+		if String(kd.get("pattern", "plain")) in KitView.STRIPES_V and not (sl in ["contrast", "raglan"]):
+			sleeves = _mini_cols(kd, c1, c2)[0]
+		if _mini_patterned(kd):
+			var pc: Array = _mini_cols(kd, c1, c2)
+			var parts: Array = _mini_pattern(String(kd.get("pattern", "plain")))
+			for k in 2:
+				for piece: PackedVector2Array in parts[k]:
+					var pts := PackedVector2Array()
+					for q in piece:
+						pts.append(c + q * s)
+					draw_colored_polygon(pts, pc[k])
+	draw_colored_polygon(PackedVector2Array([u.call(-0.30, -0.44), u.call(-0.52, -0.26), u.call(-0.40, -0.06), u.call(-0.29, -0.13)]), sleeves)
+	draw_colored_polygon(PackedVector2Array([u.call(0.30, -0.44), u.call(0.52, -0.26), u.call(0.40, -0.06), u.call(0.29, -0.13)]), sleeves)
+	if not kd.is_empty():
+		# Punho na cor dos detalhes, como a gola
+		for sx in [-1.0, 1.0]:
+			draw_line(u.call(0.52 * sx, -0.26), u.call(0.40 * sx, -0.06), collar_col, maxf(1.5, s * 0.045), true)
+	draw_polyline(PackedVector2Array([u.call(-0.13, -0.47), u.call(0.0, -0.37), u.call(0.13, -0.47)]), collar_col, maxf(2.0, s * 0.05), true)
 	var outline := body.duplicate()
 	outline.append(body[0])
 	draw_polyline(outline, UIColors.D_TEXT if sel else Color(0, 0, 0, 0.55), maxf(1.5, s * (0.05 if sel else 0.025)), true)

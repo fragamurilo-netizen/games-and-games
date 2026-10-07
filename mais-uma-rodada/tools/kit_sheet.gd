@@ -15,6 +15,8 @@ func _initialize() -> void:
 	var league := ""
 	var full := true
 	var back := false
+	var with_sp := false
+	var num := 10
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--out="):
 			_out = a.substr(6)
@@ -32,6 +34,10 @@ func _initialize() -> void:
 			full = false
 		elif a == "--back":
 			back = true
+		elif a == "--sp":
+			with_sp = true # patrocinador e fornecedor como no jogo
+		elif a.begins_with("--num="):
+			num = int(a.substr(6))
 		elif a.begins_with("--offset="):
 			offset = int(a.substr(9))
 		elif a.begins_with("--league="):
@@ -127,9 +133,13 @@ func _initialize() -> void:
 		v.size = Vector2(w, px)
 		v.full = full
 		v.back = back
-		v.number = 10
+		v.number = num
 		v.back_name = "SILVA"
-		v.kit = specs[i]
+		var kd: Dictionary = (specs[i] as Dictionary).duplicate()
+		if with_sp and not kd.has("sp"):
+			kd["sp"] = {"n": "Banco Sul", "c": "#FFFFFF", "t": "#0B2A6B", "m": "curva"}
+			kd["sup"] = {"n": "Volt", "logo": ["curva", "barras", "raio", "asas"][i % 4], "c": "#FFFFFF"}
+		v.kit = kd
 		if i < crests.size():
 			v.crest = crests[i]
 		root.add_child(v)

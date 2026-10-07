@@ -206,21 +206,7 @@ func _draw() -> void:
 		sb.set_corner_radius_all(int(logo.size.y * 0.22))
 		sb.anti_aliasing = true
 		draw_style_box(sb, logo)
-		var txt := String(b.get("n", "")).to_upper()
-		var mark := String(b.get("m", ""))
-		if mark == "":
-			mark = String(b.get("logo", ""))
-		var mu := logo.size.y * 0.24
-		var mark_w := mu * 2.6 if BrandMark.has(mark) and mu >= 2.5 else 0.0
-		var fs := int(logo.size.y * 0.5)
-		var tw := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-		if tw > logo.size.x - 8.0 - mark_w:
-			fs = maxi(7, int(fs * (logo.size.x - 8.0 - mark_w) / tw))
-			tw = font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-		var x0 := logo.get_center().x - (tw + mark_w) * 0.5
-		if mark_w > 0.0:
-			BrandMark.draw(self, mark, Vector2(x0 + mu, logo.get_center().y), mu, tx, bg)
-		draw_string(font, Vector2(x0 + mark_w, logo.get_center().y + fs * 0.36), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, tx)
+		BrandLogo.draw(self, b, logo.grow_individual(-logo.size.y * 0.3, -logo.size.y * 0.14, -logo.size.y * 0.3, -logo.size.y * 0.14), tx)
 	# Rodapé do painel e piso.
 	draw_rect(Rect2(0, back.end.y, w, 4), c1)
 	for i in 6:

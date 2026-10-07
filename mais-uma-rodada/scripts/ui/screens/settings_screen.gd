@@ -163,6 +163,10 @@ func refresh() -> void:
 		AppSettings.tv_graphics = i
 		AppSettings.save_settings()))
 	card2.add_child(UIKit.label("Faixa do gol na cor do clube, tarja do goleador, números, tabela ao vivo, substituições e cartões, cada liga com a cara da sua transmissão.", "Small", true))
+	card2.add_child(_toggle("Replay automático dos gols", AppSettings.goal_replays, func(v: bool):
+		AppSettings.goal_replays = v
+		AppSettings.save_settings()))
+	card2.add_child(UIKit.label("Desligado, o jogo segue direto depois do gol. Dá para rever pelo botão Rever na narração, e durante o replay o botão Pular volta ao vivo.", "Small", true))
 	tabs["game"].push_front(UIKit.card_panel(card2)) # partidas primeiro: a opção mais usada
 	var cs := UIKit.card("Card", 12)
 	cs.add_child(UIKit.section("Compras"))

@@ -774,6 +774,7 @@ func _update_chips() -> void:
 			"rating": 0,
 			"c1": Color(String((kg if int(s["pos"]) == Pos.GK else kh).get("c1", club.color1))),
 			"c2": Color(String((kg if int(s["pos"]) == Pos.GK else kh).get("c2", club.color2))),
+			"kit": kg if int(s["pos"]) == Pos.GK else kh,
 			"cond": p.condition if p != null else 100.0}
 		if p != null and Pos.familiarity(p.position, p.secondary, s["pos"]) < 0.9:
 			ch["warn"] = true

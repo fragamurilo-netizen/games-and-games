@@ -60,6 +60,8 @@ static var match_gfx: int = 0
 ## cartões, outros jogos, melhor em campo).
 const TV_GRAPHICS_NAMES: Array[String] = ["Desligado", "Só os gols", "Completo"]
 static var tv_graphics: int = 2
+## Replay automático depois de cada gol (o "Rever" na narração continua valendo).
+static var goal_replays: bool = true
 ## Escudos, logos, fotos e uniformes em imagem dos pacotes instalados (drop-ins): ligados (true) ou
 ## só os desenhos do jogo (false).
 static var pack_images: bool = true
@@ -97,6 +99,7 @@ static func load_settings() -> void:
 	match_view = clampi(int(cfg.get_value("game", "match_view", 0)), 0, 2)
 	match_gfx = clampi(int(cfg.get_value("game", "match_gfx", 0)), 0, 1)
 	tv_graphics = clampi(int(cfg.get_value("game", "tv_graphics", 2)), 0, 2)
+	goal_replays = bool(cfg.get_value("game", "goal_replays", true))
 	pack_images = bool(cfg.get_value("look", "pack_images", true))
 
 
@@ -123,6 +126,7 @@ static func save_settings() -> void:
 	cfg.set_value("game", "match_view", match_view)
 	cfg.set_value("game", "match_gfx", match_gfx)
 	cfg.set_value("game", "tv_graphics", tv_graphics)
+	cfg.set_value("game", "goal_replays", goal_replays)
 	cfg.set_value("look", "pack_images", pack_images)
 	cfg.save(PATH)
 

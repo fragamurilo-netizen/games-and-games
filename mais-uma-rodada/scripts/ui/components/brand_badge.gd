@@ -29,20 +29,5 @@ func _draw() -> void:
 	sb.bg_color = bg
 	sb.set_corner_radius_all(8)
 	draw_style_box(sb, r)
-	var mark := String(brand.get("m", ""))
-	if mark == "":
-		mark = String(brand.get("logo", ""))
-	var font := get_theme_font(&"font", &"Caps")
-	var txt := String(brand.get("n", "")).to_upper()
-	var fs := int(clampf(size.y * 0.36, 9.0, 22.0))
-	var mu := size.y * 0.24
-	var mark_w := mu * 2.7 if BrandMark.has(mark) else 0.0
-	var maxw := size.x - 20.0 - mark_w
-	var tw := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-	if tw > maxw:
-		fs = maxi(7, int(fs * maxw / tw))
-		tw = font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-	var x0 := (size.x - tw - mark_w) * 0.5
-	if mark_w > 0.0:
-		BrandMark.draw(self, mark, Vector2(x0 + mu, size.y * 0.5), mu, fg, bg)
-	draw_string(font, Vector2(x0 + mark_w, size.y * 0.5 + fs * 0.36), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, fg)
+	var pad := Vector2(size.y * 0.22, size.y * 0.18)
+	BrandLogo.draw(self, brand, Rect2(r.position + pad, r.size - pad * 2.0), fg)

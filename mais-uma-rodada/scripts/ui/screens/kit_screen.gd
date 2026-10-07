@@ -430,7 +430,7 @@ func _build_stage(club: Club, pre: bool) -> void:
 		kv.number = 1 if _which == "gk" else 10
 		kv.back = is_back
 		kv.back_name = _ten_name() if _which != "gk" else ""
-		kv.custom_minimum_size = Vector2(170, 300) if not is_back else Vector2(128, 226)
+		kv.custom_minimum_size = Vector2(196, 344) if not is_back else Vector2(140, 248)
 		kv.size_flags_vertical = Control.SIZE_SHRINK_END
 		kv.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		big.add_child(kv)

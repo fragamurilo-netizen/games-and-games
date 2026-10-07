@@ -48,6 +48,30 @@ static func text_texture(text: String, requester: CanvasItem) -> Texture2D:
 	return _lookup(key, requester)
 
 
+## Logo completo da marca (BrandLogo) em branco, para o retrato imprimir na camisa com a tinta certa.
+static func brand_texture(brand: Dictionary, requester: CanvasItem) -> Texture2D:
+	var name := String(brand.get("n", ""))
+	if name == "":
+		return null
+	var key := "b" + name
+	if not _entries.has(key):
+		var asp := clampf(BrandLogo.aspect(brand), 1.0, 8.0)
+		var w := clampi(int(TEXT_H * asp) + 8, 16, 1024)
+		var lc := LogoCanvas.new()
+		lc.brand = brand
+		lc.size = Vector2(w, TEXT_H)
+		_make(key, lc, Vector2i(w, TEXT_H), float(w) / TEXT_H)
+	return _lookup(key, requester)
+
+
+class LogoCanvas:
+	extends Control
+	var brand: Dictionary = {}
+
+	func _draw() -> void:
+		BrandLogo.draw(self, brand, Rect2(Vector2.ZERO, size).grow(-2.0), Color.WHITE)
+
+
 ## Volta do segundo plano: o conteúdo dos SubViewports pode ter sido perdido junto com a
 ## superfície; pede um novo desenho de todos.
 static func refresh() -> void:
