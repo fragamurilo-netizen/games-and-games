@@ -12,6 +12,7 @@ func _initialize() -> void:
 	var checked := 0
 	var saved := {"fs": 0, "es": 0, "ns": 0, "mt": 0, "er": 0}
 	var catalogs := {"fs": [FaceGen.FACE_SHAPES, "face_shape"], "es": [FaceGen.EYE_SHAPES, "eye_shape"], "ns": [FaceGen.NOSE_TYPES, "nose_type"], "mt": [FaceGen.MOUTH_TYPES, "mouth_type"], "er": [FaceGen.EAR_TYPES, "ear_type"]}
+	var original_counts := {"fs": 18, "es": 30, "ns": 32, "mt": 26, "er": 12}
 	for eth in 13:
 		for age in [17, 28, 45, 65]:
 			for i in 12:
@@ -47,6 +48,12 @@ func _initialize() -> void:
 			if face[catalogs[key][1]] != index:
 				_fail("índice não respeitado: %s=%d" % [key, index])
 				return
+			if baseline != null and index < original_counts[key]:
+				var old: Dictionary = baseline.features(4921, 7, 30, look)
+				for field: String in old:
+					if old[field] != face.get(field):
+						_fail("anatomia antiga mudou: %s=%d, %s" % [key, index, field])
+						return
 			checked += 1
 	print("anatomia: %d casos, com erro: 0" % checked)
 	quit()
