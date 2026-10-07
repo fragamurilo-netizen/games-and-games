@@ -1,8 +1,15 @@
-# Continuar daqui (atualizado em 06/10/2026)
+# Continuar daqui (atualizado em 07/10/2026)
 
 Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou outra sessão do Claude.
 
 ## Onde está o jogo
+
+- **Rodada de 07/10 (tarde e noite): `claude/youthful-newton-hey7og`** = `claude/hopeful-newton-8avbo4` (já com o Codex) + o que vem abaixo. APK consolidado, sem trava de compra: `mais-uma-rodada/builds/MaisUmaRodada-1.0.0-consolidado-uniformes-logos-2026-10-07.apk` (release, certificado de sempre, instala por cima). Conferido: `check_scripts` 0 erros, `smoke_boot` e `mobile_regression`.
+  - **Jogo fechando ao iniciar a partida:** a abertura da TV criava os SubViewports em 512×512 e montava todas as páginas de uma vez (pico de ~105 MB de vídeo e ~1 s travado). Agora o `PhotoPortrait` nasce em 2×2 e se desliga ao sair da árvore, e o `BroadcastIntro` monta cada página só quando ela aparece. Medição: `tools/match_start_stress.gd`.
+  - **Uniformes:** luz e sombra por malha (`KitShade` + `KitGeom`: grade recortada em cada peça, normal de um modelo do corpo, oclusão onde as peças se encostam e dobras do tecido), frisos e listras que seguem o contorno, mangas listradas nas camisas listradas, escudo e patrocínio bordados, peito mais estreito e mangas mais longas. A cor do patrocínio depende do fundo: contraste WCAG ≥ 3 sobre todas as cores embaixo dele; se nenhuma cor serve, entra uma placa na cor da camisa.
+  - **Marcas:** `LogoGeom` (formas, booleanas, contornos de letras da fonte), `BrandMark` (símbolo para as 573 marcas e 31 fornecedores desenhados um a um) e `BrandLogo` (tipografia por setor e logotipo completo em camisas, placas, sala de imprensa e retratos). Folhas para conferir: `tools/brand_sheet.gd`.
+  - **Partida:** botão "Pular replay" e a opção "Replay automático dos gols" (`AppSettings.goal_replays`). Instruções individuais por jogador em Tática › Instruções individuais e na Beira do campo.
+  - **Em andamento, fora do APK:** teste da luz por malha nos rostos (`FaceShade`).
 
 - **Frente paralela do Codex (visual: escudos, logos, uniformes, rostos):** pedido completo em `docs/handoff/codex-visual.md`. O Codex trabalha num ramo próprio, `codex/visual-escudos-uniformes-rostos`, a partir de `claude/hopeful-newton-8avbo4`, e só mexe nos arquivos listados lá. Do lado do Claude, **não mexa** nesses arquivos enquanto a frente estiver aberta (`crest_view.gd`, `crest_art.gd`, `kit_view.gd`, `kit_stage.gd`, `portrait_view.gd`, `face_gen.gd`, `photo_portrait.gd`, `photo_look.gdshader`, `decal_cache.gd`, `data/world/kits/`, os campos `crest`/`colors`/`kit` dos clubes e `identity.json` → `logos`). Juntar só com o OK do dono.
 - **Rodada de 06/10 à noite (continuação): `claude/hopeful-newton-8avbo4`.** APK com tudo: `builds/MaisUmaRodada-1.0.0-transmissao-tv-2026-10-06-debug.apk` (certificado de sempre, instala por cima). Detalhes em "Transmissão de TV, escudos reais e mundo vivo" logo abaixo.
