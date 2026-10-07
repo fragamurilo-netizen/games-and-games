@@ -3,6 +3,7 @@ extends Node
 var games := 6
 var wait_save := true
 var intro_dir := ""
+var instr_dir := ""
 
 
 func _ready() -> void:
@@ -11,6 +12,8 @@ func _ready() -> void:
 			games = int(a.get_slice("=", 1))
 		elif a.begins_with("--tv="):
 			AppSettings.tv_graphics = int(a.get_slice("=", 1))
+		elif a.begins_with("--instr-shots="):
+			instr_dir = a.get_slice("=", 1)
 		elif a.begins_with("--intro-shots="):
 			intro_dir = a.get_slice("=", 1)
 		elif a == "--no-wait-save":
@@ -92,6 +95,8 @@ func _run() -> void:
 		if ms == null or ms.get("_done") == null:
 			print("[etapa] %d: a tela da partida não abriu" % g)
 			break
+		if instr_dir != "" and g == 0:
+			await _instr_shots(ms)
 		ms.set("_pace", 2)
 		var guard := Time.get_ticks_msec() + 240000
 		while not bool(ms.get("_done")) and Time.get_ticks_msec() < guard:
@@ -152,3 +157,26 @@ func _walk_intro() -> void:
 		if next == null:
 			break
 		next.pressed.emit()
+
+
+## Capturas da partida: a lista de instruções individuais e o seletor de um jogador.
+func _instr_shots(ms: Node) -> void:
+	DirAccess.make_dir_recursive_absolute(instr_dir)
+	UIManager.close_all_modals()
+	await _frames(10)
+	ms.call("_open_instructions")
+	await _frames(20)
+	get_viewport().get_texture().get_image().save_png(instr_dir + "/instr_lista.png")
+	var sim: MatchSimulation = ms.get("_sim")
+	var side: int = ms.get("_user_side")
+	var t: MatchTeam = sim.teams[side]
+	ms.set("_instr_pid", t.slots[9].p.id)
+	ms.call("_render_tactics")
+	await _frames(20)
+	get_viewport().get_texture().get_image().save_png(instr_dir + "/instr_jogador.png")
+	UIManager.close_all_modals()
+	await _frames(4)
+	ms.call("_open_shouts")
+	await _frames(20)
+	get_viewport().get_texture().get_image().save_png(instr_dir + "/beira.png")
+	UIManager.close_all_modals()

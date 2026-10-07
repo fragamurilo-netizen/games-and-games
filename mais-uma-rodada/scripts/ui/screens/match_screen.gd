@@ -2581,6 +2581,12 @@ func _open_shouts() -> void:
 	head.add_child(title)
 	head.add_child(UIKit.icon_button("close", func(): UIManager.close_modal()))
 	v.add_child(head)
+	var ind := UIKit.button("Instruções individuais", "GhostButton", func():
+		UIManager.close_modal()
+		_open_instructions.call_deferred(), "user")
+	ind.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	v.add_child(ind)
+	v.add_child(UIKit.section("Gritos para o time"))
 	if t.sh_key != "":
 		v.add_child(UIKit.colored("Em vigor: %s (até %d')" % [String(MatchSimulation.SHOUTS[t.sh_key]["short"]), t.sh_until], UIColors.ACCENT, "Small"))
 	var wait := _sim.shout_wait(_user_side)
@@ -2606,6 +2612,9 @@ func _open_shouts() -> void:
 
 
 var _subs_only := false
+## Instruções individuais: só a lista dos jogadores (aberta pelo "Instruções") e o jogador escolhido.
+var _instr_only := false
+var _instr_pid := -1
 
 
 ## Substituir: lista de quem está em campo; toque em quem sai e depois em quem entra.
@@ -2629,6 +2638,8 @@ func _open_tactics() -> void:
 	if _done:
 		return
 	_subs_only = false
+	_instr_only = false
+	_instr_pid = -1
 	_sub_out = -1
 	_tac_box = UIKit.vbox(12)
 	_tac_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -2646,8 +2657,11 @@ func _render_tactics() -> void:
 		return
 	UIKit.clear(_tac_box)
 	var t: MatchTeam = _sim.teams[_user_side]
+	if _instr_pid >= 0:
+		_render_instruction_pick(t)
+		return
 	var head := UIKit.hbox(10)
-	var title := UIKit.label(("Substituir" if _subs_only else "Tática") if _sub_out < 0 else "Quem entra?", "Section")
+	var title := UIKit.label(("Substituir" if _subs_only else ("Instruções individuais" if _instr_only else "Tática")) if _sub_out < 0 else "Quem entra?", "Section")
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(title)
 	head.add_child(UIKit.icon_button("close", func(): UIManager.close_modal()))
@@ -2657,6 +2671,9 @@ func _render_tactics() -> void:
 		return
 	if _subs_only:
 		_render_subs(t)
+		return
+	if _instr_only:
+		_render_player_instructions(t)
 		return
 	var tac := DatabaseManager.tactics()
 	_tac_box.add_child(UIKit.section("Formação"))
@@ -2717,6 +2734,94 @@ func _render_tactics() -> void:
 				_drain(false)
 				_render_tactics()))
 		_tac_box.add_child(fl2)
+	_tac_box.add_child(UIKit.section("Instruções individuais"))
+	_render_player_instructions(t)
+
+
+## Abre direto a lista de instruções individuais (botão "Instruções").
+func _open_instructions() -> void:
+	if _done:
+		return
+	_subs_only = false
+	_instr_only = true
+	_instr_pid = -1
+	_sub_out = -1
+	_tac_box = UIKit.vbox(12)
+	_tac_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_render_tactics()
+	var s := ScrollContainer.new()
+	s.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	s.custom_minimum_size = Vector2(0, 880)
+	s.scroll_deadzone = 14
+	s.add_child(_tac_box)
+	UIManager.show_modal(s, true)
+
+
+## Jogadores em campo com a instrução de cada um; tocar abre as opções.
+func _render_player_instructions(t: MatchTeam) -> void:
+	_tac_box.add_child(UIKit.label("Toque no jogador para mudar o que ele faz em campo. Vale na hora.", "Muted", true))
+	for mp: MatchPlayer in t.slots:
+		if mp == null or mp.slot <= 0:
+			continue
+		var pid := mp.p.id
+		var row := UIKit.hbox(10)
+		row.add_child(UIKit.pos_badge(mp.pos))
+		var col := UIKit.vbox(2)
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.add_child(UIKit.label(mp.p.display_name(), "H3"))
+		var cur := String(mp.instr.get("name", ""))
+		col.add_child(UIKit.colored(cur, UIColors.ACCENT, "Small") if cur != "" else UIKit.label("Padrão da função", "Muted"))
+		row.add_child(col)
+		_tac_box.add_child(UIKit.tap_row(row, func():
+			_instr_pid = pid
+			_render_tactics()))
+
+
+## As instruções para um jogador: a atual em destaque e a que combina com o estilo dele.
+func _render_instruction_pick(t: MatchTeam) -> void:
+	var mp: MatchPlayer = t.by_id.get(_instr_pid, null)
+	if mp == null or not mp.on_pitch:
+		_instr_pid = -1
+		_render_tactics()
+		return
+	var head := UIKit.hbox(10)
+	head.add_child(UIKit.icon_button("back", func():
+		_instr_pid = -1
+		_render_tactics()))
+	var title := UIKit.label(mp.p.display_name(), "Section")
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(title)
+	head.add_child(UIKit.icon_button("close", func(): UIManager.close_modal()))
+	_tac_box.add_child(head)
+	var st := PlayStyle.describe(mp.p)
+	_tac_box.add_child(UIKit.label("%s · %s" % [Pos.name_of(mp.pos), String(st["name"])], "Muted", true))
+	var match_key := String(st["instruction"])
+	var cur_name := String(mp.instr.get("name", ""))
+	var pid := mp.p.id
+	var pick := func(key: String) -> void:
+		_sim.set_instruction(_user_side, pid, key)
+		_drain(false)
+		var nm := String(TeamSheet.INSTRUCTIONS.get(key, {}).get("name", "Padrão da função"))
+		UIManager.toast("%s: %s" % [mp.p.short_name(), nm.to_lower()], UIColors.ACCENT)
+		_instr_pid = -1
+		_render_tactics()
+	var std := UIKit.label("Padrão da função", "H3" if cur_name == "" else "Body")
+	_tac_box.add_child(UIKit.tap_row(std, pick.bind("")))
+	for k in TeamSheet.INSTRUCTION_ORDER:
+		var key: String = k
+		var d: Dictionary = TeamSheet.INSTRUCTIONS[key]
+		var col := UIKit.vbox(2)
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var hr := UIKit.hbox(8)
+		var nm := UIKit.label(String(d["name"]), "H3")
+		if String(d["name"]) == cur_name:
+			nm.add_theme_color_override(&"font_color", UIColors.ACCENT)
+		hr.add_child(nm)
+		if key == match_key:
+			hr.add_child(UIKit.pill("Combina com o estilo", UIColors.GREEN, 13))
+		col.add_child(hr)
+		col.add_child(UIKit.label(String(d["desc"]), "Small", true))
+		_tac_box.add_child(UIKit.tap_row(col, pick.bind(key)))
 
 
 ## Quem está em campo, com fôlego, nota e cartão: tocar escolhe quem sai.
