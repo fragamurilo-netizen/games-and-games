@@ -261,7 +261,7 @@ func to_dict() -> Dictionary:
 	return {
 		"id": id, "key": key, "name": name, "short": short_name, "abbr": abbr, "nick": nickname,
 		"city": city, "region": region, "founded": founded, "nat": nation, "lg": league_id, "tier": tier,
-		"cmk": snappedf(commercial, 0.001), "rvk": snappedf(rev_k, 0.0001), "af": affairs, "rep": reputation, "fans": fan_base, "mood": fan_mood, "board": board_confidence,
+		"cmk": commercial, "rvk": rev_k, "af": affairs, "rep": reputation, "fans": fan_base, "mood": fan_mood, "board": board_confidence,
 		"rivals": rivals, "stadium": stadium, "cap": capacity, "ven": venue, "off": official,
 		"bal": balance, "debt": debt, "tb": transfer_budget, "wb": wage_budget, "ledger": ledger,
 		"itv": income_tv, "isp": income_sponsor, "cup": cost_upkeep, "tm": ticket_mult, "trn": training,

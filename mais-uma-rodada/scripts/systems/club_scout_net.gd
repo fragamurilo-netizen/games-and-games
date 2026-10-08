@@ -15,9 +15,6 @@ const MAX_TIER := 2 # da 3ª divisão para baixo não há departamento: só o qu
 const KNOW_PER_GAME := 14.0
 const STALE_TURNS := 60 # sem ver o jogador por tanto tempo, o conhecimento cai pela metade
 
-static var _cover_cache: Dictionary = {}
-static var _cover_key := -1
-
 
 static func data(world: GameWorld) -> Dictionary:
 	if not world.stats.has("csn"):
@@ -53,14 +50,17 @@ static func quality(c: Club) -> float:
 	return clampf(0.45 + c.reputation / 200.0 + c.facilities / 500.0, 0.5, 1.1)
 
 
-## Ligas que o departamento cobre (recalculado a cada temporada).
+## Ligas que o departamento cobre (montado na primeira consulta da temporada e guardado no mundo:
+## a reputação muda durante o ano, e o save carregado tem de cobrir as mesmas ligas do original).
 static func covered(world: GameWorld, c: Club) -> Array:
-	var ck := hash([world.get_instance_id(), world.year]) # outro save carregado não usa a lista deste
-	if _cover_key != ck:
-		_cover_cache.clear()
-		_cover_key = ck
-	if _cover_cache.has(c.id):
-		return _cover_cache[c.id]
+	var cc: Dictionary = world.stats.get("csn_cov", {})
+	if int(cc.get("y", -1)) != world.year:
+		cc = {"y": world.year, "c": {}}
+		world.stats["csn_cov"] = cc
+	var cache: Dictionary = cc["c"]
+	var key := str(c.id)
+	if cache.has(key):
+		return cache[key]
 	var out: Array = [c.league_id]
 	var nat := c.nation
 	# A divisão de baixo do próprio país (achados baratos) e a de cima (quem caiu e quer voltar).
@@ -101,7 +101,7 @@ static func covered(world: GameWorld, c: Club) -> Array:
 				var top2 := Reputation.top_league_of(n)
 				if top2 != "" and not out.has(top2):
 					out.append(top2)
-	_cover_cache[c.id] = out
+	cache[key] = out
 	return out
 
 

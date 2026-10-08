@@ -1286,6 +1286,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 	progress = 90
 	# Mercado das férias: os outros clubes fazem a maior parte dos negócios antes da bola rolar.
 	MarketAI.offseason(world)
+	TransferManager.enforce_squad_limits(world)
 	tt = _time("es_mercado", tt)
 	progress = 97
 	compute_goals(world)

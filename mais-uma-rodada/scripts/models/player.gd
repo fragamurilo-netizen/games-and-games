@@ -588,7 +588,7 @@ func to_dict() -> Dictionary:
 		"ask": asking_price, "jy": joined_year, "val": value, "rc": release_clause, "cl": clauses, "loan": loan,
 		"cond": condition, "mor": morale, "rr": recent_ratings, "iw": injury_weeks, "in": injury_name,
 		"sus": suspension, "nd": intl_duty, "ya": yellow_acc, "ret": retiring, "uw": unhappy_weeks,
-		"acc": dev_acc, "arc": snappedf(arc, 0.001), "min": minutes_season, "o0": ovr_start, "pl": persona_log,
+		"acc": dev_acc, "arc": arc, "min": minutes_season, "o0": ovr_start, "pl": persona_log,
 		"stats": stats, "cs": cup_stats, "hist": _saved(_history_raw, _history), "spells": _saved(_spells_raw, _spells),
 		"ca": career_apps, "cg": career_goals, "cas": career_assists, "tt": titles, "aw": awards, "tro": _saved(_trophies_raw, _trophies),
 	}

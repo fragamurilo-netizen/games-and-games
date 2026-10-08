@@ -226,3 +226,4 @@ static func _add_trait(p: Player, t: String) -> void:
 	if p.traits.size() >= 3:
 		p.traits.remove_at(p.traits.size() - 1)
 	p.traits.append(t)
+	p.clear_trait_cache() # o salário e a ambição já lidos na geração mudam com o traço novo

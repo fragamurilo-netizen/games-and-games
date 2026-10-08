@@ -1441,44 +1441,62 @@ static func balance_squads(world: GameWorld) -> void:
 		if world.is_user_club(c.id):
 			continue
 		_ai_cut_wages(world, c)
-		while c.player_ids.size() > int(rules["max_players"]):
-			var before := c.player_ids.size()
-			_ai_release_weakest(world, c)
-			if c.player_ids.size() == before:
+		_fit_squad(world, c, free, rules)
+
+
+## Depois do mercado das férias: elencos da IA de volta aos limites (venda sem reposição ou compra
+## demais deixavam clube com 15 ou 37 jogadores no começo do ano).
+static func enforce_squad_limits(world: GameWorld) -> void:
+	var rules := DatabaseManager.squad_rules()
+	var free := world.free_agents().duplicate()
+	free.sort_custom(func(a, b): return a.ovr_f > b.ovr_f)
+	for c: Club in world.clubs:
+		if world.is_user_club(c.id):
+			continue
+		if c.player_ids.size() > int(rules["max_players"]) or c.player_ids.size() < int(rules["min_players"]):
+			_fit_squad(world, c, free, rules)
+
+
+## Corta o excesso (libera o mais fraco) e completa o que falta (livre do nível ou gerado).
+static func _fit_squad(world: GameWorld, c: Club, free: Array, rules: Dictionary) -> void:
+	while c.player_ids.size() > int(rules["max_players"]):
+		var before := c.player_ids.size()
+		_ai_release_weakest(world, c)
+		if c.player_ids.size() == before:
+			break
+	var guard := 0
+	while guard < 12:
+		guard += 1
+		var needs := squad_needs(world, c)
+		var short := c.player_ids.size() < int(rules["min_players"]) + 2
+		var urgent: Dictionary = {}
+		for n in needs:
+			if int(n["count"]) < int(FAMILIES[int(n["fam"])][1]):
+				urgent = n
 				break
-		var guard := 0
-		while guard < 12:
-			guard += 1
-			var needs := squad_needs(world, c)
-			var short := c.player_ids.size() < int(rules["min_players"]) + 2
-			var urgent: Dictionary = {}
-			for n in needs:
-				if int(n["count"]) < int(FAMILIES[int(n["fam"])][1]):
-					urgent = n
-					break
-			if urgent.is_empty() and not short:
-				break
-			var fam: int = urgent["fam"] if not urgent.is_empty() else -1
-			var pick: Player = null
-			var level := PlayerGenerator.club_level(c)
-			for p: Player in free:
-				if p.club_id >= 0:
-					continue
-				if fam >= 0 and _family_of(p.position) != fam:
-					continue
-				if p.ovr_f > level + 6.0 or not ClubPolicy.eligible(world, c, p):
-					continue
-				if MarketAI.origin_weight(c, p) < 0.5:
-					continue # sul-americano completa o elenco com quem é do continente
-				pick = p
-				break
-			if pick == null:
-				var used := WorldGenerator.used_names_of(world)
-				var pos: int = FAMILIES[fam][0][0] if fam >= 0 else Pos.CM
-				pick = PlayerGenerator.create(world, world.rng, pos, level - 4.0, world.rng.randi_range(20, 30), PlayerGenerator.pick_nationality(world.rng, c), c.city, used)
-				pick.club_id = -1
-				world.add_player(pick)
-			complete_transfer(world, pick, c, 0, Valuation.wage_demand(pick, c, world.year), world.rng.randi_range(1, 2))
+		if urgent.is_empty() and not short:
+			break
+		var fam: int = urgent["fam"] if not urgent.is_empty() else -1
+		var pick: Player = null
+		var level := PlayerGenerator.club_level(c)
+		for p: Player in free:
+			if p.club_id >= 0:
+				continue
+			if fam >= 0 and _family_of(p.position) != fam:
+				continue
+			if p.ovr_f > level + 6.0 or not ClubPolicy.eligible(world, c, p):
+				continue
+			if MarketAI.origin_weight(c, p) < 0.5:
+				continue # sul-americano completa o elenco com quem é do continente
+			pick = p
+			break
+		if pick == null:
+			var used := WorldGenerator.used_names_of(world)
+			var pos: int = FAMILIES[fam][0][0] if fam >= 0 else Pos.CM
+			pick = PlayerGenerator.create(world, world.rng, pos, level - 4.0, world.rng.randi_range(20, 30), PlayerGenerator.pick_nationality(world.rng, c), c.city, used)
+			pick.club_id = -1
+			world.add_player(pick)
+		complete_transfer(world, pick, c, 0, Valuation.wage_demand(pick, c, world.year), world.rng.randi_range(1, 2))
 
 
 ## Folha acima do teto: coloca à venda quem custa muito para o que rende; em crise, libera.
