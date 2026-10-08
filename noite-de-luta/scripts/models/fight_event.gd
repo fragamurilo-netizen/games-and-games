@@ -13,10 +13,17 @@ var bouts: Array = []
 ## Quantas lutas o card comporta.
 var slots: int = 6
 var done: bool = false
+## Liga Global com presidente: evento numerado com pay-per-view (os outros são Fight Night).
+var ppv: bool = false
+## Presidente: a noite já foi fechada (bônus escolhidos e contas feitas).
+var closed: bool = false
+## Fechamento da noite (presidente): público, receitas, custos, bônus. Vazio antes.
+var report: Dictionary = {}
 
 
 func to_dict() -> Dictionary:
-	return {"id": id, "week": week, "tier": tier, "name": name, "city": city, "nation": nation, "bouts": bouts, "slots": slots, "done": done}
+	return {"id": id, "week": week, "tier": tier, "name": name, "city": city, "nation": nation, "bouts": bouts, "slots": slots, "done": done,
+		"ppv": ppv, "closed": closed, "report": report}
 
 
 static func from_dict(d: Dictionary) -> FightEvent:
@@ -30,4 +37,7 @@ static func from_dict(d: Dictionary) -> FightEvent:
 	e.bouts = (d.get("bouts", []) as Array).map(func(v): return int(v))
 	e.slots = int(d.get("slots", 6))
 	e.done = bool(d.get("done", false))
+	e.ppv = bool(d.get("ppv", false))
+	e.closed = bool(d.get("closed", false))
+	e.report = d.get("report", {})
 	return e

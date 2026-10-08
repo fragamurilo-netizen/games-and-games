@@ -44,6 +44,11 @@ static func _new_event(w: GameWorld, wk: int, tier: int, name: String, city: Str
 static func _lgc(w: GameWorld, wk: int) -> void:
 	var cities: Array = DataDB.mma()["lgc_cities"]
 	var c: Array = cities[w.rng.randi_range(0, cities.size() - 1)]
+	if w.is_president():
+		# A organização do jogador: numeradas com pay-per-view a cada quatro semanas.
+		var e := _new_event(w, wk, 2, Org.event_name(w, wk), String(c[0]), String(c[1]), 11 if Org.is_ppv_week(wk) else 10)
+		e.ppv = Org.is_ppv_week(wk)
+		return
 	var n := _next_num(w, "LGC", 40)
 	_new_event(w, wk, 2, "LGC %d" % n, String(c[0]), String(c[1]), 11)
 

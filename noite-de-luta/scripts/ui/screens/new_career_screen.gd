@@ -1,9 +1,11 @@
 extends BaseScreen
-## Fundar a academia: nome, país e cidade, cores e o caixa inicial (como no LEATHER, quem
-## escolhe o tamanho do desafio é o jogador).
+## Nova carreira: o papel (empresário de uma academia, como no LEATHER, ou presidente da
+## organização de elite), o nome, o país, as cores e o caixa inicial. Nos dois papéis o mundo é o
+## mesmo e anda sozinho; o papel é o jeito de participar dele.
 
 const NATIONS := ["BRA", "USA", "POR", "ENG", "IRL", "MEX", "ARG", "POL", "RUS", "JPN", "AUS", "CAN", "FRA", "ESP"]
 
+var _role := "empresario"
 var _name := "Equipe Nova Era"
 var _nation := "BRA"
 var _city := ""
@@ -14,12 +16,21 @@ var _name_edit: LineEdit
 
 func setup(p: Dictionary) -> void:
 	super.setup(p)
-	screen_title = "Nova academia"
+	screen_title = "Nova carreira"
 	show_nav = false
 
 
 func refresh() -> void:
 	var c := reset()
+	var pres := _role == "presidente"
+	c.add_child(UIKit.segment([["empresario", "Empresário"], ["presidente", "Presidente"]], _role, func(k: String):
+		if k == _role:
+			return
+		_role = k
+		_name = "Liga Global de Combate" if k == "presidente" else "Equipe Nova Era"
+		_funds = 1
+		refresh()))
+	c.add_child(UIKit.label("Dono de uma academia: contrata, treina, aceita lutas e leva alguém até o cinturão." if not pres else "Presidente da liga de elite: marca as noites, monta os cards, decide quem disputa o cinturão e cuida das contas.", "Small", true))
 	var cities: Array = DataDB.cities(_nation)
 	if _city == "" or not cities.any(func(x: Array) -> bool: return String(x[0]) == _city):
 		_city = String((cities[0] as Array)[0]) if not cities.is_empty() else ""
@@ -36,12 +47,12 @@ func refresh() -> void:
 	var nm := UIKit.label(_name, "Section")
 	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	pv.add_child(nm)
-	pv.add_child(UIKit.label("%s · %s" % [_city, DataDB.nation_name(_nation)], "Small"))
+	pv.add_child(UIKit.label(("%s · %s" % [_city, DataDB.nation_name(_nation)]) if not pres else "Sede em %s" % DataDB.nation_name(_nation), "Small"))
 	ph.add_child(pv)
 	prev.add_child(ph)
 	c.add_child(UIKit.card_panel(prev))
 	# Nome
-	c.add_child(UIKit.section_header("Nome da academia"))
+	c.add_child(UIKit.section_header("Nome da academia" if not pres else "Nome da organização"))
 	_name_edit = LineEdit.new()
 	_name_edit.text = _name
 	_name_edit.max_length = 28
@@ -52,7 +63,7 @@ func refresh() -> void:
 		badge.team = _preview_team())
 	c.add_child(_name_edit)
 	# País
-	c.add_child(UIKit.section_header("País da academia"))
+	c.add_child(UIKit.section_header("País da academia" if not pres else "País da sede"))
 	var fl := UIKit.flow(8)
 	var g := ButtonGroup.new()
 	for code: String in NATIONS:
@@ -61,15 +72,16 @@ func refresh() -> void:
 			_city = ""
 			refresh()))
 	c.add_child(fl)
-	c.add_child(UIKit.section_header("Cidade"))
-	var cf := UIKit.flow(8)
-	var g2 := ButtonGroup.new()
-	for i in mini(cities.size(), 10):
-		var cn := String((cities[i] as Array)[0])
-		cf.add_child(UIKit.chip(cn, cn == _city, g2, func():
-			_city = cn
-			refresh()))
-	c.add_child(cf)
+	if not pres:
+		c.add_child(UIKit.section_header("Cidade"))
+		var cf := UIKit.flow(8)
+		var g2 := ButtonGroup.new()
+		for i in mini(cities.size(), 10):
+			var cn := String((cities[i] as Array)[0])
+			cf.add_child(UIKit.chip(cn, cn == _city, g2, func():
+				_city = cn
+				refresh()))
+		c.add_child(cf)
 	# Cores
 	c.add_child(UIKit.section_header("Cores"))
 	var grid := GridContainer.new()
@@ -102,12 +114,17 @@ func refresh() -> void:
 	c.add_child(grid)
 	# Caixa inicial
 	c.add_child(UIKit.section_header("Caixa inicial"))
-	c.add_child(UIKit.segment([["0", "US$ 100 mil"], ["1", "US$ 250 mil"], ["2", "US$ 500 mil"]], str(_funds), func(k: String):
-		_funds = int(k)))
-	var hint := UIKit.label("Com menos dinheiro, cada contratação e cada técnico pesam mais. US$ 250 mil é o padrão.", "Small", true)
-	c.add_child(hint)
+	if pres:
+		c.add_child(UIKit.segment([["0", "US$ 6 mi"], ["1", "US$ 12 mi"], ["2", "US$ 25 mi"]], str(_funds), func(k: String):
+			_funds = int(k)))
+		c.add_child(UIKit.label("Uma noite fraca dá prejuízo; um pay-per-view com estrelas paga meses de folha. US$ 12 mi é o padrão.", "Small", true))
+	else:
+		c.add_child(UIKit.segment([["0", "US$ 100 mil"], ["1", "US$ 250 mil"], ["2", "US$ 500 mil"]], str(_funds), func(k: String):
+			_funds = int(k)))
+		c.add_child(UIKit.label("Com menos dinheiro, cada contratação e cada técnico pesam mais. US$ 250 mil é o padrão.", "Small", true))
 	var f := footer()
-	f.add_child(UIKit.button("Fundar a academia", "PrimaryButton", _start))
+	UIKit.clear(f)
+	f.add_child(UIKit.button("Fundar a academia" if not pres else "Assumir a organização", "PrimaryButton", _start))
 
 
 func _preview_team() -> Team:
@@ -122,13 +139,18 @@ func _preview_team() -> Team:
 
 func _start() -> void:
 	if _name.length() < 3:
-		UIManager.toast("Dê um nome à academia.", UIColors.RED)
+		UIManager.toast("Dê um nome à %s." % ("organização" if _role == "presidente" else "academia"), UIColors.RED)
 		return
 	var pair: Array = WorldGenerator.TEAM_COLORS[_colors]
 	UIManager.toast("Criando o mundo do MMA…")
 	await get_tree().process_frame
 	await get_tree().process_frame
 	GameManager.delete_save()
-	var w := Career.new_career(_name, "", _nation, _city, Color(String(pair[0])), Color(String(pair[1])), Career.START_FUNDS[_funds], int(Time.get_unix_time_from_system()) % 100000)
+	var seed_v := int(Time.get_unix_time_from_system()) % 100000
+	var w: GameWorld
+	if _role == "presidente":
+		w = Org.new_career(_name, "", _nation, Color(String(pair[0])), Color(String(pair[1])), Org.START_FUNDS[_funds], seed_v)
+	else:
+		w = Career.new_career(_name, "", _nation, _city, Color(String(pair[0])), Color(String(pair[1])), Career.START_FUNDS[_funds], seed_v)
 	GameManager.start_career(w)
 	UIManager.goto("hub")

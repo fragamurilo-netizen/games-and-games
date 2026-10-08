@@ -48,8 +48,13 @@ func refresh() -> void:
 	var idle := mine.filter(func(f: Fighter) -> bool: return f.bout_id < 0 and f.available() and Matchmaker.ready_to_book(w, f, 0))
 	if not idle.is_empty() and w.offers.is_empty():
 		c.add_child(UIKit.state_block("empty", "%s sem luta marcada" % Fmt.plural(idle.size(), "lutador", "lutadores"), "Propostas chegam com o tempo, mais rápido quanto maior a reputação da academia. Ou desafie alguém pelo Ranking.", "Ver rankings", func(): UIManager.switch_area("rankings")))
+	OrgKit.followed_section(w, c)
+	c.add_child(UIKit.menu_group([
+		UIKit.menu_row("belt", "Cinturões", "Os campeões e a linhagem de cada categoria", func(): UIManager.push("titles")),
+		UIKit.menu_row("list", "Resultados da semana", "Todas as noites, da Liga Global ao regional", func(): UIManager.push("results")),
+	]))
 	# Notícias
-	c.add_child(UIKit.section_header("Notícias"))
+	c.add_child(UIKit.section_header("Notícias", "Resultados", func(): UIManager.push("results")))
 	var shown := 0
 	for i in range(w.news.size() - 1, -1, -1):
 		var n: Dictionary = w.news[i]

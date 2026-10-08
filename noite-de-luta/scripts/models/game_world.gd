@@ -36,6 +36,21 @@ var calendar_weeks: Array = []
 var challenge_block: Dictionary = {}
 ## Contratações recusadas: id do lutador → semana em que ele volta a ouvir propostas.
 var sign_block: Dictionary = {}
+## Papel do jogador: "empresario" (dono de uma academia, como no LEATHER) ou "presidente" (manda
+## na Liga Global: marca as noites, monta os cards, paga as bolsas). Nos dois o jogo é o mesmo
+## mundo andando sozinho; o papel é o jeito de participar dele.
+var role: String = "empresario"
+## Lutadores que o jogador acompanha (como fã): aparecem no Início com a próxima luta e o último
+## resultado, em qualquer papel.
+var followed: Array = []
+## História de cada cinturão: divisão → [{week, id, name, how, event}] (quem ganhou e quando).
+var title_history: Dictionary = {}
+## Presidente: o matchmaker da organização completa sozinho as vagas que sobrarem nos cards
+## duas semanas antes da noite (o jogador cuida das lutas grandes).
+var delegate_cards: bool = true
+## Presidente: a organização pede este bloqueio quando uma academia recusa uma luta
+## ("id_a:id_b" → semana em que dá para tentar de novo).
+var bout_block: Dictionary = {}
 
 
 func new_id() -> int:
@@ -61,6 +76,36 @@ func event(id: int) -> FightEvent:
 
 func user_team() -> Team:
 	return teams.get(user_team_id, null)
+
+
+func is_president() -> bool:
+	return role == "presidente"
+
+
+## Nome da Liga Global: no papel de presidente é a organização do jogador.
+func league_name() -> String:
+	var t := user_team()
+	if is_president() and t != null:
+		return t.name
+	return Rankings.tier_name(2)
+
+
+func league_short() -> String:
+	var t := user_team()
+	if is_president() and t != null:
+		return t.short
+	return String(((DataDB.mma()["promotions"] as Dictionary)["2"] as Dictionary)["short"])
+
+
+func is_followed(f: Fighter) -> bool:
+	return f != null and followed.has(f.id)
+
+
+func toggle_follow(f: Fighter) -> void:
+	if followed.has(f.id):
+		followed.erase(f.id)
+	else:
+		followed.append(f.id)
 
 
 func is_user_fighter(f: Fighter) -> bool:
@@ -186,7 +231,8 @@ func to_dict() -> Dictionary:
 		"fighters": fs, "teams": ts, "events": es, "bouts": bs, "offers": offers, "news": news,
 		"champions": champions, "rankings": rankings, "user_team": user_team_id, "staff_market": staff_market,
 		"played": played_this_week, "ev_count": event_counters, "cal": calendar_weeks, "ch_block": challenge_block,
-		"sign_block": sign_block}
+		"sign_block": sign_block, "role": role, "followed": followed, "titles": title_history,
+		"delegate": delegate_cards, "bout_block": bout_block}
 
 
 static func from_dict(d: Dictionary) -> GameWorld:
@@ -222,4 +268,9 @@ static func from_dict(d: Dictionary) -> GameWorld:
 	w.challenge_block = d.get("ch_block", {})
 	for k in (d.get("sign_block", {}) as Dictionary):
 		w.sign_block[int(k)] = int(d["sign_block"][k])
+	w.role = String(d.get("role", "empresario"))
+	w.followed = (d.get("followed", []) as Array).map(func(v): return int(v))
+	w.title_history = d.get("titles", {})
+	w.delegate_cards = bool(d.get("delegate", true))
+	w.bout_block = d.get("bout_block", {})
 	return w

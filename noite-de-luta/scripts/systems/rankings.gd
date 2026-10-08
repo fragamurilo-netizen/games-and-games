@@ -81,3 +81,7 @@ static func apply_result(w: GameWorld, b: Bout) -> void:
 		else:
 			wf.titles_won += 1
 			wf.title_defenses = 0
+			var ev := w.event(b.event_id)
+			var lf := w.fighter(b.other(win))
+			var how := ("venceu %s" % lf.display_name()) if champ_before == lf.id else ("cinturão vago, venceu %s" % lf.display_name() if champ_before < 0 else "venceu %s" % lf.display_name())
+			Org.record_title(w, b.division, wf, how, ev.name if ev != null else "")

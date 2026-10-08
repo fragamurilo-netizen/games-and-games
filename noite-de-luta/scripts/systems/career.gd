@@ -30,8 +30,11 @@ static func new_career(team_name: String, short: String, nation: String, city: S
 	return w
 
 
-## Lutas da equipe do jogador nesta semana que ainda não foram feitas.
+## Lutas do jogador nesta semana que ainda não foram feitas: as da equipe (empresário) ou as da
+## noite da organização (presidente).
 static func pending_user_bouts(w: GameWorld) -> Array:
+	if w.is_president():
+		return Org.pending_bouts(w)
 	var out: Array = []
 	for f: Fighter in w.user_fighters():
 		var b := w.bout(f.bout_id)
@@ -240,15 +243,19 @@ static func cancel_bout(w: GameWorld, b: Bout, reason: String) -> void:
 ## aqui, se `auto` = true).
 static func advance_week(w: GameWorld, auto: bool = false) -> void:
 	for ev: FightEvent in Calendar.events_in_week(w, w.week):
+		var org_night := w.is_president() and ev.tier == 2
 		for bid: int in ev.bouts.duplicate():
 			var b := w.bout(bid)
 			if b == null or b.status != "marcada":
 				continue
-			var mine := w.is_user_fighter(w.fighter(b.a)) or w.is_user_fighter(w.fighter(b.b))
+			var mine := org_night or w.is_user_fighter(w.fighter(b.a)) or w.is_user_fighter(w.fighter(b.b))
 			if mine and not auto:
 				continue
 			simulate(w, b)
 		ev.done = true
+		# Presidente que deixou a semana andar sem fechar a noite: os bônus saem pela sugestão.
+		if org_night and not ev.closed:
+			Org.close_event(w, ev, Org.auto_bonuses(w, ev))
 	_finances(w)
 	Development.week(w)
 	_contracts(w)
@@ -262,11 +269,17 @@ static func advance_week(w: GameWorld, auto: bool = false) -> void:
 	Rankings.rebuild(w)
 	Calendar.ensure_events(w)
 	Matchmaker.book_cpu(w)
-	Matchmaker.user_offers(w)
+	if w.is_president():
+		Org.delegate_fill(w)
+	else:
+		Matchmaker.user_offers(w)
 	_trim(w)
 
 
 static func _finances(w: GameWorld) -> void:
+	if w.is_president():
+		Org.weekly(w)
+		return
 	var t := w.user_team()
 	if t == null:
 		return
@@ -310,7 +323,7 @@ static func _trim(w: GameWorld) -> void:
 		return
 	for e: FightEvent in w.events.values():
 		if e.week < w.week - 30:
-			var keep := false
+			var keep := w.is_president() and e.tier == 2 and e.week >= w.week - 104
 			for bid: int in e.bouts:
 				var b := w.bout(bid)
 				if b != null and (w.is_user_fighter(w.fighter(b.a)) or w.is_user_fighter(w.fighter(b.b)) or b.title):

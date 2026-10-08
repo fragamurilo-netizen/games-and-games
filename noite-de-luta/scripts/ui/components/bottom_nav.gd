@@ -5,26 +5,49 @@ extends PanelContainer
 
 signal tab_selected(tab: String)
 
-const TABS := [
-	["hub", "Início", "home"],
-	["team", "Equipe", "users"],
-	["rankings", "Rankings", "belt"],
-	["market", "Mercado", "swap"],
-	["gym", "Academia", "shield"],
-]
+const TABS_BY_ROLE := {
+	"empresario": [
+		["hub", "Início", "home"],
+		["team", "Equipe", "users"],
+		["rankings", "Rankings", "belt"],
+		["market", "Mercado", "swap"],
+		["gym", "Academia", "shield"],
+	],
+	"presidente": [
+		["hub", "Início", "home"],
+		["events", "Eventos", "glove"],
+		["rankings", "Rankings", "list"],
+		["titles", "Cinturões", "belt"],
+		["org", "Organização", "shield"],
+	],
+}
 
 var _buttons: Dictionary = {}
 var _active := ""
 var vertical := false
+var role := ""
 
 
 func _ready() -> void:
-	var row := HBoxContainer.new()
+	set_role("empresario")
+
+
+## Monta os botões do papel (empresário ou presidente); nada muda se o papel é o mesmo.
+func set_role(r: String) -> void:
+	if r == role:
+		return
+	role = r
+	var old := get_node_or_null("Row")
+	if old != null:
+		remove_child(old)
+		old.queue_free()
+	_buttons.clear()
+	var row: BoxContainer = VBoxContainer.new() if vertical else HBoxContainer.new()
 	row.name = "Row"
-	row.add_theme_constant_override(&"separation", 0)
+	row.add_theme_constant_override(&"separation", 6 if vertical else 0)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(row)
-	for t in TABS:
+	for t in TABS_BY_ROLE.get(r, TABS_BY_ROLE["empresario"]):
 		var b := Button.new()
 		b.theme_type_variation = "NavButton"
 		b.text = t[1]
@@ -44,6 +67,9 @@ func _ready() -> void:
 		row.add_child(b)
 		_buttons[tab] = b
 	row.resized.connect(queue_redraw)
+	if is_inside_tree():
+		set_vertical(vertical)
+		select(_active)
 
 
 ## Lateral (true) ou embaixo (false).

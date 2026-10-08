@@ -15,6 +15,8 @@ var color2: Color = Color("#F1F0EC")
 var reputation: float = 20.0
 var balance: float = 0.0
 var is_user: bool = false
+## "academia" (as equipes de lutadores) ou "organizacao" (a Liga Global do jogador presidente).
+var kind: String = "academia"
 ## Staff contratado: [{id, name, role, quality, age, wage, nation, since}]
 var staff: Array = []
 ## Lançamentos da semana para a tela de finanças: [{week, label, value}] (últimos 80).
@@ -53,7 +55,7 @@ func weekly_wages() -> float:
 
 func to_dict() -> Dictionary:
 	return {"id": id, "name": name, "short": short, "nation": nation, "city": city, "c1": color1.to_html(false),
-		"c2": color2.to_html(false), "rep": reputation, "bal": balance, "user": is_user, "staff": staff, "ledger": ledger}
+		"c2": color2.to_html(false), "rep": reputation, "bal": balance, "user": is_user, "staff": staff, "ledger": ledger, "kind": kind}
 
 
 static func from_dict(d: Dictionary) -> Team:
@@ -70,4 +72,5 @@ static func from_dict(d: Dictionary) -> Team:
 	t.is_user = bool(d.get("user", false))
 	t.staff = d.get("staff", [])
 	t.ledger = d.get("ledger", [])
+	t.kind = String(d.get("kind", "academia"))
 	return t

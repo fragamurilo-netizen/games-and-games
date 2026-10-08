@@ -17,10 +17,25 @@ const SCREENS := {
 	"fight": "res://scripts/ui/screens/fight_screen.gd",
 	"event": "res://scripts/ui/screens/event_screen.gd",
 	"settings": "res://scripts/ui/screens/settings_screen.gd",
+	# Os dois papéis (acompanhar o mundo como fã)
+	"titles": "res://scripts/ui/screens/titles_screen.gd",
+	"results": "res://scripts/ui/screens/results_screen.gd",
+	# Presidente da organização
+	"org_hub": "res://scripts/ui/screens/org_hub_screen.gd",
+	"events": "res://scripts/ui/screens/org_events_screen.gd",
+	"org_event": "res://scripts/ui/screens/org_event_screen.gd",
+	"book": "res://scripts/ui/screens/book_screen.gd",
+	"night": "res://scripts/ui/screens/night_screen.gd",
+	"org": "res://scripts/ui/screens/org_screen.gd",
 }
-## As cinco áreas da carreira. Cada uma guarda a própria pilha: trocar de área e voltar
-## devolve a tela como o jogador deixou (filtros, busca, rolagem).
-const TABS := ["hub", "team", "rankings", "market", "gym"]
+## As cinco áreas da carreira de cada papel. Cada área guarda a própria pilha: trocar de área e
+## voltar devolve a tela como o jogador deixou (filtros, busca, rolagem).
+const TABS_BY_ROLE := {
+	"empresario": ["hub", "team", "rankings", "market", "gym"],
+	"presidente": ["hub", "events", "rankings", "titles", "org"],
+}
+## O Início do presidente é outra tela, com o mesmo nome de área.
+const ROLE_SCREENS := {"presidente": {"hub": "org_hub"}}
 
 var main: Node = null # scripts/ui/main.gd
 var area := "hub"
@@ -47,10 +62,18 @@ func current() -> BaseScreen:
 	return stack.back() if not stack.is_empty() else null
 
 
+func tabs() -> Array:
+	var role := GameManager.world.role if GameManager.has_career() else "empresario"
+	return TABS_BY_ROLE.get(role, TABS_BY_ROLE["empresario"])
+
+
 func _instance(name: String, params: Dictionary) -> BaseScreen:
-	if not _script_cache.has(name):
-		_script_cache[name] = load(SCREENS[name])
-	var node: BaseScreen = _script_cache[name].new()
+	var real := name
+	if GameManager.has_career():
+		real = String((ROLE_SCREENS.get(GameManager.world.role, {}) as Dictionary).get(name, name))
+	if not _script_cache.has(real):
+		_script_cache[real] = load(SCREENS[real])
+	var node: BaseScreen = _script_cache[real].new()
 	node.screen_name = name
 	node.setup(params)
 	return node
@@ -60,7 +83,7 @@ func _instance(name: String, params: Dictionary) -> BaseScreen:
 ## (menu, boas-vindas, nova carreira): descarta todas as pilhas.
 func goto(name: String, params: Dictionary = {}) -> void:
 	close_all_modals()
-	if name in TABS:
+	if name in tabs():
 		_hide_top()
 		_free_stack(name)
 		_set_area(name)

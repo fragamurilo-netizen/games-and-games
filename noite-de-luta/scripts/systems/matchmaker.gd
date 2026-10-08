@@ -113,6 +113,9 @@ static func book_cpu(w: GameWorld) -> void:
 				pools[key] = []
 			pools[key].append(f)
 	for tier in [2, 1, 0]:
+		# Presidente: as noites da liga são do jogador (o matchmaker dele completa à parte, Org).
+		if tier == 2 and w.is_president():
+			continue
 		for ev: FightEvent in Calendar.open_events(w, tier, w.week + 2, w.week + 8):
 			var guard := 0
 			while ev.bouts.size() < ev.slots and guard < 40:
@@ -159,6 +162,8 @@ static func _fill_one(w: GameWorld, ev: FightEvent, tier: int, pools: Dictionary
 ## Disputas de cinturão nas noites da Liga Global: campeão contra o melhor desafiante disponível
 ## (ou os dois primeiros pelo cinturão vago).
 static func _title_fights(w: GameWorld) -> void:
+	if w.is_president():
+		return # quem decide as disputas de cinturão é o presidente
 	for d: Dictionary in DataDB.divisions():
 		var div := String(d["id"])
 		if _title_booked(w, div):

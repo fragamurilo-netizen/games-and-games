@@ -139,6 +139,7 @@ static func _crown_champions(w: GameWorld) -> void:
 		champ.titles_won = maxi(1, champ.titles_won)
 		champ.title_defenses = w.rng.randi_range(0, 3)
 		champ.popularity = clampf(champ.popularity + 20.0, 0.0, 100.0)
+		Org.record_title(w, div, champ, "campeão no começo da carreira", "")
 		if champ.team_id < 0:
 			var teams: Array = w.teams.values()
 			champ.team_id = (teams[w.rng.randi_range(0, teams.size() - 1)] as Team).id

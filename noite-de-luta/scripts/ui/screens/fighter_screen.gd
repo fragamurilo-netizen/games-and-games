@@ -69,7 +69,21 @@ func _header(w: GameWorld, f: Fighter) -> Control:
 	h.add_child(v)
 	card.add_child(h)
 	var st := FightKit.status_text(w, f)
-	card.add_child(UIKit.colored(String(st[0]), st[1], "Small"))
+	var srow := UIKit.hbox(8)
+	var sl := UIKit.colored(String(st[0]), st[1], "Small", true)
+	srow.add_child(sl)
+	var following := w.is_followed(f)
+	var fb := UIKit.button("Seguindo" if following else "Seguir", "TextButton", func():
+		w.toggle_follow(f)
+		GameManager.save_now()
+		UIManager.toast(("Você acompanha %s: a próxima luta e o último resultado aparecem no Início." % f.short_name()) if w.is_followed(f) else "Você deixou de acompanhar %s." % f.short_name())
+		refresh(), "star")
+	if following:
+		fb.add_theme_color_override(&"font_color", UIColors.GOLD)
+		fb.add_theme_color_override(&"icon_normal_color", UIColors.GOLD)
+	fb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	srow.add_child(fb)
+	card.add_child(srow)
 	return UIKit.card_panel(card)
 
 
@@ -210,6 +224,9 @@ func _contrato(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 
 func _actions(w: GameWorld, f: Fighter) -> void:
 	var foot := footer()
+	if w.is_president():
+		_president_actions(w, f, foot)
+		return
 	if w.is_user_fighter(f):
 		var offers := w.offers.filter(func(o: Dictionary) -> bool: return int(o["fighter"]) == f.id)
 		if not offers.is_empty():
@@ -227,3 +244,30 @@ func _actions(w: GameWorld, f: Fighter) -> void:
 		foot.add_child(UIKit.button("Desafiar", "PrimaryButton", func(): UIManager.push("challenge", {"target": f.id})))
 	else:
 		hide_footer()
+
+
+
+## Presidente: marcar luta para este lutador na próxima noite da liga em que ele pode lutar, ou
+## ver o card em que ele já está.
+func _president_actions(w: GameWorld, f: Fighter, foot: VBoxContainer) -> void:
+	var b := w.bout(f.bout_id)
+	if b != null and b.status == "marcada":
+		var ev := w.event(b.event_id)
+		if ev != null and ev.tier == 2:
+			foot.add_child(UIKit.button("Ver o card da %s" % ev.name, "GhostButton", func(): UIManager.push("org_event", {"id": ev.id})))
+		else:
+			foot.add_child(UIKit.button("Ver o card da %s" % (ev.name if ev != null else "noite"), "GhostButton", func(): UIManager.push("event", {"id": b.event_id})))
+		return
+	if not Org.eligible(w, f) or not f.injury.is_empty() or f.retired:
+		hide_footer()
+		return
+	var target: FightEvent = null
+	for ev: FightEvent in Org.upcoming_events(w):
+		if ev.week - w.week >= 2 and Org.event_bouts(w, ev).size() < ev.slots and Matchmaker.ready_to_book(w, f, ev.week - w.week) and f.suspension <= ev.week - w.week:
+			target = ev
+			break
+	if target == null:
+		hide_footer()
+		return
+	var tid := target.id
+	foot.add_child(UIKit.button("Marcar luta na %s" % target.name, "PrimaryButton", func(): UIManager.push("book", {"event": tid, "a": f.id})))
