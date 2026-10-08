@@ -4,6 +4,48 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 
 ## Onde está o jogo
 
+- **Rodada de 08/10 (noite): correções e velocidade, `claude/hopeful-newton-8avbo4`.** Pedido do dono: "corrija todos os bugs, deixe bem mais rápido e mande o APK". APK: `mais-uma-rodada/builds/MaisUmaRodada-1.0.0-rapido-correcoes-2026-10-08.apk` (release sem trava, certificado de sempre, instala por cima).
+  - **Os 8 testes que falhavam na bateria completa passam:**
+    - virada de ano: os elencos da IA voltam aos limites depois do mercado das férias (`TransferManager.enforce_squad_limits`);
+    - dívida e caixa inicial, sub-20, "quer sair", promessas, gritos da beira do campo e determinismo (bônus de jogo grande guardado no mundo).
+  - **Save carregado = mundo original.** Depois de carregar, as datas seguintes divergiam. Eram três causas:
+    1. Traços dados na criação do mundo (ídolo, leal, líder...) não limpavam o cache de traços, e o original usava salário pedido e ambição velhos (`SquadStory._add_trait`).
+    2. As ligas que os olheiros cobrem ficavam num cache estático, montado em momentos diferentes. Agora vão em `world.stats["csn_cov"]`, por temporada.
+    3. A receita comercial e o fator de receita do clube, e o arco do jogador, perdiam precisão no save.
+  - **Velocidade** (servidor de 4 núcleos, `tools/perf_deep.gd -- --days=10 --season`):
+    - temporada inteira de ~252 s para ~191 s;
+    - datas da janela de transferências ~40% mais rápidas;
+    - laços do elenco no fim de temporada 2,8× mais rápidos.
+  - **O que mudou na velocidade:**
+    - **Mercado da IA:**
+      - a lista de alvos avaliada fica na carência (`need["tc"]`, salva com o mundo) e é reaproveitada enquanto verba, folha e elenco do clube não mudam (`TransferBrain._kept_targets`, `_club_sig`). Lista esgotada na mesma data não é refeita;
+      - filtros que não dependem do conhecimento saem antes (`_pool`/`_may_target`);
+      - resumo do elenco para a vontade do jogador (`TransferManager.squad_digest`);
+      - índice do mercado só com `avail`;
+      - atalho na carência urgente.
+    - **Clube interessado** (`MarketAI.realistic_suitor`, usado nos pré-contratos, rumores e eventos): nível lido uma vez por clube e ordenação nativa. Era o grosso dos eventos de clube na segunda metade do ano.
+    - **Laços do elenco** (`Relations._affinity`): as contas caras só saem quando a química do par ainda permite o laço. O resultado é idêntico em 683 mil pares.
+    - **Olheiros e coesão:**
+      - poda dos olheiros numa passada só;
+      - coesão com a língua do clube lida uma vez;
+      - ordenação nativa (`Array.sort()` em `[chave, -índice]`) nos dois.
+    - **Metade por semana com o dobro do efeito**, como a evolução já fazia: coesão (metade dos clubes) e lesões de treino (metade do elenco).
+    - **Partidas:** os números individuais (`MatchStats.build`) saem na thread de cada jogo.
+    - **Técnicos:** a classificação fica guardada enquanto todos leem a rodada (`CompetitionManager.memo_positions`, só na thread principal).
+  - **Tentado e descartado:** avaliar as listas de alvos de todos os clubes em paralelo. As threads do GDScript disputam os mesmos objetos (contagem de referências de jogadores, clubes e dicionários compartilhados), e cada lista custou ~4,7 ms de CPU contra ~2 ms em sequência. As partidas da IA em 3 threads rendem só 1,7× pelo mesmo motivo.
+  - **O que ainda pesa** (por data de rodada cheia, no servidor):
+    - partidas da IA ~0,55 s;
+    - mercado ~0,5 s na janela;
+    - aplicar resultados ~0,3 s;
+    - escalações da IA ~0,25 s;
+    - evolução ~0,25 s;
+    - olheiros ~0,2 s.
+    Fora isso: criar o mundo ~21 s, começar a carreira ~5 s, fim de temporada ~30 s (o mercado das férias é 1/3).
+  - **Conferido:**
+    - `check_scripts` 0 erros, `smoke_boot`, `mobile_regression` e `tools/matchday_smoke.gd`;
+    - testes de determinismo, simulação paralela = sequencial, save/load, mercado da IA, valores, personalidade/lesões, técnicos e vestiário;
+    - bateria completa: ver o resultado no commit do APK.
+
 - **Rodada de 08/10 (manhã), para o colega continuar: `claude/youthful-newton-hey7og`**, commit "Rostos: 9 etnias novas e cada jogador mais diferente". Ainda **sem APK novo**: o último continua sendo o de 07/10.
   - **Pedido do dono:** criar mais cabelos e barbas e diferenciar mais cada jogador. As etnias devem ficar mais realistas e muito mais variadas, usando pessoas reais só como referência do que é um rosto humano (nada copiado de alguém). A tecnologia continua a mesma: retrato 2D procedural, `PortraitView`, `FaceGen` e `FaceShade`.
   - **Feito e conferido:**
