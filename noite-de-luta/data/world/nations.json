@@ -1,5 +1,5 @@
 {
-	"_doc": "Nações do mundo. confed: UEFA, CONMEBOL, CONCACAF, CAF, AFC, OFC. coef: força do futebol local (vagas e sorteios continentais). origins: de onde vêm os jogadores nascidos no país — c = cultura de nome (names.json), eth = pesos de etnia para o rosto (nor, eur, med, arb, lat, and, mix, afr, eas, sas = sul-asiático, hae = chifre da África, pac = polinésio, sea = sudeste asiático), w = peso, h = família de outra origem (cultura → peso: sobrenome dela e primeiro nome às vezes do país; ver names.json → mixing). youth: bônus de talento da base. imports: pesos das nacionalidades estrangeiras nas ligas do país. foreign: fatia de estrangeiros por divisão. cities: [nome, tamanho 1-5, região]. lang: vocabulário dos clubes procedurais. flag: desenho da bandeira (ver FlagView).",
+	"_doc": "Nações do mundo. confed: UEFA, CONMEBOL, CONCACAF, CAF, AFC, OFC. coef: força do futebol local (vagas e sorteios continentais). origins: de onde vêm os jogadores nascidos no país — c = cultura de nome (names.json), eth = pesos de etnia para o rosto (nor, eur, med, arb, lat, and, mix, afr, eas, sas = sul-asiático, hae = chifre da África, pac = polinésio, sea = sudeste asiático, slv = eslavo e báltico, bal = balcânico/dinárico, cel = celta, cau = Cáucaso, Anatólia e Irã, naf = norte-africano/amazigh, cas = centro-asiático, nil = nilótico/África Oriental, mel = melanésio, sah = saheliano/fula; só crescem no fim), w = peso, h = família de outra origem (cultura → peso: sobrenome dela e primeiro nome às vezes do país; ver names.json → mixing). youth: bônus de talento da base. imports: pesos das nacionalidades estrangeiras nas ligas do país. foreign: fatia de estrangeiros por divisão. cities: [nome, tamanho 1-5, região]. lang: vocabulário dos clubes procedurais. flag: desenho da bandeira (ver FlagView).",
 	"ethnicities": [
 		"nor",
 		"eur",
@@ -13,7 +13,16 @@
 		"sas",
 		"hae",
 		"pac",
-		"sea"
+		"sea",
+		"slv",
+		"bal",
+		"cel",
+		"cau",
+		"naf",
+		"cas",
+		"nil",
+		"mel",
+		"sah"
 	],
 	"nations": {
 		"ENG": {
@@ -33,33 +42,38 @@
 					"c": "en",
 					"w": 80,
 					"eth": {
-						"nor": 50,
+						"nor": 44,
+						"cel": 6,
 						"eur": 22,
 						"mix": 13,
 						"afr": 15,
 						"sas": 0.7,
-						"hae": 0.6
+						"hae": 0.6,
+						"nil": 0.3
 					}
 				},
 				{
 					"c": "ie",
 					"w": 4,
 					"eth": {
-						"nor": 1
+						"cel": 0.75,
+						"nor": 0.25
 					}
 				},
 				{
 					"c": "sco",
 					"w": 3,
 					"eth": {
-						"nor": 1
+						"cel": 0.6,
+						"nor": 0.4
 					}
 				},
 				{
 					"c": "wal",
 					"w": 1,
 					"eth": {
-						"nor": 1
+						"cel": 0.6,
+						"nor": 0.4
 					}
 				},
 				{
@@ -73,14 +87,15 @@
 					"c": "maghreb",
 					"w": 1,
 					"eth": {
-						"arb": 1
+						"naf": 0.85,
+						"arb": 0.15
 					}
 				},
 				{
 					"c": "south_slav",
 					"w": 1,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				},
 				{
@@ -410,14 +425,16 @@
 					"c": "maghreb",
 					"w": 4,
 					"eth": {
-						"arb": 1
+						"naf": 0.85,
+						"arb": 0.15
 					}
 				},
 				{
 					"c": "waf_fr",
 					"w": 3,
 					"eth": {
-						"afr": 1
+						"afr": 0.8,
+						"sah": 0.2
 					}
 				},
 				{
@@ -805,35 +822,38 @@
 					"c": "tr",
 					"w": 8,
 					"eth": {
-						"med": 1
+						"cau": 0.8,
+						"med": 0.2
 					}
 				},
 				{
 					"c": "south_slav",
 					"w": 4,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				},
 				{
 					"c": "west_slav",
 					"w": 3,
 					"eth": {
-						"eur": 1
+						"slv": 1
 					}
 				},
 				{
 					"c": "waf_fr",
 					"w": 3,
 					"eth": {
-						"afr": 1
+						"afr": 0.8,
+						"sah": 0.2
 					}
 				},
 				{
 					"c": "maghreb",
 					"w": 1,
 					"eth": {
-						"arb": 1
+						"naf": 0.85,
+						"arb": 0.15
 					}
 				},
 				{
@@ -1113,7 +1133,8 @@
 					"c": "waf_fr",
 					"w": 3,
 					"eth": {
-						"afr": 1
+						"afr": 0.8,
+						"sah": 0.2
 					}
 				},
 				{
@@ -1127,14 +1148,15 @@
 					"c": "maghreb",
 					"w": 1,
 					"eth": {
-						"arb": 1
+						"naf": 0.85,
+						"arb": 0.15
 					}
 				},
 				{
 					"c": "south_slav",
 					"w": 2,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				}
 			],
@@ -1365,21 +1387,24 @@
 						"med": 10,
 						"mix": 10,
 						"afr": 5,
-						"sea": 2
+						"sea": 2,
+						"mel": 0.5
 					}
 				},
 				{
 					"c": "waf_fr",
 					"w": 25,
 					"eth": {
-						"afr": 1
+						"afr": 0.8,
+						"sah": 0.2
 					}
 				},
 				{
 					"c": "maghreb",
 					"w": 12,
 					"eth": {
-						"arb": 1
+						"naf": 0.85,
+						"arb": 0.15
 					}
 				},
 				{
@@ -1414,7 +1439,7 @@
 					"c": "south_slav",
 					"w": 1,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				}
 			],
@@ -1708,7 +1733,8 @@
 					"c": "waf_fr",
 					"w": 1,
 					"eth": {
-						"afr": 1
+						"afr": 0.8,
+						"sah": 0.2
 					}
 				},
 				{
@@ -1894,14 +1920,16 @@
 					"c": "maghreb",
 					"w": 8,
 					"eth": {
-						"arb": 1
+						"naf": 0.85,
+						"arb": 0.15
 					}
 				},
 				{
 					"c": "tr",
 					"w": 3,
 					"eth": {
-						"med": 1
+						"cau": 0.8,
+						"med": 0.2
 					}
 				},
 				{
@@ -2117,8 +2145,10 @@
 					"c": "tr",
 					"w": 95,
 					"eth": {
-						"med": 85,
-						"eur": 10,
+						"cau": 62,
+						"med": 20,
+						"bal": 8,
+						"cas": 5,
 						"arb": 5
 					}
 				},
@@ -2133,14 +2163,15 @@
 					"c": "maghreb",
 					"w": 1,
 					"eth": {
-						"arb": 1
+						"naf": 0.85,
+						"arb": 0.15
 					}
 				},
 				{
 					"c": "south_slav",
 					"w": 1,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				},
 				{
@@ -2347,28 +2378,31 @@
 					"c": "waf_fr",
 					"w": 15,
 					"eth": {
-						"afr": 1
+						"afr": 0.8,
+						"sah": 0.2
 					}
 				},
 				{
 					"c": "maghreb",
 					"w": 10,
 					"eth": {
-						"arb": 1
+						"naf": 0.85,
+						"arb": 0.15
 					}
 				},
 				{
 					"c": "tr",
 					"w": 2,
 					"eth": {
-						"med": 1
+						"cau": 0.8,
+						"med": 0.2
 					}
 				},
 				{
 					"c": "south_slav",
 					"w": 1,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				},
 				{
@@ -2556,7 +2590,8 @@
 					"c": "sco",
 					"w": 80,
 					"eth": {
-						"nor": 90,
+						"cel": 62,
+						"nor": 28,
 						"eur": 8,
 						"afr": 2
 					}
@@ -2589,7 +2624,7 @@
 					"c": "south_slav",
 					"w": 1,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				},
 				{
@@ -2603,7 +2638,7 @@
 					"c": "west_slav",
 					"w": 2,
 					"eth": {
-						"eur": 1
+						"slv": 1
 					}
 				}
 			],
@@ -2767,15 +2802,16 @@
 					"c": "gr",
 					"w": 90,
 					"eth": {
-						"eur": 50,
-						"med": 50
+						"med": 55,
+						"eur": 25,
+						"bal": 20
 					}
 				},
 				{
 					"c": "alb",
 					"w": 4,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				},
 				{
@@ -2789,14 +2825,15 @@
 					"c": "south_slav",
 					"w": 2,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				},
 				{
 					"c": "maghreb",
 					"w": 1,
 					"eth": {
-						"arb": 1
+						"naf": 0.85,
+						"arb": 0.15
 					}
 				},
 				{
@@ -2960,8 +2997,9 @@
 					"c": "de",
 					"w": 80,
 					"eth": {
-						"nor": 45,
+						"nor": 40,
 						"eur": 45,
+						"slv": 5,
 						"afr": 5,
 						"mix": 5
 					}
@@ -2970,35 +3008,38 @@
 					"c": "south_slav",
 					"w": 8,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				},
 				{
 					"c": "tr",
 					"w": 4,
 					"eth": {
-						"med": 1
+						"cau": 0.8,
+						"med": 0.2
 					}
 				},
 				{
 					"c": "waf_fr",
 					"w": 3,
 					"eth": {
-						"afr": 1
+						"afr": 0.8,
+						"sah": 0.2
 					}
 				},
 				{
 					"c": "west_slav",
 					"w": 3,
 					"eth": {
-						"eur": 1
+						"slv": 1
 					}
 				},
 				{
 					"c": "maghreb",
 					"w": 1,
 					"eth": {
-						"arb": 1
+						"naf": 0.85,
+						"arb": 0.15
 					}
 				},
 				{
@@ -3178,28 +3219,30 @@
 					"c": "alb",
 					"w": 8,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				},
 				{
 					"c": "south_slav",
 					"w": 4,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				},
 				{
 					"c": "waf_fr",
 					"w": 6,
 					"eth": {
-						"afr": 1
+						"afr": 0.8,
+						"sah": 0.2
 					}
 				},
 				{
 					"c": "tr",
 					"w": 2,
 					"eth": {
-						"med": 1
+						"cau": 0.8,
+						"med": 0.2
 					}
 				},
 				{
@@ -3356,8 +3399,11 @@
 					"c": "ua",
 					"w": 95,
 					"eth": {
-						"nor": 45,
-						"eur": 55
+						"slv": 80,
+						"eur": 10,
+						"nor": 6,
+						"bal": 2,
+						"cau": 2
 					}
 				},
 				{
@@ -3371,21 +3417,21 @@
 					"c": "south_slav",
 					"w": 1,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				},
 				{
 					"c": "west_slav",
 					"w": 1,
 					"eth": {
-						"eur": 1
+						"slv": 1
 					}
 				},
 				{
 					"c": "ge",
 					"w": 1,
 					"eth": {
-						"eur": 1
+						"cau": 1
 					}
 				}
 			],
@@ -3547,8 +3593,10 @@
 					"c": "hr",
 					"w": 95,
 					"eth": {
-						"eur": 85,
-						"nor": 15
+						"bal": 70,
+						"slv": 10,
+						"eur": 15,
+						"med": 5
 					}
 				},
 				{
@@ -3562,14 +3610,15 @@
 					"c": "waf_fr",
 					"w": 1,
 					"eth": {
-						"afr": 1
+						"afr": 0.8,
+						"sah": 0.2
 					}
 				},
 				{
 					"c": "alb",
 					"w": 1,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				},
 				{
@@ -3723,8 +3772,9 @@
 					"c": "rs",
 					"w": 95,
 					"eth": {
-						"eur": 85,
-						"nor": 15
+						"bal": 78,
+						"slv": 10,
+						"eur": 12
 					}
 				},
 				{
@@ -3738,21 +3788,22 @@
 					"c": "waf_fr",
 					"w": 1,
 					"eth": {
-						"afr": 1
+						"afr": 0.8,
+						"sah": 0.2
 					}
 				},
 				{
 					"c": "east_slav",
 					"w": 1,
 					"eth": {
-						"eur": 1
+						"slv": 1
 					}
 				},
 				{
 					"c": "west_slav",
 					"w": 1,
 					"eth": {
-						"eur": 1
+						"slv": 1
 					}
 				}
 			],
@@ -3892,15 +3943,17 @@
 					"c": "cz",
 					"w": 92,
 					"eth": {
-						"nor": 50,
-						"eur": 50
+						"slv": 60,
+						"eur": 30,
+						"nor": 10
 					}
 				},
 				{
 					"c": "waf_fr",
 					"w": 2,
 					"eth": {
-						"afr": 1
+						"afr": 0.8,
+						"sah": 0.2
 					}
 				},
 				{
@@ -3914,14 +3967,14 @@
 					"c": "south_slav",
 					"w": 2,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				},
 				{
 					"c": "east_slav",
 					"w": 2,
 					"eth": {
-						"eur": 1
+						"slv": 1
 					}
 				}
 			],
@@ -4075,21 +4128,23 @@
 					"c": "maghreb",
 					"w": 2,
 					"eth": {
-						"arb": 1
+						"naf": 0.85,
+						"arb": 0.15
 					}
 				},
 				{
 					"c": "tr",
 					"w": 2,
 					"eth": {
-						"med": 1
+						"cau": 0.8,
+						"med": 0.2
 					}
 				},
 				{
 					"c": "south_slav",
 					"w": 3,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				},
 				{
@@ -4103,14 +4158,15 @@
 					"c": "persian",
 					"w": 1,
 					"eth": {
-						"arb": 1
+						"cau": 0.85,
+						"arb": 0.15
 					}
 				},
 				{
 					"c": "alb",
 					"w": 1,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				}
 			],
@@ -4254,7 +4310,8 @@
 					"c": "wal",
 					"w": 70,
 					"eth": {
-						"nor": 90,
+						"cel": 60,
+						"nor": 30,
 						"eur": 5,
 						"afr": 3,
 						"mix": 2
@@ -4264,7 +4321,8 @@
 					"c": "en",
 					"w": 30,
 					"eth": {
-						"nor": 70,
+						"nor": 60,
+						"cel": 10,
 						"eur": 15,
 						"afr": 10,
 						"mix": 5
@@ -4303,7 +4361,8 @@
 					"c": "ie",
 					"w": 92,
 					"eth": {
-						"nor": 95,
+						"cel": 72,
+						"nor": 23,
 						"eur": 3,
 						"afr": 2
 					}
@@ -4378,21 +4437,22 @@
 					"c": "south_slav",
 					"w": 2,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				},
 				{
 					"c": "persian",
 					"w": 1,
 					"eth": {
-						"arb": 1
+						"cau": 0.85,
+						"arb": 0.15
 					}
 				},
 				{
 					"c": "alb",
 					"w": 2,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				}
 			],
@@ -4450,28 +4510,30 @@
 					"c": "south_slav",
 					"w": 4,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				},
 				{
 					"c": "persian",
 					"w": 2,
 					"eth": {
-						"arb": 1
+						"cau": 0.85,
+						"arb": 0.15
 					}
 				},
 				{
 					"c": "alb",
 					"w": 2,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				},
 				{
 					"c": "tr",
 					"w": 2,
 					"eth": {
-						"med": 1
+						"cau": 0.8,
+						"med": 0.2
 					}
 				}
 			],
@@ -4507,7 +4569,8 @@
 					"c": "is",
 					"w": 100,
 					"eth": {
-						"nor": 1
+						"nor": 85,
+						"cel": 15
 					}
 				}
 			],
@@ -4538,7 +4601,8 @@
 					"c": "fi",
 					"w": 90,
 					"eth": {
-						"nor": 1
+						"nor": 70,
+						"slv": 30
 					}
 				},
 				{
@@ -4552,7 +4616,7 @@
 					"c": "alb",
 					"w": 5,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				}
 			],
@@ -4587,8 +4651,9 @@
 					"c": "pl",
 					"w": 98,
 					"eth": {
-						"nor": 50,
-						"eur": 50
+						"slv": 75,
+						"eur": 15,
+						"nor": 10
 					}
 				},
 				{
@@ -4638,8 +4703,10 @@
 					"c": "sk",
 					"w": 96,
 					"eth": {
-						"nor": 45,
-						"eur": 55
+						"slv": 70,
+						"eur": 22,
+						"bal": 3,
+						"nor": 5
 					}
 				},
 				{
@@ -4689,8 +4756,10 @@
 					"c": "si",
 					"w": 100,
 					"eth": {
-						"eur": 80,
-						"nor": 20
+						"slv": 40,
+						"eur": 35,
+						"bal": 20,
+						"nor": 5
 					}
 				}
 			],
@@ -4726,8 +4795,10 @@
 					"c": "hu",
 					"w": 97,
 					"eth": {
-						"eur": 70,
-						"nor": 30
+						"eur": 58,
+						"slv": 22,
+						"nor": 15,
+						"bal": 5
 					}
 				},
 				{
@@ -4770,7 +4841,9 @@
 					"c": "ro",
 					"w": 97,
 					"eth": {
-						"eur": 90,
+						"eur": 45,
+						"bal": 35,
+						"slv": 10,
 						"med": 10
 					}
 				},
@@ -4820,8 +4893,9 @@
 					"c": "ba",
 					"w": 100,
 					"eth": {
-						"eur": 85,
-						"nor": 15
+						"bal": 85,
+						"slv": 8,
+						"eur": 7
 					}
 				}
 			],
@@ -4862,8 +4936,9 @@
 					"c": "rs",
 					"w": 100,
 					"eth": {
-						"eur": 90,
-						"nor": 10
+						"bal": 90,
+						"eur": 6,
+						"slv": 4
 					}
 				}
 			],
@@ -4904,14 +4979,16 @@
 					"c": "mk",
 					"w": 75,
 					"eth": {
-						"eur": 1
+						"bal": 85,
+						"med": 10,
+						"slv": 5
 					}
 				},
 				{
 					"c": "alb",
 					"w": 25,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				}
 			],
@@ -4952,8 +5029,9 @@
 					"c": "alb",
 					"w": 100,
 					"eth": {
-						"eur": 85,
-						"med": 15
+						"bal": 75,
+						"med": 20,
+						"eur": 5
 					}
 				}
 			],
@@ -4994,15 +5072,16 @@
 					"c": "alb",
 					"w": 95,
 					"eth": {
-						"eur": 85,
-						"med": 15
+						"bal": 78,
+						"med": 17,
+						"eur": 5
 					}
 				},
 				{
 					"c": "south_slav",
 					"w": 5,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				}
 			],
@@ -5037,8 +5116,9 @@
 					"c": "ge",
 					"w": 100,
 					"eth": {
-						"eur": 60,
-						"med": 40
+						"cau": 85,
+						"eur": 8,
+						"med": 7
 					}
 				}
 			],
@@ -5074,15 +5154,18 @@
 					"c": "ru",
 					"w": 97,
 					"eth": {
-						"nor": 50,
-						"eur": 50
+						"slv": 72,
+						"eur": 10,
+						"nor": 6,
+						"cas": 7,
+						"cau": 5
 					}
 				},
 				{
 					"c": "ge",
 					"w": 3,
 					"eth": {
-						"eur": 1
+						"cau": 1
 					}
 				}
 			],
@@ -5119,7 +5202,8 @@
 					"c": "br",
 					"w": 100,
 					"eth": {
-						"eur": 30,
+						"eur": 29,
+						"slv": 1,
 						"med": 8,
 						"mix": 37,
 						"afr": 20,
@@ -5729,7 +5813,7 @@
 					"c": "east_slav",
 					"w": 1,
 					"eth": {
-						"eur": 1
+						"slv": 1
 					}
 				}
 			],
@@ -7209,7 +7293,8 @@
 					"c": "us",
 					"w": 72,
 					"eth": {
-						"nor": 45,
+						"nor": 43,
+						"slv": 2,
 						"eur": 25,
 						"afr": 20,
 						"mix": 10,
@@ -7530,7 +7615,8 @@
 					"c": "waf_fr",
 					"w": 4,
 					"eth": {
-						"afr": 1
+						"afr": 0.8,
+						"sah": 0.2
 					}
 				},
 				{
@@ -7551,7 +7637,7 @@
 					"c": "east_slav",
 					"w": 1,
 					"eth": {
-						"eur": 1
+						"slv": 1
 					}
 				},
 				{
@@ -7774,8 +7860,11 @@
 					"c": "eg",
 					"w": 100,
 					"eth": {
-						"arb": 90,
-						"afr": 10
+						"arb": 84,
+						"naf": 6,
+						"afr": 5,
+						"nil": 3,
+						"hae": 2
 					}
 				}
 			],
@@ -7899,8 +7988,10 @@
 					"c": "ma",
 					"w": 98,
 					"eth": {
-						"arb": 95,
-						"afr": 5
+						"naf": 70,
+						"arb": 24,
+						"afr": 4,
+						"sah": 2
 					}
 				},
 				{
@@ -7910,7 +8001,7 @@
 					},
 					"w": 1,
 					"eth": {
-						"arb": 1
+						"naf": 1
 					}
 				},
 				{
@@ -7920,7 +8011,7 @@
 					},
 					"w": 1,
 					"eth": {
-						"arb": 1
+						"naf": 1
 					}
 				}
 			],
@@ -8044,8 +8135,10 @@
 					"c": "tn",
 					"w": 100,
 					"eth": {
-						"arb": 95,
-						"afr": 5
+						"naf": 55,
+						"arb": 38,
+						"med": 3,
+						"afr": 4
 					}
 				}
 			],
@@ -8305,7 +8398,8 @@
 					"c": "ng",
 					"w": 100,
 					"eth": {
-						"afr": 1
+						"afr": 88,
+						"sah": 12
 					}
 				}
 			],
@@ -8424,7 +8518,8 @@
 					"c": "sn",
 					"w": 100,
 					"eth": {
-						"afr": 1
+						"afr": 65,
+						"sah": 35
 					}
 				}
 			],
@@ -8603,7 +8698,8 @@
 					"c": "cm",
 					"w": 100,
 					"eth": {
-						"afr": 2
+						"afr": 90,
+						"sah": 10
 					}
 				}
 			],
@@ -8643,7 +8739,8 @@
 					"c": "ml",
 					"w": 100,
 					"eth": {
-						"afr": 1
+						"afr": 60,
+						"sah": 40
 					}
 				}
 			],
@@ -8685,8 +8782,10 @@
 					"c": "dz",
 					"w": 100,
 					"eth": {
-						"arb": 95,
-						"afr": 5
+						"naf": 65,
+						"arb": 30,
+						"afr": 3,
+						"sah": 2
 					}
 				}
 			],
@@ -8722,7 +8821,8 @@
 					"c": "ml",
 					"w": 100,
 					"eth": {
-						"afr": 1
+						"afr": 55,
+						"sah": 45
 					}
 				}
 			],
@@ -8764,7 +8864,8 @@
 					"c": "bf",
 					"w": 100,
 					"eth": {
-						"afr": 1
+						"afr": 80,
+						"sah": 20
 					}
 				}
 			],
@@ -9012,7 +9113,8 @@
 					"c": "gw",
 					"w": 100,
 					"eth": {
-						"afr": 1
+						"afr": 80,
+						"sah": 20
 					}
 				}
 			],
@@ -9561,10 +9663,11 @@
 					"c": "gulf",
 					"w": 100,
 					"eth": {
-						"arb": 75,
+						"arb": 72,
 						"afr": 25,
 						"hae": 6,
-						"sas": 3
+						"sas": 3,
+						"naf": 3
 					}
 				}
 			],
@@ -9659,10 +9762,11 @@
 					"c": "gulf",
 					"w": 100,
 					"eth": {
-						"arb": 75,
+						"arb": 72,
 						"afr": 25,
 						"hae": 4,
-						"sas": 4
+						"sas": 4,
+						"naf": 3
 					}
 				}
 			],
@@ -9763,7 +9867,8 @@
 					"c": "cn",
 					"w": 100,
 					"eth": {
-						"eas": 1
+						"eas": 97,
+						"cas": 3
 					}
 				}
 			],
@@ -9932,34 +10037,39 @@
 					"c": "en",
 					"w": 80,
 					"eth": {
-						"nor": 60,
+						"nor": 55,
+						"cel": 5,
 						"eur": 25,
 						"afr": 8,
+						"nil": 1.5,
 						"mix": 5,
 						"eas": 2,
 						"sea": 3,
-						"pac": 3
+						"pac": 3,
+						"mel": 0.5
 					}
 				},
 				{
 					"c": "ie",
 					"w": 3,
 					"eth": {
-						"nor": 1
+						"cel": 0.75,
+						"nor": 0.25
 					}
 				},
 				{
 					"c": "sco",
 					"w": 2,
 					"eth": {
-						"nor": 1
+						"cel": 0.6,
+						"nor": 0.4
 					}
 				},
 				{
 					"c": "south_slav",
 					"w": 5,
 					"eth": {
-						"eur": 1
+						"bal": 1
 					}
 				},
 				{
@@ -10139,8 +10249,11 @@
 					"c": "persian",
 					"w": 100,
 					"eth": {
-						"arb": 90,
-						"eur": 10
+						"cau": 72,
+						"arb": 12,
+						"cas": 8,
+						"sas": 5,
+						"eur": 3
 					}
 				}
 			],
@@ -10194,11 +10307,13 @@
 					"c": "en",
 					"w": 100,
 					"eth": {
-						"nor": 70,
+						"nor": 65,
+						"cel": 5,
 						"eur": 15,
 						"mix": 10,
 						"afr": 5,
-						"pac": 14
+						"pac": 14,
+						"mel": 2
 					}
 				}
 			],

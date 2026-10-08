@@ -1,5 +1,5 @@
 {
-	"_doc": "Complemento do names.json (que veio do futebol masculino) para o MMA. cultures: culturas que faltavam (Ásia Central, Cáucaso, Tailândia, Lituânia, Bulgária). origins: de onde vêm os lutadores dos países que no names.json eram só seleção (mesmo formato de nations.json › origins). female: primeiros nomes femininos por cultura; female_group liga as culturas sem lista própria a uma lista parecida.",
+	"_doc": "Complemento do names.json (que veio do futebol masculino) para o MMA. cultures: culturas que faltavam (Daguestão, Chechênia, tártaros, Ásia Central, Cáucaso, Afeganistão, Tailândia, Lituânia, Bulgária). origins: de onde vêm os lutadores (vale antes do nations.json; mesmo formato, com fw = peso nas mulheres). A Rússia do MMA tem muito mais Daguestão e Chechênia do que a Rússia do futebol. female: primeiros nomes femininos por cultura; female_group liga as culturas sem lista própria a uma lista parecida.",
 	"cultures": {
 		"kz": {
 			"first": [
@@ -27,7 +27,11 @@
 				"Marat",
 				"Sanzhar",
 				"Yesset",
-				"Olzhas"
+				"Olzhas",
+				"Beibut",
+				"Nursultan",
+				"Alikhan",
+				"Madiyar"
 			],
 			"last": [
 				"Nurmagambetov",
@@ -49,7 +53,16 @@
 				"Yessenov",
 				"Tursynov",
 				"Kuanyshev",
-				"Zhakenov"
+				"Zhakenov",
+				"Suleimenov",
+				"Bekmukhambetov",
+				"Tokhtarov",
+				"Zhaksylykov",
+				"Seitkaliev",
+				"Duisenbayev",
+				"Omarov",
+				"Mukhamedzhanov",
+				"Tleuov"
 			],
 			"zipf": 1.2
 		},
@@ -74,7 +87,12 @@
 				"Nodir",
 				"Muhammad",
 				"Doniyor",
-				"Elyor"
+				"Elyor",
+				"Jakhongir",
+				"Farkhod",
+				"Khurshid",
+				"Abror",
+				"Timur"
 			],
 			"last": [
 				"Karimov",
@@ -92,7 +110,16 @@
 				"Toshmatov",
 				"Aliev",
 				"Qodirov",
-				"Sharipov"
+				"Sharipov",
+				"Abdurakhmonov",
+				"Sultonov",
+				"Nurmatov",
+				"Khamidov",
+				"Juraev",
+				"Normatov",
+				"Tojiboev",
+				"Rasulov",
+				"Akhmedov"
 			],
 			"zipf": 1.2
 		},
@@ -115,7 +142,17 @@
 				"Medet",
 				"Ruslan",
 				"Kubanych",
-				"Nursultan"
+				"Nursultan",
+				"Talant",
+				"Nurlan",
+				"Ermek",
+				"Bekbolot",
+				"Kubanychbek",
+				"Aidar",
+				"Bakai",
+				"Atai",
+				"Chyngyz",
+				"Elnur"
 			],
 			"last": [
 				"Asanov",
@@ -131,7 +168,15 @@
 				"Turdubaev",
 				"Mambetov",
 				"Kurmanov",
-				"Usenov"
+				"Usenov",
+				"Asanbekov",
+				"Kadyrbekov",
+				"Beishenaliev",
+				"Zhumabaev",
+				"Abdrakhmanov",
+				"Toktosunov",
+				"Nurmatov",
+				"Sultanbekov"
 			],
 			"zipf": 1.2
 		},
@@ -151,7 +196,14 @@
 				"Sorbon",
 				"Navruz",
 				"Umed",
-				"Dilovar"
+				"Dilovar",
+				"Farrukh",
+				"Sharaf",
+				"Abdulloh",
+				"Behruz",
+				"Sohib",
+				"Parviz",
+				"Siyovush"
 			],
 			"last": [
 				"Rahimov",
@@ -166,7 +218,12 @@
 				"Safarov",
 				"Odinaev",
 				"Boboev",
-				"Khojaev"
+				"Khojaev",
+				"Sultonov",
+				"Ismoilov",
+				"Hasanov",
+				"Sangov",
+				"Kholov"
 			],
 			"zipf": 1.2
 		},
@@ -189,7 +246,8 @@
 				"Samir",
 				"Elnur",
 				"Ruslan",
-				"Murad"
+				"Murad",
+				"Togrul"
 			],
 			"last": [
 				"Aliyev",
@@ -205,7 +263,12 @@
 				"Karimov",
 				"Mustafayev",
 				"Quliyev",
-				"Najafov"
+				"Najafov",
+				"Abbasov",
+				"Gasimov",
+				"Valiyev",
+				"Huseynli",
+				"Sultanov"
 			],
 			"zipf": 1.25
 		},
@@ -228,7 +291,9 @@
 				"Arsen",
 				"Gevorg",
 				"Ashot",
-				"Hovhannes"
+				"Hovhannes",
+				"Vahe",
+				"Sargis"
 			],
 			"last": [
 				"Hakobyan",
@@ -245,7 +310,12 @@
 				"Ghazaryan",
 				"Hovhannisyan",
 				"Manukyan",
-				"Arakelyan"
+				"Arakelyan",
+				"Martirosyan",
+				"Stepanyan",
+				"Simonyan",
+				"Galstyan",
+				"Abrahamyan"
 			],
 			"zipf": 1.2
 		},
@@ -428,82 +498,479 @@
 				"Umarov"
 			],
 			"zipf": 1.3
+		},
+		"dag": {
+			"first": [
+				"Magomed",
+				"Shamil",
+				"Rasul",
+				"Gadzhi",
+				"Abubakar",
+				"Akhmed",
+				"Ali",
+				"Arsen",
+				"Murad",
+				"Ramazan",
+				"Said",
+				"Saygid",
+				"Gamzat",
+				"Kurban",
+				"Omar",
+				"Usman",
+				"Abdulla",
+				"Islam",
+				"Zaur",
+				"Tagir",
+				"Ibragim",
+				"Muslim",
+				"Makhach",
+				"Dzhabrail",
+				"Abdulkerim",
+				"Gasan",
+				"Gusein",
+				"Magomedrasul",
+				"Magomedsalam",
+				"Shakhban",
+				"Eldar",
+				"Kamil",
+				"Arslan",
+				"Anvar",
+				"Abdurakhman",
+				"Akhmednabi",
+				"Nurmagomed",
+				"Rabadan",
+				"Abdulmanap",
+				"Yusup",
+				"Khalid",
+				"Daud",
+				"Sharaputdin",
+				"Gitinomagomed",
+				"Dzhamal"
+			],
+			"last": [
+				"Magomedov",
+				"Gadzhiev",
+				"Abdulaev",
+				"Aliev",
+				"Omarov",
+				"Ramazanov",
+				"Gasanov",
+				"Kurbanov",
+				"Shakhbanov",
+				"Abakarov",
+				"Khalidov",
+				"Isaev",
+				"Akhmedov",
+				"Gamzatov",
+				"Saidov",
+				"Musaev",
+				"Abdurakhmanov",
+				"Dzhamaldinov",
+				"Ibragimov",
+				"Mirzaev",
+				"Kadiev",
+				"Bagomedov",
+				"Abdulkadyrov",
+				"Ataev",
+				"Daudov",
+				"Zubairov",
+				"Yusupov",
+				"Umarov",
+				"Murtazaliev",
+				"Saipulaev",
+				"Khizriev",
+				"Gadzhimuradov",
+				"Alikhanov",
+				"Rabadanov",
+				"Abdulmuslimov",
+				"Magomedaliev",
+				"Shamilov",
+				"Medzhidov",
+				"Kurbanaliev",
+				"Dibirov",
+				"Akaev",
+				"Abdulkhalikov",
+				"Gusenov",
+				"Magomedkhanov",
+				"Batyrov",
+				"Kazbekov",
+				"Nabiev",
+				"Sultanakhmedov",
+				"Gitinov",
+				"Dzhabrailov"
+			],
+			"zipf": 1.35
+		},
+		"chech": {
+			"first": [
+				"Adam",
+				"Ruslan",
+				"Islam",
+				"Ibragim",
+				"Movsar",
+				"Zelimkhan",
+				"Magomed",
+				"Akhmed",
+				"Aslan",
+				"Apti",
+				"Bekkhan",
+				"Shamil",
+				"Turpal",
+				"Umar",
+				"Usman",
+				"Abubakar",
+				"Rasul",
+				"Ali",
+				"Sultan",
+				"Khasan",
+				"Khusein",
+				"Zaurbek",
+				"Arbi",
+				"Salman",
+				"Alikhan",
+				"Mansur",
+				"Baisangur",
+				"Isa",
+				"Daud",
+				"Askhab",
+				"Khamzat",
+				"Abdul-Kerim",
+				"Said-Magomed",
+				"Lechi",
+				"Musa",
+				"Sharip",
+				"Ayub",
+				"Vakha",
+				"Rizvan",
+				"Deni"
+			],
+			"last": [
+				"Bataev",
+				"Tsukaev",
+				"Khadzhiev",
+				"Umarov",
+				"Mutsaev",
+				"Dzhabrailov",
+				"Yandiev",
+				"Albakov",
+				"Tutaev",
+				"Gaitukaev",
+				"Musaev",
+				"Elmurzaev",
+				"Ismailov",
+				"Akhmadov",
+				"Dudurkaev",
+				"Saidulaev",
+				"Baisarov",
+				"Idrisov",
+				"Magomadov",
+				"Tagirov",
+				"Dzhamaldaev",
+				"Vakhaev",
+				"Abuev",
+				"Gakaev",
+				"Labazanov",
+				"Eskiev",
+				"Aldamov",
+				"Tsechoev",
+				"Gaisumov",
+				"Edilsultanov",
+				"Khamkhoev",
+				"Dakaev",
+				"Vitaev",
+				"Gelagaev",
+				"Mezhidov",
+				"Shamsudinov",
+				"Ozdoev",
+				"Khaskhanov",
+				"Mutaliev",
+				"Yakhyaev"
+			],
+			"zipf": 1.3
+		},
+		"tatar": {
+			"first": [
+				"Rinat",
+				"Ildar",
+				"Marat",
+				"Rustam",
+				"Ruslan",
+				"Azat",
+				"Ilnur",
+				"Albert",
+				"Rafael",
+				"Aidar",
+				"Timur",
+				"Rafik",
+				"Ilyas",
+				"Damir",
+				"Ramil",
+				"Linar",
+				"Almaz",
+				"Airat",
+				"Radik",
+				"Fanis",
+				"Ilgiz",
+				"Nail",
+				"Rishat",
+				"Emil"
+			],
+			"last": [
+				"Gainullin",
+				"Khairullin",
+				"Galiev",
+				"Sharipov",
+				"Zaripov",
+				"Nigmatullin",
+				"Valiev",
+				"Fazliev",
+				"Sabirov",
+				"Mukhametov",
+				"Gabdrakhmanov",
+				"Khabibullin",
+				"Shakirov",
+				"Fatkhullin",
+				"Garipov",
+				"Minnikhanov",
+				"Safin",
+				"Yusupov",
+				"Kamaletdinov",
+				"Yakupov",
+				"Gataullin",
+				"Ziganshin",
+				"Akhmetshin",
+				"Nurgaliev"
+			],
+			"zipf": 1.25
+		},
+		"afg": {
+			"first": [
+				"Ahmad",
+				"Wahid",
+				"Najibullah",
+				"Farid",
+				"Hamid",
+				"Mohammad",
+				"Abdul",
+				"Javid",
+				"Nasir",
+				"Baz",
+				"Zabihullah",
+				"Shafiq",
+				"Mustafa",
+				"Karim",
+				"Jawad",
+				"Omid",
+				"Rahim",
+				"Habib",
+				"Sardar",
+				"Siyar",
+				"Bilal",
+				"Rahmat",
+				"Asadullah",
+				"Mirwais"
+			],
+			"last": [
+				"Ahmadzai",
+				"Popalzai",
+				"Stanekzai",
+				"Wardak",
+				"Sultani",
+				"Rahimi",
+				"Amiri",
+				"Noori",
+				"Safi",
+				"Hotak",
+				"Durrani",
+				"Karimi",
+				"Mohammadi",
+				"Nazari",
+				"Yousufzai",
+				"Jalali",
+				"Rasuli",
+				"Haidari",
+				"Sharifi",
+				"Mangal",
+				"Zazai",
+				"Kakar",
+				"Barakzai",
+				"Azimi"
+			],
+			"zipf": 1.25
 		}
 	},
 	"origins": {
 		"RUS": [
 			{
 				"c": "ru",
-				"w": 60,
+				"w": 56,
 				"eth": {
-					"eur": 85,
-					"nor": 15
+					"slv": 82,
+					"eur": 10,
+					"nor": 8
 				}
 			},
 			{
-				"c": "cauc",
-				"w": 36,
+				"c": "dag",
+				"w": 24,
+				"fw": 0.12,
 				"eth": {
-					"med": 78,
-					"arb": 22
+					"cau": 100
+				}
+			},
+			{
+				"c": "chech",
+				"w": 10,
+				"fw": 0.1,
+				"eth": {
+					"cau": 100
+				}
+			},
+			{
+				"c": "tatar",
+				"w": 6,
+				"eth": {
+					"cas": 45,
+					"slv": 40,
+					"cau": 15
+				}
+			},
+			{
+				"c": "ge",
+				"w": 1,
+				"eth": {
+					"cau": 1
+				}
+			},
+			{
+				"c": "am",
+				"w": 1,
+				"eth": {
+					"cau": 1
+				}
+			},
+			{
+				"c": "az",
+				"w": 1,
+				"eth": {
+					"cau": 1
 				}
 			},
 			{
 				"c": "kz",
-				"w": 4,
+				"w": 1,
 				"eth": {
-					"eas": 80,
-					"med": 20
+					"cas": 1
 				}
 			}
 		],
 		"KAZ": [
 			{
 				"c": "kz",
-				"w": 76,
+				"w": 74,
 				"eth": {
-					"eas": 80,
-					"med": 20
+					"cas": 94,
+					"eas": 6
 				}
 			},
 			{
 				"c": "ru",
-				"w": 24,
+				"w": 20,
 				"eth": {
-					"eur": 90,
-					"nor": 10
+					"slv": 92,
+					"eur": 8
+				}
+			},
+			{
+				"c": "tatar",
+				"w": 3,
+				"eth": {
+					"cas": 60,
+					"slv": 40
+				}
+			},
+			{
+				"c": "uz",
+				"w": 3,
+				"eth": {
+					"cas": 70,
+					"cau": 30
 				}
 			}
 		],
 		"UZB": [
 			{
 				"c": "uz",
-				"w": 100,
+				"w": 92,
 				"eth": {
-					"med": 55,
-					"eas": 25,
-					"arb": 20
+					"cas": 62,
+					"cau": 38
+				}
+			},
+			{
+				"c": "tj",
+				"w": 4,
+				"eth": {
+					"cau": 80,
+					"cas": 20
+				}
+			},
+			{
+				"c": "kz",
+				"w": 2,
+				"eth": {
+					"cas": 1
+				}
+			},
+			{
+				"c": "ru",
+				"w": 2,
+				"eth": {
+					"slv": 1
 				}
 			}
 		],
 		"KGZ": [
 			{
 				"c": "kg",
-				"w": 100,
+				"w": 88,
 				"eth": {
-					"eas": 85,
-					"med": 15
+					"cas": 92,
+					"eas": 8
+				}
+			},
+			{
+				"c": "uz",
+				"w": 8,
+				"eth": {
+					"cas": 60,
+					"cau": 40
+				}
+			},
+			{
+				"c": "ru",
+				"w": 4,
+				"eth": {
+					"slv": 1
 				}
 			}
 		],
 		"TJK": [
 			{
 				"c": "tj",
-				"w": 100,
+				"w": 86,
 				"eth": {
-					"med": 60,
-					"arb": 30,
-					"sas": 10
+					"cau": 78,
+					"cas": 14,
+					"sas": 8
+				}
+			},
+			{
+				"c": "uz",
+				"w": 14,
+				"eth": {
+					"cas": 60,
+					"cau": 40
 				}
 			}
 		],
@@ -512,8 +979,7 @@
 				"c": "az",
 				"w": 100,
 				"eth": {
-					"med": 70,
-					"arb": 30
+					"cau": 100
 				}
 			}
 		],
@@ -522,48 +988,73 @@
 				"c": "am",
 				"w": 100,
 				"eth": {
-					"med": 85,
-					"arb": 15
+					"cau": 100
 				}
 			}
 		],
 		"BLR": [
 			{
-				"c": "east_slav",
+				"c": "ru",
 				"w": 100,
 				"eth": {
-					"eur": 80,
-					"nor": 20
+					"slv": 88,
+					"nor": 7,
+					"eur": 5
 				}
 			}
 		],
 		"MDA": [
 			{
 				"c": "ro",
-				"w": 100,
+				"w": 90,
 				"eth": {
-					"eur": 90,
-					"med": 10
+					"eur": 55,
+					"slv": 25,
+					"bal": 20
+				}
+			},
+			{
+				"c": "ru",
+				"w": 10,
+				"eth": {
+					"slv": 1
 				}
 			}
 		],
 		"LTU": [
 			{
 				"c": "lt",
-				"w": 100,
+				"w": 94,
 				"eth": {
-					"eur": 70,
-					"nor": 30
+					"slv": 45,
+					"nor": 45,
+					"eur": 10
+				}
+			},
+			{
+				"c": "ru",
+				"w": 6,
+				"eth": {
+					"slv": 1
 				}
 			}
 		],
 		"BUL": [
 			{
 				"c": "bg",
-				"w": 100,
+				"w": 92,
 				"eth": {
-					"eur": 60,
-					"med": 40
+					"bal": 70,
+					"slv": 20,
+					"cau": 10
+				}
+			},
+			{
+				"c": "tr",
+				"w": 8,
+				"eth": {
+					"cau": 80,
+					"bal": 20
 				}
 			}
 		],
@@ -621,12 +1112,12 @@
 		],
 		"AFG": [
 			{
-				"c": "af",
+				"c": "afg",
 				"w": 100,
 				"eth": {
-					"arb": 50,
-					"sas": 30,
-					"eas": 20
+					"cau": 55,
+					"cas": 25,
+					"sas": 20
 				}
 			}
 		],
@@ -1283,6 +1774,34 @@
 			"Bianca",
 			"Lindiwe",
 			"Naledi"
+		],
+		"tatar": [
+			"Alsu",
+			"Dilyara",
+			"Gulnara",
+			"Aliya",
+			"Elmira",
+			"Liliya",
+			"Regina",
+			"Leysan",
+			"Guzel",
+			"Alina",
+			"Kamila",
+			"Diana"
+		],
+		"afg": [
+			"Fatima",
+			"Zahra",
+			"Maryam",
+			"Marzia",
+			"Shabnam",
+			"Nilofar",
+			"Freshta",
+			"Mursal",
+			"Sahar",
+			"Roya",
+			"Laila",
+			"Hasina"
 		]
 	},
 	"female_group": {
@@ -1385,6 +1904,10 @@
 		"ph": "sea",
 		"th": "sea",
 		"molucca": "sea",
-		"sur": "nl"
+		"sur": "nl",
+		"dag": "cauc",
+		"chech": "cauc",
+		"tatar": "tatar",
+		"afg": "afg"
 	}
 }

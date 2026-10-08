@@ -1,72 +1,103 @@
 # Noite de Luta — nota de passagem (08/10/2026)
 
-Ramo: `claude/festive-maxwell-iuncob`. O jogo **já roda**: dá para fundar a academia, contratar,
-aceitar propostas, desafiar, montar o plano, assistir à luta round a round e avançar as semanas.
+Ramo: `claude/inspiring-wright-xx78jb` (parte do trabalho do colega em `claude/festive-maxwell-iuncob`,
+já incorporado). O jogo **roda nos dois papéis**: empresário de academia e presidente da organização.
 
 ## Decisões do dono
 
-- O jogo é **muito inspirado no LEATHER: Tactical Boxing Management**, levado para o MMA.
-- O jogador é o **empresário de uma academia**, não o dono de uma organização.
-- **Não usar nada do Corner Office antigo** (`corner-office/`).
-- Base técnica: a do Mais Uma Rodada (interface, retratos, nomes, países).
+- A ideia do jogo é **acompanhar carreiras como um fã acompanha o mundo do MMA**. O papel do
+  jogador é a lente: **empresário** (academia, como no LEATHER) ou **presidente** da Liga Global
+  (como um Dana White). Os dois existem; a escolha é na nova carreira.
+- Muito inspirado no **LEATHER: Tactical Boxing Management**, levado para o MMA.
+- **Não usar nada do Corner Office antigo** (`corner-office/`). Base técnica: Mais Uma Rodada.
+- Pedidos em aberto do dono: presidente **realista e divertido** (ver `docs/PRESIDENTE.md`),
+  **etnias e aparência** (ex.: daguestanês de barba sem bigode) e **estilos de luta com muito
+  realismo** — os dois últimos foram feitos nesta rodada.
 
 ## O que está pronto
 
 **Mundo e dados**
-- 12 categorias, cerca de 1.000 lutadores (do campeão ao amador), 50 academias rivais e campeões.
-- Nomes por cultura, incluindo os femininos, e uma lista de lutadores reais que nunca são gerados (`data/world/mma.json`, `data/names/fight_names.json`).
+- 12 categorias, cerca de 1.000 lutadores, 50 academias rivais, campeões e linhagem dos cinturões.
+- Nomes por cultura (`data/names/names.json` do MUR + `data/names/fight_names.json` do MMA).
+  Culturas novas: **Daguestão, Chechênia, tártaros, Afeganistão** (além de Ásia Central, Cáucaso,
+  Tailândia...). Na Rússia do MMA, ~24% vêm do Daguestão e ~10% da Chechênia (raros entre as
+  mulheres: peso `fw` nas origens).
+- **22 etnias** nos rostos: as 9 novas do MUR foram trazidas (eslava, balcânica, celta,
+  Cáucaso/Anatólia/Irã, norte-africana, centro-asiática, nilótica, melanésia, saheliana).
+- **Aparência de lutador** (`FighterGenerator._grooming` e `_marks`, tabela `grooming` em
+  `data/world/mma.json`): cabelo na máquina e barba cheia **sem bigode** no Daguestão e na
+  Chechênia, rosto limpo na Tailândia, cabelo curto de quem treina; **orelha de couve-flor** em quem
+  vem da luta agarrada, **nariz torto** em quem trocou muito ou foi nocauteado, **cicatriz na
+  sobrancelha** (cotovelada). As marcas também chegam depois das lutas (`battle_marks`).
+  Chaves de `look`: `hs` cabelo, `bd` barba, `er` orelha, `ns` nariz, `sc` cicatriz, `wt` peso, `fem`.
 
-**Motor de luta** (`scripts/systems/fight_engine.gd`, `fight_plan.gd`)
-- Round a round, com plano de 10 escolhas.
-- Calibrado com `tools/fight_soak.gd`: nocautes de 20% a 42% conforme o peso nos homens e 15% nas mulheres; finalizações perto de 18%.
+**Estilos de luta** (`data/world/styles.json`, `scripts/systems/styles.gd`)
+- **23 artes de base**: MMA, boxe, muay thai, kickboxing, kickboxing holandês, caratê tradicional,
+  kyokushin, taekwondo, sanda, capoeira, savate, wrestling livre, wrestling universitário,
+  greco-romana, judô, sambo esportivo, sambo de combate, jiu-jitsu, grappling sem kimono, luta livre
+  esportiva, catch wrestling, kurash e luta senegalesa.
+- Cada lutador tem a base e uma **segunda arte** (`Fighter.base2`, 45% nos atributos, 50% no
+  repertório). Base por país e **por cultura** (o daguestanês vem do wrestling, o russo étnico do
+  sambo e do boxe, o holandês do kickboxing holandês, o filipino do sanda...).
+- O **motor usa o estilo**: golpes preferidos (inclusive giratório, joelhada voadora, chute na
+  panturrilha, oblíquo), 15 técnicas de queda com lugar de queda e impacto (baiana, single, suplex,
+  uchi mata, arremesso de cinturão...), 17 finalizações por posição (chave de calcanhar, d'arce,
+  guilhotina na entrada da queda...) e **21 marcas de escola** (luta encadeada, controle por cima e
+  "mat return", clinch tailandês, segura o chute, guarda perigosa, chaves de perna, entra e sai...).
+  O plano sugerido pelo técnico também segue a escola. Narração com o nome do golpe da escola
+  ("meia-lua de compasso", "teep", "mae-geri").
+- Perfil do lutador: card "Estilo de luta" (descrição, marcas, quedas e finalizações favoritas).
 
-**Carreira** (`scripts/systems/`)
-- `Calendar`: Liga Global (LGC) a cada duas semanas, uma noite continental e três regionais por semana.
-- `Matchmaker`: lutas das rivais, cinturão, propostas, desafios no estilo LEATHER (perder trava os desafios para cima por 8 semanas; o campeão só aceita os três primeiros do ranking).
-- `Rankings`: rating tipo Elo.
-- `Signing`: contratação com fatia da bolsa, número de lutas e luvas.
-- `StaffMarket`: 7 funções.
-- `Development`: treino por foco e intensidade, envelhecimento, condição física, lesões, aposentadorias, novos amadores todo mês.
-- `Career`: pesagem e corte de peso, bolsas, reputação, notícias, finanças semanais, contratos e a semana andando.
-- Save em JSON (`GameManager`, `user://carreira.json`, cerca de 2,5 MB).
+**Motor de luta** (`fight_engine.gd`, `fight_plan.gd`): round a round, plano de 10 escolhas, três
+juízes. Calibragem atual (`fight_soak`, 2.400 lutas): nocaute 24%, finalização 22%, decisão 54%.
+Aproveitamento por base no mundo gerado (`style_lab --world`): wrestling ~60%, judô/sambo ~57-60%,
+boxe ~50%, jiu-jitsu ~48%, MMA ~46%, muay thai/kickboxing ~42% (no MMA real o wrestling também é a
+base que mais vence).
 
-**Telas** (`scripts/ui/screens/`)
-- Menu, nova academia e Início (noite de luta, propostas, próximas lutas, notícias, avançar semana).
-- Equipe, perfil do lutador (ficha, carreira, treino, contrato), Rankings (com modo "escolher quem desafiar").
-- Mercado (lutadores e staff), Academia (finanças e staff), proposta, desafio, card do evento e opções.
-- Plano de luta (pesagem, leitura do técnico, ficha, editor do plano) e luta ao vivo (placar, fôlego e dano, narração, corner no intervalo, resultado).
+**Carreira** (`scripts/systems/`): Calendar, Matchmaker, Rankings (Elo), Signing, StaffMarket,
+Development, Career, **Org** (modo Presidente: cards, ofertas com chance de aceite, bolsas, luta
+principal em 5 rounds, PPV a cada 4 semanas, público, bônus, prestígio, finanças, delegar cards).
 
-## Verificação feita
+**Telas**: as da academia (Início, Equipe, Rankings, Mercado, Academia, plano e luta ao vivo) e as do
+presidente (Início, Eventos, card, marcar luta, noite de luta com "Assistir"/"Simular", bônus e
+relatório, Cinturões, Organização). Para os dois: **Seguir** lutadores, Resultados da semana e
+Cinturões com linhagem.
 
-- `tools/check_scripts.gd`: 70 scripts, 0 erros.
-- `tools/world_sim.gd`: 26 semanas sem erro (cerca de 29 lutas por semana) e o save recarrega.
-- `tools/design_shots.gd`: capturas de todas as telas em 390×844, com uma luta inteira jogada.
-- **Não testado:** celular deitado e tablet, APK e aparelho Android, carreira longa jogada à mão.
+## Verificação feita (nesta rodada)
 
-## Próximos passos sugeridos
+- `tools/check_scripts.gd`: 83 scripts, 0 erros.
+- `tools/world_sim.gd`: 52 semanas como empresário e como presidente, sem erro; save recarrega.
+- `tools/fight_soak.gd` e `tools/style_lab.gd` (números acima).
+- `tools/face_sheet.gd -- --nations=RUS,KAZ,... [--only=dag,chech]`: rostos por país conferidos.
+- **Não refeito nesta rodada:** capturas de tela (`design_shots`) depois do card "Estilo de luta".
+  **Não testado:** celular deitado e tablet, APK, carreira longa jogada à mão.
 
-1. Jogar algumas semanas à mão e equilibrar o dinheiro: hoje o caixa cai uns US$ 4 mil por semana e as bolsas do regional são pequenas.
-2. Lista de lançamentos da Academia: agrupar por semana (hoje se repete muito).
-3. Bandeiras de países que vieram sem desenho no `nations.json` (THA, KAZ, UZB e outros aparecem como sigla).
-4. Capturas em 844×390 e 1280×800, e ajuste das telas largas.
-5. `CLAUDE.md` e `DESIGN.md` próprios do Noite de Luta. Hoje vale o sistema "Lousa e Giz" do MUR, com estas regras extras:
-   - vermelho e azul só para os corners;
-   - o destaque da interface é a cor da equipe.
-6. Testes automáticos (`tests/`) e preset de exportação Android.
-7. Ideias do LEATHER que ainda faltam:
-   - ofertas de "step-aside" (pagar para o adversário sair do caminho);
-   - mudar de categoria;
-   - torneios e Grand Prix;
-   - comparar dois lutadores lado a lado;
-   - lutador criado pelo jogador.
+## Próximos passos (para o colega)
+
+1. **Vida de presidente** — tarefa aberta do dono. Pesquisa e mecânicas em `docs/PRESIDENTE.md`;
+   começar pela semana da luta (lesão → substituto, peso perdido → multa/peso combinado) e pela
+   coletiva pós-luta.
+2. Capturas das telas (`design_shots` nos dois papéis) e conferir o card "Estilo de luta".
+3. Economia do presidente: a popularidade infla e satura público/PPV com o tempo (`Org.draw`).
+4. Bandeiras que faltam no `nations.json` (THA, KAZ, UZB e outros aparecem como sigla).
+5. Rostos: o renderizador mostra pouco nariz e boca em alguns tamanhos; conferir em 56–120 px.
+6. Ideias do LEATHER que faltam: step-aside, mudar de categoria, torneios, comparar dois lutadores.
+
+## Avisos
+
+- **`trait` é palavra reservada no Godot 4.7** (por isso `Styles.mark`, não `Styles.trait`).
+- Classe nova (`class_name`) precisa de `godot --headless --path . --import` antes do `check_scripts`.
+- Há um `git stash` antigo ("wip-corner-office-tokens-e-motor"); não faz parte deste jogo.
+- Não integrar ramos `codex/*`; perguntar ao dono antes de juntar na `main`.
 
 ## Comandos (na pasta `noite-de-luta`)
 
 ```
 godot --headless --path . --import
 godot --headless --path . --script res://tools/check_scripts.gd
-godot --headless --path . --script res://tools/build_theme.gd          # depois de mexer em cores/tokens
-godot --headless --path . --script res://tools/world_sim.gd -- --weeks=52
+godot --headless --path . --script res://tools/world_sim.gd -- --weeks=52 [--role=presidente]
 godot --headless --path . --script res://tools/fight_soak.gd -- --n=300 --seed=7
-xvfb-run -a -s "-screen 0 1400x1400x24" godot --path . --resolution 390x844 --script res://tools/design_shots.gd -- --out=/tmp/telas
+godot --headless --path . --script res://tools/style_lab.gd -- --a=wrestling --b=muay_thai --log=1   # ou --world
+xvfb-run -a -s "-screen 0 1600x1600x24" godot --path . --resolution 1400x1300 --script res://tools/face_sheet.gd -- --out=/tmp/rostos.png --nations=RUS,KAZ,GEO
+xvfb-run -a -s "-screen 0 1400x1400x24" godot --path . --resolution 390x844 --script res://tools/design_shots.gd -- --out=/tmp/telas [--role=presidente]
 ```

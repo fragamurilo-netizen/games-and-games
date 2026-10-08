@@ -31,15 +31,16 @@ static func ethnicity_index(key: String) -> int:
 
 
 ## Origem de quem nasceu em `nation_code`: {"c": cultura de nome, "eth": índice da etnia}.
-## Com família de outra origem, "c" vem como "país+família" (ou "país+família+m").
-static func pick_origin(rng: RandomNumberGenerator, nation_code: String) -> Dictionary:
+## Com família de outra origem, "c" vem como "país+família" (ou "país+família+m"). `fem`: usa o
+## peso feminino da origem ("fw"), quando houver (lutadoras do Daguestão são raras).
+static func pick_origin(rng: RandomNumberGenerator, nation_code: String, fem: bool = false) -> Dictionary:
 	_prepare()
 	var origins: Array = DataDB.origins(nation_code)
 	if origins.is_empty():
 		return {"c": "en", "eth": 1, "h": ""}
 	var weights: Array = []
 	for o in origins:
-		weights.append(float(o["w"]))
+		weights.append(float(o["w"]) * (float(o.get("fw", 1.0)) if fem else 1.0))
 	var o: Dictionary = origins[maxi(0, RngUtil.weighted_index(rng, weights))]
 	var eth_key: Variant = RngUtil.weighted_key(rng, o["eth"])
 	var c := String(o["c"])

@@ -21,15 +21,31 @@ const STRIKES := {
 	"chute_frontal": {"acc": 0.50, "pow": 0.5, "skill": "chutes", "zone": "body", "cost": 0.0040},
 	"joelhada": {"acc": 0.48, "pow": 0.95, "skill": "clinch", "zone": "body", "cost": 0.0045},
 	"cotovelada": {"acc": 0.44, "pow": 0.85, "skill": "clinch", "zone": "head", "cost": 0.0035},
+	# Golpes de escola: raros no geral, frequentes em quem vem da arte certa (ver styles.json).
+	"chute_panturrilha": {"acc": 0.62, "pow": 0.6, "skill": "chutes", "zone": "legs", "cost": 0.0038},
+	"chute_obliquo": {"acc": 0.55, "pow": 0.45, "skill": "chutes", "zone": "legs", "cost": 0.0034},
+	"chute_giratorio": {"acc": 0.33, "pow": 1.25, "skill": "chutes", "zone": "body", "cost": 0.0060},
+	"chute_rodado": {"acc": 0.18, "pow": 1.8, "skill": "chutes", "zone": "head", "cost": 0.0070},
+	"backfist": {"acc": 0.24, "pow": 1.1, "skill": "maos", "zone": "head", "cost": 0.0050},
+	"superman": {"acc": 0.30, "pow": 1.0, "skill": "maos", "zone": "head", "cost": 0.0045},
+	"joelhada_voadora": {"acc": 0.22, "pow": 1.7, "skill": "clinch", "zone": "head", "cost": 0.0070},
 }
+const SPINNING := ["chute_giratorio", "chute_rodado", "backfist"]
+## Chutes que dá para segurar (o chute baixo e o oblíquo não).
+const CATCHABLE := ["chute_corpo", "chute_alto", "chute_frontal", "chute_giratorio", "chute_rodado"]
 ## Peso de cada golpe por distância (0 longa, 1 média, 2 curta).
 const POOL := [
-	{"jab": 3.0, "direto": 2.0, "chute_baixo": 2.2, "chute_corpo": 1.4, "chute_alto": 0.5, "chute_frontal": 0.8},
-	{"jab": 2.2, "direto": 2.2, "gancho": 2.0, "uppercut": 0.5, "overhand": 0.8, "chute_baixo": 1.2, "chute_corpo": 0.8, "chute_alto": 0.25},
+	{"jab": 3.0, "direto": 2.0, "chute_baixo": 1.8, "chute_corpo": 1.4, "chute_alto": 0.5, "chute_frontal": 0.8,
+		"chute_panturrilha": 0.5, "chute_obliquo": 0.2, "chute_giratorio": 0.1, "chute_rodado": 0.04, "superman": 0.05},
+	{"jab": 2.2, "direto": 2.2, "gancho": 2.0, "uppercut": 0.5, "overhand": 0.8, "chute_baixo": 1.0, "chute_corpo": 0.8, "chute_alto": 0.25,
+		"chute_panturrilha": 0.5, "chute_obliquo": 0.1, "chute_giratorio": 0.06, "chute_rodado": 0.04, "backfist": 0.05, "superman": 0.05, "joelhada_voadora": 0.04},
 	{"gancho": 2.4, "uppercut": 1.6, "direto": 1.0, "jab": 0.7, "joelhada": 0.9, "cotovelada": 0.4},
 ]
 const GROUND_ORDER := ["guarda", "meia", "lateral", "montada"]
 const GPOS_NAME := {"guarda": "guarda", "meia": "meia-guarda", "lateral": "cem quilos", "montada": "montada", "costas": "pegada nas costas"}
+## Como cada um fica depois da queda ({a} = quem derrubou, {b} = quem caiu).
+const GPOS_IN := {"guarda": "{b} cai e fecha a guarda.", "meia": "{b} cai na meia-guarda.", "lateral": "{a} cai direto nos cem quilos.",
+	"montada": "{a} já cai montado.", "costas": "{a} cai pegando as costas de {b}."}
 
 var f: Array[Fighter] = [] # [vermelho, azul]
 var rounds: int = 3
@@ -56,6 +72,8 @@ var ko_factor := 1.0
 var mods: Array = [{}, {}]
 var _round_events: Array = []
 var _last_strike := ""
+## Repertório de cada lado (Styles.profile): golpes, quedas, finalizações e marcas da escola.
+var prof: Array = [{}, {}]
 
 
 ## `opts`: {narrate, mods: [{atributo: ajuste}, {}], ko (fator de nocaute da categoria)}
@@ -69,6 +87,7 @@ func setup(fa: Fighter, fb: Fighter, n_rounds: int, is_title: bool, r: RandomNum
 	# Fator de nocaute da categoria, achatado: o pesado nocauteia mais, mas o mosca também derruba.
 	ko_factor = 1.0 + (float(opts.get("ko", 1.0)) - 1.0) * 0.5
 	plans = [FightPlan.suggest(fa, fb), FightPlan.suggest(fb, fa)]
+	prof = [Styles.profile(fa), Styles.profile(fb)]
 	# Forma do dia: ninguém luta sempre igual (é o que faz a zebra existir).
 	var m2: Array = []
 	for i in 2:
@@ -231,6 +250,11 @@ func _spend(i: int, amount: float) -> void:
 	s[i]["st"] = maxf(0.05, float(s[i]["st"]) - amount * (1.3 - f[i].a("cardio") / 200.0))
 
 
+## Força de uma marca do estilo do lado `i` (0 a 1).
+func _tr(i: int, t: String) -> float:
+	return Styles.mark(prof[i], t)
+
+
 # --- Em pé --------------------------------------------------------------------------------
 
 func _tick_standing(dt: float) -> void:
@@ -244,6 +268,11 @@ func _tick_standing(dt: float) -> void:
 			c[i] = _at(i, "movimentacao") * 0.6 + _at(i, "velocidade") * 0.25 + _at(i, "qi") * 0.15
 			if int(plans[i]["postura"]) == 2 and want[i] > want[1 - i]:
 				c[i] += 10.0
+			# Caratê e taekwondo mandam na distância longa; o greco e o tailandês encurtam.
+			if want[i] == 0:
+				c[i] += 8.0 * _tr(i, "blitz")
+			elif want[i] == 2:
+				c[i] += 6.0 * maxf(_tr(i, "cage"), _tr(i, "plum"))
 		var p0: float = pow(c[0], 2.0) / (pow(c[0], 2.0) + pow(c[1], 2.0))
 		dist = want[0] if rng.randf() < p0 else want[1]
 	# Quedas
@@ -259,10 +288,13 @@ func _tick_standing(dt: float) -> void:
 	# Clinch
 	if dist == 2:
 		for i: int in order:
-			if int(plans[i]["distancia"]) == 2 and rng.randf() < 0.22 + (_at(i, "clinch") - _at(1 - i, "movimentacao")) / 250.0:
+			if int(plans[i]["distancia"]) == 2 and rng.randf() < 0.22 + (_at(i, "clinch") - _at(1 - i, "movimentacao")) / 250.0 + 0.06 * maxf(_tr(i, "cage"), _tr(i, "plum")):
 				pos = "clinch"
-				cage = rng.randf() < 0.55
-				_log(i, "info", "%s amarra no clinch%s." % [f[i].short_name(), " e prensa na grade" if cage else ""])
+				cage = rng.randf() < 0.55 + 0.3 * _tr(i, "cage")
+				if _tr(i, "plum") >= 0.6 and not cage:
+					_log(i, "info", "%s prende %s pela nuca no clinch tailandês." % [f[i].short_name(), f[1 - i].short_name()])
+				else:
+					_log(i, "info", "%s amarra no clinch%s." % [f[i].short_name(), " e prensa na grade" if cage else ""])
 				return
 	_exchange()
 
@@ -296,6 +328,7 @@ func _exchange() -> void:
 		counter_p = 0.18
 	if missed_any:
 		counter_p += 0.06
+	counter_p += 0.08 * _tr(d, "counter")
 	if rng.randf() < counter_p * (1.0 - float(s[d]["rock"])):
 		_strike(d, 0, int(plans[d]["contra"]) == 1)
 
@@ -305,11 +338,18 @@ func _pick_strike(i: int, zone_dist: int) -> String:
 	var kick_pref := pow(clampf(_at(i, "chutes") / maxf(20.0, _at(i, "maos")), 0.4, 2.2), 1.6)
 	var alvo := int(plans[i]["alvo"])
 	for k: String in pool.keys():
-		var w: float = pool[k]
+		var w: float = pool[k] * Styles.strike_mult(prof[i], k)
 		if k.begins_with("chute"):
 			w *= kick_pref
-		if k in ["joelhada", "cotovelada"]:
+		if k in ["joelhada", "cotovelada", "joelhada_voadora"]:
 			w *= clampf(_at(i, "clinch") / 60.0, 0.3, 1.8)
+		# Giratório e voador só saem de quem tem técnica para isso.
+		if k in SPINNING or k in ["joelhada_voadora", "superman"]:
+			w *= clampf((_at(i, String(STRIKES[k]["skill"])) - 45.0) / 30.0, 0.05, 1.5)
+		if k in ["chute_baixo", "chute_panturrilha"]:
+			w *= 1.0 + 0.8 * _tr(i, "low_kicks")
+		if STRIKES[k]["zone"] == "body":
+			w *= 1.0 + 0.5 * _tr(i, "body")
 		var z: String = STRIKES[k]["zone"]
 		if alvo == 1 and z == "head":
 			w *= 1.6
@@ -329,7 +369,11 @@ func _strike(att: int, idx: int, counter: bool, forced: String = "", zone_dist: 
 	var zone: String = sp["zone"]
 	if kind in ["gancho", "direto"] and int(plans[att]["alvo"]) == 2 and rng.randf() < 0.45:
 		zone = "body"
+	elif kind in ["gancho", "direto", "uppercut"] and rng.randf() < 0.3 * _tr(att, "body"):
+		zone = "body"
 	if kind == "joelhada" and rng.randf() < 0.35:
+		zone = "head"
+	if kind == "chute_giratorio" and rng.randf() < 0.25:
 		zone = "head"
 	var rs: Array = round_stats.back()
 	rs[att]["sig_att"] += 1
@@ -337,7 +381,11 @@ func _strike(att: int, idx: int, counter: bool, forced: String = "", zone_dist: 
 	_spend(att, float(sp["cost"]))
 	var off := _at(att, String(sp["skill"])) * 0.55 + _at(att, "velocidade") * 0.2 + _at(att, "qi") * 0.1 + 15.0
 	var dfn := _at(d, "defesa") * 0.6 + _at(d, "movimentacao") * 0.25 + _at(d, "velocidade") * 0.15
+	if String(sp["skill"]) == "maos":
+		dfn += 7.0 * _tr(d, "head_movement")
 	var acc := float(sp["acc"]) - 0.04 + (off - dfn) / 210.0
+	if kind in SPINNING:
+		acc += 0.04 * _tr(att, "spin")
 	acc += float(s[d]["rock"]) * 0.28 - 0.03 * idx
 	if int(plans[d]["postura"]) == 0:
 		acc -= 0.05
@@ -349,7 +397,9 @@ func _strike(att: int, idx: int, counter: bool, forced: String = "", zone_dist: 
 	acc = clampf(acc, 0.05, 0.9)
 	if rng.randf() >= acc:
 		s[d]["unans"] = 0
-		if narrate and (rng.randf() < 0.16 or kind in ["chute_alto", "overhand"]):
+		if kind in CATCHABLE and _catch_kick(d, att, false):
+			return false
+		if narrate and (rng.randf() < 0.16 or kind in ["chute_alto", "overhand"] or kind in SPINNING):
 			_log(att, "info", _miss_text(att, kind))
 		return false
 	# Acertou
@@ -370,15 +420,19 @@ func _strike(att: int, idx: int, counter: bool, forced: String = "", zone_dist: 
 		"head":
 			return _head_hit(att, kind, dmg, counter)
 		"body":
-			s[d]["body"] = float(s[d]["body"]) + dmg * 0.1
-			s[d]["st"] = maxf(0.05, float(s[d]["st"]) - dmg * 0.045)
+			var bd := dmg * (1.0 - 0.2 * _tr(d, "tough"))
+			s[d]["body"] = float(s[d]["body"]) + bd * 0.1
+			s[d]["st"] = maxf(0.05, float(s[d]["st"]) - bd * 0.045 * (1.0 + 0.3 * _tr(att, "body")))
 			if narrate and (dmg > 0.9 or rng.randf() < 0.45):
 				_log(att, "golpe" if dmg < 1.1 else "forte", _hit_text(att, kind, "body", dmg))
-			if float(s[d]["body"]) > 1.3 and rng.randf() < dmg * 0.05:
+			if float(s[d]["body"]) > 1.3 and rng.randf() < bd * 0.05:
 				_finish(att, "TKO", "golpe no corpo")
 				_log(att, "fim", "%s se curva com a dor no fígado e o árbitro interrompe!" % f[d].short_name())
+			elif kind in CATCHABLE and rng.randf() < 0.35:
+				_catch_kick(d, att, true)
 		"legs":
-			s[d]["legs"] = float(s[d]["legs"]) + dmg * 0.085
+			var lk := (1.0 + 0.35 * _tr(att, "low_kicks")) * (1.3 if kind == "chute_panturrilha" else 1.0) * (1.15 if kind == "chute_baixo" else 1.0)
+			s[d]["legs"] = float(s[d]["legs"]) + dmg * 0.085 * lk
 			if narrate and (dmg > 0.8 or rng.randf() < 0.4):
 				_log(att, "golpe", _hit_text(att, kind, "legs", dmg))
 			if float(s[d]["legs"]) > 1.5 and rng.randf() < 0.05:
@@ -392,7 +446,7 @@ func _head_hit(att: int, kind: String, dmg: float, counter: bool) -> bool:
 	var chin := _at(d, "queixo")
 	var shock := dmg * (1.0 + float(s[d]["head"]) * 0.55) * (1.3 - chin / 100.0 * 0.6)
 	s[d]["head"] = float(s[d]["head"]) + dmg * 0.09
-	var cut_k := 3.0 if kind == "cotovelada" else 1.0
+	var cut_k := 3.0 * (1.0 + _tr(att, "elbows")) if kind == "cotovelada" else (1.6 if kind in ["joelhada_voadora", "backfist"] else 1.0)
 	if rng.randf() < dmg * 0.045 * cut_k:
 		s[d]["cut"] = float(s[d]["cut"]) + rng.randf_range(0.2, 0.45)
 		if narrate:
@@ -401,7 +455,7 @@ func _head_hit(att: int, kind: String, dmg: float, counter: bool) -> bool:
 	if rng.randf() < rock_p:
 		var ko_p := clampf((shock - 1.0) * 0.45 + float(s[d]["rock"]) * 0.14 - _at(d, "coracao") / 650.0, 0.0, 0.6)
 		if rng.randf() < ko_p:
-			_finish(att, "KO", "nocaute (%s)" % _strike_name(kind))
+			_finish(att, "KO", "nocaute (%s)" % _strike_name(kind, false, att))
 			_log(att, "fim", _ko_text(att, kind))
 			return true
 		s[d]["rock"] = minf(1.0, float(s[d]["rock"]) + 0.25 + shock * 0.15)
@@ -410,7 +464,7 @@ func _head_hit(att: int, kind: String, dmg: float, counter: bool) -> bool:
 			var rs: Array = round_stats.back()
 			rs[att]["kd"] += 1
 			s[att]["total"]["kd"] += 1
-			_log(att, "kd", "%s vai ao chão com %s de %s!" % [f[d].short_name(), _strike_name(kind, true), f[att].short_name()])
+			_log(att, "kd", "%s vai ao chão com %s de %s!" % [f[d].short_name(), _strike_name(kind, true, att), f[att].short_name()])
 			# Quem derrubou parte para cima no chão ou deixa levantar.
 			if int(plans[att]["por_cima"]) != 3 and rng.randf() < 0.7:
 				pos = "chao"
@@ -421,7 +475,7 @@ func _head_hit(att: int, kind: String, dmg: float, counter: bool) -> bool:
 					if finished:
 						break
 			return true
-		_log(att, "forte", "%s acerta %s e %s sente! %s está balançado." % [f[att].short_name(), _strike_name(kind, true), f[d].short_name(), f[d].short_name()])
+		_log(att, "forte", "%s acerta %s e %s sente! %s está balançado." % [f[att].short_name(), _strike_name(kind, true, att), f[d].short_name(), f[d].short_name()])
 	elif narrate and (dmg > 0.85 or rng.randf() < 0.35):
 		_log(att, "golpe" if dmg < 1.0 else "forte", _hit_text(att, kind, "head", dmg, counter))
 	_check_tko(att)
@@ -464,8 +518,20 @@ func _stance(i: int) -> int:
 
 # --- Quedas e clinch ----------------------------------------------------------------------
 
-func _takedown(i: int, from_clinch: bool) -> void:
+func _takedown(i: int, from_clinch: bool, depth: int = 0) -> void:
 	var o := 1 - i
+	var tech := _pick_td(i, from_clinch)
+	# Puxar para a guarda: só quem confia no jogo de costas e quer finalizar de lá.
+	if tech == "puxar_guarda":
+		if int(plans[i]["por_baixo"]) == 2 and _at(i, "por_baixo") >= _at(o, "por_cima"):
+			pos = "chao"
+			top = o
+			gpos = "guarda"
+			_spend(i, 0.006)
+			_log(i, "chao", _say(Styles.takedown(tech).get("texts", ["{a} puxa {b} para a guarda."]), i))
+			return
+		tech = "single"
+	var td := Styles.takedown(tech)
 	var rs: Array = round_stats.back()
 	rs[i]["td_att"] += 1
 	s[i]["total"]["td_att"] += 1
@@ -474,7 +540,9 @@ func _takedown(i: int, from_clinch: bool) -> void:
 	var p := 0.36 + (off - dfn) / 150.0 + float(s[o]["legs"]) * 0.1 + float(s[o]["rock"]) * 0.3
 	p += (float(s[i]["st"]) - float(s[o]["st"])) * 0.15
 	if from_clinch:
-		p += 0.08 + (_at(i, "clinch") - _at(o, "clinch")) / 300.0
+		p += 0.08 + (_at(i, "clinch") - _at(o, "clinch")) / 300.0 + 0.05 * _tr(i, "throws")
+	if depth > 0:
+		p += 0.04
 	p = clampf(p, 0.05, 0.9)
 	_spend(i, 0.022)
 	_spend(o, 0.008)
@@ -483,21 +551,109 @@ func _takedown(i: int, from_clinch: bool) -> void:
 		s[i]["total"]["td"] += 1
 		pos = "chao"
 		top = i
-		var lat := clampf(0.08 + (_at(i, "por_cima") - _at(o, "por_baixo")) / 200.0, 0.02, 0.3)
-		var r := rng.randf()
-		gpos = "lateral" if r < lat else ("meia" if r < lat + 0.32 else "guarda")
-		var how := "do clinch" if from_clinch else _pick(["nas duas pernas", "numa entrada de baiana", "na single leg", "com um levantamento"])
-		_log(i, "queda", "%s derruba %s %s. %s cai na %s." % [f[i].short_name(), f[o].short_name(), how, f[o].short_name(), GPOS_NAME[gpos]])
+		# Onde cai: cada técnica tem o seu lugar (o judoca cai nos cem quilos, a baiana na guarda);
+		# quem é melhor por cima ainda melhora a posição.
+		var land: Dictionary = (td.get("land", {"guarda": 5, "meia": 3, "lateral": 1}) as Dictionary).duplicate()
+		var edge := clampf((_at(i, "por_cima") - _at(o, "por_baixo")) / 60.0, -0.6, 0.8)
+		if land.has("lateral"):
+			land["lateral"] = float(land["lateral"]) * (1.0 + edge)
+		gpos = String(RngUtil.weighted_key(rng, land))
+		var texts: Array = td.get("texts", ["{a} derruba {b}."])
+		_log(i, "queda", "%s %s" % [_say(texts, i), _say([GPOS_IN[gpos]], i)])
+		# Arremesso e slam machucam.
+		var dmg := float(td.get("dmg", 0.0))
+		if dmg > 0.0:
+			var hit := dmg * rng.randf_range(0.6, 1.3) * (1.0 + _at(i, "forca") / 200.0)
+			s[o]["head"] = float(s[o]["head"]) + hit * 0.05
+			s[o]["body"] = float(s[o]["body"]) + hit * 0.06
+			s[o]["st"] = maxf(0.05, float(s[o]["st"]) - hit * 0.05)
+			rs[i]["dmg"] += hit
+			s[i]["total"]["dmg"] += hit
+			if hit > 0.7 and rng.randf() < 0.3:
+				s[o]["rock"] = minf(1.0, float(s[o]["rock"]) + 0.2)
+				_log(i, "forte", "O impacto balança %s!" % f[o].short_name())
+		return
+	# Errou a queda: quem pega pescoço pune a entrada; quem encadeia tenta de novo.
+	if not from_clinch and _front_headlock(o):
+		return
+	if depth == 0 and rng.randf() < 0.3 * _tr(i, "chain"):
+		pos = "clinch"
+		cage = true
+		_log(i, "info", _say(["{a} não solta: emenda a segunda entrada e prensa {b} na grade.", "{b} defende, mas {a} já está na outra perna.", "{a} corre {b} até a grade e continua na queda."], i))
+		_takedown(i, true, depth + 1)
+		return
+	if narrate:
+		_log(o, "info", _say(["{a} defende a queda e se solta.", "{a} sprawla e anula a entrada de {b}.", "{a} mantém a luta em pé."], o))
+	if not from_clinch and rng.randf() < 0.3:
+		pos = "clinch"
+		cage = true
+
+
+## Técnica de queda do lado `i`, pelo repertório e por onde a luta está.
+func _pick_td(i: int, from_clinch: bool) -> String:
+	var w := {}
+	var tds: Dictionary = prof[i]["td"]
+	for k: String in tds:
+		var fr := String(Styles.takedown(k).get("from", "ambos"))
+		if fr == "ambos" or (fr == "clinch") == from_clinch:
+			w[k] = float(tds[k])
+	if w.is_empty():
+		return "corpo" if from_clinch else "duas_pernas"
+	return String(RngUtil.weighted_key(rng, w))
+
+
+## Quem defende a queda de cabeça baixa do outro pode pegar o pescoço: guilhotina puxando para a
+## guarda, ou sprawl e d'arce/anaconda por cima. Devolve se aconteceu.
+func _front_headlock(o: int) -> bool:
+	var i := 1 - o
+	var ch := (0.03 + 0.12 * _tr(o, "guillotine")) * clampf((_at(o, "finalizacao") - 40.0) / 40.0, 0.2, 1.4)
+	if rng.randf() >= ch:
+		return false
+	var w := {}
+	var subs: Dictionary = prof[o]["subs"]
+	for k: String in subs:
+		if bool(Styles.sub(k).get("pe", false)):
+			w[k] = float(subs[k])
+	var sid := "guilhotina" if w.is_empty() else String(RngUtil.weighted_key(rng, w))
+	pos = "chao"
+	if sid == "guilhotina":
+		top = i
+		gpos = "guarda"
+		_log(o, "fin", _say(["{a} abraça o pescoço de {b} na entrada e puxa a guilhotina!", "{b} entra de cabeça baixa e {a} fecha a guilhotina!"], o))
 	else:
-		if narrate:
-			_log(o, "info", _say(["{a} defende a queda e se solta.", "{a} sprawla e anula a entrada de {b}.", "{a} mantém a luta em pé."], o))
-		if not from_clinch and rng.randf() < 0.3:
-			pos = "clinch"
-			cage = true
+		top = o
+		gpos = "meia"
+		_log(o, "fin", "%s sprawla, passa o braço por baixo e cai n%s %s!" % [f[o].short_name(), String(Styles.sub(sid).get("art", "o")), String(Styles.sub(sid)["name"])])
+	_sub_attempt(o, sid, true)
+	return true
+
+
+## O especialista segura o chute e derruba (sanda, tailandês). `landed`: depois de levar o chute
+## no corpo. Devolve se tentou.
+func _catch_kick(d: int, att: int, landed: bool) -> bool:
+	var ch := 0.1 * _tr(d, "catch") + (0.01 if landed else 0.02)
+	if pos != "solto" or finished or rng.randf() >= ch:
+		return false
+	var rs: Array = round_stats.back()
+	rs[d]["td_att"] += 1
+	s[d]["total"]["td_att"] += 1
+	var p := 0.5 + (_at(d, "queda") + _at(d, "clinch") - _at(att, "def_queda") - _at(att, "movimentacao")) / 200.0
+	if rng.randf() < clampf(p, 0.15, 0.85):
+		rs[d]["td"] += 1
+		s[d]["total"]["td"] += 1
+		pos = "chao"
+		top = d
+		gpos = "guarda" if rng.randf() < 0.6 else "meia"
+		_log(d, "queda", _say(["{a} segura o chute de {b} e derruba com uma rasteira!", "{a} prende a perna de {b} debaixo do braço e varre o pé de apoio."], d))
+	elif narrate:
+		_log(d, "info", _say(["{a} segura o chute, mas {b} se equilibra num pé só e solta.", "{a} agarra a perna, {b} pula e se livra."], d))
+	return true
 
 
 func _tick_clinch(dt: float) -> void:
-	var c := [_at(0, "clinch") * 0.6 + _at(0, "forca") * 0.4, _at(1, "clinch") * 0.6 + _at(1, "forca") * 0.4]
+	var c := [0.0, 0.0]
+	for i in 2:
+		c[i] = _at(i, "clinch") * 0.6 + _at(i, "forca") * 0.4 + 8.0 * maxf(_tr(i, "plum"), _tr(i, "cage")) + 4.0 * _tr(i, "throws")
 	var dom := 0 if rng.randf() < c[0] / (c[0] + c[1]) else 1
 	var rs: Array = round_stats.back()
 	if cage:
@@ -516,6 +672,7 @@ func _tick_clinch(dt: float) -> void:
 	# Queda do clinch
 	for i in 2:
 		var intent: float = [0.02, 0.16, 0.36][int(plans[i]["jogo"])] * (0.5 + _at(i, "queda") / 100.0)
+		intent *= 1.0 + 0.5 * _tr(i, "throws") + 0.3 * _tr(i, "cage")
 		if rng.randf() < intent * (1.3 if i == dom else 0.7):
 			_takedown(i, true)
 			return
@@ -523,14 +680,16 @@ func _tick_clinch(dt: float) -> void:
 	var att := dom if rng.randf() < 0.7 else 1 - dom
 	var n := rng.randi_range(1, 3)
 	for k in n:
-		var kind: String = RngUtil.weighted_key(rng, {"joelhada": 1.6, "cotovelada": 0.6, "gancho": 1.0, "uppercut": 0.8})
+		var dirty := 1.0 + _tr(att, "dirty")
+		var kind: String = RngUtil.weighted_key(rng, {"joelhada": 1.6 * (1.0 + _tr(att, "plum")), "cotovelada": 0.6 * (1.0 + _tr(att, "elbows") + 0.5 * _tr(att, "plum")),
+			"gancho": 1.0 * dirty, "uppercut": 0.8 * dirty})
 		_strike(att, k, false, kind, 2)
 		if finished or pos != "clinch":
 			return
 	_spend(0, 0.004)
 	_spend(1, 0.004)
 	if narrate and rng.randf() < 0.2:
-		_log(dom, "info", "%s trabalha %s." % [f[dom].short_name(), "prensando na grade" if cage else "no clinch pelo pescoço"])
+		_log(dom, "info", "%s trabalha %s." % [f[dom].short_name(), "prensando na grade" if cage else ("as joelhadas pela nuca" if _tr(dom, "plum") >= 0.6 else "no clinch pelo pescoço")])
 
 
 # --- Chão ---------------------------------------------------------------------------------
@@ -541,7 +700,7 @@ func _tick_ground(dt: float) -> void:
 	var rs: Array = round_stats.back()
 	rs[tp]["ctrl"] += dt
 	s[tp]["total"]["ctrl"] += dt
-	var p_top := 0.6 + (_at(tp, "por_cima") - _at(bt, "por_baixo")) / 200.0
+	var p_top := 0.6 + (_at(tp, "por_cima") - _at(bt, "por_baixo")) / 200.0 + 0.04 * _tr(tp, "ride") - 0.04 * _tr(bt, "guard")
 	if rng.randf() < p_top:
 		match int(plans[tp]["por_cima"]):
 			0:
@@ -552,8 +711,8 @@ func _tick_ground(dt: float) -> void:
 				if rng.randf() < 0.14:
 					_advance(tp)
 			1:
-				if _can_sub_from_top() and rng.randf() < 0.16:
-					_sub_attempt(tp, _top_sub())
+				if _can_sub_from_top() and rng.randf() < 0.16 + 0.05 * (_tr(tp, "back") + _tr(tp, "legs")):
+					_sub_attempt(tp, _pick_sub(tp, true))
 				else:
 					_advance(tp)
 			2:
@@ -572,12 +731,16 @@ func _tick_ground(dt: float) -> void:
 				_get_up(bt)
 			1:
 				if gpos in ["guarda", "meia"]:
-					_sweep(bt)
+					# Quem joga de perna entra no pé do outro em vez de raspar.
+					if rng.randf() < 0.25 * _tr(bt, "legs"):
+						_sub_attempt(bt, _pick_sub(bt, false, true))
+					else:
+						_sweep(bt)
 				else:
 					_recover(bt)
 			2:
-				if gpos in ["guarda", "meia"] and rng.randf() < 0.22:
-					_sub_attempt(bt, _pick(["triângulo", "chave de braço", "guilhotina", "kimura"]))
+				if gpos in ["guarda", "meia"] and rng.randf() < 0.22 + 0.12 * _tr(bt, "guard") + 0.08 * _tr(bt, "legs"):
+					_sub_attempt(bt, _pick_sub(bt, false))
 				else:
 					_recover(bt)
 	_spend(tp, 0.003)
@@ -590,7 +753,7 @@ func _gnp(tp: int) -> void:
 	rs[tp]["sig_att"] += 1
 	s[tp]["total"]["sig_att"] += 1
 	var pos_acc: float = {"guarda": -0.08, "meia": 0.0, "lateral": 0.08, "montada": 0.15, "costas": 0.12}.get(gpos, 0.0)
-	var acc := clampf(0.52 + (_at(tp, "por_cima") - _at(bt, "por_baixo")) / 150.0 + pos_acc + float(s[bt]["rock"]) * 0.2, 0.15, 0.9)
+	var acc := clampf(0.52 + (_at(tp, "por_cima") - _at(bt, "por_baixo")) / 150.0 + pos_acc + float(s[bt]["rock"]) * 0.2 + 0.04 * _tr(tp, "gnp"), 0.15, 0.9)
 	_spend(tp, 0.003)
 	if rng.randf() >= acc:
 		s[bt]["unans"] = 0
@@ -598,7 +761,7 @@ func _gnp(tp: int) -> void:
 	rs[tp]["sig_land"] += 1
 	s[tp]["total"]["sig_land"] += 1
 	var mult: float = {"guarda": 0.75, "meia": 0.9, "lateral": 1.05, "montada": 1.3, "costas": 1.1}.get(gpos, 1.0)
-	var dmg := 0.55 * mult * (0.5 + _at(tp, "potencia") / 100.0 * 0.5 + _at(tp, "forca") / 250.0) * ko_factor * rng.randf_range(0.6, 1.3)
+	var dmg := 0.55 * mult * (0.5 + _at(tp, "potencia") / 100.0 * 0.5 + _at(tp, "forca") / 250.0) * ko_factor * rng.randf_range(0.6, 1.3) * (1.0 + 0.25 * _tr(tp, "gnp"))
 	rs[tp]["dmg"] += dmg
 	s[tp]["total"]["dmg"] += dmg
 	s[bt]["unans"] = int(s[bt]["unans"]) + 1
@@ -639,7 +802,9 @@ func _advance(tp: int) -> void:
 	var nxt := gpos
 	if gpos == "costas":
 		return
-	if gpos in ["lateral", "montada"] and rng.randf() < 0.3:
+	if gpos in ["lateral", "montada"] and rng.randf() < 0.3 + 0.25 * _tr(tp, "back"):
+		nxt = "costas"
+	elif gpos == "meia" and rng.randf() < 0.12 * maxf(_tr(tp, "back"), _tr(tp, "ride")):
 		nxt = "costas"
 	elif i >= 0 and i < GROUND_ORDER.size() - 1:
 		nxt = GROUND_ORDER[i + 1]
@@ -657,8 +822,20 @@ func _get_up(bt: int) -> void:
 	var tp := 1 - bt
 	var pen: float = {"guarda": 0.05, "meia": 0.0, "lateral": -0.08, "montada": -0.13, "costas": -0.1}.get(gpos, 0.0)
 	var p := 0.22 + (_at(bt, "por_baixo") * 0.4 + _at(bt, "forca") * 0.3 + _at(bt, "velocidade") * 0.3 - _at(tp, "por_cima") * 0.7 - _at(tp, "forca") * 0.3) / 120.0 + pen
+	p += 0.06 * _tr(bt, "scramble") - 0.05 * _tr(tp, "ride")
 	_spend(bt, 0.012)
 	if rng.randf() < clampf(p, 0.04, 0.75):
+		# Wrestler de controle devolve ao chão quem levanta (o "mat return").
+		if rng.randf() < 0.22 * _tr(tp, "ride") * clampf(_at(tp, "queda") / 70.0, 0.5, 1.3):
+			var rs: Array = round_stats.back()
+			rs[tp]["td_att"] += 1
+			rs[tp]["td"] += 1
+			s[tp]["total"]["td_att"] += 1
+			s[tp]["total"]["td"] += 1
+			gpos = "costas" if rng.randf() < 0.25 * _tr(tp, "back") + 0.1 else "meia"
+			_spend(bt, 0.01)
+			_log(tp, "queda", _say(["{b} levanta, mas {a} cola nas costas e devolve ao chão.", "{b} quase sai, {a} prende a cintura e derruba de novo.", "Mat return de {a}: {b} volta para o chão."], tp))
+			return
 		if rng.randf() < 0.4:
 			pos = "clinch"
 			cage = true
@@ -699,19 +876,40 @@ func _can_sub_from_top() -> bool:
 	return gpos in ["meia", "lateral", "montada", "costas"]
 
 
-func _top_sub() -> String:
-	match gpos:
-		"costas":
-			return "mata-leão"
-		"montada":
-			return _pick(["chave de braço", "katagatame", "mata-leão"]) if rng.randf() < 0.8 else "americana"
-		"lateral":
-			return _pick(["kimura", "americana", "katagatame"])
-	return _pick(["kimura", "guilhotina", "katagatame"])
+## Finalização do lado `i` pelo repertório e pela posição (por cima ou por baixo). `legs_only`:
+## só chave de perna.
+func _pick_sub(i: int, on_top: bool, legs_only: bool = false) -> String:
+	var w := {}
+	var subs: Dictionary = prof[i]["subs"]
+	var side := "top" if on_top else "bottom"
+	for k: String in subs:
+		var info := Styles.sub(k)
+		if legs_only and not bool(info.get("leg", false)):
+			continue
+		if gpos in (info.get(side, []) as Array):
+			w[k] = float(subs[k])
+	if w.is_empty():
+		if legs_only:
+			return "chave_calcanhar" if gpos != "guarda" else "botinha"
+		match gpos:
+			"costas":
+				return "mata_leao"
+			"montada":
+				return "chave_braco"
+			"lateral":
+				return "kimura"
+			"meia":
+				return "guilhotina" if not on_top else "kimura"
+		return "triangulo" if not on_top else "katagatame"
+	return String(RngUtil.weighted_key(rng, w))
 
 
-func _sub_attempt(i: int, name: String) -> void:
+## Tentativa de finalização `sid` (ver styles.json › subs). `announced`: o lance já foi narrado.
+func _sub_attempt(i: int, sid: String, announced: bool = false) -> void:
 	var o := 1 - i
+	var info := Styles.sub(sid)
+	var name := String(info.get("name", sid))
+	var art := "a" if String(info.get("art", "a")) == "a" else ""
 	var rs: Array = round_stats.back()
 	rs[i]["sub_att"] += 1
 	s[i]["total"]["sub_att"] += 1
@@ -720,22 +918,28 @@ func _sub_attempt(i: int, name: String) -> void:
 	var bonus: float = {"costas": 0.14, "montada": 0.08, "lateral": 0.05, "meia": 0.02, "guarda": 0.0}.get(gpos, 0.0)
 	if i != top:
 		bonus = -0.04
+	# Chave de perna contra quem nunca treinou isso: o calcanhar estoura antes de bater.
+	if bool(info.get("leg", false)):
+		bonus += 0.03 * _tr(i, "legs") + (0.05 if _tr(o, "legs") < 0.3 else -0.03)
 	var p_lock := clampf(0.17 + (off - dfn) / 130.0 + bonus + (1.0 - float(s[o]["st"])) * 0.15 + float(s[o]["rock"]) * 0.25, 0.03, 0.75)
 	_spend(i, 0.018)
 	if rng.randf() >= p_lock:
-		if narrate:
-			_log(o, "info", "%s ameaça um%s %s, mas %s se defende." % [f[i].short_name(), "a" if name in ["chave de braço", "guilhotina", "kimura", "americana"] else "", name, f[o].short_name()])
+		if narrate and not announced:
+			_log(o, "info", "%s ameaça um%s %s, mas %s se defende." % [f[i].short_name(), art, name, f[o].short_name()])
+		elif narrate:
+			_log(o, "info", "%s tira a cabeça e escapa da %s." % [f[o].short_name(), name] if art == "a" else "%s escapa do %s." % [f[o].short_name(), name])
 		if i != top and rng.randf() < 0.25:
 			_advance(top)
 		return
-	_log(i, "fin", "%s encaixa um%s %s!" % [f[i].short_name(), "a" if name in ["chave de braço", "guilhotina", "kimura", "americana"] else "", name])
+	if not announced:
+		_log(i, "fin", "%s encaixa um%s %s!" % [f[i].short_name(), art, name])
 	var p_tap := clampf(0.32 + (off - dfn) / 120.0 + (1.0 - float(s[o]["st"])) * 0.2 + float(s[o]["rock"]) * 0.25 - _at(o, "coracao") / 900.0, 0.06, 0.85)
 	if rng.randf() < p_tap:
 		_finish(i, "FIN", "finalização (%s)" % name)
 		_log(i, "fim", "%s bate! Vitória de %s por finalização." % [f[o].short_name(), f[i].short_name()])
 	else:
 		_spend(o, 0.05)
-		_log(o, "info", "%s aguenta firme e escapa da %s." % [f[o].short_name(), name])
+		_log(o, "info", "%s aguenta firme e escapa d%s %s." % [f[o].short_name(), "a" if art == "a" else "o", name])
 		if i != top and rng.randf() < 0.3:
 			top = i
 			gpos = "guarda"
@@ -825,20 +1029,41 @@ func _pick(arr: Array) -> String:
 	return String(arr[rng.randi_range(0, arr.size() - 1)])
 
 
-func _strike_name(kind: String, with_article: bool = false) -> String:
-	var n: Dictionary = {"jab": "o jab", "direto": "um direto", "gancho": "um gancho", "uppercut": "um uppercut",
-		"overhand": "um overhand", "chute_baixo": "um chute baixo", "chute_corpo": "um chute no corpo",
-		"chute_alto": "um chute alto", "chute_frontal": "um chute frontal", "joelhada": "uma joelhada", "cotovelada": "uma cotovelada"}
-	var t2: String = n.get(kind, "um golpe")
+const STRIKE_NAMES := {"jab": "o jab", "direto": "um direto", "gancho": "um gancho", "uppercut": "um uppercut",
+	"overhand": "um overhand", "chute_baixo": "um chute baixo", "chute_corpo": "um chute no corpo",
+	"chute_alto": "um chute alto", "chute_frontal": "um chute frontal", "joelhada": "uma joelhada", "cotovelada": "uma cotovelada",
+	"chute_panturrilha": "um chute na panturrilha", "chute_obliquo": "um chute oblíquo no joelho", "chute_giratorio": "um chute giratório",
+	"chute_rodado": "um chute rodado", "backfist": "um backfist giratório", "superman": "um superman punch", "joelhada_voadora": "uma joelhada voadora"}
+
+
+## Nome do golpe ("um chute circular" para o tailandês, "uma meia-lua de compasso" para o capoeirista).
+func _strike_name(kind: String, with_article: bool = false, att: int = -1) -> String:
+	var custom := _custom_name(att, kind)
+	if custom != "":
+		var first := custom.split(" ")[0]
+		var t3 := ("uma " if first.ends_with("a") else "um ") + custom
+		return t3 if with_article else custom
+	var t2: String = STRIKE_NAMES.get(kind, "um golpe")
 	if with_article:
 		return t2
 	return t2.split(" ", true, 1)[1]
+
+
+func _custom_name(att: int, kind: String) -> String:
+	if att < 0 or att > 1 or prof.size() < 2 or (prof[att] as Dictionary).is_empty():
+		return ""
+	return String((prof[att]["names"] as Dictionary).get(kind, ""))
 
 
 func _hit_text(att: int, kind: String, zone: String, _dmg: float, counter: bool = false) -> String:
 	var a := f[att].short_name()
 	var b := f[1 - att].short_name()
 	var t2 := ""
+	var custom := _custom_name(att, kind)
+	if custom != "" and rng.randf() < 0.6:
+		var where: String = {"head": "na cabeça de", "body": "no corpo de", "legs": "na perna de"}.get(zone, "em")
+		t2 = "%s acerta %s %s %s." % [a, _strike_name(kind, true, att), where, b]
+		return ("No contragolpe: " + t2) if counter else t2
 	match kind:
 		"jab":
 			t2 = _pick(["%s encaixa o jab em %s.", "Jab firme de %s na cara de %s.", "%s pontua com o jab em %s."]) % [a, b]
@@ -867,7 +1092,21 @@ func _hit_text(att: int, kind: String, zone: String, _dmg: float, counter: bool 
 		"joelhada":
 			t2 = "Joelhada de %s no %s de %s." % [a, "rosto" if zone == "head" else "corpo", b]
 		"cotovelada":
-			t2 = "%s acerta uma cotovelada curta em %s." % [a, b]
+			t2 = _pick(["%s acerta uma cotovelada curta em %s.", "Cotovelada de %s rasga a sobrancelha de %s.", "%s gira a cotovelada na saída do clinch e pega %s."]) % [a, b]
+		"chute_panturrilha":
+			t2 = _pick(["Chute na panturrilha de %s: a perna de %s dobra.", "%s castiga a panturrilha de %s.", "%s acha de novo a panturrilha de %s. Já está mancando."]) % [a, b]
+		"chute_obliquo":
+			t2 = "%s pisa no joelho da frente de %s com um chute oblíquo." % [a, b]
+		"chute_giratorio":
+			t2 = ("%s gira e crava o chute no fígado de %s!" if zone == "body" else "%s gira e acerta o chute na cabeça de %s!") % [a, b]
+		"chute_rodado":
+			t2 = "Chute rodado de %s pega a cabeça de %s!" % [a, b]
+		"backfist":
+			t2 = "Backfist giratório de %s estala no rosto de %s!" % [a, b]
+		"superman":
+			t2 = "%s salta num superman punch e acerta %s." % [a, b]
+		"joelhada_voadora":
+			t2 = "%s voa com a joelhada e acerta o rosto de %s!" % [a, b]
 		_:
 			t2 = "%s acerta %s." % [a, b]
 	if counter:
@@ -876,6 +1115,10 @@ func _hit_text(att: int, kind: String, zone: String, _dmg: float, counter: bool 
 
 
 func _miss_text(att: int, kind: String) -> String:
+	if kind in SPINNING:
+		return _say(["{a} tenta o giratório e {b} sai do caminho.", "{a} gira, erra e quase fica de costas para {b}."], att)
+	if kind == "joelhada_voadora":
+		return _say(["{a} voa com a joelhada, {b} desvia e {a} cai desequilibrado."], att)
 	if kind.begins_with("chute"):
 		return _say(["{a} chuta e {b} bloqueia com a canela.", "{b} segura o chute e empurra {a}.", "{b} recua e o chute de {a} passa no vazio."], att)
 	return _say(["{a} solta a combinação e {b} esquiva.", "{b} bloqueia o golpe de {a}.", "{b} gira a cintura e {a} erra."], att)
@@ -890,5 +1133,7 @@ func _ko_text(att: int, kind: String) -> String:
 	var a := f[att].short_name()
 	var b := f[1 - att].short_name()
 	if rng.randf() < 0.5:
-		return "%s acerta %s e %s apaga! Nocaute!" % [a, _strike_name(kind, true), b]
-	return "Que golpe! %s derruba %s com %s e o árbitro abraça. Nocaute!" % [a, b, _strike_name(kind, true)]
+		return "%s acerta %s e %s apaga! Nocaute!" % [a, _strike_name(kind, true, att), b]
+	if kind in SPINNING or kind == "joelhada_voadora":
+		return "Que golpe! %s acerta %s e %s cai duro. Nocaute de destaque da noite!" % [a, _strike_name(kind, true, att), b]
+	return "Que golpe! %s derruba %s com %s e o árbitro abraça. Nocaute!" % [a, b, _strike_name(kind, true, att)]

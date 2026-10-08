@@ -67,6 +67,8 @@ var southpaw: bool = false
 var natural_kg: float = 75.0
 var division: String = "M70"
 var base: String = "mma"
+## Segunda arte que ele treinou para completar o jogo ("" = só a de base). Ver Styles.
+var base2: String = ""
 var attrs: Dictionary = {}
 ## Teto de nível (escondido): só o olheiro dá uma ideia dele.
 var potential: float = 60.0
@@ -209,7 +211,7 @@ func to_dict() -> Dictionary:
 	return {
 		"id": id, "first": first, "last": last, "nick": nickname, "ff": family_first, "sex": sex, "nation": nation, "city": city,
 		"eth": eth, "face": face_seed, "look": look, "by": birth_year, "bm": birth_month, "h": height_cm,
-		"r": reach_cm, "sp": southpaw, "nat_kg": natural_kg, "div": division, "base": base, "attrs": attrs,
+		"r": reach_cm, "sp": southpaw, "nat_kg": natural_kg, "div": division, "base": base, "base2": base2, "attrs": attrs,
 		"pot": potential, "peak": peak_age, "team": team_id, "contract": contract, "rec": record, "am": amateur,
 		"hist": history, "rating": rating, "streak": streak, "last_fw": last_fight_week, "cond": condition,
 		"inj": injury, "susp": suspension, "pop": popularity, "wear": wear, "ret": retired, "titles": titles_won,
@@ -238,6 +240,7 @@ static func from_dict(d: Dictionary) -> Fighter:
 	f.natural_kg = float(d.get("nat_kg", 75.0))
 	f.division = String(d.get("div", "M70"))
 	f.base = String(d.get("base", "mma"))
+	f.base2 = String(d.get("base2", ""))
 	f.attrs = d.get("attrs", {})
 	f.potential = float(d.get("pot", 60.0))
 	f.peak_age = int(d.get("peak", 29))

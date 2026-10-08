@@ -597,6 +597,7 @@ func _layer_front() -> void:
 		_beard_mesh()
 	_eyes()
 	_brows(rng)
+	_brow_scar()
 	_nose()
 	_mouth()
 	if int(f["beard"]) != FaceGen.B_NONE:
@@ -1562,12 +1563,28 @@ func _marks(rng: RandomNumberGenerator) -> void:
 	if bool(f["mole"]):
 		var mp: Vector2 = f["mole_pos"]
 		_r_circle(_px(mp.x, mp.y), maxf(0.7, _s * 0.005), _skin.darkened(0.5))
-	if bool(f["scar"]):
+	if bool(f["scar"]) and not f.has("scar_brow"):
 		var sp: Vector2 = f["scar_pos"]
 		var a := _px(sp.x, sp.y)
 		var b := a + Vector2(_fw * 0.12, _fh * 0.07)
 		_r_line(a, b, Color(_skin.lightened(0.2), 0.6), maxf(0.8, _s * 0.006), true)
 		_r_line(a + Vector2(0, 1), b + Vector2(0, 1), Color(_skin.darkened(0.3), 0.3), maxf(0.6, _s * 0.004), true)
+
+
+## Cicatriz de corte na sobrancelha (cotovelada, cabeçada): depois das sobrancelhas, porque o
+## corte abre uma falha nos pelos. Risco claro e brilhante, borda escura embaixo.
+func _brow_scar() -> void:
+	var f := _f
+	if not f.has("scar_brow") or _s < 40.0:
+		return
+	var sb := float(f["scar_brow"])
+	var a := _px(sb * (_X + 0.06), _E - float(f["brow_gap"]) - 0.085)
+	var b := a + Vector2(-sb * _fw * 0.04, _fh * 0.12)
+	var wd := maxf(1.0, _s * 0.009)
+	# Falha nos pelos
+	_r_line(a.lerp(b, 0.2), a.lerp(b, 0.62), Color(_skin, 0.95), wd * 1.6, true)
+	_r_line(a, b, Color(_skin.lightened(0.28).lerp(Color(0.95, 0.75, 0.75), 0.25), 0.85), wd, true)
+	_r_line(a + Vector2(sb * wd * 0.6, wd * 0.4), b + Vector2(sb * wd * 0.6, wd * 0.4), Color(_skin.darkened(0.35), 0.35), wd * 0.6, true)
 
 
 # ---------------------------------------------------------------------------
@@ -2785,8 +2802,8 @@ func _ears() -> void:
 	for sx: float in [-1.0, 1.0]:
 		var ek := er * (1.0 + sx * asym * 0.03)
 		var ec := _px(sx * (float(f["cheek_w"]) * 0.97 + out * 0.07), 0.04)
-		var ew := _fw * (0.15 + out * 0.04) * ek * float(f.get("ear_width", 1.0))
-		var eh := _fh * 0.2 * ek * float(f.get("ear_height", 1.0))
+		var ew := _fw * (0.15 + out * 0.04) * ek * float(f.get("ear_width", 1.0)) * (1.0 + cauli * 0.12)
+		var eh := _fh * 0.2 * ek * float(f.get("ear_height", 1.0)) * (1.0 - cauli * 0.1)
 		var rotation := float(f.get("ear_rotate", 0.0)) * sx
 		var ep := func(x: float, y: float) -> Vector2:
 			return ec + Vector2(x * ew * sx, y * eh).rotated(rotation)
@@ -2805,7 +2822,7 @@ func _ears() -> void:
 			# Ponta no alto da orelha
 			if pointy > 0.0 and y < -0.5 and cos(a) * sx > -0.2:
 				y -= pointy * 0.2 * smoothstep(-0.5, -1.0, y)
-			var bump := 1.0 + cauli * (0.08 * sin(a * 5.0 + 1.0) + 0.05 * sin(a * 9.0))
+			var bump := 1.0 + cauli * (0.13 * sin(a * 5.0 + 1.0) + 0.08 * sin(a * 9.0 + sx))
 			pts.append(ec + Vector2(x * ew * bump, y * eh * bump).rotated(rotation))
 		var lit := -sx
 		var em := _radial(ec, pts, _rings(5 if _s >= 140.0 else 3), func(p: Vector2, t: float, _i: int) -> Color:
@@ -2814,12 +2831,18 @@ func _ears() -> void:
 			lum -= 0.22 * _g2(d.x + sx * 0.15, d.y + 0.05, 0.4, 0.45)
 			lum += 0.1 * smoothstep(0.6, 0.95, t) * (1.0 if d.y < 0.3 else 0.3)
 			# Orelha de lutador: cartilagem inchada, com caroços e sombras
-			lum += cauli * 0.1 * sin(d.x * 9.0 + d.y * 7.0) * (1.0 - t)
+			lum += cauli * (0.16 * sin(d.x * 9.0 + d.y * 7.0) + 0.1 * sin(d.y * 13.0 - d.x * 5.0)) * (1.0 - t * 0.6)
 			var c := _shade(_skin, lum)
 			return c.lerp(Color(0.85, 0.35, 0.3), 0.08 + 0.05 * float(f["rosy"])))
 		_rim(em, pts.size())
 		var lw := maxf(0.55, _s * 0.0025)
-		if _s >= 140.0:
+		if cauli > 0.0 and _s >= 60.0:
+			# Couve-flor: a cartilagem incha e apaga as dobras; sobram caroços e vincos.
+			for q: Array in [[0.05, -0.35, 0.34], [-0.12, 0.05, 0.3], [0.18, 0.2, 0.26], [-0.2, -0.45, 0.22]]:
+				_soft_spot(ep.call(float(q[0]), float(q[1])), ew * float(q[2]), eh * float(q[2]) * 0.8, Color(_skin.lightened(0.14), 0.4 * cauli))
+			for q: Array in [[-0.05, -0.12], [0.1, 0.4], [-0.25, -0.25]]:
+				_soft_spot(ep.call(float(q[0]), float(q[1])), ew * 0.16, eh * 0.1, Color(_skin.darkened(0.55), 0.38 * cauli))
+		elif _s >= 140.0:
 			# Concha, hélice, anti-hélice em Y e trago têm profundidades próprias.
 			var concha := float(f.get("ear_concha", 1.0))
 			_soft_spot(ep.call(-0.05, 0.12), ew * 0.45, eh * 0.42, Color(_skin.darkened(0.5), 0.28 * concha))

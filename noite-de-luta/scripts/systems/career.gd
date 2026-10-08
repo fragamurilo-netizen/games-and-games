@@ -147,6 +147,9 @@ static func resolve(w: GameWorld, b: Bout, res: Dictionary, e: FightEngine) -> v
 			f.popularity = maxf(1.0, f.popularity - 1.0)
 		var st: Dictionary = e.s[i] if e != null else {}
 		Development.after_fight(w, f, float(st.get("head", 0.5)), float(st.get("body", 0.2)), float(st.get("legs", 0.2)), float(st.get("cut", 0.0)), res_code == "D" and method in ["KO", "TKO"])
+		var tot: Dictionary = st.get("total", {})
+		var grappled := float(tot.get("ctrl", 0.0)) + float(e.s[1 - i]["total"].get("ctrl", 0.0) if e != null else 0.0) > 120.0
+		FighterGenerator.battle_marks(f, w.rng, float(st.get("cut", 0.0)), res_code == "D" and method in ["KO", "TKO"], grappled)
 	_pay(w, b, winner_id)
 	_reputation(w, b, winner_id, ra, rb)
 	_news(w, b, winner_id, method, champ_before, ra, rb)

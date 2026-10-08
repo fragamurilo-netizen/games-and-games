@@ -91,7 +91,7 @@ func _ficha(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 	var body := UIKit.card("Card", UITokens.S1)
 	body.add_child(UIKit.label("Físico", "Section"))
 	body.add_child(UIKit.kv("Estilo", f.style_label()))
-	body.add_child(UIKit.kv("Arte de base", String(((DataDB.mma()["bases"] as Dictionary)[f.base] as Dictionary)["name"])))
+	body.add_child(UIKit.kv("Arte de base", Styles.describe(f)))
 	body.add_child(UIKit.kv("Altura · envergadura", "%s · %d cm" % [Fmt.height(f.height_cm), f.reach_cm]))
 	body.add_child(UIKit.kv("Base", "Canhota" if f.southpaw else "Ortodoxa"))
 	var limit := float(DataDB.division(f.division).get("limit_kg", 70.0))
@@ -118,11 +118,33 @@ func _ficha(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 	else:
 		pot.add_child(UIKit.label("Contrate um olheiro", "Small"))
 	body.add_child(pot)
-	var cards: Array = [UIKit.card_panel(body)]
+	var cards: Array = [UIKit.card_panel(body), _style_card(f)]
 	cards.append_array(FightKit.attr_blocks(f))
 	for x: Control in cards:
 		c.add_child(x)
 	columnize(c, 2, 2)
+
+
+## Estilo de luta: de onde ele vem, as marcas da escola e as armas que mais usa.
+func _style_card(f: Fighter) -> Control:
+	var card := UIKit.card("Card", UITokens.S1)
+	card.add_child(UIKit.label("Estilo de luta", "Section"))
+	card.add_child(UIKit.label(String(Styles.base(f.base).get("desc", "")), "Small", true))
+	if f.base2 != "" and f.base2 != f.base:
+		card.add_child(UIKit.label("Completou o jogo com %s." % Styles.name(f.base2).to_lower(), "Small", true))
+	for t: Array in Styles.trait_list(f):
+		card.add_child(UIKit.kv(String(t[0]), String(t[1])))
+	var p := Styles.profile(f)
+	var fav := func(d: Dictionary, n: int, info: Callable) -> String:
+		var ks := d.keys()
+		ks.sort_custom(func(a: String, b: String) -> bool: return float(d[a]) > float(d[b]))
+		var names: Array = []
+		for k: String in ks.slice(0, n):
+			names.append(String(info.call(k).get("name", k)))
+		return ", ".join(names)
+	card.add_child(UIKit.kv("Quedas", fav.call(p["td"], 2, Styles.takedown)))
+	card.add_child(UIKit.kv("Finalizações", fav.call(p["subs"], 3, Styles.sub)))
+	return UIKit.card_panel(card)
 
 
 func _carreira(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:

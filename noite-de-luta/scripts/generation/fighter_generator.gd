@@ -28,10 +28,6 @@ static func pick_nation(rng: RandomNumberGenerator, fem: bool) -> String:
 	return _nation_keys[maxi(0, RngUtil.weighted_index(rng, _nation_w_f if fem else _nation_w))]
 
 
-static func pick_base(rng: RandomNumberGenerator, nation: String) -> String:
-	var t: Dictionary = DataDB.mma().get("base_by_nation", {})
-	var w: Dictionary = t.get(nation, t["*"])
-	return String(RngUtil.weighted_key(rng, w))
 
 
 static func _gauss(rng: RandomNumberGenerator, sd: float) -> float:
@@ -54,7 +50,7 @@ static func make(w: GameWorld, div: String, level: float, age_: int = 0, amateur
 	f.sex = "f" if fem else "m"
 	f.division = div
 	f.nation = nation if nation != "" else pick_nation(rng, fem)
-	var origin := NameGenerator.pick_origin(rng, f.nation)
+	var origin := NameGenerator.pick_origin(rng, f.nation, fem)
 	f.eth = int(origin["eth"])
 	var nm := NameGenerator.generate(rng, String(origin["c"]), _used(w), fem)
 	f.first = String(nm["first"])
@@ -63,7 +59,8 @@ static func make(w: GameWorld, div: String, level: float, age_: int = 0, amateur
 	var cities: Array = DataDB.cities(f.nation)
 	if not cities.is_empty():
 		f.city = String((cities[rng.randi_range(0, mini(cities.size() - 1, 14))] as Array)[0])
-	f.base = pick_base(rng, f.nation)
+	f.base = Styles.pick_base(rng, f.nation, String(origin["c"]), fem)
+	f.base2 = Styles.pick_second(rng, f.base, fem)
 	# Idade
 	var age := age_
 	if age <= 0:
@@ -80,7 +77,7 @@ static func make(w: GameWorld, div: String, level: float, age_: int = 0, amateur
 	var hmean: int = HEIGHT.get(div, 176)
 	f.height_cm = clampi(int(round(rng.randfn(hmean, 5.0))), hmean - 14, hmean + 14)
 	f.reach_cm = clampi(f.height_cm + int(round(rng.randfn(2.0, 5.0))), f.height_cm - 8, f.height_cm + 16)
-	f.southpaw = rng.randf() < (0.24 if f.base in ["boxe", "karate", "kickboxing"] else 0.17)
+	f.southpaw = rng.randf() < (0.24 if Styles.family(f.base) == "trocacao" else 0.17)
 	var limit := float(d.get("limit_kg", 70.0))
 	if div == "M120":
 		f.natural_kg = snappedf(limit - rng.randf_range(0.0, 14.0), 0.1)
@@ -111,7 +108,65 @@ static func make(w: GameWorld, div: String, level: float, age_: int = 0, amateur
 	if f.is_pro():
 		f.last_fight_week = w.week - rng.randi_range(2, 22)
 	f.wear = maxf(0.0, f.fights() * rng.randf_range(0.02, 0.06))
+	_grooming(f, rng, String(origin["c"]))
+	_marks(f, rng)
 	return f
+
+
+## Cabelo e barba de lutador, pela cultura (data/world/mma.json › grooming): no Daguestão e na
+## Chechênia, cabelo na máquina e barba cheia sem bigode; na Tailândia, rosto limpo; no resto,
+## muita gente com cabelo curto de quem treina todo dia. O resto fica com o gerador de rostos.
+static func _grooming(f: Fighter, rng: RandomNumberGenerator, culture: String) -> void:
+	if f.is_female():
+		return
+	var g: Dictionary = DataDB.mma().get("grooming", {})
+	var parts := culture.split("+")
+	var key := parts[0]
+	if parts.size() > 1 and g.has(parts[1]) and rng.randf() < 0.6:
+		key = parts[1]
+	var t: Dictionary = g.get(key, g.get("*", {}))
+	var dflt: Dictionary = g.get("*", {})
+	if rng.randf() < float(t.get("hair_p", dflt.get("hair_p", 0.0))):
+		var hw: Dictionary = t.get("hair", dflt.get("hair", {}))
+		if not hw.is_empty():
+			f.look["hs"] = int(RngUtil.weighted_key(rng, hw))
+	if rng.randf() < float(t.get("beard_p", 0.0)):
+		var bw: Dictionary = t.get("beard", {})
+		if not bw.is_empty():
+			f.look["bd"] = int(RngUtil.weighted_key(rng, bw))
+
+
+## Marcas de quem luta: orelha de couve-flor em quem cresceu no tatame de luta agarrada, nariz
+## torto em quem trocou muito em pé ou foi nocauteado, cicatriz na sobrancelha de cotovelada.
+static func _marks(f: Fighter, rng: RandomNumberGenerator) -> void:
+	var fam1 := Styles.family(f.base)
+	var fam2 := Styles.family(f.base2) if f.base2 != "" else ""
+	var years := clampf(float(f.fights() + int(f.amateur.get("w", 0)) + int(f.amateur.get("l", 0))) / 20.0, 0.3, 1.4)
+	var sexk := 0.35 if f.is_female() else 1.0
+	var ear: float = {"agarrada": 0.5, "completa": 0.12, "trocacao": 0.04}.get(fam1, 0.1)
+	if f.base in ["wrestling", "folkstyle", "greco", "kurash", "laamb"]:
+		ear = 0.62
+	if fam2 == "agarrada":
+		ear += 0.1
+	if rng.randf() < ear * years * sexk:
+		f.look["er"] = 6
+	var hits := float(f.record.get("ko_l", 0)) * 0.12 + (0.18 if fam1 == "trocacao" else 0.05) + (0.12 if f.base == "boxe" else 0.0)
+	if rng.randf() < hits * years * sexk:
+		f.look["ns"] = int(RngUtil.weighted_key(rng, {"23": 2.0, "30": 1.5, "9": 1.0}))
+	var cut := 0.22 if f.base == "muay_thai" else 0.06
+	if rng.randf() < cut * years:
+		f.look["sc"] = 1 if rng.randf() < 0.5 else -1
+
+
+## Depois de cada luta, a marca pode chegar: o corte vira cicatriz, o nocaute entorta o nariz, o
+## tatame estoura a orelha.
+static func battle_marks(f: Fighter, rng: RandomNumberGenerator, cut: float, lost_by_ko: bool, grappled: bool) -> void:
+	if cut > 0.6 and not f.look.has("sc") and rng.randf() < 0.3:
+		f.look["sc"] = 1 if rng.randf() < 0.5 else -1
+	if lost_by_ko and not f.look.has("ns") and rng.randf() < (0.06 if f.is_female() else 0.12):
+		f.look["ns"] = 23 if rng.randf() < 0.6 else 9
+	if grappled and not f.look.has("er") and rng.randf() < (0.015 if f.is_female() else 0.04):
+		f.look["er"] = 6
 
 
 static func _used(w: GameWorld) -> Dictionary:
@@ -145,7 +200,7 @@ static func _nickname(w: GameWorld, rng: RandomNumberGenerator, culture: String)
 ## Atributos: nível alvo + viés da arte marcial + físico da categoria + pontos fortes e fracos
 ## individuais; depois um ajuste para o nível calculado bater com o alvo.
 static func _make_attrs(f: Fighter, rng: RandomNumberGenerator, level: float, age: int, d: Dictionary) -> void:
-	var bias: Dictionary = ((DataDB.mma()["bases"] as Dictionary).get(f.base, {}) as Dictionary).get("attrs", {})
+	var bias: Dictionary = Styles.attr_bias(f.base, f.base2)
 	var wt := float(d.get("wt", 0.5))
 	var ko := float(d.get("ko", 1.0))
 	var at := {}

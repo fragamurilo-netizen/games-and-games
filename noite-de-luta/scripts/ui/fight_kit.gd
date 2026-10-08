@@ -200,7 +200,7 @@ static func tape(w: GameWorld, fa: Fighter, fb: Fighter) -> VBoxContainer:
 		["Envergadura", "%d cm" % fa.reach_cm, "%d cm" % fb.reach_cm],
 		["Base", "Canhota" if fa.southpaw else "Ortodoxa", "Canhota" if fb.southpaw else "Ortodoxa"],
 		["Estilo", fa.style_label(), fb.style_label()],
-		["Arte de base", String((DataDB.mma()["bases"] as Dictionary)[fa.base]["name"]), String((DataDB.mma()["bases"] as Dictionary)[fb.base]["name"])],
+		["Arte de base", Styles.describe(fa), Styles.describe(fb)],
 		["Nível", str(fa.level()), str(fb.level())],
 	]
 	for r: Array in rows:

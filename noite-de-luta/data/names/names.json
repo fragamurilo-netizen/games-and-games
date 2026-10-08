@@ -11748,7 +11748,13 @@
 				"lat": 1,
 				"and": 1,
 				"mix": 1,
-				"afr": 1
+				"afr": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"pt": {
 				"nor": 1,
@@ -11756,7 +11762,13 @@
 				"med": 1,
 				"lat": 1,
 				"mix": 1,
-				"afr": 0.75
+				"afr": 0.75,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 0.75,
+				"sah": 0.75
 			},
 			"es": {
 				"nor": 1,
@@ -11764,7 +11776,13 @@
 				"med": 1,
 				"lat": 1,
 				"mix": 0.45,
-				"afr": 0.08
+				"afr": 0.08,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 0.08,
+				"sah": 0.08
 			},
 			"eus": {
 				"nor": 1,
@@ -11772,7 +11790,13 @@
 				"med": 1,
 				"lat": 0.5,
 				"mix": 0.3,
-				"afr": 0.04
+				"afr": 0.04,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 0.04,
+				"sah": 0.04
 			},
 			"en": {
 				"nor": 1,
@@ -11780,42 +11804,80 @@
 				"med": 1,
 				"mix": 0.7,
 				"afr": 0.4,
-				"pac": 0.35
+				"pac": 0.35,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 0.4,
+				"mel": 0.35,
+				"sah": 0.4
 			},
 			"sco": {
 				"nor": 1,
 				"eur": 1,
 				"med": 1,
 				"mix": 0.6,
-				"afr": 0.3
+				"afr": 0.3,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 0.3,
+				"sah": 0.3
 			},
 			"wal": {
 				"nor": 1,
 				"eur": 1,
 				"med": 1,
 				"mix": 0.6,
-				"afr": 0.3
+				"afr": 0.3,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 0.3,
+				"sah": 0.3
 			},
 			"ie": {
 				"nor": 1,
 				"eur": 1,
 				"med": 1,
 				"mix": 0.5,
-				"afr": 0.15
+				"afr": 0.15,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 0.15,
+				"sah": 0.15
 			},
 			"us": {
 				"nor": 1,
 				"eur": 1,
 				"med": 1,
 				"mix": 0.85,
-				"afr": 0.3
+				"afr": 0.3,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 0.3,
+				"sah": 0.3
 			},
 			"fr": {
 				"nor": 1,
 				"eur": 1,
 				"med": 1,
 				"mix": 0.5,
-				"afr": 0.6
+				"afr": 0.6,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 0.6,
+				"sah": 0.6,
+				"mel": 1
 			},
 			"nl": {
 				"nor": 1,
@@ -11823,235 +11885,374 @@
 				"med": 1,
 				"mix": 0.5,
 				"afr": 0.25,
-				"sea": 0.4
+				"sea": 0.4,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 0.25,
+				"sah": 0.25
 			},
 			"de": {
 				"nor": 1,
 				"eur": 1,
 				"med": 1,
 				"mix": 0.35,
-				"afr": 0.1
+				"afr": 0.1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 0.1,
+				"sah": 0.1
 			},
 			"it": {
 				"nor": 1,
 				"eur": 1,
 				"med": 1,
 				"mix": 0.4,
-				"afr": 0.1
+				"afr": 0.1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 0.1,
+				"sah": 0.1
 			},
 			"dk": {
 				"nor": 1,
 				"eur": 1,
 				"med": 1,
 				"mix": 0.35,
-				"afr": 0.08
+				"afr": 0.08,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 0.08,
+				"sah": 0.08
 			},
 			"se": {
 				"nor": 1,
 				"eur": 1,
 				"med": 1,
 				"mix": 0.35,
-				"afr": 0.08
+				"afr": 0.08,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 0.08,
+				"sah": 0.08
 			},
 			"no": {
 				"nor": 1,
 				"eur": 1,
 				"med": 1,
 				"mix": 0.35,
-				"afr": 0.08
+				"afr": 0.08,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 0.08,
+				"sah": 0.08
 			},
 			"fi": {
 				"nor": 1,
 				"eur": 1,
 				"med": 1,
 				"mix": 0.35,
-				"afr": 0.08
+				"afr": 0.08,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 0.08,
+				"sah": 0.08
 			},
 			"is": {
 				"nor": 1,
 				"eur": 1,
-				"med": 1
+				"med": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1
 			},
 			"nordic": {
 				"nor": 1,
 				"eur": 1,
-				"med": 1
+				"med": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1
 			},
 			"jp": {
-				"eas": 1
+				"eas": 1,
+				"cas": 1
 			},
 			"kr": {
-				"eas": 1
+				"eas": 1,
+				"cas": 1
 			},
 			"cn": {
-				"eas": 1
+				"eas": 1,
+				"cas": 1
 			},
 			"rsa": {
 				"afr": 1,
-				"mix": 0.25
+				"mix": 0.25,
+				"nil": 1,
+				"sah": 1
 			},
 			"af": {
 				"nor": 1,
 				"eur": 1,
 				"med": 1,
-				"mix": 1
+				"mix": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1
 			},
 			"tr": {
 				"med": 1,
 				"eur": 1,
 				"nor": 1,
-				"arb": 1
+				"arb": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"naf": 1,
+				"cas": 1
 			},
 			"jm": {
 				"afr": 1,
 				"mix": 1,
-				"hae": 1
+				"hae": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"cv": {
 				"afr": 1,
 				"mix": 1,
-				"hae": 1
+				"hae": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"ao": {
 				"afr": 1,
 				"mix": 1,
-				"hae": 1
+				"hae": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"lusoaf": {
 				"afr": 1,
 				"mix": 1,
-				"hae": 1
+				"hae": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"mz": {
 				"afr": 1,
 				"mix": 1,
-				"hae": 1
+				"hae": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"gw": {
 				"afr": 1,
 				"mix": 1,
-				"hae": 1
+				"hae": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"waf_en": {
 				"afr": 1,
 				"mix": 1,
-				"hae": 1
+				"hae": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"waf_fr": {
 				"afr": 1,
 				"mix": 1,
-				"hae": 1
+				"hae": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"ng": {
 				"afr": 1,
 				"mix": 1,
-				"hae": 1
+				"hae": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"gh": {
 				"afr": 1,
 				"mix": 1,
-				"hae": 1
+				"hae": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"sn": {
 				"afr": 1,
 				"mix": 1,
-				"hae": 1
+				"hae": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"ml": {
 				"afr": 1,
 				"mix": 1,
-				"hae": 1
+				"hae": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"ci": {
 				"afr": 1,
 				"mix": 1,
-				"hae": 1
+				"hae": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"cm": {
 				"afr": 1,
 				"mix": 1,
-				"hae": 1
+				"hae": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"cd": {
 				"afr": 1,
 				"mix": 1,
-				"hae": 1
+				"hae": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"bf": {
 				"afr": 1,
 				"mix": 1,
-				"hae": 1
+				"hae": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"ga": {
 				"afr": 1,
 				"mix": 1,
-				"hae": 1
+				"hae": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"zw": {
 				"afr": 1,
 				"mix": 1,
-				"hae": 1
+				"hae": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"gulf": {
 				"arb": 1,
 				"afr": 1,
 				"hae": 1,
 				"sas": 1,
-				"med": 1
+				"med": 1,
+				"cau": 1,
+				"naf": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"sa": {
 				"arb": 1,
 				"afr": 1,
 				"hae": 1,
 				"sas": 1,
-				"med": 1
+				"med": 1,
+				"cau": 1,
+				"naf": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"eg": {
 				"arb": 1,
 				"afr": 1,
 				"hae": 1,
 				"sas": 1,
-				"med": 1
+				"med": 1,
+				"cau": 1,
+				"naf": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"ma": {
 				"arb": 1,
 				"afr": 1,
 				"hae": 1,
 				"sas": 1,
-				"med": 1
+				"med": 1,
+				"cau": 1,
+				"naf": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"dz": {
 				"arb": 1,
 				"afr": 1,
 				"hae": 1,
 				"sas": 1,
-				"med": 1
+				"med": 1,
+				"cau": 1,
+				"naf": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"tn": {
 				"arb": 1,
 				"afr": 1,
 				"hae": 1,
 				"sas": 1,
-				"med": 1
+				"med": 1,
+				"cau": 1,
+				"naf": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"maghreb": {
 				"arb": 1,
 				"afr": 1,
 				"hae": 1,
 				"sas": 1,
-				"med": 1
+				"med": 1,
+				"cau": 1,
+				"naf": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"arab": {
 				"arb": 1,
 				"afr": 1,
 				"hae": 1,
 				"sas": 1,
-				"med": 1
+				"med": 1,
+				"cau": 1,
+				"naf": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"persian": {
 				"arb": 1,
 				"med": 1,
-				"eur": 1
+				"eur": 1,
+				"slv": 1,
+				"bal": 1,
+				"cau": 1,
+				"naf": 1,
+				"cas": 1,
+				"sas": 1
 			},
 			"rio": {
 				"nor": 1,
@@ -12060,7 +12261,13 @@
 				"lat": 1,
 				"and": 1,
 				"mix": 1,
-				"afr": 1
+				"afr": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"latam": {
 				"nor": 1,
@@ -12069,7 +12276,13 @@
 				"lat": 1,
 				"and": 1,
 				"mix": 1,
-				"afr": 1
+				"afr": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"mx": {
 				"nor": 1,
@@ -12078,7 +12291,13 @@
 				"lat": 1,
 				"and": 1,
 				"mix": 1,
-				"afr": 1
+				"afr": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"co": {
 				"nor": 1,
@@ -12087,7 +12306,13 @@
 				"lat": 1,
 				"and": 1,
 				"mix": 1,
-				"afr": 1
+				"afr": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"pe": {
 				"nor": 1,
@@ -12096,7 +12321,13 @@
 				"lat": 1,
 				"and": 1,
 				"mix": 1,
-				"afr": 1
+				"afr": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"ec": {
 				"nor": 1,
@@ -12105,7 +12336,13 @@
 				"lat": 1,
 				"and": 1,
 				"mix": 1,
-				"afr": 1
+				"afr": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"ve": {
 				"nor": 1,
@@ -12114,7 +12351,13 @@
 				"lat": 1,
 				"and": 1,
 				"mix": 1,
-				"afr": 1
+				"afr": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"cl": {
 				"nor": 1,
@@ -12123,7 +12366,13 @@
 				"lat": 1,
 				"and": 1,
 				"mix": 1,
-				"afr": 1
+				"afr": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"py": {
 				"nor": 1,
@@ -12132,7 +12381,13 @@
 				"lat": 1,
 				"and": 1,
 				"mix": 1,
-				"afr": 1
+				"afr": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"bo": {
 				"nor": 1,
@@ -12141,7 +12396,13 @@
 				"lat": 1,
 				"and": 1,
 				"mix": 1,
-				"afr": 1
+				"afr": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"cam": {
 				"nor": 1,
@@ -12150,97 +12411,176 @@
 				"lat": 1,
 				"and": 1,
 				"mix": 1,
-				"afr": 1
+				"afr": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"nil": 1,
+				"sah": 1
 			},
 			"gr": {
 				"nor": 1,
 				"eur": 1,
-				"med": 1
+				"med": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1
 			},
 			"alb": {
 				"nor": 1,
 				"eur": 1,
-				"med": 1
+				"med": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1
 			},
 			"hu": {
 				"nor": 1,
 				"eur": 1,
-				"med": 1
+				"med": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1
 			},
 			"ro": {
 				"nor": 1,
 				"eur": 1,
-				"med": 1
+				"med": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1
 			},
 			"ge": {
 				"nor": 1,
 				"eur": 1,
-				"med": 1
+				"med": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1
 			},
 			"south_slav": {
 				"nor": 1,
 				"eur": 1,
-				"med": 1
+				"med": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1
 			},
 			"west_slav": {
 				"nor": 1,
 				"eur": 1,
-				"med": 1
+				"med": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1
 			},
 			"east_slav": {
 				"nor": 1,
 				"eur": 1,
-				"med": 1
+				"med": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1
 			},
 			"hr": {
 				"nor": 1,
 				"eur": 1,
-				"med": 1
+				"med": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1
 			},
 			"rs": {
 				"nor": 1,
 				"eur": 1,
-				"med": 1
+				"med": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1
 			},
 			"ba": {
 				"nor": 1,
 				"eur": 1,
-				"med": 1
+				"med": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1
 			},
 			"si": {
 				"nor": 1,
 				"eur": 1,
-				"med": 1
+				"med": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1
 			},
 			"mk": {
 				"nor": 1,
 				"eur": 1,
-				"med": 1
+				"med": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1
 			},
 			"pl": {
 				"nor": 1,
 				"eur": 1,
-				"med": 1
+				"med": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1
 			},
 			"cz": {
 				"nor": 1,
 				"eur": 1,
-				"med": 1
+				"med": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1
 			},
 			"sk": {
 				"nor": 1,
 				"eur": 1,
-				"med": 1
+				"med": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1
 			},
 			"ua": {
 				"nor": 1,
 				"eur": 1,
-				"med": 1
+				"med": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1
 			},
 			"ru": {
 				"nor": 1,
 				"eur": 1,
-				"med": 1
+				"med": 1,
+				"slv": 1,
+				"bal": 1,
+				"cel": 1,
+				"cau": 1,
+				"cas": 1
 			}
 		},
 		"heritage": {
@@ -12643,6 +12983,94 @@
 					"it": 1,
 					"es": 1,
 					"gr": 1
+				}
+			},
+			"slv": {
+				"*": {
+					"west_slav": 1,
+					"east_slav": 1
+				}
+			},
+			"bal": {
+				"*": {
+					"south_slav": 2,
+					"alb": 1
+				},
+				"SUI": {
+					"alb": 2,
+					"south_slav": 1
+				}
+			},
+			"cel": {
+				"*": {
+					"ie": 2,
+					"sco": 1
+				}
+			},
+			"cau": {
+				"*": {
+					"tr": 2,
+					"persian": 1
+				}
+			},
+			"naf": {
+				"*": {
+					"maghreb": 2,
+					"ma": 1,
+					"dz": 1
+				},
+				"ESP": {
+					"ma": 4,
+					"dz": 1
+				},
+				"FRA": {
+					"dz": 3,
+					"ma": 3,
+					"tn": 2
+				},
+				"BEL": {
+					"ma": 4
+				},
+				"NED": {
+					"ma": 4
+				}
+			},
+			"cas": {
+				"*": {
+					"tr": 1
+				}
+			},
+			"nil": {
+				"*": {
+					"ssd": 2,
+					"horn": 1
+				}
+			},
+			"mel": {
+				"*": {
+					"pac": 1
+				}
+			},
+			"sah": {
+				"*": {
+					"waf_fr": 2,
+					"sn": 2,
+					"ml": 2,
+					"bf": 1
+				},
+				"ENG": {
+					"waf_en": 1,
+					"sn": 1
+				},
+				"ESP": {
+					"sn": 2,
+					"ml": 1,
+					"gw": 1
+				},
+				"FRA": {
+					"sn": 2,
+					"ml": 2,
+					"waf_fr": 2
 				}
 			}
 		},

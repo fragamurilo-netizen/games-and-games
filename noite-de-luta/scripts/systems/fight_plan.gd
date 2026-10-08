@@ -101,7 +101,32 @@ static func suggest(me: Fighter, opp: Fighter) -> Dictionary:
 		p["por_baixo"] = 1
 	else:
 		p["por_baixo"] = 0
+	_school(p, me, opp)
 	return p
+
+
+## O jeito da escola por cima da conta dos atributos: o sambista de combate bate por cima, o
+## jiu-jiteiro joga de guarda, o caratê luta de longe e no contra-ataque, o tailandês cola.
+static func _school(p: Dictionary, me: Fighter, opp: Fighter) -> void:
+	var pr := Styles.profile(me)
+	if Styles.mark(pr, "gnp") >= 0.6 and int(p["por_cima"]) == 2:
+		p["por_cima"] = 0
+	if Styles.mark(pr, "guard") >= 0.6 and me.a("finalizacao") >= 60.0 and me.a("finalizacao") > opp.a("def_finalizacao"):
+		p["por_baixo"] = 2
+	if Styles.mark(pr, "blitz") >= 0.6 and int(p["jogo"]) != 2:
+		p["distancia"] = 0
+		if int(p["postura"]) != 2:
+			p["contra"] = 1
+	if Styles.mark(pr, "plum") >= 0.8 and int(p["jogo"]) != 2 and me.a("clinch") >= opp.a("clinch"):
+		p["distancia"] = 2
+	if Styles.mark(pr, "low_kicks") >= 0.8 and int(p["alvo"]) == 0:
+		p["alvo"] = 3
+	elif Styles.mark(pr, "body") >= 0.8 and int(p["alvo"]) == 0:
+		p["alvo"] = 2
+	if Styles.mark(pr, "counter") >= 0.7 and int(p["postura"]) != 2:
+		p["contra"] = 1
+	if Styles.mark(pr, "chain") >= 0.6 and int(p["jogo"]) == 1 and me.a("queda") >= opp.a("def_queda"):
+		p["jogo"] = 2
 
 
 ## Ajuste do corner entre rounds (o que a IA rival faz, como no LEATHER: quem está perdendo
