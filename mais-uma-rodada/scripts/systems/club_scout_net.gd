@@ -172,19 +172,27 @@ static func _observe(mem: Dictionary, p: Player, gain: float, turn: int) -> void
 static func _prune(world: GameWorld, mem: Dictionary, lvl: float, turn: int) -> void:
 	var k: Dictionary = mem["k"]
 	var t: Dictionary = mem["t"]
+	# Uma passada só: esquece quem parou, esfria quem sumiu e já anota a nota de quem fica.
+	# Ordenação nativa (a comparação por função, com duas buscas no mundo por comparação, era o
+	# grosso da semana dos olheiros).
+	var keys: Array = []
+	var ids: Array = []
 	for pid in k.keys():
 		var p: Player = world.players.get(pid)
 		if p == null or p.retiring:
 			k.erase(pid)
 			t.erase(pid)
-		elif turn - int(t.get(pid, turn)) > STALE_TURNS:
+			continue
+		if turn - int(t.get(pid, turn)) > STALE_TURNS:
 			k[pid] = float(k[pid]) * 0.5
 			t[pid] = turn
-	if k.size() <= MAX_KNOWN:
+		keys.append([float(k[pid]) + p.ovr_f * 0.3, -ids.size()])
+		ids.append(pid)
+	if ids.size() <= MAX_KNOWN:
 		return
-	var ids := k.keys()
-	ids.sort_custom(func(a, b): return float(k[a]) + world.players[a].ovr_f * 0.3 > float(k[b]) + world.players[b].ovr_f * 0.3)
-	for pid in ids.slice(MAX_KNOWN):
+	keys.sort()
+	for j in range(0, keys.size() - MAX_KNOWN):
+		var pid: Variant = ids[-int(keys[j][1])]
 		k.erase(pid)
 		t.erase(pid)
 
@@ -206,16 +214,6 @@ static func estimate(world: GameWorld, c: Club, p: Player, kn: float = -1.0) -> 
 	var h := hash([c.id, p.id, "olho"])
 	var err := float(h % 1300) / 100.0 - 6.5 # ±6,5 pontos para quem só ouviu falar
 	return Valuation.perceived_rating(p, world.year) + Valuation.shift + err * (1.0 - clampf(kn, 0.0, 100.0) / 100.0)
-
-
-## Jogadores que o clube conhece bem o bastante para fazer proposta (pid → conhecimento).
-static func shortlist(world: GameWorld, c: Club, min_know: float = 30.0) -> Dictionary:
-	var out := {}
-	var k: Dictionary = of(world, c.id)["k"]
-	for pid in k:
-		if float(k[pid]) >= min_know:
-			out[pid] = float(k[pid])
-	return out
 
 
 ## Jogadores de cada liga ordenados pelo nível que o mercado enxerga (cache por data).

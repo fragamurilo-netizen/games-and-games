@@ -118,24 +118,22 @@ static func fits_level(world: GameWorld, c: Club, p: Player, below: float = 4.0,
 ## filosofia que aceita o jogador. Sorteia entre os de nível mais próximo. null se ninguém faria sentido.
 static func realistic_suitor(world: GameWorld, p: Player, min_rep: float, rng: RandomNumberGenerator, below: float = 4.0, filter: Callable = Callable()) -> Club:
 	var r := Valuation.perceived_rating(p, world.year) + Valuation.shift
-	var cands: Array = []
+	var cands: Array = [] # [distância do nível, id, clube]: ordenação nativa, nível lido uma vez por clube
 	for c: Club in world.clubs:
 		if c.id == p.club_id or world.is_user_club(c.id) or c.reputation < min_rep:
 			continue
-		if not fits_level(world, c, p, below) or not ClubPolicy.ai_wants(world, c, p):
+		var lvl := PlayerGenerator.club_level(c)
+		if r < lvl - below or r > lvl + 14.0 or not ClubPolicy.ai_wants(world, c, p): # fits_level
 			continue
 		if origin_weight(c, p) < 0.15:
 			continue # rumor tem de fazer sentido: clube argentino não sonda zagueiro sueco
 		if filter.is_valid() and not filter.call(c):
 			continue
-		cands.append(c)
+		cands.append([absf(r - lvl - 2.0), c.id, c])
 	if cands.is_empty():
 		return null
-	cands.sort_custom(func(a: Club, b: Club):
-		var da := absf(r - PlayerGenerator.club_level(a) - 2.0)
-		var db := absf(r - PlayerGenerator.club_level(b) - 2.0)
-		return da < db if da != db else a.id < b.id)
-	return cands[rng.randi_range(0, mini(cands.size(), 6) - 1)]
+	cands.sort() # mais perto do nível primeiro; empate pelo id
+	return cands[rng.randi_range(0, mini(cands.size(), 6) - 1)][2]
 
 
 ## Quanto um clube paga por um garoto que nem estreou no profissional: aposta no potencial, com
@@ -400,6 +398,21 @@ static func _loan_destination(world: GameWorld, owner: Club, p: Player) -> Club:
 # ---------------------------------------------------------------------------
 
 static func _has_urgent_need(world: GameWorld, c: Club) -> bool:
+	# Atalho (todo clube, toda data): sem família abaixo do mínimo, não há carência urgente, seja
+	# qual for a prioridade de cima. Só monta a lista inteira quando falta gente em alguma família.
+	var counts := PackedInt32Array()
+	counts.resize(TransferManager.FAMILIES.size())
+	for pid in c.player_ids:
+		var q: Player = world.players.get(pid)
+		if q != null and q.injury_weeks < 6 and not q.retiring:
+			counts[TransferManager.FAM_OF[q.position]] += 1
+	var short := false
+	for i in counts.size():
+		if counts[i] < int(TransferManager.FAMILIES[i][1]):
+			short = true
+			break
+	if not short:
+		return false
 	var needs := TransferManager.squad_needs(world, c)
 	return not needs.is_empty() and int(needs[0]["count"]) < int(TransferManager.FAMILIES[int(needs[0]["fam"])][1])
 
@@ -714,8 +727,8 @@ static func decision_bar(p: Player) -> float:
 
 
 ## Vontade do jogador de ir (0..1): a base do jogo + dinheiro do Golfo/EUA para veteranos + voltar para casa.
-static func player_interest(world: GameWorld, p: Player, buyer: Club, squad: Array = []) -> float:
-	var v := TransferManager.interest(world, p, buyer, squad)
+static func player_interest(world: GameWorld, p: Player, buyer: Club, squad: Array = [], digest: Dictionary = {}) -> float:
+	var v := TransferManager.interest(world, p, buyer, squad, digest)
 	var age := p.age(world.year)
 	var prof := profile(buyer.nation)
 	if age >= 29:

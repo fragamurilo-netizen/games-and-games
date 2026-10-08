@@ -27,8 +27,10 @@ static func _data() -> Dictionary:
 		_d = v if v is Dictionary else {"names": {}, "nations": {}, "near": []}
 		_near.clear()
 		for e in _d.get("near", []):
-			_near["%s|%s" % [e[0], e[1]]] = float(e[2])
-			_near["%s|%s" % [e[1], e[0]]] = float(e[2])
+			for ab in [[String(e[0]), String(e[1])], [String(e[1]), String(e[0])]]:
+				if not _near.has(ab[0]):
+					_near[ab[0]] = {}
+				_near[ab[0]][ab[1]] = float(e[2])
 	return _d
 
 
@@ -60,7 +62,8 @@ static func similarity(a: String, b: String) -> float:
 	if a == b:
 		return 1.0
 	_data()
-	return float(_near.get("%s|%s" % [a, b], 0.0))
+	var row: Variant = _near.get(a) # língua → língua → parecença (sem montar texto a cada consulta)
+	return float(row.get(b, 0.0)) if row != null else 0.0
 
 
 ## Língua do vestiário do clube.
@@ -133,8 +136,13 @@ static func level(p: Player, code: String) -> float:
 
 ## Comunicação do jogador no clube (0..1): a língua do vestiário ou, onde o inglês corre solto, o inglês.
 static func comm(p: Player, c: Club) -> float:
-	var main := level(p, club_lang(c)) / 100.0
-	var en := level(p, "en") / 100.0 * english_level(c.nation)
+	return _comm(p, club_lang(c), english_level(c.nation))
+
+
+## `comm` com a língua do clube e o inglês do país já lidos (o vestiário inteiro de uma vez).
+static func _comm(p: Player, code: String, en_lvl: float) -> float:
+	var main := level(p, code) / 100.0
+	var en := level(p, "en") / 100.0 * en_lvl
 	return clampf(maxf(main, en * 0.9), 0.0, 1.0)
 
 
@@ -243,12 +251,19 @@ static func cohesion_push(world: GameWorld, c: Club) -> float:
 	var squad: Array = world.squad(c)
 	if squad.is_empty():
 		return 0.0
-	var arr := squad.duplicate()
-	arr.sort_custom(func(a: Player, b: Player): return a.stats[Player.S_APPS] > b.stats[Player.S_APPS] if a.stats[Player.S_APPS] != b.stats[Player.S_APPS] else a.ovr_f > b.ovr_f)
+	# Os 14 que mais jogam (empate: o melhor). Ordenação nativa de [jogos, overall, índice]: a
+	# comparação por função custava mais que o resto da semana do clube.
+	var keys: Array = []
+	for i in squad.size():
+		var q: Player = squad[i]
+		keys.append([q.stats[Player.S_APPS], q.ovr_f, -i])
+	keys.sort()
 	var tot := 0.0
-	var n := mini(14, arr.size())
-	for i in n:
-		tot += comm(arr[i], c)
+	var n := mini(14, keys.size())
+	var code := club_lang(c)
+	var en_lvl := english_level(c.nation)
+	for k in n:
+		tot += _comm(squad[-int(keys[keys.size() - 1 - k][2])], code, en_lvl)
 	var avg := tot / float(n)
 	return minf(0.0, (avg - 0.8) * 0.6)
 

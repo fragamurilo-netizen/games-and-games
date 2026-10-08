@@ -26,7 +26,7 @@ const N := 11
 ## {player_id: [SH, SO, KP, TK, IT, DR, SV, PP, XG, AD, FC]} dos dois times.
 static func build(world: GameWorld, f: Fixture, res: Dictionary) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
-	rng.seed = hash([world.world_seed, f.home, f.away, f.slot, f.hg, f.ag, "stats"])
+	rng.seed = hash([world.world_seed, f.home, f.away, f.slot, int(res["hg"]), int(res["ag"]), "stats"]) # placar do resultado: roda na thread do jogo, antes de f receber o placar
 	var poss := float(res.get("poss", 0.5))
 	var real: Dictionary = res.get("pstats", {})
 	var score: Array = [int(res["hg"]), int(res["ag"])]

@@ -1,7 +1,7 @@
 extends SceneTree
 ## Desempenho do que o jogador sente: gerar o mundo, começar a carreira, cada data (até o próximo
 ## jogo), o fim de temporada (por etapa), salvar e carregar, e abrir as telas principais.
-## godot --headless --path . --script res://tools/perf_deep.gd -- [--days=12] [--season] [--screens]
+## godot --headless --path . --script res://tools/perf_deep.gd -- [--days=12] [--season] [--screens] [--seq]
 ## A lógica fica em perf_deep_runner.gd (carregado depois dos autoloads).
 
 
@@ -19,4 +19,6 @@ func _start() -> void:
 			r.set("season", true)
 		if a == "--screens":
 			r.set("screens", true)
+		if a == "--seq":
+			SeasonManager.parallel = false
 	root.add_child(r)

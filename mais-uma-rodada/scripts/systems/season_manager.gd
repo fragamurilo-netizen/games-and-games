@@ -420,6 +420,9 @@ static func _play_slice(world: GameWorld, quick: Array, first: int, step: int) -
 		var e: Dictionary = quick[i]
 		var f: Fixture = e["f"]
 		e["res"] = QuickMatch.play(world, world.club(f.home), world.club(f.away), e["_hs"], e["_as"], e["ctx"], e["seed"])
+		if f.is_league():
+			# Números individuais do jogo (só leem o resultado e os atributos): prontos na thread.
+			e["res"]["detail"] = MatchStats.build(world, f, e["res"])
 		i += step
 
 
@@ -543,12 +546,15 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 			if p.age(world.year) <= 21:
 				NewsManager.on_explosion(world, p)
 		tt = _time("evolucao", tt)
+		var half := int(world.stats.get("tick_parity", 0))
 		for c: Club in world.clubs:
 			FinanceManager.process_week(world, c)
 			# O clima volta devagar para o patamar do momento (títulos, finais perdidas, jejum).
 			c.fan_mood = clampf(c.fan_mood + (Aftermath.mood_target(world, c) - c.fan_mood) * 0.03, 0.0, 100.0)
-			# Amigos no time titular se entendem; desafetos atrapalham.
-			c.cohesion = clampf(c.cohesion + Relations.cohesion_push(world, c) + Languages.cohesion_push(world, c), 20.0, 100.0)
+			# Amigos no time titular se entendem; desafetos atrapalham. Metade dos clubes por semana,
+			# com o dobro do efeito (como a evolução dos jogadores): mesmo total, metade do custo.
+			if c.id % 2 == half:
+				c.cohesion = clampf(c.cohesion + (Relations.cohesion_push(world, c) + Languages.cohesion_push(world, c)) * 2.0, 20.0, 100.0)
 			TicketOffice.weekly_mood(c) # a torcida sente o preço do ingresso
 		Aftermath.weekly(world)
 		WorldEvents.weekly(world)
@@ -598,7 +604,9 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	NewsManager.after_matchday(world, md["entries"])
 	WorldPulse.after_matchday(world, md["entries"])
 	Achievements.after_matchday(world, md["entries"])
+	CompetitionManager.memo_positions(true) # técnicos de todos os clubes leem a tabela da rodada
 	People.after_matchday(world, md["entries"])
+	CompetitionManager.memo_positions(false)
 	Relations.after_matchday(world, md["entries"]) # goleada esquenta o vestiário; vitória grande une
 	tt = _time("relacoes", tt)
 	CoachStories.after_matchday(world, md["entries"])
@@ -687,7 +695,8 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 	var big := derby or float(res.get("importance", 0.3)) >= 0.7
 	var yellow_limit := int(DatabaseManager.squad_rules()["yellow_limit"])
 	var score: Array = [f.hg, f.ag]
-	var detail: Dictionary = MatchStats.build(world, f, res) if is_league else {}
+	var detail: Dictionary = res["detail"] if res.has("detail") else (MatchStats.build(world, f, res) if is_league else {})
+	res.erase("detail")
 	if is_league:
 		LeagueStats.record(world.league(f.comp), f, res, detail)
 	TacticalScout.record(world, f, res, world.club(f.home).sheet, world.club(f.away).sheet)

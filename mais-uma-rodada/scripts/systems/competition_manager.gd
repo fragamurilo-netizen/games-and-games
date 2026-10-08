@@ -69,7 +69,24 @@ static func _push_form(row: Dictionary, r: String) -> void:
 
 ## Ids ordenados: pontos, vitórias, saldo, gols pró, menos vermelhos, id.
 static func sorted_ids(league: League) -> Array:
+	if _pos_memo_on:
+		var hit: Variant = _pos_memo.get(league)
+		if hit == null:
+			hit = LeagueFormat.sorted_ids(league)
+			_pos_memo[league] = hit
+		return (hit as Array).duplicate()
 	return LeagueFormat.sorted_ids(league)
+
+
+## Classificações lidas muitas vezes seguidas sem a tabela mudar (técnicos depois da rodada): quem
+## chama liga e desliga, na thread principal, num trecho que não mexe em tabela nenhuma.
+static var _pos_memo: Dictionary = {}
+static var _pos_memo_on := false
+
+
+static func memo_positions(on: bool) -> void:
+	_pos_memo_on = on
+	_pos_memo.clear()
 
 
 static func sort_table(club_ids: Array, t: Dictionary) -> Array:

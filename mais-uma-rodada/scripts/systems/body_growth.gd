@@ -119,11 +119,14 @@ static func yearly(world: GameWorld) -> Array:
 static func weekly(world: GameWorld) -> void:
 	var year := world.year
 	var parity := int(world.stats.get("tick_parity", 0)) # o mesmo meio-elenco do PlayerDevelopment
+	var salt := "sem%d_%d" % [year, world.current_turn()]
 	for p: Player in world.players.values():
 		if p.id % 2 == parity or p.club_id < 0:
 			continue
 		var ov := overweight(p, year)
-		var r := _r(p, "sem%d_%d" % [year, world.current_turn()])
+		if p.injury_weeks < 2 and ov <= 0:
+			continue # nada a sortear (o sorteio é de cada jogador: pular não muda o dos outros)
+		var r := _r(p, salt)
 		if p.injury_weeks >= 2 and r.randf() < prone(p) * 0.25:
 			p.weight += 1
 			continue

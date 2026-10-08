@@ -254,25 +254,55 @@ static func on_sold(world: GameWorld, seller: Club, p: Player) -> void:
 # 5. Alvos
 # ---------------------------------------------------------------------------
 
+## Por quantos dias a lista de alvos de uma carência vale (duas semanas de trabalho do departamento).
+const KEEP_TARGET_DAYS := 14
+
+
 ## Candidatos para a carência, do melhor para o pior (no máximo 8).
+## A lista avaliada fica guardada na carência: a próxima tentativa (na mesma data ou nas seguintes)
+## parte dela enquanto a verba, a folha e o elenco do clube não mudam e sobra alguém que ainda
+## serve (o departamento trabalha a lista que montou, não refaz tudo a cada proposta recusada).
 static func targets(world: GameWorld, c: Club, need: Dictionary, index: Dictionary, free_only: bool, st: Dictionary) -> Array:
-	var plan := plan_of(st, c)
-	var pr: Dictionary = plan.get("pr", {"amb": 0.0, "marquee": false})
-	var tried: Dictionary = plan.get("tried", {})
-	var prof := profile(world, c)
+	var tried: Dictionary = plan_of(st, c).get("tried", {})
+	if not free_only:
+		var kept: Variant = _kept_targets(world, c, need, tried)
+		if kept != null:
+			return kept
+	var full := _score(world, c, need, st, _pool(world, c, need, index, free_only, tried), index["memo"])
+	if not free_only:
+		_keep(world, c, need, full)
+	var out: Array = []
+	for e in full.slice(0, 8):
+		out.append(e[1])
+	return out
+
+
+## Lista dos olheiros e oferta dos empresários, já sem quem não pode vir ou é de outra família
+## (filtros que não dependem do conhecimento: cortar antes dá o mesmo resultado, mais barato).
+static func _pool(world: GameWorld, c: Club, need: Dictionary, index: Dictionary, free_only: bool, tried: Dictionary) -> Dictionary:
+	var fam := int(need.get("fam", -1))
 	var pool := {}
 	if not free_only:
-		var sl := ClubScoutNet.shortlist(world, c, 30.0)
-		for pid in sl:
-			pool[pid] = sl[pid]
+		var known: Dictionary = ClubScoutNet.of(world, c.id)["k"]
+		for pid in known:
+			var kn0 := float(known[pid])
+			if kn0 >= 30.0 and _may_target(world, c, world.players.get(pid), fam, free_only, tried):
+				pool[pid] = kn0
 	for p: Player in _agents_pool(world, c, need, index):
-		if not pool.has(p.id):
+		if not pool.has(p.id) and _may_target(world, c, p, fam, free_only, tried):
 			pool[p.id] = AGENT_KNOW
+	return pool
+
+
+## Nota de cada candidato do `pool` (pid → conhecimento): rápida para todos, completa para os 16
+## melhores. Devolve [[nota, Player]] do melhor para o pior. Só lê o mundo (roda em paralelo).
+static func _score(world: GameWorld, c: Club, need: Dictionary, st: Dictionary, pool: Dictionary, memo: Dictionary) -> Array:
+	var pr: Dictionary = plan_of(st, c).get("pr", {"amb": 0.0, "marquee": false})
+	var prof := profile(world, c)
 	var budget := float(c.transfer_budget) * (1.0 + float(pr["amb"]) * 0.25)
 	var wage_room := float(c.wage_budget - FinanceManager.wage_bill(world, c))
 	var lvl := PlayerGenerator.club_level(c)
 	# O que não muda de um candidato para outro, lido uma vez só.
-	var fam := int(need.get("fam", -1))
 	var ages: Array = need.get("ages", [18, 32])
 	var young: bool = need.get("young", false)
 	var npos := int(need.get("pos", -1))
@@ -284,13 +314,7 @@ static func targets(world: GameWorld, c: Club, need: Dictionary, index: Dictiona
 	var wage_boost := float(MarketAI.profile(c.nation).get("wage_boost", 1.0))
 	var scored: Array = []
 	for pid in pool:
-		var p: Player = world.players.get(pid)
-		if p == null or p.club_id == c.id or p.retiring or p.injury_weeks > 4 or not p.loan.is_empty() or tried.has(pid):
-			continue
-		if p.club_id >= 0 and (free_only or world.is_user_club(p.club_id) or p.joined_year == world.year):
-			continue
-		if fam >= 0 and TransferManager._family_of(p.position) != fam:
-			continue
+		var p: Player = world.players[pid]
 		var age := p.age(world.year)
 		if young and age > int(ages[1]):
 			continue
@@ -318,7 +342,7 @@ static func targets(world: GameWorld, c: Club, need: Dictionary, index: Dictiona
 		var seller: Club = null
 		if p.club_id >= 0:
 			seller = world.club(p.club_id)
-			price = float(p.value) * MarketAI._seller_mult(world, seller, p, c, false, index["memo"])
+			price = float(p.value) * MarketAI._seller_mult(world, seller, p, c, false, memo)
 			if price > budget and not MarketAI._loanable(world, p, c):
 				continue
 			if MarketAI.power(seller) > my_power * 1.5 and p.squad_status <= Player.STATUS_STARTER and age < 30:
@@ -354,9 +378,8 @@ static func targets(world: GameWorld, c: Club, need: Dictionary, index: Dictiona
 	# no elenco, homens de confiança do técnico, fama e o DNA do clube.
 	var coach := Relations.coach_id_of(world, c.id)
 	var csq := world.squad(c) # o elenco do clube, montado uma vez para os 16
-	var nat_n := {}
-	for q: Player in csq:
-		nat_n[q.nationality] = int(nat_n.get(q.nationality, 0)) + 1
+	var dig := TransferManager.squad_digest(csq)
+	var nat_n: Dictionary = dig["nat"]
 	var full: Array = []
 	for e in scored.slice(0, 16):
 		var p: Player = e[1]
@@ -366,7 +389,7 @@ static func targets(world: GameWorld, c: Club, need: Dictionary, index: Dictiona
 		if bool(pr["marquee"]):
 			s2 += clampf(Reputation.player_rep(world, p) - 60.0, 0.0, 30.0) * 0.08
 		s2 += ClubDNA.candidate_bonus(world, c, p, p.ovr_f, lvl, float(p.value), maxf(1.0, budget), 0)
-		s2 += (MarketAI.player_interest(world, p, c, csq) - 0.5) * 2.0
+		s2 += (MarketAI.player_interest(world, p, c, csq, dig) - 0.5) * 2.0
 		s2 += Relations.trust_bonus(p, coach)
 		var ties := Relations.ties_in(world, p, c)
 		s2 += minf(1.0, ties.x * 0.4) - ties.y * 1.0
@@ -374,9 +397,54 @@ static func targets(world: GameWorld, c: Club, need: Dictionary, index: Dictiona
 			s2 = s2 * 0.5 + Reputation.player_rep(world, p) * 0.05 # diretoria bagunçada vai pelo nome
 		full.append([s2, p])
 	full.sort_custom(func(a, b): return float(a[0]) > float(b[0]) or (float(a[0]) == float(b[0]) and a[1].id < b[1].id))
+	return full
+
+
+## Guarda a lista avaliada na carência (ids e o clube de cada um quando foi avaliada).
+static func _keep(world: GameWorld, c: Club, need: Dictionary, full: Array) -> void:
+	var ids := PackedInt32Array()
+	var at := PackedInt32Array()
+	for e in full:
+		ids.append((e[1] as Player).id)
+		at.append((e[1] as Player).club_id)
+	need["tc"] = [world.current_day(), _club_sig(c), ids, at]
+
+
+## Pode ser alvo (sem olhar nível nem preço): não é do clube, está inteiro, não foi tentado, não
+## chegou a outro clube neste ano e é da família procurada.
+static func _may_target(world: GameWorld, c: Club, p: Player, fam: int, free_only: bool, tried: Dictionary) -> bool:
+	if p == null or p.club_id == c.id or p.retiring or p.injury_weeks > 4 or not p.loan.is_empty() or tried.has(p.id):
+		return false
+	if p.club_id >= 0 and (free_only or world.is_user_club(p.club_id) or p.joined_year == world.year):
+		return false
+	return fam < 0 or TransferManager._family_of(p.position) == fam
+
+
+## O que, mudando no clube, invalida a lista guardada (comprou, vendeu, ganhou ou perdeu verba).
+static func _club_sig(c: Club) -> int:
+	return hash([c.transfer_budget, c.wage_budget, c.player_ids.hash()])
+
+
+## Lista guardada da carência, sem quem já foi tentado, trocou de clube, se machucou ou vai parar.
+## null = avaliar de novo. Lista esgotada na mesma data em que foi montada fica vazia: nada mudou
+## no que os olheiros sabem, e a reavaliação daria os mesmos nomes (já tentados).
+static func _kept_targets(world: GameWorld, c: Club, need: Dictionary, tried: Dictionary) -> Variant:
+	var tc: Array = need.get("tc", [])
+	if tc.is_empty() or absi(world.current_day() - int(tc[0])) > KEEP_TARGET_DAYS or int(tc[1]) != _club_sig(c):
+		return null # (o dia recomeça na virada da temporada: a distância vale nos dois sentidos)
+	var ids: PackedInt32Array = tc[2]
+	var at: PackedInt32Array = tc[3]
 	var out: Array = []
-	for e in full.slice(0, 8):
-		out.append(e[1])
+	for i in ids.size():
+		var p: Player = world.players.get(ids[i])
+		if p == null or p.club_id != at[i] or p.club_id == c.id or tried.has(p.id) or p.retiring \
+				or p.injury_weeks > 4 or not p.loan.is_empty():
+			continue
+		out.append(p)
+		if out.size() >= 8:
+			break
+	if out.is_empty() and int(tc[0]) != world.current_day():
+		return null
 	return out
 
 

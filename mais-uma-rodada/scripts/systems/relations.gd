@@ -288,38 +288,44 @@ static func _club_bonds(world: GameWorld, c: Club, initial: bool) -> void:
 ## Que laço dois companheiros formam: [tipo, valor, jogador, outro] ou [] (nenhum), pela situação e
 ## pela química fixa do par.
 static func _affinity(world: GameWorld, c: Club, a: Player, b: Player, initial: bool) -> Array:
+	# A química fixa do par decide quais laços são possíveis (amizade e mentor pedem química baixa,
+	# briga pede alta): as contas caras (anos juntos, histórico) só saem quando o laço ainda cabe.
+	# Mesma ordem de decisão e mesmo resultado de antes, com muito menos trabalho por par.
 	var ch := chem(a.id, b.id)
-	var ya := years_together(world, a, b)
+	if ch >= 0.55 and ch <= 0.7:
+		return []
 	var aa := a.age(world.year)
 	var ab := b.age(world.year)
-	var abroad := a.nationality == b.nationality and a.nationality != c.nation
-	var same_lang := Languages.primary(a.nationality) == Languages.primary(b.nationality)
-	# Revelados juntos: amizade de infância
-	if came_up_together(a, b) and ch < 0.55:
-		return [AMIGO, 45.0 + ch * 40.0, a, b]
-	# Compatriotas longe de casa se juntam
-	if abroad and ch < 0.35:
-		return [AMIGO, 30.0 + ch * 30.0, a, b]
-	if not same_lang and a.nationality != c.nation and b.nationality != c.nation and ch < 0.1:
-		return [AMIGO, 25.0, a, b]
-	# Veterano líder adota o garoto da posição
 	var fam_a := TransferManager._family_of(a.position)
 	var fam_b := TransferManager._family_of(b.position)
-	if fam_a == fam_b and absi(aa - ab) >= 8 and ch < 0.3:
-		var old := a if aa > ab else b
-		var kid := b if aa > ab else a
-		if old.has_trait("lider") or old.hid("det") >= 14:
-			return [MENTOR, 50.0, kid, old]
-	# Anos lado a lado
-	if ya >= 3 and ch < 0.35:
-		return [AMIGO, 20.0 + ya * 6.0, a, b]
-	# Briga por posição: dois do mesmo setor, nível parecido, idades de quem quer jogar já
-	if fam_a == fam_b and absi(a.overall - b.overall) <= 3 and aa >= 22 and ab >= 22 and ch > 0.86:
-		if a.trait_sum("ambition") + b.trait_sum("ambition") > 20.0 or HiddenPersona.hot_head(a) or HiddenPersona.hot_head(b):
-			return [INIMIGO, -35.0, a, b]
-	# Dois esquentados no mesmo vestiário
-	if HiddenPersona.hot_head(a) and HiddenPersona.hot_head(b) and ch > 0.7:
-		return [INIMIGO, -40.0, a, b]
+	if ch > 0.7:
+		# Briga por posição: dois do mesmo setor, nível parecido, idades de quem quer jogar já
+		if fam_a == fam_b and absi(a.overall - b.overall) <= 3 and aa >= 22 and ab >= 22 and ch > 0.86:
+			if a.trait_sum("ambition") + b.trait_sum("ambition") > 20.0 or HiddenPersona.hot_head(a) or HiddenPersona.hot_head(b):
+				return [INIMIGO, -35.0, a, b]
+		# Dois esquentados no mesmo vestiário
+		if HiddenPersona.hot_head(a) and HiddenPersona.hot_head(b):
+			return [INIMIGO, -40.0, a, b]
+		return []
+	# Revelados juntos: amizade de infância
+	if came_up_together(a, b):
+		return [AMIGO, 45.0 + ch * 40.0, a, b]
+	if ch < 0.35:
+		# Compatriotas longe de casa se juntam
+		if a.nationality == b.nationality and a.nationality != c.nation:
+			return [AMIGO, 30.0 + ch * 30.0, a, b]
+		if ch < 0.1 and a.nationality != c.nation and b.nationality != c.nation and Languages.primary(a.nationality) != Languages.primary(b.nationality):
+			return [AMIGO, 25.0, a, b]
+		# Veterano líder adota o garoto da posição
+		if fam_a == fam_b and absi(aa - ab) >= 8 and ch < 0.3:
+			var old := a if aa > ab else b
+			var kid := b if aa > ab else a
+			if old.has_trait("lider") or old.hid("det") >= 14:
+				return [MENTOR, 50.0, kid, old]
+		# Anos lado a lado
+		var ya := years_together(world, a, b)
+		if ya >= 3:
+			return [AMIGO, 20.0 + ya * 6.0, a, b]
 	if initial and ch < 0.04:
 		return [AMIGO, 25.0, a, b]
 	return []

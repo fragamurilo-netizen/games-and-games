@@ -5,7 +5,6 @@ extends RefCounted
 
 const STATUS_ASK: Array[float] = [1.55, 1.25, 1.05, 0.9, 1.3] # estrela, titular, rotação, reserva, promessa
 const OFFER_DAYS := 2 # prazo das propostas, em jogos do usuário
-const BAND := 4.0 # largura das faixas de nível do índice do mercado
 
 # Famílias de posição para carências de elenco: [posições, mínimo]
 const FAMILIES: Array = [
@@ -68,8 +67,8 @@ static func asking_price(world: GameWorld, p: Player, memo: Dictionary = {}) -> 
 ## Probabilidade (0..1) de o jogador topar se mudar para `buyer` com salário justo.
 ## `squad`: o elenco do comprador, quando quem chama já o tem (a busca da IA avalia vários
 ## jogadores para o mesmo clube); vazio = monta aqui.
-static func interest(world: GameWorld, p: Player, buyer: Club, squad: Array = []) -> float:
-	var bsq := squad if not squad.is_empty() else world.squad(buyer)
+static func interest(world: GameWorld, p: Player, buyer: Club, squad: Array = [], digest: Dictionary = {}) -> float:
+	var bsq := squad if not squad.is_empty() or not digest.is_empty() else world.squad(buyer)
 	var cur := world.club(p.club_id) if p.club_id >= 0 else null
 	var rep_diff := buyer.reputation - (cur.reputation if cur != null else buyer.reputation - 8.0)
 	var amb := 1.0 + p.trait_sum("ambition") / 40.0
@@ -90,9 +89,12 @@ static func interest(world: GameWorld, p: Player, buyer: Club, squad: Array = []
 		# país, se adapta mais rápido e topa mais fácil.
 		v += Languages.ease(p, buyer, p.age(world.year)) # quem fala (ou entende) a língua topa mais fácil
 		var mates := 0
-		for q in bsq:
-			if q.nationality == p.nationality:
-				mates += 1
+		if not digest.is_empty():
+			mates = int(digest["nat"].get(p.nationality, 0))
+		else:
+			for q in bsq:
+				if q.nationality == p.nationality:
+					mates += 1
 		if mates >= 2:
 			v += 0.04
 	if cur != null and buyer.nation != cur.nation:
@@ -102,9 +104,15 @@ static func interest(world: GameWorld, p: Player, buyer: Club, squad: Array = []
 		v += 0.1
 	# Minutos: teria espaço no novo time?
 	var better := 0
-	for q in bsq:
-		if q.position == p.position and q.ovr_f > p.ovr_f + 2.0:
-			better += 1
+	if not digest.is_empty():
+		var bar := p.ovr_f + 2.0
+		for o in digest["pos"][p.position]:
+			if o > bar:
+				better += 1
+	else:
+		for q in bsq:
+			if q.position == p.position and q.ovr_f > p.ovr_f + 2.0:
+				better += 1
 	v += 0.1 if better == 0 else (-0.08 * better)
 	if p.morale < 40.0 and cur != null:
 		v += 0.15 # insatisfeito quer sair
@@ -112,6 +120,19 @@ static func interest(world: GameWorld, p: Player, buyer: Club, squad: Array = []
 	v += CoachIdentity.interest_delta(world, p, buyer)
 	v += Relations.pull(world, p, buyer) # amigos, irmão, técnico favorito, ídolo; desafeto e inimigo afastam
 	return clampf(v, 0.05, 0.95)
+
+
+## Resumo do elenco do comprador para `interest` avaliar muitos candidatos seguidos sem percorrer o
+## elenco a cada um: compatriotas por país e overall de cada posição. Mesmo resultado.
+static func squad_digest(squad: Array) -> Dictionary:
+	var nat := {}
+	var pos: Array = []
+	for _i in Pos.COUNT:
+		pos.append([])
+	for q: Player in squad:
+		nat[q.nationality] = int(nat.get(q.nationality, 0)) + 1
+		(pos[q.position] as Array).append(q.ovr_f)
+	return {"nat": nat, "pos": pos}
 
 
 ## Salário pedido para assinar com `buyer` (quanto menos interessado, mais caro).
@@ -997,51 +1018,24 @@ static func process_matchday(world: GameWorld) -> Array:
 	return done
 
 
-## Índices do mercado (reconstruídos por data): por família de posição × faixa de nível e por
-## família dentro de cada país (clubes compram muito mais no próprio país).
+## Índice do mercado (reconstruído por data): quem os empresários oferecem, por país do clube e
+## família de posição. Ordem da lista de jogadores do mundo (o mesmo mundo dá o mesmo índice).
 static func _build_index(world: GameWorld) -> Dictionary:
-	var band: Array = []
-	for _f in FAMILIES:
-		band.append({})
-	var nat := {}
-	var young := {}
-	var abroad := {} # nacionalidade → jogadores dela em clubes de outro país (a repatriação)
 	var avail := {} # país do clube → família → quem os empresários oferecem (livre, listado, insatisfeito, fim de contrato)
+	var year := world.year
 	for p: Player in world.players.values():
 		if p.retiring or not p.loan.is_empty():
 			continue
-		var f := _family_of(p.position)
-		var b := int(p.ovr_f / BAND)
-		if not band[f].has(b):
-			band[f][b] = []
-		band[f][b].append(p)
+		if p.club_id >= 0 and not p.transfer_listed and p.morale >= 35.0 and p.contract_end > year:
+			continue
 		var n: String = world.clubs[p.club_id].nation if p.club_id >= 0 else p.nationality
-		if not nat.has(n):
-			var arr: Array = []
+		if not avail.has(n):
+			var arr3: Array = []
 			for _k in FAMILIES:
-				arr.append([])
-			nat[n] = arr
-		nat[n][f].append(p)
-		if p.club_id < 0 or p.transfer_listed or p.morale < 35.0 or p.contract_years_left(world.year) <= 0:
-			if not avail.has(n):
-				var arr3: Array = []
-				for _k in FAMILIES:
-					arr3.append([])
-				avail[n] = arr3
-			avail[n][f].append(p)
-		if p.club_id >= 0 and n != p.nationality:
-			if not abroad.has(p.nationality):
-				var arr2: Array = []
-				for _k in FAMILIES:
-					arr2.append([])
-				abroad[p.nationality] = arr2
-			abroad[p.nationality][f].append(p)
-		# Joias (até 20 anos, potencial alto): o garimpo dos clubes europeus na América do Sul.
-		if p.club_id >= 0 and p.potential >= 72 and p.age(world.year) <= 20:
-			if not young.has(n):
-				young[n] = []
-			young[n].append(p)
-	return {"band": band, "nat": nat, "young": young, "abroad": abroad, "avail": avail}
+				arr3.append([])
+			avail[n] = arr3
+		avail[n][_family_of(p.position)].append(p)
+	return {"avail": avail}
 
 
 ## Família de cada posição (índice em FAMILIES), na ordem de Pos: GK, RB, CB, LB, DM, CM, AM, RM,

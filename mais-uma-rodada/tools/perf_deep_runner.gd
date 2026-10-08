@@ -46,14 +46,21 @@ func _run() -> void:
 		tot += ms
 		print("data %2d (jogo do usuário + até o próximo): %.0f ms" % [i + 1, ms])
 	print("média por data: %.0f ms" % (tot / maxf(1.0, days)))
-	_top(SeasonManager.timings, 12, "etapas (ms)")
+	_top(SeasonManager.timings, 40, "etapas (ms)")
 	if season:
 		var guard := 0
+		SeasonManager.timings.clear()
 		t = Time.get_ticks_usec()
+		var slow: Array = []
 		while not GameManager.season_over() and guard < 400:
+			var td := Time.get_ticks_usec()
 			GameManager.play_instant()
 			guard += 1
+			slow.append([_ms(td), guard + days, "janela" if w.transfer_window_open() else ""])
 		print("resto da temporada: %.0f ms (%d datas)" % [_ms(t), guard])
+		slow.sort_custom(func(a, b): return a[0] > b[0])
+		print("  datas mais lentas: ", ", ".join(PackedStringArray(slow.slice(0, 8).map(func(e): return "%d %.0f ms %s" % [e[1], e[0], e[2]]))))
+		_top(SeasonManager.timings, 45, "resto da temporada (ms)")
 		SeasonManager.timings.clear()
 		t = Time.get_ticks_usec()
 		SeasonManager.end_season(w)

@@ -114,16 +114,19 @@ const TRAIN_RATE := 0.0085 # por jogador e semana (≈ 10 a 12 por clube na temp
 static func training_week(world: GameWorld) -> void:
 	var r := RandomNumberGenerator.new()
 	r.seed = hash([world.year, world.current_turn(), "treino_lesao"])
+	# Metade dos jogadores por semana, com o dobro do risco (o mesmo meio-elenco da evolução):
+	# mesma média de lesões no ano, metade das contas.
+	var parity := int(world.stats.get("tick_parity", 0))
 	for c: Club in world.clubs:
 		if c.is_pool():
 			continue
 		var user := world.is_user_club(c.id)
 		var club_m := TrainingManager.injury_mult(world, c.id) if user else 1.0
 		for p: Player in world.squad(c):
-			if p.is_injured():
+			if p.id % 2 != parity or p.is_injured():
 				continue
 			var age := p.age(world.year)
-			var risk := TRAIN_RATE * club_m
+			var risk := TRAIN_RATE * 2.0 * club_m
 			risk *= 1.0 + clampf((80.0 - p.condition) / 30.0, 0.0, 1.0) # cansado se machuca mais
 			risk *= (1.0 + p.injury_prone / 10.0) * 0.5
 			risk *= 1.0 + maxf(0.0, age - 29) * 0.06
