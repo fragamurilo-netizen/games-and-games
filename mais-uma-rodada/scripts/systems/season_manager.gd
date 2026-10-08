@@ -739,7 +739,8 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 			var inj: int = ln[QuickMatch.L_INJ]
 			played[p.id] = int(played.get(p.id, 0)) + mins
 			if mins >= 30 and big_f >= PlayerDevelopment.BIG_GAME:
-				PlayerDevelopment.big_games[p.id] = maxf(big_f, float(PlayerDevelopment.big_games.get(p.id, 0.0)))
+				var bg := PlayerDevelopment.big_games(world)
+				bg[p.id] = maxf(big_f, float(bg.get(p.id, 0.0)))
 			p.minutes_season += mins
 			if is_league:
 				p.stats[Player.S_APPS] += 1

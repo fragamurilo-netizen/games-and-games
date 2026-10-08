@@ -58,14 +58,19 @@ static func talent_drift(world: GameWorld) -> float:
 ## Evolução semanal de todos os jogadores. minutes: {player_id: minutos no jogo desta rodada}.
 ## Retorna jogadores que tiveram salto notável (para notícias).
 ## Jogos grandes da semana (final, clássico, mata-mata decisivo): {id do jogador: importância}.
-## Preenchido por SeasonManager._apply_match e consumido em weekly_tick.
-static var big_games: Dictionary = {}
+## Preenchido por SeasonManager._apply_match e consumido em weekly_tick. Mora no mundo (vai para o
+## save): guardado em variável estática ele se perdia ao carregar e vazava entre dois mundos.
+static func big_games(world: GameWorld) -> Dictionary:
+	if not world.stats.has("big_games"):
+		world.stats["big_games"] = {}
+	return world.stats["big_games"]
 const BIG_GAME := 0.6 # importância a partir da qual o jogo conta como "grande"
 const BIG_GAME_BOOST := 0.45 # jovem que joga jogo grande amadurece mais (no máximo +45% na semana)
 
 
 static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dictionary = {}) -> Array:
 	var rng := world.rng
+	var bg := big_games(world)
 	# Metade dos jogadores por semana, com o dobro do efeito: mesmo total, metade do custo.
 	var parity := int(world.stats.get("tick_parity", 0))
 	world.stats["tick_parity"] = 1 - parity
@@ -111,8 +116,8 @@ static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dic
 				# Quem joga bem cresce mais; quem vive de notas baixas trava.
 				var perf_f := performance_factor(p) if mins > 0 else 1.0
 				# Importância do jogo: garoto que segura uma final ou um clássico amadurece mais rápido.
-				if age <= 23 and big_games.has(p.id):
-					perf_f *= 1.0 + BIG_GAME_BOOST * clampf((float(big_games[p.id]) - BIG_GAME) / (1.0 - BIG_GAME) * 0.6 + 0.4, 0.0, 1.0)
+				if age <= 23 and bg.has(p.id):
+					perf_f *= 1.0 + BIG_GAME_BOOST * clampf((float(bg[p.id]) - BIG_GAME) / (1.0 - BIG_GAME) * 0.6 + 0.4, 0.0, 1.0)
 				# Jovens ao lado de um mentor aprendem mais rápido.
 				var mentor_f := 1.0 + float(mentors.get(cid, 0.0)) if age <= 22 and cid >= 0 and not p.has_trait("mentor") else 1.0
 				# A cabeça conta: moral, confiança no treinador e o nível de quem treina ao lado.
@@ -143,7 +148,7 @@ static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dic
 			# A cabeça ainda aprende: veteranos ganham leitura de jogo enquanto o físico cai.
 			if rng.randf() < 0.035 * p.trait_mult("dev_mult"):
 				_wisdom(rng, p)
-	big_games.clear()
+	bg.clear()
 	return notable
 
 

@@ -66,7 +66,6 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 static func forget_static_state() -> void:
 	LeagueReputation.reset()
 	Valuation._club_factor.clear()
-	PlayerDevelopment.big_games.clear()
 	PlayerAssessment.invalidate()
 
 
