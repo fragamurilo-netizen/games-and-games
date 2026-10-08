@@ -274,14 +274,18 @@ static func _derive(_world: GameWorld, rng: RandomNumberGenerator, c: Club) -> v
 	c.board_confidence = 60.0
 	c.cohesion = clampf(55.0 + float(arch.get("cohesion_bonus", 0)) + rng.randf_range(0.0, 10.0), 0.0, 100.0)
 	Economy.anchor_revenue(c) # receita real dos clubes de referência
-	var revenue := FinanceManager.net_revenue(c) # caixa e dívida na escala do que sobra para o futebol
+	# Caixa e dívida na escala do que sobra para o futebol. Na geração a cota de TV ainda não foi
+	# lançada (income_tv = 0): net_revenue descontava a TV inteira e o clube pequeno nascia com caixa e
+	# dívida negativos. Aqui a TV entra como prevista, com um piso.
+	var revenue := maxf(float(FinanceManager.expected_revenue(c)) - FinanceManager.opex_extra(c), float(FinanceManager.expected_revenue(c)) * 0.1)
 	c.balance = int(revenue * float(arch.get("balance_mult", 0.3)) * rng.randf_range(0.8, 1.2))
 	c.balance = int(round(c.balance / 10000.0)) * 10000
 	# Dívida de longo prazo em anos de receita (arquétipo). Sorteio à parte, sem mexer no gerador do mundo.
 	var dr := RandomNumberGenerator.new()
 	dr.seed = hash([c.key, c.name, rng.state])
 	var dm: Array = arch.get("debt", [0.05, 0.3])
-	c.debt = int(round(revenue * dr.randf_range(float(dm[0]), float(dm[1])) / 10000.0)) * 10000
+	# Dívida em anos de receita (a bruta, como nos balanços): "gigante endividado" deve mais de um ano
+	c.debt = int(round(float(FinanceManager.expected_revenue(c)) * dr.randf_range(float(dm[0]), float(dm[1])) / 10000.0)) * 10000
 	var real_debt := Economy.real_debt(c)
 	if real_debt >= 0:
 		c.debt = real_debt # dívida real (balanços de 2025)

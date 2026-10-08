@@ -730,7 +730,8 @@ static func pick_team(world: GameWorld, key: String, exclude: Dictionary = {}, r
 	var total := 0.0
 	for slot in XI_SHAPE:
 		var best: Player = null
-		var best_s := filler + rng.randfn(0.0, 1.0)
+		# Garoto da casa joga antes do reforço de fora (mesmo improvisado), se não for bem pior
+		var best_s := filler - 5.0 + rng.randfn(0.0, 1.0)
 		for si in 2:
 			var src: Array = pool if si == 0 else extra
 			for p: Player in src:

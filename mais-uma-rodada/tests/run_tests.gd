@@ -878,11 +878,13 @@ func _test_debt() -> void:
 	for c: Club in w.clubs:
 		check(c.balance >= 0, "%s começou com caixa negativo" % c.name)
 		var dr := FinanceManager.debt_ratio(c)
+		# Clube com balanço real (Economy.real_debt) segue o dado real, não o arquétipo
+		var real := Economy.real_debt(c) >= 0
 		if c.archetype == "gigante_endividado":
 			giants += 1
-			check(dr >= 0.95, "%s: gigante endividado com dívida de %.2f" % [c.name, dr])
+			check(real or dr >= 0.95, "%s: gigante endividado com dívida de %.2f" % [c.name, dr])
 		elif c.archetype == "rico_promovido":
-			check(c.debt == 0, "%s: clube de dono rico começou devendo" % c.name)
+			check(real or c.debt == 0, "%s: clube de dono rico começou devendo" % c.name)
 		if dr < 0.5:
 			small_debt += 1
 		total += 1
@@ -1206,11 +1208,11 @@ func _test_events() -> void:
 			check(msg != "", "evento %s opção %d sem resposta" % [k, i])
 			check(not w.events.has(e2), "evento %s não saiu da lista" % k)
 	check(built >= 10, "poucos tipos de evento disponíveis (%d)" % built)
-	# Promessa de minutos quebrada derruba a moral
-	var p: Player = squad[10]
+	# Promessa de minutos quebrada derruba a moral (elenco de agora: os eventos acima podem ter vendido alguém)
+	var p: Player = w.squad(c)[10]
 	p.morale = 70.0
 	w.promises.clear()
-	w.promises.append({"k": "minutes", "p": p.id, "until": w.current_turn(), "need": 2, "s0": p.stat(Player.S_STARTS)})
+	w.promises.append({"k": "minutes", "p": p.id, "until": w.current_turn(), "need": 2, "s0": p.stat(Player.S_STARTS) + EventManager._cup_starts(p)})
 	EventManager._check_promises(w, w.current_turn(), "V")
 	check(p.morale < 60.0 and w.promises.is_empty(), "promessa quebrada sem consequência")
 	# Expiração aplica a opção padrão
@@ -1706,10 +1708,14 @@ func _test_shouts() -> void:
 	# Mesmo jogo (mesma semente) com e sem um grito aos 60': até ali tudo igual; nos 10 minutos
 	# seguintes, "Pra frente!" dá mais finalizações e "Pressão!" mais faltas.
 	var shot_t := [MatchSimulation.EV_GOAL, MatchSimulation.EV_SAVE, MatchSimulation.EV_MISS, MatchSimulation.EV_POST, MatchSimulation.EV_BLOCK]
+	# Só finalização em jogada: escanteio, falta, pênalti e rebote não dependem de "mais gente no
+	# ataque" e, com o motor de 07/10, são ~1/3 das finalizações (diluíam o efeito em 120 jogos).
+	var open_play := [MatchSimulation.CH_THROUGH, MatchSimulation.CH_CROSS, MatchSimulation.CH_LONG, MatchSimulation.CH_DRIBBLE,
+		MatchSimulation.CH_COUNTER, MatchSimulation.CH_ERROR]
 	var shots := [0, 0, 0]
 	var fouls := [0, 0, 0]
 	for mode in 3:
-		for k in 120:
+		for k in 200:
 			var sim := MatchSimulation.new()
 			sim.setup(w, c, foe, ClubAI.prepare_ai_sheet(w, c, foe, true), ClubAI.prepare_ai_sheet(w, foe, c, false), {"competition": "BRA1", "attendance": 20000}, 500 + k, true)
 			sim.teams[0].is_user = true
@@ -1722,7 +1728,7 @@ func _test_shouts() -> void:
 			for ev in sim.events:
 				if int(ev.get("h", 1)) != 2 or int(ev["m"]) <= 60 or int(ev["m"]) > 70:
 					continue
-				if int(ev["s"]) == 0 and shot_t.has(int(ev["t"])):
+				if int(ev["s"]) == 0 and shot_t.has(int(ev["t"])) and open_play.has(int(ev.get("x", {}).get("ct", -1))):
 					shots[mode] += 1
 				if int(ev["t"]) == MatchSimulation.EV_FOUL and int(ev["s"]) == 0:
 					fouls[mode] += 1

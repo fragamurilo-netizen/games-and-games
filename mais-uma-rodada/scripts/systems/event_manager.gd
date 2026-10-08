@@ -330,8 +330,13 @@ static func _build(world: GameWorld, k: String) -> Dictionary:
 			if star == null:
 				return {}
 			# O sonho é um clube maior, mas ao alcance dele (um degrau acima, não o gigante europeu).
-			var big := MarketAI.realistic_suitor(world, star, minf(club.reputation + 10.0, 92.0), rng, 6.0,
-				func(c: Club): return c.tier == 1 and c.reputation > club.reputation)
+			# Num clube grande, +10 de reputação só sobra gigante que não o quer: desce o degrau.
+			var big: Club = null
+			for step: float in [10.0, 5.0, 1.0]:
+				big = MarketAI.realistic_suitor(world, star, minf(club.reputation + step, 92.0), rng, 6.0,
+					func(c: Club): return c.tier == 1 and c.reputation > club.reputation)
+				if big != null:
+					break
 			if big == null:
 				return {}
 			ev["p"] = star.id
