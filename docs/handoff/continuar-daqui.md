@@ -1,9 +1,64 @@
-# Continuar daqui (atualizado em 07/10/2026)
+# Continuar daqui (atualizado em 08/10/2026)
 
 Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou outra sessão do Claude.
 
 ## Onde está o jogo
 
+- **Rodada de 08/10 (manhã), para o colega continuar: `claude/youthful-newton-hey7og`**, commit "Rostos: 9 etnias novas e cada jogador mais diferente". Ainda **sem APK novo**: o último continua sendo o de 07/10.
+  - **Pedido do dono:** criar mais cabelos e barbas e diferenciar mais cada jogador. As etnias devem ficar mais realistas e muito mais variadas, usando pessoas reais só como referência do que é um rosto humano (nada copiado de alguém). A tecnologia continua a mesma: retrato 2D procedural, `PortraitView`, `FaceGen` e `FaceShade`.
+  - **Feito e conferido:**
+    - **Etnias 13 a 21** (índices novos só no fim de `nations.json → ethnicities` e de `FaceGen`):
+      - `slv` eslava/báltica, `bal` balcânica/dinárica, `cel` celta, `cau` Cáucaso/Anatólia/Irã, `naf` norte-africana/amazigh;
+      - `cas` centro-asiática, `nil` nilótica, `mel` melanésia, `sah` saheliana/fula.
+    - **O que cada etnia nova tem:**
+      - sua linha em todas as tabelas `ETH_*`, além de altura do rosto, sobrancelha, nariz, mandíbula e inclinação dos olhos (`_eth_traits`);
+      - quatro grupos de traços novos (eslavo, dinárico/Ásia Ocidental, centro-asiático, melanésio);
+      - regras próprias de barba, monocelha, sardas, tatuagem e penteado, e altura em `PlayerGenerator._height_shift`.
+    - **Rostos que já existem não mudam por causa disso:** as linhas das etnias 0 a 12 ficaram iguais e os sorteios novos usam sementes próprias.
+    - **Proporções medidas em 600 rostos por etnia:**
+      - celta: ~44% com sardas e ~76% com olho claro;
+      - eslava: ~60% com olho claro e ~40% loiros ou castanho-claros;
+      - melanésia: ~8% com crespo loiro natural;
+      - centro-asiática: ~42% com prega mongólica;
+      - nilótica: a pele mais escura da escala.
+    - **Origens redistribuídas por país:**
+      - Rússia, Ucrânia, Polônia, Tchéquia, Eslováquia e Finlândia passam a ter eslavo;
+      - Bálcãs, Albânia, Kosovo, Romênia e Grécia passam a ter balcânico;
+      - Irlanda, Escócia, Gales e Islândia passam a ter celta;
+      - Turquia, Geórgia e Irã passam a ter Cáucaso;
+      - Marrocos, Argélia, Tunísia e Egito passam a ter norte-africano;
+      - Senegal, Mali, Guiné, Burkina, Nigéria e Camarões passam a ter saheliano.
+    - **Diásporas:** turcos, magrebinos, iugoslavos e albaneses na Europa usam as etnias novas. `names.json → mixing` ganhou `coherent` e `heritage` das chaves novas.
+    - **Individualidade** (`FaceGen._individuality`): quatro eixos que variam juntos (robusto/delicado, longo/curto, meio do rosto largo/estreito, cheio/seco) mais variação solta por traço. Uma parte das pessoas tem rosto comum e outra tem traços bem marcados, com limites que o desenho aguenta.
+    - **Rótulos da "Origem"** no perfil do treinador (`manager_screen.gd`). "Havaiana" estava errado e virou "Chifre da África". Também foram feitas as traduções en/es, as linhas do rosto 3D (`face3d_look.gd`) e as ferramentas que tinham 13 fixo.
+    - **Testes:** `check_scripts` 0 erros, `run_tests -- --only=rostos,gera` ok, `tools/face_contract.gd` 0 erros e `smoke_boot` ok. `tests/mobile_regression.gd` e a bateria completa ainda **não** rodaram.
+  - **Falta (próximo passo):**
+    1. **Penteados e barbas novos** (o pedido de "mais cabelos e barbas" ainda não foi feito). Hoje são 225 penteados e 149 barbas.
+       - Acrescentar sempre no fim das listas, com o mesmo tamanho em todas:
+         - penteados: `FaceGen.HAIR_STYLES`, `FaceGen.STYLE_TEX_W` e `PortraitView.STYLE_P`;
+         - barbas: `FaceGen.BEARDS`, `BEARD_PARTS`, `BEARD_MIN_CAP` e `BEARD_POP`.
+         - O teste "rostos e personalização" confere os tamanhos.
+       - Pôr as barbas novas em `_beard_realism` (plain/beards/classic). Pôr os penteados chamativos ou longos em `FLASHY_STYLE_NAMES` ou `LONG_STYLE_NAMES`.
+       - Não mexer em `HS_V1` (211) nem em `BD_V1` (141). O que vem depois desses índices entra no sorteio à parte (`_newer_pick`), e os rostos antigos não mudam.
+       - Ideias de penteado:
+         - wolf cut;
+         - franja "vírgula" e permanente coreana (leste asiático);
+         - flat top;
+         - comb-over e social grisalho para técnicos mais velhos;
+         - cortina longa anos 90;
+         - liso na altura do ombro;
+         - cacheado longo com undercut;
+         - "skin fade" com topete texturizado;
+         - tranças finas presas.
+       - Ideias de barba: cavanhaque ligado ao bigode fino, barba cheia curta com bochecha alta, barba longa com laterais curtas e bigode grosso com barba por fazer.
+       - Conferir com `xvfb-run -a -s "-screen 0 1400x1400x24" godot --path . --resolution 1220x1220 --script res://tools/face_sheet.gd -- --catalog=hs --list=225,226,... --ml=1 --out=/tmp/hs.png`. Para barbas, use `--catalog=bd`.
+    2. **Ajuste fino visual** das etnias novas e da individualidade em folhas grandes: `face_sheet.gd -- --eth=13,14,15,16,17,18,19,20,21 --size=150 --ml=1`. Para retratos grandes com a luz, use `tools/face_light_test.gd`.
+    3. **Validar e gerar o APK:**
+       - rodar `tests/mobile_regression.gd` e as capturas (`tools/design_shots.gd --only=hub,squad,player,compare`);
+       - gerar o release com `MODE=release SIGNER=/opt/apk/signer.jar bash tools/build_debug_apk.sh <saída>`;
+       - conferir `sem_trava` em `assets/project.binary` e o certificado (SHA-256 `1e08a903…f187b5953`);
+       - renomear com `git mv` em `mais-uma-rodada/builds/`, adicionar com `git add -f` e atualizar esta nota.
+    4. **Opcional:** 136 países ainda não têm `origins` (Quênia, Etiópia, Cazaquistão, Papua-Nova Guiné...). Hoje nenhum deles gera jogadores. Se algum ganhar liga ou importação, use `nil`, `hae`, `cas` e `mel` nas origens.
 - **Rodada de 07/10 (tarde e noite): `claude/youthful-newton-hey7og` (já dentro de `claude/hopeful-newton-8avbo4`)** = `claude/hopeful-newton-8avbo4` (já com o Codex) + o que vem abaixo. APK consolidado, sem trava de compra: `mais-uma-rodada/builds/MaisUmaRodada-1.0.0-rostos-realistas-2026-10-07.apk` (release, certificado de sempre, instala por cima). Conferido: `check_scripts` 0 erros, `smoke_boot` e `mobile_regression`.
   - **Jogo fechando ao iniciar a partida:** a abertura da TV criava os SubViewports em 512×512 e montava todas as páginas de uma vez (pico de ~105 MB de vídeo e ~1 s travado). Agora o `PhotoPortrait` nasce em 2×2 e se desliga ao sair da árvore, e o `BroadcastIntro` monta cada página só quando ela aparece. Medição: `tools/match_start_stress.gd`.
   - **Uniformes:** luz e sombra por malha (`KitShade` + `KitGeom`: grade recortada em cada peça, normal de um modelo do corpo, oclusão onde as peças se encostam e dobras do tecido), frisos e listras que seguem o contorno, mangas listradas nas camisas listradas, escudo e patrocínio bordados, peito mais estreito e mangas mais longas. A cor do patrocínio depende do fundo: contraste WCAG ≥ 3 sobre todas as cores embaixo dele; se nenhuma cor serve, entra uma placa na cor da camisa.
