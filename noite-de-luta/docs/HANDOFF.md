@@ -83,6 +83,17 @@ Cinturões com linhagem.
 5. Rostos: o renderizador mostra pouco nariz e boca em alguns tamanhos; conferir em 56–120 px.
 6. Ideias do LEATHER que faltam: step-aside, mudar de categoria, torneios, comparar dois lutadores.
 
+## APK de teste
+
+- `releases/NoiteDeLuta-0.1.0.apk` (release, arm64, Android 7+). Assinado com uma chave de teste
+  local: um APK novo assinado com outra chave pede desinstalar o antigo antes.
+- Para gerar de novo: modelos de exportação do Godot 4.7.2 (só `android_*.apk` e `version.txt` em
+  `~/.local/share/godot/export_templates/4.7.2.stable`), Android SDK com `build-tools;34.0.0`
+  (caminho em `export/android/android_sdk_path` nas configurações do editor) e o preset
+  `export_presets.cfg` (sem gradle). Release:
+  `GODOT_ANDROID_KEYSTORE_RELEASE_PATH=… _USER=… _PASSWORD=… godot --headless --path . --export-release Android build/NoiteDeLuta.apk`
+  (ou `--export-debug` com a chave de debug do editor).
+
 ## Avisos
 
 - **`trait` é palavra reservada no Godot 4.7** (por isso `Styles.mark`, não `Styles.trait`).
