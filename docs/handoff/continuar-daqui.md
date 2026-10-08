@@ -32,8 +32,22 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
     - **Individualidade** (`FaceGen._individuality`): quatro eixos que variam juntos (robusto/delicado, longo/curto, meio do rosto largo/estreito, cheio/seco) mais variação solta por traço. Uma parte das pessoas tem rosto comum e outra tem traços bem marcados, com limites que o desenho aguenta.
     - **Rótulos da "Origem"** no perfil do treinador (`manager_screen.gd`). "Havaiana" estava errado e virou "Chifre da África". Também foram feitas as traduções en/es, as linhas do rosto 3D (`face3d_look.gd`) e as ferramentas que tinham 13 fixo.
     - **Testes:** `check_scripts` 0 erros, `run_tests -- --only=rostos,gera` ok, `tools/face_contract.gd` 0 erros e `smoke_boot` ok. `tests/mobile_regression.gd` e a bateria completa ainda **não** rodaram.
+  - **Feito depois (08/10, tarde, `claude/hopeful-newton-8avbo4`):**
+    - **Penteados 225–235:** wolf cut, franja vírgula, permanente coreana, flat top, penteado por cima (mais velhos, não some com calvície), social clássico, cortina anos 90, liso na altura do ombro, cacheado longo com undercut, skin fade com topete texturizado e tranças finas presas. Franja vírgula e permanente valem 3× no leste asiático. Penteado por cima e social clássico aparecem nos mais velhos.
+    - **Barbas 149–154:** cheia curta com bochecha alta, longa com laterais curtas, cheia com pescoço por aparar, falhada de jovem, bigode grosso com cavanhaque curto e bigode caído com barba curta.
+    - **Rostos mais bonitos e humanos (pedido do dono: "são todos feios, alguns não parecem humanos"):**
+      - beleza média sobe de ~0,5 para ~0,76: 12% bonitos de verdade, 3% comuns, ninguém na cauda "muito feio";
+      - os defeitos de quem é feio ficaram pela metade;
+      - os "traços marcados" da individualidade são menores (`_individuality`);
+      - `_pleasant` em todo mundo: olhos um pouco maiores, terço de baixo mais curto, mandíbula afinando, nariz mais fino, sobrancelha mais leve, orelhas e pescoço menores;
+      - rosto de atleta: largura no máximo 0,83 da altura, gordura até 0,32 em quem não é pesado, lábios com teto;
+      - olhos sem cara de réptil: anel central fraco e castanho, centro da íris sem brilho, pupila maior, amarelo e oliva puxados para mel;
+      - sem dentes à mostra (viravam um "zíper" no retrato pequeno): o sorriso largo é de boca fechada. A expressão de susto saiu, e a de bravo e as caretas ficaram raras;
+      - na pele escura a sombra da luz de estúdio não vai mais ao preto, e o lábio perdeu o brilho cinza.
+    - APK: `mais-uma-rodada/builds/MaisUmaRodada-1.0.0-rostos-bonitos-2026-10-08.apk` (release sem trava, certificado de sempre).
+    - Os rostos de todos os jogadores mudam um pouco, de propósito. Os testes "rostos e personalização" e "geração do mundo" passam, e `face_contract` dá 0 erros.
   - **Falta (próximo passo):**
-    1. **Penteados e barbas novos** (o pedido de "mais cabelos e barbas" ainda não foi feito). Hoje são 225 penteados e 149 barbas.
+    1. ~~**Penteados e barbas novos**~~ (feito acima). Hoje são 236 penteados e 155 barbas.
        - Acrescentar sempre no fim das listas, com o mesmo tamanho em todas:
          - penteados: `FaceGen.HAIR_STYLES`, `FaceGen.STYLE_TEX_W` e `PortraitView.STYLE_P`;
          - barbas: `FaceGen.BEARDS`, `BEARD_PARTS`, `BEARD_MIN_CAP` e `BEARD_POP`.

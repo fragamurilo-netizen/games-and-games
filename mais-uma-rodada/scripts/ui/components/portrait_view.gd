@@ -333,6 +333,17 @@ const STYLE_P: Array = [
 	{"tp": 0.03, "sd": 0.0, "fd": 2, "tx": "braid", "op": 0.8, "fr": "shaved_part"}, # nagô com risco lateral
 	{"tp": 0.08, "sd": 0.04, "tx": "wavy", "bk": "bun_low", "fl": 0, "gl": 0.15}, # ondulado preso em coque baixo
 	{"tp": 0.16, "sd": 0.0, "fd": 2, "fl": 0, "gl": 0.25, "sp": 5}, # para trás desarrumado com degradê
+	{"tp": 0.2, "sd": 0.12, "sb": 0.16, "sp": 5, "tx": "wavy", "bk": "long_short", "hl": 0.08, "fr": "curtain", "fl": 2}, # wolf cut
+	{"tp": 0.14, "sd": 0.07, "sb": 0.08, "fl": 2, "hl": 0.14, "fr": "side_fringe_long", "gl": 0.3}, # franja vírgula
+	{"tp": 0.2, "sd": 0.1, "sb": 0.08, "sp": 3, "tx": "wavy", "hl": 0.1, "fr": "curtain", "fl": 2, "gl": 0.1}, # permanente coreana
+	{"tp": 0.17, "sd": 0.0, "fd": 2, "sp": 1, "fl": 0, "lu": 1}, # flat top
+	{"tp": 0.06, "sd": 0.03, "fl": 1, "fr": "part", "gl": 0.35, "op": 0.82}, # penteado por cima
+	{"tp": 0.09, "sd": 0.05, "sb": 0.05, "fd": 1, "fl": 1, "fr": "part", "gl": 0.15}, # social clássico
+	{"tp": 0.13, "sd": 0.09, "sb": 0.18, "fl": 3, "fr": "curtain", "bk": "long_short", "hl": 0.08}, # cortina anos 90
+	{"tp": 0.12, "sd": 0.1, "sb": 0.2, "fl": 1, "bk": "long_short", "fr": "side_fringe", "gl": 0.25}, # liso na altura do ombro
+	{"tp": 0.32, "sd": 0.0, "fd": 3, "sp": 3, "tx": "curl", "hl": 0.05, "sa": 0.12}, # cacheado longo com undercut
+	{"tp": 0.17, "sd": 0.0, "fd": 5, "fr": "quiff", "sp": 5, "ph": 0.9, "lu": 1}, # skin fade com topete texturizado
+	{"tp": 0.04, "sd": 0.02, "tx": "braid", "op": 0.85, "bk": "pony", "lu": 1}, # tranças finas presas
 ]
 
 const LIGHT := Vector3(-0.4, -0.5, 0.77)
@@ -2404,8 +2415,9 @@ func _eyes() -> void:
 	# gato" (cara de réptil), então entra pouco mais da metade.
 	var tilt := _fw * float(f["eye_tilt"]) * 0.55
 	var iris_main := _iris_natural(f["eye"])
-	var ring: float = float(f.get("eye_ring", 0.0)) * 0.6
-	var ring_col := _iris_natural(f.get("eye_in", Color("#8A5A26")))
+	# Anel central fraco e em castanho: amarelo forte em volta da pupila dava olho de réptil
+	var ring: float = float(f.get("eye_ring", 0.0)) * 0.25
+	var ring_col := _iris_natural(f.get("eye_in", Color("#8A5A26"))).lerp(Color("#5E4128"), 0.5)
 	var limbal: float = f.get("limbal", 0.7)
 	var het: int = f.get("hetero", 0)
 	var het_side: float = f.get("hetero_side", 1.0)
@@ -2503,7 +2515,7 @@ func _eyes() -> void:
 				var d := p - ic
 				var r := d.length() / ir
 				var ang := atan2(d.y, d.x)
-				var lum := 0.94 + 0.16 * (1.0 - smoothstep(0.35, 0.75, r)) - (0.16 + 0.26 * limbal) * smoothstep(0.78, 1.0, r)
+				var lum := 0.92 + 0.05 * (1.0 - smoothstep(0.35, 0.75, r)) - (0.16 + 0.26 * limbal) * smoothstep(0.78, 1.0, r)
 				lum -= 0.42 * (1.0 - smoothstep(-ir * 0.95, -ir * 0.05, d.y))
 				lum += (0.05 * sin(ang * 17.0 + sx * 3.0) + 0.035 * sin(ang * 31.0 + 1.7)) * (1.0 - r)
 				var base := iris_col
@@ -2519,7 +2531,7 @@ func _eyes() -> void:
 				for q in ipts:
 					iuv.append((q - ic) / (ir * 2.0) + Vector2(0.5, 0.5))
 				_detail(im, iuv, "iris", 0.85)
-		for piece in Geometry2D.intersect_polygons(_ellipse(ic, ir * 0.36, ir * 0.36, 16), sclera):
+		for piece in Geometry2D.intersect_polygons(_ellipse(ic, ir * 0.41, ir * 0.41, 16), sclera):
 			_fill(piece, Color("#0A0706"))
 		# Anel límbico: a borda da íris escurece e fica suave (só onde a íris aparece)
 		if _s >= 90.0:
@@ -2644,8 +2656,10 @@ func _eyes() -> void:
 ## castanho esverdeado, e nenhuma íris fica saturada demais.
 static func _iris_natural(c: Color) -> Color:
 	var yellow := smoothstep(0.05, 0.1, c.h) * (1.0 - smoothstep(0.2, 0.26, c.h))
-	var sat := minf(c.s * (1.0 - 0.3 * yellow), 0.62)
-	return Color.from_hsv(c.h, sat, c.v * (1.0 - 0.12 * yellow), c.a)
+	# Amarelo e oliva puxam para o mel/castanho-esverdeado (amarelo vivo é olho de réptil)
+	var h := lerpf(c.h, 0.075 if c.h < 0.15 else 0.27, 0.5 * yellow)
+	var sat := minf(c.s * (1.0 - 0.45 * yellow), 0.55)
+	return Color.from_hsv(h, sat, c.v * (1.0 - 0.18 * yellow), c.a)
 
 
 func _brows(rng: RandomNumberGenerator) -> void:
@@ -2899,8 +2913,9 @@ func _mouth() -> void:
 		rb.reverse()
 		inside.append_array(rb)
 		if not Geometry2D.triangulate_polygon(inside).is_empty():
-			_fill(inside, Color("#3A1414"))
-			var th := gap * (0.75 if teeth > 0.0 else 0.35)
+			_fill(inside, Color("#4A2420"))
+			# Dentes: uma faixa só, macia (riscos entre os dentes viravam um zíper no retrato)
+			var th := gap * (0.86 if teeth > 0.0 else 0.35)
 			var tb := PackedVector2Array()
 			for i in range(2, 13):
 				var t := float(i) / 14.0
@@ -2912,11 +2927,9 @@ func _mouth() -> void:
 			var tcols := PackedColorArray()
 			for i in tpoly.size():
 				var q := absf(float(i % 11) / 10.0 - 0.5) * 2.0
-				tcols.append(Color("#EDE6DA").darkened(0.08 + 0.3 * q * q))
+				tcols.append(Color("#E6DED0").darkened(0.1 + 0.35 * q * q))
 			if not Geometry2D.triangulate_polygon(tpoly).is_empty():
 				_r_polygon(tpoly, tcols)
-				for i in range(4, 11, 2):
-					_r_line(line[i], tb[i - 2], Color(0.55, 0.45, 0.4, 0.25), maxf(0.5, _s * 0.002), true)
 	if _mlon:
 		var lu := PackedVector2Array(up)
 		var rl := line.duplicate()
