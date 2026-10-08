@@ -44,7 +44,7 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
   - **Conferido:**
     - `check_scripts` 0 erros, `smoke_boot`, `mobile_regression` e `tools/matchday_smoke.gd`;
     - testes de determinismo, simulação paralela = sequencial, save/load, mercado da IA, valores, personalidade/lesões, técnicos e vestiário;
-    - bateria completa: ver o resultado no commit do APK.
+    - bateria completa: 53 testes ok, 0 falha (~57 min).
 
 - **Rodada de 08/10 (manhã), para o colega continuar: `claude/youthful-newton-hey7og`**, commit "Rostos: 9 etnias novas e cada jogador mais diferente". Ainda **sem APK novo**: o último continua sendo o de 07/10.
   - **Pedido do dono:** criar mais cabelos e barbas e diferenciar mais cada jogador. As etnias devem ficar mais realistas e muito mais variadas, usando pessoas reais só como referência do que é um rosto humano (nada copiado de alguém). A tecnologia continua a mesma: retrato 2D procedural, `PortraitView`, `FaceGen` e `FaceShade`.
