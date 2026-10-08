@@ -271,7 +271,7 @@ func _oil(u: float, v: float) -> float:
 	o += 1.0 * _g2(nu + 0.01, v - (_N - 0.065), _NW * 0.45, 0.05)
 	o += 0.7 * _g2(absf(u) - 0.46, v - 0.1, 0.17, 0.09)
 	o += 0.55 * _g2(u, v - 0.86, 0.16, 0.07)
-	o += 0.9 * _g2(u, v - (_M + _ll * 0.45), _mw * 0.55, _ll * 0.4)
+	o += 0.4 * _g2(u, v - (_M + _ll * 0.45), _mw * 0.55, _ll * 0.4) # brilho forte no lábio deixava a boca cinzenta
 	return minf(o, 1.0)
 
 
@@ -395,8 +395,9 @@ func _draw(poly: PackedVector2Array, val: PackedFloat32Array, spc: PackedFloat32
 	var dark_k := clampf(float(pv._f["skin_i"]) / 9.0, 0.0, 1.0)
 	# Sombra quente: perto do terminador puxa para o vermelho (sangue sob a pele), no fundo é um
 	# marrom profundo do próprio tom
-	var deep := PortraitView._shade(skin, 0.12)
-	var warm := PortraitView._shade(skin, 0.42).lerp(Color(0.55, 0.12, 0.08), 0.22)
+	# Pele escura: a sombra não vai ao preto (os traços sumiam no rosto todo escuro)
+	var deep := PortraitView._shade(skin, lerpf(0.12, 0.32, dark_k))
+	var warm := PortraitView._shade(skin, lerpf(0.42, 0.6, dark_k)).lerp(Color(0.55, 0.12, 0.08), 0.22 - 0.08 * dark_k)
 	var lift := PortraitView._shade(skin, 1.38)
 	var spec_c := Color(1.0, 0.98, 0.95)
 	var spec_k := 0.24 + 0.12 * dark_k

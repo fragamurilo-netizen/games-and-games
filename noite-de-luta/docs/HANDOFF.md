@@ -31,6 +31,13 @@ já incorporado). O jogo **roda nos dois papéis**: empresário de academia e pr
   sobrancelha** (cotovelada). As marcas também chegam depois das lutas (`battle_marks`).
   Chaves de `look`: `hs` cabelo, `bd` barba, `er` orelha, `ns` nariz, `sc` cicatriz, `wt` peso, `fem`.
 
+**Rostos vindos do Mais Uma Rodada** (o gerador é o mesmo): a anatomia do Codex (72 perfis faciais,
+volume, olhos, lábios e fios, ramo `codex/visual-escudos-uniformes-rostos`) já estava aqui; em
+08/10 entrou também o commit `870169c` do MUR ("rostos mais bonitos e humanos": `_pleasant`, olhos
+sem cara de réptil, sorriso de boca fechada, pele escura sem sombra preta, 11 penteados e 6 barbas
+novos no fim das listas). Ficaram de fora só as partes que dependem de código que o Noite de Luta não
+tem (máscara de lábio `_ml_masks` e o sombreamento novo de cabelo e roupa no `face_shade`).
+
 **Estilos de luta** (`data/world/styles.json`, `scripts/systems/styles.gd`)
 - **23 artes de base**: MMA, boxe, muay thai, kickboxing, kickboxing holandês, caratê tradicional,
   kyokushin, taekwondo, sanda, capoeira, savate, wrestling livre, wrestling universitário,
@@ -85,7 +92,7 @@ Cinturões com linhagem.
 
 ## APK de teste
 
-- `releases/NoiteDeLuta-0.1.0.apk` (release, arm64, Android 7+). Assinado com uma chave de teste
+- `releases/NoiteDeLuta-0.1.1.apk` (release, arm64, Android 7+; instala por cima da 0.1.0). Assinado com uma chave de teste
   local: um APK novo assinado com outra chave pede desinstalar o antigo antes.
 - Para gerar de novo: modelos de exportação do Godot 4.7.2 (só `android_*.apk` e `version.txt` em
   `~/.local/share/godot/export_templates/4.7.2.stable`), Android SDK com `build-tools;34.0.0`
