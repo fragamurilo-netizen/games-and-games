@@ -16,8 +16,6 @@ const SCREENS := {
 	"fight_plan": "res://scripts/ui/screens/fight_plan_screen.gd",
 	"fight": "res://scripts/ui/screens/fight_screen.gd",
 	"event": "res://scripts/ui/screens/event_screen.gd",
-	"bout": "res://scripts/ui/screens/bout_screen.gd",
-	"compare": "res://scripts/ui/screens/compare_screen.gd",
 	"settings": "res://scripts/ui/screens/settings_screen.gd",
 }
 ## As cinco áreas da carreira. Cada uma guarda a própria pilha: trocar de área e voltar

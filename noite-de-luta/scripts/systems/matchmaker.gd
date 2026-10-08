@@ -221,6 +221,12 @@ static func _plural(n: String) -> String:
 	return n
 
 
+## "Peso-meio-médio" (título de tela).
+static func division_title(div: String) -> String:
+	var n := division_name(div)
+	return n.substr(0, 1).to_upper() + n.substr(1)
+
+
 ## Nome curto para listas: "Leve", "Palha (F)".
 static func division_short(div: String) -> String:
 	var d := DataDB.division(div)
@@ -263,14 +269,15 @@ static func _make_offer(w: GameWorld, f: Fighter, opp_override: Fighter = null) 
 		var r := w.rank_of(f)
 		var cands: Array = []
 		for o: Fighter in w.in_division(f.division):
-			if w.is_user_fighter(o) or not o.is_pro() and f.is_pro():
+			if w.is_user_fighter(o) or (not o.is_pro() and f.is_pro()):
 				continue
 			if not ready_to_book(w, o, 2) or not can_face(w, f, o):
 				continue
 			var ro := w.rank_of(o)
 			var gap := absf(float(r if r >= 0 else 999) - float(ro if ro >= 0 else 999))
 			if not f.is_pro():
-				gap = absf(o.fights() - 0.0) * 4.0 + absf(o.level() - f.level())
+				# Estreia: contra outro amador ou um profissional de poucas lutas.
+				gap = o.fights() * 2.5 + absf(o.level() - f.level()) * 0.6
 			if gap <= WINDOW[tier] + 2:
 				cands.append([gap + w.rng.randf_range(0.0, 4.0), o])
 		if cands.is_empty():

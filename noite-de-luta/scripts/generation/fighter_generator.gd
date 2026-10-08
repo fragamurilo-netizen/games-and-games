@@ -70,7 +70,9 @@ static func make(w: GameWorld, div: String, level: float, age_: int = 0, amateur
 		if amateur:
 			age = rng.randi_range(18, 24)
 		else:
-			age = clampi(int(round(rng.randfn(29.0, 4.0))), 21, 40)
+			# A elite já tem estrada: nível alto pede idade de quem lutou bastante.
+			var lo := 21 + int(clampf((level - 62.0) / 5.0, 0.0, 5.0))
+			age = clampi(int(round(rng.randfn(29.0 + maxf(0.0, level - 70.0) * 0.08, 4.0))), lo, 40)
 	f.birth_month = rng.randi_range(1, 12)
 	f.birth_year = w.year() - age - (1 if f.birth_month > w.month() else 0)
 	f.peak_age = clampi(int(round(rng.randfn(29.5 + float(d.get("wt", 0.5)) * 1.5, 1.6))), 26, 34)
@@ -106,6 +108,8 @@ static func make(w: GameWorld, div: String, level: float, age_: int = 0, amateur
 	if not amateur and rng.randf() < clampf(0.25 + (level - 50.0) / 80.0, 0.2, 0.75):
 		f.nickname = _nickname(w, rng, String(origin["c"]))
 	f.condition = rng.randf_range(88.0, 100.0)
+	if f.is_pro():
+		f.last_fight_week = w.week - rng.randi_range(2, 22)
 	f.wear = maxf(0.0, f.fights() * rng.randf_range(0.02, 0.06))
 	return f
 
@@ -191,6 +195,7 @@ static func _make_record(f: Fighter, rng: RandomNumberGenerator, level: float, a
 	var debut := rng.randi_range(19, 25)
 	var years := maxf(0.4, age - debut + rng.randf())
 	var n := maxi(1, int(round(years * rng.randf_range(1.6, 3.0))))
+	n = maxi(n, int((level - 60.0) / 2.0))
 	n = mini(n, 42)
 	var p := clampf(0.36 + 0.62 * pow(clampf((level - 42.0) / 46.0, 0.0, 1.0), 0.85), 0.3, 0.93)
 	var rec := {"w": 0, "l": 0, "d": 0, "nc": 0, "ko_w": 0, "sub_w": 0, "dec_w": 0, "ko_l": 0, "sub_l": 0, "dec_l": 0}

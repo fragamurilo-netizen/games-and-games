@@ -19,6 +19,8 @@ var status: String = "marcada"
 ## {winner (id ou -1), method (KO, TKO, FIN, DEC, EMP, SR), detail, round, time (s no round),
 ##  cards [[a, b] por juiz], stats {a: {...}, b: {...}}, missed_weight [ids]}
 var result: Dictionary = {}
+## Pesagem: {"kg": [a, b], "missed": [ids], "mods": [{}, {}], "cut": [% a, % b]}
+var weigh: Dictionary = {}
 ## Narração resumida das lutas da equipe do jogador (lances principais), para rever.
 var log: Array = []
 
@@ -37,7 +39,7 @@ func has(fid: int) -> bool:
 
 func to_dict() -> Dictionary:
 	return {"id": id, "ev": event_id, "week": week, "a": a, "b": b, "div": division, "rounds": rounds,
-		"title": title, "main": main_event, "pa": purse_a, "pb": purse_b, "status": status, "res": result, "log": log}
+		"title": title, "main": main_event, "pa": purse_a, "pb": purse_b, "status": status, "res": result, "log": log, "weigh": weigh}
 
 
 static func from_dict(d: Dictionary) -> Bout:
@@ -56,4 +58,5 @@ static func from_dict(d: Dictionary) -> Bout:
 	x.status = String(d.get("status", "marcada"))
 	x.result = d.get("res", {})
 	x.log = d.get("log", [])
+	x.weigh = d.get("weigh", {})
 	return x

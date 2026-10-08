@@ -1,108 +1,72 @@
-# Noite de Luta — nota de passagem (07/10/2026)
+# Noite de Luta — nota de passagem (08/10/2026)
 
-Trabalho interrompido no meio a pedido do dono, para outro colega continuar. Ramo:
-`claude/festive-maxwell-iuncob` (parte do commit 9a1fbe9 do ramo `claude/inspiring-wright-xx78jb`).
+Ramo: `claude/festive-maxwell-iuncob`. O jogo **já roda**: dá para fundar a academia, contratar,
+aceitar propostas, desafiar, montar o plano, assistir à luta round a round e avançar as semanas.
 
 ## Decisões do dono
 
-- O jogo é **muito inspirado no LEATHER: Tactical Boxing Management**, levado para o MMA. O
-  jogador é o **empresário de uma academia/equipe**, não o dono de uma organização:
-  - contrata amadores, profissionais e veteranos;
-  - aceita propostas e desafia adversários perto no ranking (perder atrasa os desafios; o campeão
-    só defende contra os primeiros da fila);
-  - monta o **plano de luta** antes de cada round e assiste à luta em texto;
-  - treina por prioridades, contrata staff, cuida da condição física, das lesões e do corte de peso;
-  - ganha reputação. O jogo não tem fim.
-- **Não usar nada do Corner Office antigo** (`corner-office/`): o dono considera que não funcionava.
+- O jogo é **muito inspirado no LEATHER: Tactical Boxing Management**, levado para o MMA.
+- O jogador é o **empresário de uma academia**, não o dono de uma organização.
+- **Não usar nada do Corner Office antigo** (`corner-office/`).
 - Base técnica: a do Mais Uma Rodada (interface, retratos, nomes, países).
 
-## O que está feito
+## O que está pronto
 
-- Correção da chave de peso nos retratos: `look["wt"]` (0 a 1), porque `bw` já era a
-  sobrancelha do editor. `tools/face_sheet.gd` converte a categoria em `wt`.
-- Base de interface portada do MUR, sem o futebol: `UIKit`, `UIColors` (só modo escuro; destaque na
-  cor da equipe; `CORNER_RED`/`CORNER_BLUE` só na luta), `UITokens`, `UILayout`, `TouchScroll`,
-  `DataTable`, `BaseScreen` (o esqueleto da tela é montado em código, sem .tscn por tela),
-  `UIManager`, `main.gd`/`scenes/main.tscn`, `TopBar`, `BottomNav` (Início, Equipe, Rankings,
-  Mercado, Academia), `TeamBadge`, `StarsView`, `FlagView`, `Fmt` (US$), `Sfx`/`AudioManager`,
-  `AppSettings`. Ícones novos: `belt.svg`, `glove.svg`. Ícone do app novo.
-- Dados (`data/world/mma.json`):
-  - 12 categorias (8 masculinas e 4 femininas), com limite de peso, físico do retrato e fator de nocaute;
-  - peso de cada país na geração e arte marcial de base por país;
-  - três camadas de evento (regional, continental, Liga Global de Combate — LGC);
-  - nomes de equipes e apelidos;
-  - lista de lutadores reais que nunca são gerados.
-- `data/names/fight_names.json`:
-  - culturas de nome que faltavam (Ásia Central, Daguestão/Cáucaso, Tailândia, Lituânia, Bulgária);
-  - origens dos países que não tinham;
-  - **nomes femininos** de todas as culturas (o `names.json` do MUR só tinha homens).
-- Modelos com save em dicionário: `Fighter` (18 atributos de 1 a 100 em três grupos), `Team`,
-  `Bout`, `FightEvent`, `GameWorld` (semana a semana; lutas no sábado).
-- Geração: `NameGenerator` (portado), `FighterGenerator` (país → origem → base marcial →
-  atributos → idade, potencial e cartel coerentes), `WorldGenerator` (cerca de 900 lutadores do
-  campeão ao estreante, prospectos amadores, cerca de 50 equipes rivais, campeões).
-- **Motor de luta** (`scripts/systems/fight_engine.gd`) e **plano de luta**
-  (`fight_plan.gd`, 10 escolhas por round):
-  - o motor roda round a round, para dá para mudar o plano no intervalo;
-  - em pé: disputa de distância, combinações, contragolpe e base;
-  - quedas, clinch na grade e posições no chão;
-  - ground and pound e finalizações;
-  - árbitro com critério próprio, médico e corner;
-  - três juízes com gostos diferentes (10-9 e 10-8);
-  - narração em português;
-  - o plano da IA rival se ajusta quando ela está perdendo.
-- Calibragem (`tools/fight_soak.gd`, 3600 lutas):
+**Mundo e dados**
+- 12 categorias, cerca de 1.000 lutadores (do campeão ao amador), 50 academias rivais e campeões.
+- Nomes por cultura, incluindo os femininos, e uma lista de lutadores reais que nunca são gerados (`data/world/mma.json`, `data/names/fight_names.json`).
 
-  | Grupo | Nocaute | Finalização | Decisão |
-  |---|---|---|---|
-  | Homens | 20% (mosca) a 42% (pesado) | ~18% | — |
-  | Mulheres | ~15% | ~19% | ~65% |
+**Motor de luta** (`scripts/systems/fight_engine.gd`, `fight_plan.gd`)
+- Round a round, com plano de 10 escolhas.
+- Calibrado com `tools/fight_soak.gd`: nocautes de 20% a 42% conforme o peso nos homens e 15% nas mulheres; finalizações perto de 18%.
 
-  - O melhor (5 ou mais pontos de nível acima) vence cerca de 80%.
-  - Há também uma "forma do dia" aleatória por lutador, que permite zebras.
-- Começados, **ainda sem testar**: `Rankings`, `Calendar`, `Matchmaker`
-  - `Rankings`: rating tipo Elo e as camadas por posição;
-  - `Calendar`: LGC a cada duas semanas, uma noite continental e três regionais por semana;
-  - `Matchmaker`: casamentos das equipes rivais, cinturão, propostas, desafios com chance de aceite e bolsas.
+**Carreira** (`scripts/systems/`)
+- `Calendar`: Liga Global (LGC) a cada duas semanas, uma noite continental e três regionais por semana.
+- `Matchmaker`: lutas das rivais, cinturão, propostas, desafios no estilo LEATHER (perder trava os desafios para cima por 8 semanas; o campeão só aceita os três primeiros do ranking).
+- `Rankings`: rating tipo Elo.
+- `Signing`: contratação com fatia da bolsa, número de lutas e luvas.
+- `StaffMarket`: 7 funções.
+- `Development`: treino por foco e intensidade, envelhecimento, condição física, lesões, aposentadorias, novos amadores todo mês.
+- `Career`: pesagem e corte de peso, bolsas, reputação, notícias, finanças semanais, contratos e a semana andando.
+- Save em JSON (`GameManager`, `user://carreira.json`, cerca de 2,5 MB).
 
-## Estado da compilação
+**Telas** (`scripts/ui/screens/`)
+- Menu, nova academia e Início (noite de luta, propostas, próximas lutas, notícias, avançar semana).
+- Equipe, perfil do lutador (ficha, carreira, treino, contrato), Rankings (com modo "escolher quem desafiar").
+- Mercado (lutadores e staff), Academia (finanças e staff), proposta, desafio, card do evento e opções.
+- Plano de luta (pesagem, leitura do técnico, ficha, editor do plano) e luta ao vivo (placar, fôlego e dano, narração, corner no intervalo, resultado).
 
-`tools/check_scripts.gd` dá 2 erros:
+## Verificação feita
 
-- `world_generator.gd` chama `StaffMarket`, que **ainda não existe**.
-- `matchmaker.gd` tem erros de inferência de tipo. Rodar `--import` antes, para registrar as classes novas (`Rankings`, `Calendar`, `Matchmaker`), e tipar `evs`/`tier`.
+- `tools/check_scripts.gd`: 70 scripts, 0 erros.
+- `tools/world_sim.gd`: 26 semanas sem erro (cerca de 29 lutas por semana) e o save recarrega.
+- `tools/design_shots.gd`: capturas de todas as telas em 390×844, com uma luta inteira jogada.
+- **Não testado:** celular deitado e tablet, APK e aparelho Android, carreira longa jogada à mão.
 
-O tema `assets/theme/main_theme.tres` ainda não foi gerado:
+## Próximos passos sugeridos
 
-```
-godot --headless --path . --script res://tools/build_theme.gd
-```
-
-`GameManager` é só um esboço.
-
-## Próximos passos (na ordem)
-
-1. `StaffMarket`: técnicos de striking, wrestling e jiu-jitsu, preparador físico, fisioterapeuta, nutricionista e olheiro, com qualidade e salário semanal.
-2. Treino e envelhecimento semanal (foco e intensidade; ganho pela idade, pelo potencial e pelo staff), lesões e condição física (sobe uns 7% por semana, como no LEATHER).
-3. `Career`: avançar a semana, com estes passos:
-   - lutas da CPU, pesagem e corte de peso, bolsas e a fatia da equipe;
-   - finanças semanais;
-   - propostas, rankings e campeões;
-   - aposentadorias e novos prospectos;
-   - contratação com negociação de fatia, lutas e luvas.
-4. `GameManager`: nova carreira, salvar e carregar em JSON. Gerar o tema.
-5. Telas: menu, nova carreira, Início (próximas lutas, propostas, avançar semana), Equipe,
-   perfil do lutador, Rankings, Mercado (lutadores e staff), Academia (finanças, staff),
-   proposta/desafio, **plano de luta**, **luta ao vivo** (narração, fôlego e dano, corner entre
-   rounds), resultado e card do evento.
-6. Ferramenta de capturas e testes; `CLAUDE.md` e `DESIGN.md` do Noite de Luta.
+1. Jogar algumas semanas à mão e equilibrar o dinheiro: hoje o caixa cai uns US$ 4 mil por semana e as bolsas do regional são pequenas.
+2. Lista de lançamentos da Academia: agrupar por semana (hoje se repete muito).
+3. Bandeiras de países que vieram sem desenho no `nations.json` (THA, KAZ, UZB e outros aparecem como sigla).
+4. Capturas em 844×390 e 1280×800, e ajuste das telas largas.
+5. `CLAUDE.md` e `DESIGN.md` próprios do Noite de Luta. Hoje vale o sistema "Lousa e Giz" do MUR, com estas regras extras:
+   - vermelho e azul só para os corners;
+   - o destaque da interface é a cor da equipe.
+6. Testes automáticos (`tests/`) e preset de exportação Android.
+7. Ideias do LEATHER que ainda faltam:
+   - ofertas de "step-aside" (pagar para o adversário sair do caminho);
+   - mudar de categoria;
+   - torneios e Grand Prix;
+   - comparar dois lutadores lado a lado;
+   - lutador criado pelo jogador.
 
 ## Comandos (na pasta `noite-de-luta`)
 
 ```
 godot --headless --path . --import
 godot --headless --path . --script res://tools/check_scripts.gd
-godot --headless --path . --script res://tools/fight_soak.gd -- --n=300 --seed=7   # calibragem
-godot --headless --path . --script res://tools/fight_soak.gd -- --n=2 --log        # narração
-xvfb-run -a -s "-screen 0 1600x1600x24" godot --path . --resolution 1500x900 --script res://tools/face_sheet.gd -- --out=/tmp/lutadores.png
+godot --headless --path . --script res://tools/build_theme.gd          # depois de mexer em cores/tokens
+godot --headless --path . --script res://tools/world_sim.gd -- --weeks=52
+godot --headless --path . --script res://tools/fight_soak.gd -- --n=300 --seed=7
+xvfb-run -a -s "-screen 0 1400x1400x24" godot --path . --resolution 390x844 --script res://tools/design_shots.gd -- --out=/tmp/telas
 ```

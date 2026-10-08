@@ -158,7 +158,7 @@ func run_round() -> Array:
 	if not finished:
 		t = ROUND_S
 		_score_round()
-		_log(-1, "fim", "Fim do %dº round." % round_no)
+		_log(-1, "round", "Fim do %dº round." % round_no)
 	return _round_events
 
 
