@@ -9,6 +9,8 @@ extends RefCounted
 const ETH_MIX: Array = [
 	[1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.86, 0.06, 0.08], [0.78, 0.12, 0.1], [0.62, 0.14, 0.24], [0.28, 0.04, 0.68],
 	[0.42, 0.5, 0.08], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.55, 0.22, 0.23], [0.1, 0.9, 0.0], [0.2, 0.32, 0.48], [0.1, 0.06, 0.84],
+	[0.94, 0.0, 0.06], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.9, 0.04, 0.06], [0.8, 0.16, 0.04], [0.45, 0.0, 0.55], [0.0, 1.0, 0.0],
+	[0.06, 0.84, 0.1], [0.2, 0.8, 0.0],
 ]
 ## Traços típicos de cada grupo (somados aos da mistura de referência do MakeHuman).
 const ETH_BIAS: Array = [
@@ -22,9 +24,18 @@ const ETH_BIAS: Array = [
 	{"mouth-upperlip-volume-inflate": 0.3, "mouth-lowerlip-volume-inflate": 0.3, "forehead-nubian-more": 0.3, "nose-nostril-width-max": 0.2, "chin-prognathism-more": 0.15}, # africano
 	{"eye-epicanthus-in": 0.6, "nose-scale-depth-decr": 0.4, "cheek-bones-out": 0.4, "eye-height2-min": 0.3, "eyebrows-trans-depth-less": 0.3, "head-scale-horiz-more": 0.15, "eye-eyefold-down": 0.3}, # leste asiático
 	{"nose-scale-vert-incr": 0.25, "eye-size-big": 0.2, "mouth-lowerlip-volume-inflate": 0.1, "eyebrows-trans-depth-more": 0.2, "nose-point-down": 0.2}, # sul-asiático
-	{"mouth-upperlip-volume-inflate": 0.35, "mouth-lowerlip-volume-inflate": 0.3, "nose-nostril-width-max": 0.3, "forehead-nubian-more": 0.2}, # caribenho
+	{"mouth-upperlip-volume-inflate": 0.35, "mouth-lowerlip-volume-inflate": 0.3, "nose-nostril-width-max": 0.3, "forehead-nubian-more": 0.2}, # chifre da África
 	{"head-scale-horiz-more": 0.3, "nose-scale-horiz-incr": 0.4, "mouth-lowerlip-volume-inflate": 0.3, "cheek-volume-inflate": 0.3, "chin-width-max": 0.3}, # pacífico
 	{"eye-epicanthus-in": 0.45, "nose-scale-horiz-incr": 0.3, "nose-scale-depth-decr": 0.3, "cheek-bones-out": 0.25, "mouth-upperlip-volume-inflate": 0.15}, # sudeste asiático
+	{"cheek-bones-out": 0.3, "head-scale-horiz-more": 0.2, "nose-volume-potato": 0.2, "mouth-upperlip-volume-deflate": 0.2, "eye-push1-in": 0.15}, # eslavo
+	{"nose-hump-morehump": 0.35, "nose-scale-vert-incr": 0.25, "eyebrows-trans-depth-more": 0.4, "eye-push1-in": 0.3, "head-scale-vert-more": 0.25, "chin-prominent-more": 0.25}, # balcânico
+	{"nose-scale-horiz-decr": 0.2, "eyebrows-trans-depth-more": 0.25, "mouth-upperlip-volume-deflate": 0.3, "cheek-volume-deflate": 0.15}, # celta
+	{"nose-hump-morehump": 0.55, "nose-scale-vert-incr": 0.35, "eyebrows-trans-depth-more": 0.45, "eye-push1-in": 0.3, "nose-point-down": 0.3}, # Cáucaso e Anatólia
+	{"nose-hump-morehump": 0.3, "nose-scale-vert-incr": 0.2, "eyebrows-trans-depth-more": 0.3, "mouth-lowerlip-volume-inflate": 0.2, "nose-point-down": 0.15}, # norte-africano
+	{"eye-epicanthus-in": 0.4, "cheek-bones-out": 0.5, "head-scale-horiz-more": 0.25, "nose-scale-depth-decr": 0.2, "eye-height2-min": 0.2}, # centro-asiático
+	{"forehead-nubian-more": 0.35, "head-scale-vert-more": 0.3, "mouth-upperlip-volume-inflate": 0.3, "mouth-lowerlip-volume-inflate": 0.3, "nose-scale-horiz-decr": 0.15}, # nilótico
+	{"eyebrows-trans-depth-more": 0.45, "nose-scale-horiz-incr": 0.4, "nose-point-down": 0.25, "mouth-lowerlip-volume-inflate": 0.3, "eye-push1-in": 0.3}, # melanésio
+	{"head-scale-vert-more": 0.2, "nose-scale-horiz-decr": 0.15, "mouth-upperlip-volume-inflate": 0.25, "mouth-lowerlip-volume-inflate": 0.25, "forehead-nubian-more": 0.2}, # saheliano
 ]
 ## Penteado do FaceGen (índice) → corte do catálogo.
 const STYLE_MAP: Array[String] = [

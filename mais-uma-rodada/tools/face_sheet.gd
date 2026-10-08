@@ -15,7 +15,7 @@ func _initialize() -> void:
 	var px := 90
 	var cols := 13
 	var seed_base := 1000
-	var eths: Array = range(13)
+	var eths: Array = range(FaceGen.ETH_COUNT)
 	var ages: Array = [15, 17, 19, 21, 23, 26, 29, 32, 35, 38, 42, 48, 58]
 	var aging := false
 	var beauty := false

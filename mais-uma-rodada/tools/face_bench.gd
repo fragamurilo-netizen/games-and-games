@@ -32,7 +32,7 @@ func _run() -> void:
 		view.size = Vector2(px, px)
 		view.position = Vector2((i % 4) * px, (i / 4) * px)
 		view.set("face_seed", 1000 + i * 7919)
-		view.set("eth", i % 13)
+		view.set("eth", i % FaceGen.ETH_COUNT)
 		view.set("age", 18 + i * 3)
 		root.add_child(view)
 		views.append(view)

@@ -13,7 +13,7 @@ func _initialize() -> void:
 	var saved := {"fs": 0, "es": 0, "ns": 0, "mt": 0, "er": 0}
 	var catalogs := {"fs": [FaceGen.FACE_SHAPES, "face_shape"], "es": [FaceGen.EYE_SHAPES, "eye_shape"], "ns": [FaceGen.NOSE_TYPES, "nose_type"], "mt": [FaceGen.MOUTH_TYPES, "mouth_type"], "er": [FaceGen.EAR_TYPES, "ear_type"]}
 	var original_counts := {"fs": 18, "es": 30, "ns": 32, "mt": 26, "er": 12}
-	for eth in 13:
+	for eth in FaceGen.ETH_COUNT:
 		for age in [17, 28, 45, 65]:
 			for i in 12:
 				var seed_value := 1000 + i * 7919

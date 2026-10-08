@@ -177,7 +177,7 @@ func _look(w: GameWorld, m: Dictionary) -> Control:
 	var look: Dictionary = m["look"]
 	var feats := FaceGen.features(int(m["seed"]), int(m["eth"]), ManagerProfile.age(w), look)
 	var eths := DatabaseManager.ethnicities()
-	card.add_child(_cycler("Origem", ["Nórdica", "Europeia", "Mediterrânea", "Árabe", "Latina", "Andina", "Miscigenada", "Africana", "Leste asiático", "Sul asiático", "Havaiana", "Pacífico", "Sudeste asiático"].slice(0, eths.size()), int(m["eth"]), func(v: int):
+	card.add_child(_cycler("Origem", ["Nórdica", "Europeia", "Mediterrânea", "Árabe", "Latina", "Andina", "Miscigenada", "Africana", "Leste asiático", "Sul asiático", "Chifre da África", "Pacífico", "Sudeste asiático", "Eslava", "Balcânica", "Celta", "Cáucaso e Anatólia", "Norte-africana", "Centro-asiática", "Nilótica", "Melanésia", "Saheliana"].slice(0, eths.size()), int(m["eth"]), func(v: int):
 		m["eth"] = v
 		m["look"] = {}
 		_touch()

@@ -24,7 +24,19 @@ const E_SAS := 9
 const E_HAE := 10
 const E_PAC := 11
 const E_SEA := 12
-const ETH_COUNT := 13
+# 13+: populações que antes caíam numa etnia vizinha genérica (russo como "europeu", sérvio
+# como "nórdico", irlandês sem ruivos, turco e iraniano como "mediterrâneo/árabe", fula como
+# qualquer africano...). Cada uma tem o seu fenótipo médio e a sua variação.
+const E_SLV := 13 # eslava e báltica (Rússia, Ucrânia, Polônia, Tchéquia, Bálticos)
+const E_BAL := 14 # balcânica / dinárica (Sérvia, Croácia, Bósnia, Montenegro, Albânia)
+const E_CEL := 15 # celta / ilhas britânicas (Irlanda, Escócia, País de Gales)
+const E_CAU := 16 # Cáucaso, Anatólia e planalto iraniano (Turquia, Geórgia, Irã, curdos)
+const E_NAF := 17 # norte-africana / amazigh (Marrocos, Argélia, Tunísia, Líbia)
+const E_CAS := 18 # centro-asiática / turco-mongol (Cazaquistão, Uzbequistão, tártaros)
+const E_NIL := 19 # nilótica / África Oriental (Sudão do Sul, Quênia, Uganda)
+const E_MEL := 20 # melanésia (Papua-Nova Guiné, Ilhas Salomão, Vanuatu, Fiji, Nova Caledônia)
+const E_SAH := 21 # saheliana / fula (Senegal, Mali, Guiné, Níger, Mauritânia)
+const ETH_COUNT := 22
 
 # ---------------------------------------------------------------------------
 # Penteados (os índices antigos continuam valendo nos saves)
@@ -793,8 +805,9 @@ const CHIN_TYPES: Array[String] = ["Comum", "Partido", "Recuado", "Proeminente",
 const EXPRESSIONS: Array[String] = ["Neutro", "Sorriso leve", "Sorriso aberto", "Sério", "Bravo", "Confiante",
 	"Surpreso", "Cansado", "Pensativo", "Desconfiado"]
 ## Grupo de traços por etnia: 0 europeu, 1 mediterrâneo/árabe, 2 latino/mestiço, 3 africano,
-## 4 leste/sudeste asiático, 5 sul-asiático, 6 andino, 7 pacífico.
-const ETH_GROUP: Array[int] = [0, 0, 1, 1, 2, 6, 2, 3, 4, 5, 3, 7, 4]
+## 4 leste/sudeste asiático, 5 sul-asiático, 6 andino, 7 pacífico, 8 eslavo, 9 dinárico e
+## Ásia Ocidental, 10 centro-asiático, 11 melanésio.
+const ETH_GROUP: Array[int] = [0, 0, 1, 1, 2, 6, 2, 3, 4, 5, 3, 7, 4, 8, 9, 0, 9, 1, 10, 3, 11, 3]
 ## Pesos dos tipos por grupo (mesma ordem de NOSE_TYPES, EYE_SHAPES, MOUTH_TYPES).
 const GROUP_NOSE_W: Array = [
 	[4, 1.4, 1.2, 1.0, 0.4, 1.6, 0.1, 1.0, 0.5, 0.5, 1.0, 1.0, 0.8, 0.1, 0.8, 0.6, 0.3, 0.6, 1.0, 0.5, 1.0, 0.8, 0.6, 0.5],
@@ -805,6 +818,14 @@ const GROUP_NOSE_W: Array = [
 	[4, 0.6, 1.2, 1.4, 1.0, 0.8, 0.3, 0.8, 1.0, 0.4, 0.6, 1.2, 0.5, 0.6, 0.8, 0.8, 0.8, 0.7, 1.0, 0.5, 0.8, 0.8, 0.5, 0.5],
 	[4, 0.5, 1.0, 2.0, 1.2, 0.4, 0.4, 0.4, 1.6, 0.4, 0.3, 1.2, 0.4, 0.6, 0.8, 0.9, 0.8, 0.8, 1.2, 0.4, 0.6, 0.8, 0.5, 0.5],
 	[3, 0.6, 1.6, 0.2, 2.2, 0.2, 1.6, 0.1, 0.2, 0.5, 0.2, 0.3, 0.4, 1.6, 0.6, 0.4, 1.2, 1.2, 0.2, 0.9, 0.3, 1.0, 1.0, 0.4],
+	# eslavo: reto, arrebitado, batatudo e de ponta redonda; pouco aquilino
+	[4, 2.0, 1.8, 0.5, 0.7, 1.0, 0.2, 0.6, 0.2, 0.6, 0.6, 0.7, 1.0, 0.15, 1.1, 0.5, 0.4, 1.0, 0.5, 1.2, 0.6, 1.3, 0.6, 0.6],
+	# dinárico e Ásia Ocidental: dorso alto, aquilino, romano, comprido, ponta caída
+	[3.5, 0.4, 0.9, 2.6, 0.5, 0.7, 0.05, 1.3, 1.6, 0.8, 0.5, 1.8, 0.3, 0.15, 1.2, 1.2, 0.9, 0.4, 1.8, 0.2, 1.0, 0.6, 0.4, 0.6],
+	# centro-asiático: entre o leste asiático e o europeu
+	[4, 1.4, 1.3, 0.5, 0.95, 0.7, 0.9, 0.4, 0.3, 0.45, 0.4, 0.5, 1.2, 0.5, 0.9, 0.4, 0.5, 1.1, 0.4, 1.0, 0.45, 1.0, 0.7, 0.5],
+	# melanésio: largo, de dorso convexo e ponta caída
+	[3, 0.4, 1.5, 0.6, 2.0, 0.2, 1.2, 0.1, 0.8, 0.5, 0.2, 0.5, 0.3, 1.6, 0.8, 1.4, 1.4, 1.0, 0.4, 0.5, 0.3, 1.0, 0.9, 0.4],
 ]
 const GROUP_EYE_W: Array = [
 	[4, 1.2, 1.2, 0.8, 0.5, 1.0, 0.6, 0.6, 1.2, 0.5, 0.7, 0.6, 0.4, 0.6, 1.4, 0.8, 1.0, 0.3, 1.0, 0.8, 0.7, 1.2],
@@ -815,6 +836,10 @@ const GROUP_EYE_W: Array = [
 	[4, 1.8, 0.6, 1.0, 0.6, 1.0, 0.5, 0.6, 1.2, 0.4, 0.4, 0.8, 0.6, 0.5, 1.8, 1.0, 1.0, 0.4, 1.0, 0.6, 0.6, 1.2],
 	[3, 0.8, 1.4, 0.6, 1.4, 0.6, 0.6, 0.5, 1.2, 0.2, 0.8, 0.5, 0.8, 0.8, 1.2, 0.7, 0.9, 1.0, 1.0, 0.7, 0.5, 1.2],
 	[3, 1.0, 1.4, 0.6, 1.2, 0.4, 0.6, 0.4, 1.0, 0.3, 0.8, 0.4, 0.6, 0.8, 1.2, 0.9, 0.9, 0.9, 1.0, 0.6, 0.6, 1.1],
+	[4, 0.9, 1.5, 0.7, 0.8, 1.2, 0.6, 0.6, 1.3, 0.4, 0.9, 0.5, 0.6, 0.8, 1.1, 0.6, 0.9, 0.5, 1.2, 1.0, 0.6, 1.2],
+	[4, 1.3, 0.8, 1.0, 0.5, 1.6, 0.5, 0.8, 1.4, 0.4, 0.6, 0.7, 0.5, 0.6, 1.6, 0.8, 1.1, 0.3, 1.4, 1.1, 0.6, 1.1],
+	[3, 0.6, 1.8, 0.5, 1.7, 0.6, 0.7, 0.4, 1.4, 0.2, 1.0, 0.4, 0.9, 0.9, 0.8, 0.4, 0.7, 1.4, 1.2, 0.8, 0.4, 1.3],
+	[4, 1.2, 0.8, 0.6, 0.5, 1.5, 0.7, 0.4, 0.8, 0.5, 0.6, 0.4, 0.4, 0.6, 1.3, 1.0, 0.9, 0.3, 1.1, 1.1, 0.7, 1.0],
 ]
 const GROUP_MOUTH_W: Array = [
 	[4, 1.6, 0.6, 0.8, 1.0, 0.8, 0.8, 0.8, 1.0, 0.2, 0.8, 0.8, 0.6, 0.6, 0.8, 0.8, 0.6, 0.8],
@@ -825,6 +850,10 @@ const GROUP_MOUTH_W: Array = [
 	[4, 0.8, 1.2, 1.0, 0.6, 1.2, 0.6, 1.0, 0.5, 0.6, 0.8, 0.8, 0.6, 0.6, 0.8, 0.8, 0.6, 0.8],
 	[4, 1.0, 1.0, 1.0, 0.8, 1.0, 1.0, 0.6, 0.8, 0.4, 0.8, 0.8, 0.6, 0.6, 0.8, 0.8, 0.6, 0.8],
 	[3, 0.4, 1.8, 1.2, 0.4, 1.4, 0.5, 0.6, 0.3, 1.6, 1.2, 1.4, 0.6, 0.8, 0.3, 0.3, 0.6, 0.6],
+	[4, 1.8, 0.5, 0.7, 1.2, 0.9, 0.9, 0.6, 1.2, 0.15, 0.6, 0.7, 0.6, 0.6, 0.9, 0.7, 0.5, 0.9],
+	[4, 1.2, 0.9, 0.9, 0.8, 1.1, 1.0, 0.9, 0.8, 0.4, 0.8, 0.9, 0.6, 0.6, 0.8, 0.8, 0.5, 0.8],
+	[4, 1.3, 0.65, 0.65, 1.3, 0.95, 0.85, 0.6, 1.0, 0.22, 0.7, 0.75, 0.6, 0.6, 0.85, 0.75, 0.55, 0.85],
+	[3, 0.3, 1.8, 1.3, 0.3, 1.4, 0.6, 0.5, 0.2, 1.6, 1.1, 1.5, 0.5, 0.7, 0.4, 0.3, 0.5, 0.6],
 ]
 ## Tipos acrescentados depois (olhos 22+, narizes 24+, bocas 18+): pesos por grupo em tabelas à
 ## parte e sorteio próprio (_newer_pick), para os rostos que ficam com um tipo antigo não mudarem.
@@ -840,6 +869,10 @@ const GROUP_EYE_W2: Array = [
 	[0.8, 0.1, 0.9, 0.4, 0.9, 0.5, 0.7, 0.5],
 	[0.6, 0.5, 0.5, 0.3, 0.5, 0.5, 0.4, 0.8],
 	[0.6, 0.3, 0.5, 0.4, 0.5, 0.5, 0.4, 0.6],
+	[0.8, 0.12, 0.6, 0.3, 0.4, 0.8, 0.7, 0.6],
+	[0.8, 0.05, 0.9, 0.4, 0.8, 0.6, 0.9, 0.5],
+	[0.6, 1.0, 0.5, 0.25, 0.35, 0.6, 0.4, 1.0],
+	[0.6, 0.1, 0.6, 0.4, 0.5, 0.5, 0.8, 0.5],
 ]
 const GROUP_NOSE_W2: Array = [
 	[0.8, 0.4, 0.8, 0.3, 0.2, 0.7, 0.4, 0.6],
@@ -850,6 +883,10 @@ const GROUP_NOSE_W2: Array = [
 	[0.8, 0.4, 0.5, 0.6, 0.3, 0.9, 0.4, 0.3],
 	[0.7, 0.4, 0.3, 0.7, 0.6, 1.0, 0.5, 0.2],
 	[0.9, 0.5, 0.2, 1.4, 0.9, 0.2, 0.6, 0.2],
+	[1.2, 0.6, 0.5, 0.5, 0.4, 0.4, 0.5, 0.9],
+	[0.7, 0.2, 0.6, 0.4, 0.1, 1.5, 0.6, 0.2],
+	[0.8, 0.6, 0.4, 0.7, 0.9, 0.6, 0.4, 0.4],
+	[1.0, 0.5, 0.2, 1.3, 0.7, 0.5, 0.6, 0.1],
 ]
 const GROUP_MOUTH_W2: Array = [
 	[0.6, 0.6, 0.4, 0.5, 0.4, 0.6, 0.4, 0.5],
@@ -860,6 +897,10 @@ const GROUP_MOUTH_W2: Array = [
 	[0.6, 0.6, 0.7, 0.5, 0.7, 0.4, 0.6, 0.5],
 	[0.6, 0.5, 0.5, 0.5, 0.6, 0.5, 0.5, 0.5],
 	[0.4, 0.6, 0.8, 0.5, 1.2, 0.2, 0.7, 0.4],
+	[0.5, 0.5, 0.3, 0.5, 0.3, 0.9, 0.5, 0.5],
+	[0.7, 0.7, 0.5, 0.5, 0.5, 0.5, 0.6, 0.6],
+	[0.5, 0.5, 0.4, 0.4, 0.4, 0.8, 0.5, 0.4],
+	[0.4, 0.6, 0.8, 0.5, 1.3, 0.1, 0.8, 0.4],
 ]
 ## Parâmetros que cada tipo mexe: guardados antes do tipo antigo para o tipo novo partir do zero.
 const EYE_KEYS: Array[String] = ["eye_h", "eye_w", "eye_tilt", "deep", "hooded", "eye_dx", "lid", "bulge", "crease2", "epicanthic", "under_line", "scleral", "lash_heavy", "hood_outer"]
@@ -902,14 +943,20 @@ const EYE_LIGHT: Array[int] = [2, 3, 4, 5, 8, 9, 10, 11]
 
 # ---------------------------------------------------------------------------
 # Fenótipo por etnia
-# nor, eur, med, arb, lat, and, mix, afr, eas, sas, hae, pac, sea
+# nor, eur, med, arb, lat, and, mix, afr, eas, sas, hae, pac, sea,
+# slv, bal, cel, cau, naf, cas, nil, mel, sah
+# Médias de população (antropometria e genética de pigmentação), nunca o rosto de alguém:
+# dentro de cada uma a variação é grande e as faixas se sobrepõem, como na vida real.
 # ---------------------------------------------------------------------------
 ## Faixa de tom de pele (índices contínuos em SKIN_COLORS).
-const ETH_SKIN_RANGE: Array = [[0.0, 2.0], [0.4, 3.0], [1.4, 4.0], [2.0, 5.0], [2.0, 6.0], [3.4, 6.4], [3.2, 8.0], [5.8, 9.0], [0.9, 3.3], [3.4, 7.4], [5.4, 8.6], [3.6, 6.4], [2.6, 5.6]]
+const ETH_SKIN_RANGE: Array = [[0.0, 2.0], [0.4, 3.0], [1.4, 4.0], [2.0, 5.0], [2.0, 6.0], [3.4, 6.4], [3.2, 8.0], [5.8, 9.0], [0.9, 3.3], [3.4, 7.4], [5.4, 8.6], [3.6, 6.4], [2.6, 5.6],
+	[0.0, 2.4], [0.6, 3.2], [-0.4, 1.5], [1.2, 4.0], [1.6, 5.8], [1.0, 4.2], [7.4, 10.4], [5.6, 9.4], [4.8, 8.6]]
 ## Subtom: [rosado, neutro, oliva, dourado].
 const ETH_UNDERTONE: Array = [
 	[5, 3, 0.3, 0.5], [3, 4, 1, 1], [0.5, 3, 4, 1.5], [0.3, 3, 3, 2], [0.5, 3, 2, 3], [0.2, 2, 1, 4], [0.5, 4, 1, 3],
 	[0.5, 5, 0.5, 2], [0.3, 2, 1, 5], [0.2, 3, 2, 3], [0.3, 5, 1, 2], [0.3, 3, 1, 4], [0.2, 2, 2, 5],
+	[4, 4, 0.4, 0.6], [1.5, 3.5, 2.5, 1], [6, 2.5, 0.2, 0.3], [0.5, 3, 4, 1.5], [0.4, 3, 3, 2.5], [0.6, 2.5, 1.2, 4],
+	[0.2, 5, 0.3, 1.2], [0.3, 4.5, 0.5, 2], [0.3, 4, 0.8, 3],
 ]
 ## Pesos das cores de cabelo (0..11).
 const ETH_HAIR_COLOR: Array = [
@@ -926,6 +973,20 @@ const ETH_HAIR_COLOR: Array = [
 	[4.5, 1.2, 0.1, 0.0, 0.0, 0.0, 0.0, 0.05, 0.0, 0.0, 0.3, 0.1, 0.03, 0.01],
 	[3.5, 1.5, 0.3, 0.05, 0.02, 0.0, 0.02, 0.04, 0.05, 0.0, 0.4, 0.1, 0.08, 0.008],
 	[3.5, 1.2, 0.2, 0.0, 0.0, 0.0, 0.0, 0.05, 0.05, 0.0, 1.2, 0.05, 0.03, 0.01],
+	# eslava: castanho-claro e loiro-escuro acinzentados ("russo") são a regra; preto é raro
+	[0.4, 1.7, 2.0, 1.7, 1.4, 0.6, 0.15, 0.04, 0.12, 1.3, 0.0, 0.01, 0.3, 0.006],
+	# balcânica: escuro na maioria, com uma parte castanho-clara
+	[1.6, 2.6, 1.5, 0.6, 0.3, 0.12, 0.05, 0.04, 0.2, 0.2, 0.05, 0.02, 0.2, 0.008],
+	# celta: ~10% ruivos e uns 5% acaju (a maior frequência do mundo)
+	[0.4, 2.0, 1.8, 1.2, 0.7, 0.4, 0.8, 0.03, 0.45, 0.4, 0.0, 0.01, 0.25, 0.006],
+	[2.8, 2.2, 0.7, 0.15, 0.04, 0.01, 0.03, 0.03, 0.15, 0.02, 0.2, 0.02, 0.06, 0.006],
+	# norte-africana: escuro, com castanho-claro e até loiro e ruivo entre os berberes
+	[2.8, 1.9, 0.7, 0.25, 0.08, 0.02, 0.05, 0.03, 0.15, 0.0, 0.25, 0.03, 0.08, 0.008],
+	[3.5, 1.4, 0.3, 0.05, 0.02, 0.0, 0.01, 0.03, 0.05, 0.0, 1.0, 0.03, 0.02, 0.006],
+	[5.0, 0.6, 0.05, 0.0, 0.0, 0.0, 0.0, 0.1, 0.0, 0.0, 0.5, 0.2, 0.03, 0.01],
+	# melanésia: crespo loiro natural em parte das ilhas (Salomão, Vanuatu)
+	[4.2, 1.0, 0.2, 0.05, 0.1, 0.15, 0.02, 0.05, 0.05, 0.0, 0.3, 0.15, 0.2, 0.01],
+	[5.0, 0.8, 0.1, 0.0, 0.0, 0.0, 0.0, 0.1, 0.0, 0.0, 0.3, 0.2, 0.04, 0.01],
 ]
 ## Pesos por etnia: [castanho-escuro, castanho, mel, verde, azul, cinza, quase preto, âmbar, avelã,
 ## azul-claro, azul-acinzentado, verde-acinzentado].
@@ -943,41 +1004,82 @@ const ETH_EYES: Array = [
 	[5.0, 1.0, 0.1, 0.0, 0.0, 0.0, 2.0, 0.05, 0.02, 0.0, 0.0, 0.0],
 	[5.0, 1.0, 0.05, 0.0, 0.0, 0.0, 2.0, 0.05, 0.0, 0.0, 0.0, 0.0],
 	[5.0, 1.0, 0.05, 0.0, 0.0, 0.0, 2.0, 0.05, 0.0, 0.0, 0.0, 0.0],
+	# eslava: metade com olho claro (cinza e azul-acinzentado mais que o azul nórdico)
+	[0.7, 1.4, 0.7, 0.9, 1.5, 1.4, 0.05, 0.1, 0.9, 0.9, 1.7, 1.0],
+	[1.8, 2.0, 1.0, 0.9, 0.8, 0.4, 0.15, 0.3, 1.0, 0.3, 0.5, 0.5],
+	# celta: azul-claro e verde mais que em qualquer lugar
+	[0.4, 0.9, 0.5, 1.4, 2.2, 0.8, 0.0, 0.05, 0.6, 1.8, 1.2, 0.9],
+	[2.6, 2.4, 0.9, 0.35, 0.12, 0.08, 0.4, 0.35, 0.8, 0.04, 0.1, 0.2],
+	[3.0, 2.0, 0.7, 0.3, 0.12, 0.05, 0.7, 0.35, 0.6, 0.05, 0.08, 0.15],
+	[4.0, 1.6, 0.4, 0.1, 0.03, 0.02, 1.5, 0.2, 0.3, 0.0, 0.02, 0.06],
+	[5.0, 0.8, 0.03, 0.0, 0.0, 0.0, 3.0, 0.05, 0.0, 0.0, 0.0, 0.0],
+	[5.0, 1.0, 0.05, 0.0, 0.0, 0.0, 2.2, 0.08, 0.0, 0.0, 0.0, 0.0],
+	[5.0, 1.2, 0.08, 0.0, 0.0, 0.0, 2.0, 0.15, 0.02, 0.0, 0.0, 0.0],
 ]
 ## Textura do cabelo: [liso, ondulado, cacheado, crespo].
 const ETH_TEXTURE: Array = [
 	[5, 3, 0.8, 0], [5, 4, 1.4, 0], [3, 4, 2.4, 0.1], [2.5, 4, 3, 0.3], [3, 3.5, 2.5, 0.8], [7, 1.5, 0.3, 0],
 	[0.8, 2, 3.5, 3], [0, 0, 0.4, 8], [9, 1, 0.2, 0], [4, 4, 2, 0.2], [0, 0.4, 3, 6], [1, 3, 4, 1.5], [7, 2, 0.8, 0],
+	[6, 3, 0.5, 0], [4, 4, 1.5, 0.02], [4.5, 3.5, 1.2, 0], [2.8, 4.5, 2.2, 0.05], [1.8, 3.5, 3.5, 1.0], [8, 1.4, 0.3, 0],
+	[0, 0, 0.2, 9], [0, 0.3, 2.5, 7], [0, 0.5, 2.5, 6],
 ]
 ## Cabelo crespo fora de quem tem ascendência africana é raro: parte de quem sorteou crespo nessas
 ## etnias fica com cacheado (sorteio à parte). Chance de continuar crespo, por etnia.
-const COILY_KEEP: Array[float] = [1.0, 1.0, 0.15, 0.6, 0.5, 1.0, 1.0, 1.0, 1.0, 0.15, 1.0, 1.0, 1.0]
+const COILY_KEEP: Array[float] = [1.0, 1.0, 0.15, 0.6, 0.5, 1.0, 1.0, 1.0, 1.0, 0.15, 1.0, 1.0, 1.0,
+	1.0, 0.2, 1.0, 0.15, 0.5, 1.0, 1.0, 1.0, 1.0]
 ## Penteados de cabelo crespo (black power, nagô, twists, dreads, esponja...): chance de alguém de
 ## cada etnia manter um deles quando sorteia; fora da ascendência africana, quase sempre vira um
 ## corte comum.
-const AFRO_STYLE_KEEP: Array[float] = [0.05, 0.06, 0.1, 0.3, 0.45, 0.1, 1.0, 1.0, 0.04, 0.08, 1.0, 0.7, 0.05]
+const AFRO_STYLE_KEEP: Array[float] = [0.05, 0.06, 0.1, 0.3, 0.45, 0.1, 1.0, 1.0, 0.04, 0.08, 1.0, 0.7, 0.05,
+	0.04, 0.05, 0.05, 0.06, 0.35, 0.04, 1.0, 0.8, 1.0]
 const AFRO_STYLE_WORDS: Array[String] = ["crespo", "afro", "black power", "esponja", "twist", "locs", "dread", "nagô",
 	"trança", "box braids", "waves", "high top", "frohawk", "puff", "freeform", "tufinhos"]
 ## Médias por etnia: largura do nariz, altura do dorso do nariz, lábios, abertura dos olhos,
 ## largura do rosto, maçãs do rosto, arco superciliar.
-const ETH_NOSE_W: Array[float] = [0.15, 0.155, 0.16, 0.165, 0.17, 0.18, 0.19, 0.225, 0.17, 0.175, 0.18, 0.21, 0.19]
-const ETH_BRIDGE: Array[float] = [0.95, 0.9, 0.95, 1.05, 0.75, 0.85, 0.6, 0.4, 0.35, 0.8, 0.75, 0.5, 0.4]
-const ETH_LIPS: Array[float] = [0.9, 1.0, 1.05, 1.05, 1.1, 1.0, 1.25, 1.4, 1.0, 1.1, 1.2, 1.3, 1.15]
-const ETH_EYE_OPEN: Array[float] = [1.0, 1.0, 1.0, 1.0, 1.0, 0.9, 1.0, 1.0, 0.7, 1.0, 1.0, 0.9, 0.82]
-const ETH_FACE_W: Array[float] = [1.0, 1.0, 0.99, 0.98, 1.01, 1.04, 1.0, 1.0, 1.05, 0.98, 0.95, 1.07, 1.03]
-const ETH_CHEEK: Array[float] = [0.9, 0.95, 1.0, 1.0, 1.05, 1.2, 1.05, 1.05, 1.2, 1.0, 1.1, 1.15, 1.15]
-const ETH_RIDGE: Array[float] = [1.0, 0.95, 0.95, 1.05, 0.85, 0.8, 0.8, 0.8, 0.35, 0.9, 0.8, 0.9, 0.5]
-const ETH_MONOLID: Array[float] = [0.0, 0.0, 0.0, 0.0, 0.02, 0.15, 0.03, 0.0, 0.72, 0.0, 0.0, 0.05, 0.35]
-const ETH_AQUILINE: Array[float] = [0.1, 0.12, 0.2, 0.35, 0.08, 0.3, 0.05, 0.02, 0.0, 0.15, 0.18, 0.02, 0.0]
+const ETH_NOSE_W: Array[float] = [0.15, 0.155, 0.16, 0.165, 0.17, 0.18, 0.19, 0.225, 0.17, 0.175, 0.18, 0.21, 0.19,
+	0.158, 0.158, 0.15, 0.163, 0.168, 0.172, 0.205, 0.228, 0.19]
+const ETH_BRIDGE: Array[float] = [0.95, 0.9, 0.95, 1.05, 0.75, 0.85, 0.6, 0.4, 0.35, 0.8, 0.75, 0.5, 0.4,
+	0.82, 1.08, 0.88, 1.15, 0.98, 0.6, 0.55, 0.62, 0.68]
+const ETH_LIPS: Array[float] = [0.9, 1.0, 1.05, 1.05, 1.1, 1.0, 1.25, 1.4, 1.0, 1.1, 1.2, 1.3, 1.15,
+	0.93, 1.0, 0.9, 1.03, 1.12, 1.0, 1.32, 1.3, 1.22]
+const ETH_EYE_OPEN: Array[float] = [1.0, 1.0, 1.0, 1.0, 1.0, 0.9, 1.0, 1.0, 0.7, 1.0, 1.0, 0.9, 0.82,
+	0.95, 1.0, 1.0, 1.0, 1.0, 0.8, 1.0, 0.95, 1.0]
+const ETH_FACE_W: Array[float] = [1.0, 1.0, 0.99, 0.98, 1.01, 1.04, 1.0, 1.0, 1.05, 0.98, 0.95, 1.07, 1.03,
+	1.035, 0.985, 1.0, 0.97, 0.98, 1.06, 0.94, 1.03, 0.95]
+const ETH_CHEEK: Array[float] = [0.9, 0.95, 1.0, 1.0, 1.05, 1.2, 1.05, 1.05, 1.2, 1.0, 1.1, 1.15, 1.15,
+	1.1, 1.0, 0.9, 0.98, 1.0, 1.22, 1.1, 1.05, 1.08]
+const ETH_RIDGE: Array[float] = [1.0, 0.95, 0.95, 1.05, 0.85, 0.8, 0.8, 0.8, 0.35, 0.9, 0.8, 0.9, 0.5,
+	0.95, 1.12, 0.95, 1.1, 1.0, 0.6, 0.85, 1.15, 0.85]
+const ETH_MONOLID: Array[float] = [0.0, 0.0, 0.0, 0.0, 0.02, 0.15, 0.03, 0.0, 0.72, 0.0, 0.0, 0.05, 0.35,
+	0.03, 0.0, 0.0, 0.0, 0.0, 0.45, 0.0, 0.0, 0.0]
+const ETH_AQUILINE: Array[float] = [0.1, 0.12, 0.2, 0.35, 0.08, 0.3, 0.05, 0.02, 0.0, 0.15, 0.18, 0.02, 0.0,
+	0.07, 0.3, 0.1, 0.4, 0.25, 0.12, 0.05, 0.2, 0.12]
 ## Genética de barba (média) e de calvície (média).
-const ETH_BEARD_GENE: Array[float] = [0.75, 0.8, 0.9, 0.95, 0.7, 0.35, 0.62, 0.55, 0.16, 0.88, 0.45, 0.55, 0.18]
-const ETH_BALD_GENE: Array[float] = [0.45, 0.45, 0.45, 0.42, 0.35, 0.25, 0.35, 0.32, 0.25, 0.38, 0.3, 0.3, 0.25]
+const ETH_BEARD_GENE: Array[float] = [0.75, 0.8, 0.9, 0.95, 0.7, 0.35, 0.62, 0.55, 0.16, 0.88, 0.45, 0.55, 0.18,
+	0.74, 0.88, 0.72, 0.96, 0.9, 0.38, 0.42, 0.78, 0.5]
+const ETH_BALD_GENE: Array[float] = [0.45, 0.45, 0.45, 0.42, 0.35, 0.25, 0.35, 0.32, 0.25, 0.38, 0.3, 0.3, 0.25,
+	0.45, 0.47, 0.45, 0.5, 0.42, 0.3, 0.3, 0.35, 0.3]
+## Traços das etnias 13+ que as antigas não tinham (nas antigas ficam neutros, para os rostos
+## que já existem não mudarem): altura do rosto, espessura da sobrancelha, comprimento do nariz,
+## largura da mandíbula e inclinação dos olhos.
+const ETH_FACE_H: Array[float] = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+	0.985, 1.03, 1.0, 1.02, 1.01, 0.985, 1.035, 0.99, 1.025]
+const ETH_BROW_T: Array[float] = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+	0.95, 1.08, 0.88, 1.15, 1.05, 0.88, 0.95, 1.0, 0.95]
+const ETH_NOSE_LEN: Array[float] = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+	0.97, 1.05, 0.98, 1.06, 1.02, 0.96, 1.0, 0.98, 1.02]
+const ETH_JAW: Array[float] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	0.02, 0.03, 0.0, 0.0, 0.0, 0.02, -0.02, 0.02, -0.02]
+const ETH_EYE_TILT: Array[float] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	0.006, 0.0, 0.0, 0.0, 0.0, 0.022, 0.0, 0.0, 0.0]
+## Etnias de pele e cabelo claros (loiro natural por baixo da tinta, sardas).
+const LIGHT_ETH: Array[int] = [E_NOR, E_EUR, E_SLV, E_CEL]
 
 
 static func style_group(eth: int) -> int:
-	if eth == E_AFR or eth == E_HAE:
+	if eth in [E_AFR, E_HAE, E_NIL, E_MEL, E_SAH]:
 		return 1
-	if eth == E_EAS or eth == E_SEA:
+	if eth in [E_EAS, E_SEA, E_CAS]:
 		return 2
 	return 0
 
@@ -1099,7 +1201,8 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	f["brow_len"] = rng.randf_range(0.4, 0.5)
 	f["brow_gap"] = rng.randf_range(0.17, 0.23)
 	f["brow_dens"] = rng.randf_range(0.55, 1.0)
-	f["unibrow"] = rng.randf() < 0.04 and e in [E_ARB, E_MED, E_SAS]
+	var ub := rng.randf()
+	f["unibrow"] = (ub < 0.04 and e in [E_ARB, E_MED, E_SAS, E_BAL, E_NAF]) or (ub < 0.09 and e == E_CAU)
 
 	# --- Nariz ------------------------------------------------------------------
 	f["nose_w"] = rng.randf_range(0.85, 1.2) * float(ETH_NOSE_W[e]) + aging * 0.01
@@ -1276,7 +1379,7 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 		style = clampi(int(look["hs"]), 0, HAIR_STYLES.size() - 1)
 		crown = minf(crown, 0.3)
 	if hc_i == HC_PLATINUM and not look.has("hc") and style in [H_LONG, H_SURFER, H_LONG_CURLY, H_MIDPART, H_PONYTAIL, H_BUN]:
-		hc_i = 5 if e <= E_EUR else 1
+		hc_i = 5 if e in LIGHT_ETH else 1
 		f["hair_i"] = hc_i
 	if style in [H_BLEACHED, H_BLEACH_DESIGN] and not look.has("hc"):
 		hc_i = HC_PLATINUM
@@ -1305,9 +1408,9 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	var xrng := RandomNumberGenerator.new()
 	xrng.seed = hash([seed_value, "estilo"])
 	var slit_p := 0.07 * (1.8 if age < 25 else (1.0 if age < 31 else 0.3))
-	if e in [E_AFR, E_MIX, E_LAT, E_HAE]:
+	if e in [E_AFR, E_MIX, E_LAT, E_HAE, E_NIL, E_SAH, E_MEL]:
 		slit_p *= 1.6
-	elif e in [E_EAS, E_SEA, E_NOR]:
+	elif e in [E_EAS, E_SEA, E_NOR, E_CAS, E_CEL]:
 		slit_p *= 0.5
 	var slit := 0
 	if xrng.randf() < slit_p:
@@ -1317,9 +1420,9 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	f["brow_slit"] = slit
 	# Tatuagem visível no pescoço/ombro: comum no futebol de hoje (menos no leste asiático e no mundo árabe)
 	var tat_p := 0.13 * (1.4 if age >= 21 and age <= 33 else 0.55)
-	if e in [E_LAT, E_MIX, E_AFR, E_HAE, E_EUR, E_NOR, E_MED]:
+	if e in [E_LAT, E_MIX, E_AFR, E_HAE, E_EUR, E_NOR, E_MED, E_SLV, E_BAL, E_CEL, E_NIL, E_SAH]:
 		tat_p *= 1.3
-	elif e in [E_EAS, E_SEA, E_ARB, E_SAS]:
+	elif e in [E_EAS, E_SEA, E_ARB, E_SAS, E_CAS]:
 		tat_p *= 0.45
 	var tattoo := 1 + RngUtil.weighted_index(xrng, [0.16, 0.12, 0.1, 0.08, 0.1, 0.09, 0.07, 0.07, 0.06, 0.05, 0.06, 0.04]) if xrng.randf() < tat_p else 0
 	if look.has("tt"):
@@ -1327,7 +1430,7 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	f["tattoo"] = tattoo
 	f["tattoo_side"] = -1.0 if xrng.randf() < 0.5 else 1.0
 	f["tattoo_seed"] = xrng.randi()
-	var hl_p := 0.05 * (1.5 if age < 27 else 0.6) * (1.4 if e in [E_MIX, E_LAT, E_AFR] else 1.0)
+	var hl_p := 0.05 * (1.5 if age < 27 else 0.6) * (1.4 if e in [E_MIX, E_LAT, E_AFR, E_NIL, E_SAH] else 1.0)
 	f["highlights"] = xrng.randf() < hl_p and hc_i in [0, 1, 2, 3, 10, HC_HONEY] and style not in [H_BALD, H_BUZZ, H_CORNROWS, H_WAVES]
 	if style == H_FROSTED or style == H_FROSTED_CURLS or style == 178 or style == 181 or style == 187:
 		f["tips"] = true
@@ -1358,13 +1461,13 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 			w *= 3.0 if cap < 0.6 else 0.3
 		if i == B_WISPY or i == B_PEACH:
 			w *= 3.0 if cap < 0.35 else 0.1
-		if (e == E_EAS or e == E_SEA) and i in [B_FULL, B_LONG, B_MUTTON, B_VERDI, B_BANDHOLZ, B_WALRUS, B_SCRUFFY, B_FORKED, B_LONG_BOX]:
-			w *= 0.3
+		if (e == E_EAS or e == E_SEA or e == E_CAS) and i in [B_FULL, B_LONG, B_MUTTON, B_VERDI, B_BANDHOLZ, B_WALRUS, B_SCRUFFY, B_FORKED, B_LONG_BOX]:
+			w *= 0.3 if e != E_CAS else 0.5
 		if i == B_CHIN_PUFF:
 			w *= 2.0 if cap < 0.55 else 0.4
 		if age >= 30 and i in [B_WALRUS, B_HANDLEBAR, B_VERDI, B_WALRUS_SHORT, B_HANDLEBAR_BEARD, B_FORKED]:
 			w *= 1.6
-		if (e == E_ARB or e == E_SAS) and i in [B_FULL, B_SHORT, B_BOXED, B_CURTAIN, B_MEDIUM, B_FADED, B_ROUNDED,
+		if e in [E_ARB, E_SAS, E_CAU, E_NAF] and i in [B_FULL, B_SHORT, B_BOXED, B_CURTAIN, B_MEDIUM, B_FADED, B_ROUNDED,
 				B_SHORT_SHARP, B_MEDIUM_CUT]:
 			w *= 1.8
 		if age >= 33 and i in [B_FULL, B_SHORT, B_HEAVY_STUBBLE]:
@@ -1374,6 +1477,8 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 			w *= 2.2 if tex >= T_CURLY else 0.08
 		if (e == E_EAS or e == E_SEA) and i != B_NONE and i not in [B_WISPY, B_PEACH, B_STUBBLE]:
 			w *= 0.4 # leste e sudeste asiático: barba rala e pouco comum no futebol
+		elif e == E_CAS and i != B_NONE and i not in [B_WISPY, B_PEACH, B_STUBBLE]:
+			w *= 0.65
 		bw.append(w)
 	var beard := RngUtil.weighted_index(phase_rng, bw.slice(0, BD_V1))
 	if beard < 0:
@@ -1390,7 +1495,7 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	f["shadow"] = cap * dark_hair * rng.randf_range(0.25, 0.7) if beard == B_NONE else cap * dark_hair * 0.35
 	var natural := hc_i
 	if hc_i in DYED:
-		natural = 4 if e <= E_EUR and xrng.randf() < 0.3 else 1
+		natural = 4 if e in LIGHT_ETH and xrng.randf() < 0.3 else 1
 	elif hc_i == HC_TIPS:
 		natural = 0
 	var beard_col := HAIR_COLORS[natural].darkened(0.06)
@@ -1403,6 +1508,12 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	f["aging"] = aging
 	f["youth"] = youth
 	f["freckles"] = (e == E_NOR or e == E_EUR) and sk < 1.8 and rng.randf() < (0.35 if hc_i == 6 else 0.18)
+	if e == E_CEL or e == E_SLV:
+		# Sardas: muito comuns na pele celta (e quase certas no ruivo); sorteio à parte
+		var frng := RandomNumberGenerator.new()
+		frng.seed = hash([seed_value, "sardas"])
+		var fp := (0.65 if hc_i in [6, 8] else 0.38) if e == E_CEL else (0.3 if hc_i in [6, 8] else 0.1)
+		f["freckles"] = sk < 2.0 and frng.randf() < fp
 	f["mole"] = rng.randf() < 0.14
 	f["mole_pos"] = Vector2(rng.randf_range(-0.6, 0.6), rng.randf_range(0.0, 0.7))
 	f["scar"] = rng.randf() < 0.05
@@ -1425,8 +1536,117 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	_apply_aging(f, seed_value, age)
 	_apply_expression(f, seed_value, age, look)
 	_anatomy_details(f, seed_value)
+	_eth_traits(f)
+	_individuality(f, seed_value)
 	_proportion_floor(f)
 	return f
+
+
+## Traços médios das etnias 13+ que as tabelas antigas não tinham (neutros nas antigas).
+static func _eth_traits(f: Dictionary) -> void:
+	var e: int = f["eth"]
+	if e < E_SLV:
+		return
+	f["fh"] = float(f["fh"]) * ETH_FACE_H[e]
+	f["brow_t"] = float(f["brow_t"]) * ETH_BROW_T[e]
+	f["nose_len"] = float(f["nose_len"]) * ETH_NOSE_LEN[e]
+	f["jaw"] = float(f["jaw"]) + ETH_JAW[e]
+	f["eye_tilt"] = float(f["eye_tilt"]) + ETH_EYE_TILT[e]
+
+
+## Cada pessoa diferente das outras. Num rosto de verdade os traços variam juntos, em poucos
+## eixos (é o que mostram os estudos de antropometria facial): robusto ↔ delicado (mandíbula,
+## arco da sobrancelha, nariz, lábios), longo ↔ curto (altura do rosto, nariz, testa, queixo),
+## meio do rosto largo ↔ estreito (olhos afastados, nariz e boca largos) e cheio ↔ seco (bochechas,
+## lábios, maçãs). Cada um ganha uma posição em cada eixo e, por cima, um pouco de variação solta
+## em cada traço. Uma parte tem o rosto "comum", outra tem traços bem marcados; a beleza puxa para
+## a média sem zerar. Sorteio próprio (os outros traços não mudam) e limites que o desenho aguenta.
+static func _individuality(f: Dictionary, seed_value: int) -> void:
+	var r := RandomNumberGenerator.new()
+	r.seed = hash([seed_value, "individuo"])
+	var d := r.randf_range(0.45, 0.85)
+	var roll := r.randf()
+	if roll < 0.24:
+		d = r.randf_range(0.9, 1.35) # traços bem marcados
+	elif roll < 0.38:
+		d = r.randf_range(0.2, 0.45) # rosto comum
+	d *= lerpf(1.0, 0.72, smoothstep(0.6, 1.0, float(f["beauty"])))
+	f["distinct"] = d
+	var rb := clampf(r.randfn(0.0, 1.0), -2.2, 2.2) * d # robusto
+	var lg := clampf(r.randfn(0.0, 1.0), -2.2, 2.2) * d # longo
+	var wd := clampf(r.randfn(0.0, 1.0), -2.2, 2.2) * d # meio do rosto largo
+	var fl := clampf(r.randfn(0.0, 1.0), -2.2, 2.2) * d # cheio
+	# Robusto ↔ delicado
+	f["jaw"] = float(f["jaw"]) + 0.05 * rb
+	f["jaw_v"] = float(f["jaw_v"]) + 0.02 * rb
+	f["chin_sq"] = maxf(1.05, float(f["chin_sq"]) + 0.45 * rb)
+	f["ridge"] = float(f["ridge"]) * (1.0 + 0.22 * rb)
+	f["deep"] = float(f["deep"]) * (1.0 + 0.12 * rb)
+	f["nose_w"] = float(f["nose_w"]) * (1.0 + 0.08 * rb)
+	f["nose_len"] = float(f["nose_len"]) * (1.0 + 0.04 * rb)
+	f["bridge"] = float(f["bridge"]) * (1.0 + 0.14 * rb)
+	f["lip_u"] = float(f["lip_u"]) * (1.0 - 0.09 * rb)
+	f["eye_h"] = float(f["eye_h"]) * (1.0 - 0.06 * rb)
+	f["brow_t"] = float(f["brow_t"]) * (1.0 + 0.18 * rb)
+	f["brow_gap"] = float(f["brow_gap"]) - 0.015 * rb
+	f["neck_w"] = float(f["neck_w"]) + 0.03 * rb
+	# Longo ↔ curto
+	f["fh"] = float(f["fh"]) * (1.0 + 0.05 * lg)
+	f["fw"] = float(f["fw"]) * (1.0 - 0.02 * lg)
+	f["nose_len"] = float(f["nose_len"]) * (1.0 + 0.08 * lg)
+	f["mouth_y"] = float(f["mouth_y"]) + 0.015 * lg
+	f["chin_len"] = float(f.get("chin_len", 0.0)) + 0.025 * lg
+	f["hairline"] = float(f["hairline"]) - 0.03 * lg
+	f["eye_y"] = float(f["eye_y"]) - 0.012 * lg
+	# Meio do rosto largo ↔ estreito
+	f["eye_dx"] = float(f["eye_dx"]) + 0.022 * wd
+	f["nose_w"] = float(f["nose_w"]) * (1.0 + 0.07 * wd)
+	f["mouth_w"] = float(f["mouth_w"]) * (1.0 + 0.05 * wd)
+	f["cheek_w"] = float(f["cheek_w"]) * (1.0 + 0.025 * wd)
+	f["fw"] = float(f["fw"]) * (1.0 + 0.03 * wd)
+	# Cheio ↔ seco
+	f["fat"] = float(f["fat"]) + 0.1 * fl
+	f["lip_l"] = float(f["lip_l"]) * (1.0 + 0.1 * fl)
+	f["lip_u"] = float(f["lip_u"]) * (1.0 + 0.08 * fl)
+	f["cheekbone"] = float(f["cheekbone"]) * (1.0 - 0.1 * fl)
+	f["eye_h"] = float(f["eye_h"]) * (1.0 - 0.03 * fl)
+	f["nose_tip"] = float(f["nose_tip"]) * (1.0 + 0.1 * fl)
+	# Variação solta de cada traço
+	var k := d * 0.7
+	var gs := func() -> float: return clampf(r.randfn(0.0, 1.0), -2.2, 2.2) * k
+	f["eye_w"] = float(f["eye_w"]) * (1.0 + 0.05 * gs.call())
+	f["eye_h"] = float(f["eye_h"]) * (1.0 + 0.08 * gs.call())
+	f["eye_tilt"] = float(f["eye_tilt"]) + 0.01 * gs.call()
+	f["eye_y"] = float(f["eye_y"]) + 0.012 * gs.call()
+	f["brow_arch"] = maxf(0.0, float(f["brow_arch"]) + 0.012 * gs.call())
+	f["brow_tilt"] = float(f["brow_tilt"]) + 0.01 * gs.call()
+	f["brow_len"] = float(f["brow_len"]) * (1.0 + 0.06 * gs.call())
+	f["nose_tip"] = float(f["nose_tip"]) * (1.0 + 0.1 * gs.call())
+	f["nose_up"] = clampf(float(f.get("nose_up", 0.0)) + 0.12 * gs.call(), 0.0, 0.5)
+	f["mouth_w"] = float(f["mouth_w"]) * (1.0 + 0.05 * gs.call())
+	f["bow"] = clampf(float(f["bow"]) * (1.0 + 0.15 * gs.call()), 0.1, 1.2)
+	f["mouth_y"] = float(f["mouth_y"]) + 0.008 * gs.call()
+	f["ear"] = float(f["ear"]) * (1.0 + 0.05 * gs.call())
+	f["ear_out"] = clampf(float(f["ear_out"]) + 0.25 * maxf(0.0, gs.call() - 0.4), 0.0, 1.0)
+	f["chin_width"] = clampf(float(f.get("chin_width", 1.0)) * (1.0 + 0.08 * gs.call()), 0.75, 1.3)
+	f["temple_width"] = clampf(float(f.get("temple_width", 1.0)) * (1.0 + 0.05 * gs.call()), 0.85, 1.12)
+	f["hairline"] = float(f["hairline"]) + 0.02 * gs.call()
+	# Limites que o desenho aguenta (e que um rosto humano tem)
+	f["eye_dx"] = clampf(float(f["eye_dx"]), 0.36, 0.52)
+	f["eye_y"] = clampf(float(f["eye_y"]), -0.09, 0.05)
+	f["eye_w"] = clampf(float(f["eye_w"]), 0.17, 0.29)
+	f["eye_h"] = clampf(float(f["eye_h"]), 0.06, 0.15)
+	f["nose_len"] = clampf(float(f["nose_len"]), 0.22, 0.4)
+	f["nose_w"] = clampf(float(f["nose_w"]), 0.11, 0.31)
+	f["mouth_y"] = clampf(float(f["mouth_y"]), maxf(float(f["nose_len"]) + 0.17, 0.5), 0.66)
+	f["mouth_w"] = clampf(float(f["mouth_w"]), 0.22, 0.43)
+	f["brow_gap"] = clampf(float(f["brow_gap"]), 0.13, 0.27)
+	f["chin_len"] = clampf(float(f["chin_len"]), -0.08, 0.09)
+	f["lip_u"] = clampf(float(f["lip_u"]), 0.018, 0.078)
+	f["lip_l"] = clampf(float(f["lip_l"]), 0.03, 0.115)
+	f["jaw_v"] = clampf(float(f["jaw_v"]), 0.42, 0.72)
+	f["hairline"] = clampf(float(f["hairline"]), -0.7, -0.44)
+	f["brow_t"] = clampf(float(f["brow_t"]), 0.03, 0.12)
 
 
 ## Cabeça humana tem proporção: os ajustes (magro, rosto estreito, alongado, etnia) somados
@@ -1434,10 +1654,10 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 ## entre ~0,75 e 0,9) e mandíbula e maçãs sem afinar além do plausível.
 static func _proportion_floor(f: Dictionary) -> void:
 	var fh := float(f["fh"])
-	f["fw"] = clampf(float(f["fw"]), fh * 0.76, fh * 0.88)
-	f["jaw"] = clampf(float(f["jaw"]), 0.72, 0.95)
-	f["fat"] = clampf(float(f["fat"]), 0.0, 0.7)
-	f["cheek_w"] = maxf(float(f["cheek_w"]), 0.97)
+	f["fw"] = clampf(float(f["fw"]), fh * 0.74, fh * 0.91)
+	f["jaw"] = clampf(float(f["jaw"]), 0.68, 0.98)
+	f["fat"] = clampf(float(f["fat"]), 0.0, 0.75)
+	f["cheek_w"] = maxf(float(f["cheek_w"]), 0.96)
 
 
 ## Corpo: a maioria é atleta, mas há rostos muito finos (chupados, maçãs saltadas) e gordos
@@ -2322,15 +2542,19 @@ static func _style_weights(e: int, tex: int, age: int) -> Array:
 	for i in HAIR_STYLES.size():
 		var w: float = float((STYLE_TEX_W[i] as Array)[tex]) * real[i]
 		sw.append(w)
-	if e == E_EAS or e == E_SEA:
+	if e == E_EAS or e == E_SEA or e == E_CAS:
 		for i in [H_FRINGE, H_SPIKY, H_MIDPART, H_BOWL, H_CROP, H_TEXT_FRINGE, H_LONG_SIDE_FRINGE, H_CURTAIN, H_LONG_FRINGE, H_BOB]:
-			sw[i] = float(sw[i]) * 2.0
-	if e == E_PAC:
+			sw[i] = float(sw[i]) * (2.0 if e != E_CAS else 1.4)
+	if e == E_PAC or e == E_MEL:
 		for i in [H_LONG_CURLY, H_BUN, H_TOPKNOT, H_CURLY]:
 			sw[i] = float(sw[i]) * 2.0
-	if e == E_ARB or e == E_MED or e == E_SAS:
+	if e in [E_ARB, E_MED, E_SAS, E_CAU, E_NAF, E_BAL]:
 		for i in [H_SLICK, H_FADE, H_UNDERCUT, H_WAVY_BACK, H_WET_BACK, H_IVY]:
 			sw[i] = float(sw[i]) * 1.5
+	if e in [E_SLV, E_BAL, E_CAU]:
+		# Leste europeu, Bálcãs e Cáucaso: máquina, militar e curto batido são a regra no futebol
+		for i in [H_BUZZ, H_CREW, H_SHORT, H_BUZZ_FADE, H_SKIN_FADE, H_CAESAR]:
+			sw[i] = float(sw[i]) * 1.4
 	if age >= 32:
 		for i in [H_MOHAWK, H_HIGHTOP, H_BRAIDS, H_TWISTS, H_SPIKY, H_BOWL, H_TOPKNOT, H_MULLET, H_EDGAR,
 				H_BLEACHED, H_FADE_MULLET, H_FAUX_HAWK, H_CURLY_FRINGE, H_GEL_SPIKES, H_BRAID_HAWK, H_SIDECUT,

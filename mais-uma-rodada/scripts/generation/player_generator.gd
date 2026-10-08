@@ -243,6 +243,22 @@ static func _height_shift(eth: int) -> float:
 			return 2.0 # pac
 		12:
 			return -3.0 # sea
+		13:
+			return 2.0 # slv
+		14:
+			return 3.5 # bal (dos povos mais altos do mundo)
+		15:
+			return 0.5 # cel
+		17:
+			return -0.5 # naf
+		18:
+			return -1.5 # cas
+		19:
+			return 4.0 # nil
+		20:
+			return -1.5 # mel
+		21:
+			return 1.5 # sah
 	return 0.0
 
 
