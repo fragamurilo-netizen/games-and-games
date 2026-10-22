@@ -163,6 +163,6 @@ válida do Alpha até concluir essa configuração.
 
 Na conferência final, a Play já mostrava as mudanças sendo revisadas, incluindo os
 20 países. O controle do navegador passou a exigir atualização da extensão ChatGPT
-no Chrome ao tentar salvar capturas adicionais; não foi possível concluir o vínculo
+no Chrome ao finalizar a navegação; não foi possível concluir o vínculo
 do grupo. O comprovante do post do X foi salvo antes desse bloqueio em
 `publicacao-local/x-convite-publicado.png`.
