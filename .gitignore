@@ -17,3 +17,6 @@ build/
 Thumbs.db
 *.tmp
 .claude/worktrees/
+
+# Evidências e artefatos desta preparação local
+publicacao-local/
