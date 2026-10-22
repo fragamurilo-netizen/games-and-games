@@ -72,7 +72,22 @@ Convite pronto para compartilhar quando o teste e o link de adesão estiverem di
 > a versão do Android e os passos para reproduzir. Não precisa deixar avaliação positiva;
 > quero feedback sincero para melhorar o jogo.
 
-Nenhum convite foi enviado a terceiros nesta preparação.
+Após pedido explícito do proprietário, foram publicados três convites no Reddit em
+22/10/2026 pela conta `u/muriloves`. Os textos informam que a versão está em análise,
+o teste é limitado ao Brasil, o Alpha é gratuito e os interessados devem comentar
+ou enviar mensagem privada. Não solicitaram e-mails em comentários públicos.
+
+- JogosIndiesBR, flair Projetos Pessoais:
+  https://www.reddit.com/r/JogosIndiesBR/comments/1xcqglg/procuro_testadores_no_brasil_para_o_mais_uma/
+- AndroidClosedTesting:
+  https://www.reddit.com/r/AndroidClosedTesting/comments/1xcqhnr/brazilbased_testers_wanted_for_mais_uma_rodada_a/
+- alphaandbetausers:
+  https://www.reddit.com/r/alphaandbetausers/comments/1xcqjbq/looking_for_brazilbased_android_players_to_test/
+
+Os três posts foram conferidos nos endereços finais, sem aviso de remoção nessa
+consulta. Capturas estão em `publicacao-local/reddit-*.png` (arquivos locais ignorados
+pelo Git). Isso comprova divulgação, não adesões reais ao teste. Não houve promessa
+de avaliação positiva, pagamento, acesso vitalício ou troca de testes.
 
 ## Estado final do envio
 
@@ -98,5 +113,7 @@ aprovação nem disponibilidade pública do aplicativo.
   desofuscação e de símbolos de depuração nativos. Não houve upload desses arquivos.
 - Mudanças de código: https://github.com/fragamurilo-netizen/games-and-games/pull/75 (rascunho).
 
-Não foram recrutados nem simulados os 12 participantes. Recrutamento, uso real do jogo, feedback
-e os 14 dias contínuos ainda são necessários. Nenhuma automação de acompanhamento foi criada.
+Ainda não há confirmação de 12 participantes inscritos. Após os convites no Reddit,
+é necessário organizar os interessados, habilitar acesso quando o teste estiver
+publicado e obter uso real, feedback e os 14 dias contínuos. Nenhuma automação de
+acompanhamento foi criada.
