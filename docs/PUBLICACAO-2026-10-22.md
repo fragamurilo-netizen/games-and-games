@@ -98,7 +98,11 @@ aprovação nem disponibilidade pública do aplicativo.
 
 - Faixa: teste fechado Alpha, versão `1.0.0 (22) - Alpha sem trava`.
 - Apenas o bundle 22 está na versão; o bundle 21 foi retirado do rascunho e continua na biblioteca.
-- País selecionado: Brasil.
+- País inicial: Brasil. Com autorização posterior do proprietário, o Alpha foi ampliado
+  para 20 países: Brasil, Estados Unidos, Canadá, Reino Unido, Irlanda, Índia, Austrália,
+  Nova Zelândia, Portugal, Espanha, Argentina, México, Alemanha, França, Itália,
+  Países Baixos, Polônia, Filipinas, Indonésia e África do Sul. A mudança foi enviada
+  para revisão, com confirmação de reinício da análise, e aparece em Alterações em análise.
 - Lista selecionada: `Alpha Mais Uma Rodada`, inicialmente somente com a conta do proprietário.
   Uma conta na lista não equivale a participação aceita nem inicia sozinha a contagem de 14 dias.
 - Link de adesão exibido pelo Console: https://play.google.com/apps/testing/mais.uma.rodada
@@ -117,3 +121,48 @@ Ainda não há confirmação de 12 participantes inscritos. Após os convites no
 é necessário organizar os interessados, habilitar acesso quando o teste estiver
 publicado e obter uso real, feedback e os 14 dias contínuos. Nenhuma automação de
 acompanhamento foi criada.
+
+## Divulgação ampliada e adesão
+
+Após novo pedido do proprietário, foram adicionadas capturas existentes do jogo aos
+posts de JogosIndiesBR (partida, tática e negociação) e AndroidClosedTesting (partida e
+tática). O post de alphaandbetausers, cujo editor não oferece upload de imagem, recebeu
+link para a galeria. Os textos foram atualizados para explicar os 20 países, ainda
+dependentes de aprovação; títulos antigos com Brasil não podem ser editados no Reddit.
+
+Novas publicações confirmadas:
+
+- X/Twitter, conta `@murilopsx`, com três imagens:
+  https://x.com/murilopsx/status/2113338246797377855
+- Comunidade oficial OneMoreMatch, com três imagens:
+  https://www.reddit.com/r/OneMoreMatch/comments/1xcr527/android_alpha_update_looking_for_12_volunteer/
+- Tópico de descoberta de testadores do GooglePlayDeveloper:
+  https://www.reddit.com/r/GooglePlayDeveloper/comments/1x41xot/comment/19rhw4lpd3yo2/
+
+Abordagens em ofertas públicas, sem compromisso de pagamento ou troca de testes:
+
+- `u/indieMerlovian`, que oferece testes curtos gratuitos de jogos Android:
+  https://www.reddit.com/r/playtesters/comments/1w2h6ec/comment/19rhva6yg4qn5/
+- `u/Overall-Advice-9943`, que procura apps e jogos para conhecer/avaliar:
+  https://www.reddit.com/r/appdev/comments/1xb4gv1/comment/19rhvcdxvaq4g/
+- Resposta a `u/Undeon`, que comentou no convite AndroidClosedTesting com orientações
+  sobre países, Google Groups e seu app Owlybooks:
+  https://www.reddit.com/r/AndroidClosedTesting/comments/1xcqhnr/comment/19rhw4lvtckg1/
+
+Uma resposta com dicas não é inscrição confirmada. Não houve adesão ao teste de
+Owlybooks nem promessa de teste recíproco. Não há comprovação dos 12 participantes.
+
+Tentativa de Google Group próprio: nome `Mais Uma Rodada - Android Alpha Testers`,
+prefixo pretendido `mais-uma-rodada-testers`, adesão voluntária aberta, descoberta pública,
+conversas para participantes e lista de membros/publicação restritas ao proprietário.
+A criação não foi concluída: o Google mostrou CAPTCHA obrigatório em branco, com
+Criar grupo desativado, em duas tentativas. O proprietário foi avisado e autorizou
+nova tentativa. Não divulgar esse endereço como grupo existente nem vinculá-lo à Play
+antes de confirmar a criação. A lista de e-mails original continua sendo a seleção
+válida do Alpha até concluir essa configuração.
+
+Na conferência final, a Play já mostrava as mudanças sendo revisadas, incluindo os
+20 países. O controle do navegador passou a exigir atualização da extensão ChatGPT
+no Chrome ao tentar salvar capturas adicionais; não foi possível concluir o vínculo
+do grupo. O comprovante do post do X foi salvo antes desse bloqueio em
+`publicacao-local/x-convite-publicado.png`.
