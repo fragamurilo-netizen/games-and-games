@@ -73,3 +73,30 @@ Convite pronto para compartilhar quando o teste e o link de adesão estiverem di
 > quero feedback sincero para melhorar o jogo.
 
 Nenhum convite foi enviado a terceiros nesta preparação.
+
+## Estado final do envio
+
+Em 22/10/2026, o Console confirmou **Alterações em análise** após o envio das 15 mudanças
+associadas ao primeiro lançamento Alpha. As verificações rápidas automáticas ainda estavam
+em execução (prazo mostrado: até 15 minutos), antes da revisão do Google. Isso não confirma
+aprovação nem disponibilidade pública do aplicativo.
+
+- Faixa: teste fechado Alpha, versão `1.0.0 (22) - Alpha sem trava`.
+- Apenas o bundle 22 está na versão; o bundle 21 foi retirado do rascunho e continua na biblioteca.
+- País selecionado: Brasil.
+- Lista selecionada: `Alpha Mais Uma Rodada`, inicialmente somente com a conta do proprietário.
+  Uma conta na lista não equivale a participação aceita nem inicia sozinha a contagem de 14 dias.
+- Link de adesão exibido pelo Console: https://play.google.com/apps/testing/mais.uma.rodada
+  (ainda desabilitado durante esta preparação; depende da publicação do teste).
+- Canal de feedback: https://github.com/fragamurilo-netizen/games-and-games/issues
+- Classificação IARC preenchida com autorização explícita para os termos e contato.
+  Foram declaradas referências incidentais a apostas e referências a álcool nas marcas e
+  narrativas; classificação calculada para o Brasil: **10 anos**. Público-alvo configurado: 13+.
+  Na versão de produção com compras, atualizar também a declaração de compras da IARC.
+- Todos os formulários de conteúdo necessários foram preenchidos, incluindo ID de publicidade.
+- Validação da versão no Console: sem erros bloqueantes; avisos sobre ausência de arquivo de
+  desofuscação e de símbolos de depuração nativos. Não houve upload desses arquivos.
+- Mudanças de código: https://github.com/fragamurilo-netizen/games-and-games/pull/75 (rascunho).
+
+Não foram recrutados nem simulados os 12 participantes. Recrutamento, uso real do jogo, feedback
+e os 14 dias contínuos ainda são necessários. Nenhuma automação de acompanhamento foi criada.
