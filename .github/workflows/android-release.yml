@@ -63,6 +63,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p android/build
+          touch android/.gdignore
           unzip -q "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/android_source.zip" -d android/build
           echo "${GODOT_VERSION}.stable" > android/.build_version
 
