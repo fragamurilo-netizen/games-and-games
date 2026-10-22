@@ -103,7 +103,8 @@ aprovação nem disponibilidade pública do aplicativo.
   Nova Zelândia, Portugal, Espanha, Argentina, México, Alemanha, França, Itália,
   Países Baixos, Polônia, Filipinas, Indonésia e África do Sul. A mudança foi enviada
   para revisão, com confirmação de reinício da análise, e aparece em Alterações em análise.
-- Lista selecionada: `Alpha Mais Uma Rodada`, inicialmente somente com a conta do proprietário.
+- Seleção inicial: lista `Alpha Mais Uma Rodada`, somente com a conta do proprietário.
+  Posteriormente substituída pelo Google Group confirmado, conforme atualização abaixo.
   Uma conta na lista não equivale a participação aceita nem inicia sozinha a contagem de 14 dias.
 - Link de adesão exibido pelo Console: https://play.google.com/apps/testing/mais.uma.rodada
   (ainda desabilitado durante esta preparação; depende da publicação do teste).
@@ -166,3 +167,47 @@ Na conferência final, a Play já mostrava as mudanças sendo revisadas, incluin
 no Chrome ao finalizar a navegação; não foi possível concluir o vínculo
 do grupo. O comprovante do post do X foi salvo antes desse bloqueio em
 `publicacao-local/x-convite-publicado.png`.
+
+## Grupo confirmado e vinculado ao Alpha
+
+Após o proprietário concluir a criação e fornecer o endereço em 22/10/2026, foi
+confirmado no Google Groups o grupo **Mais Uma Rodada — Testadores**:
+https://groups.google.com/g/mais-uma-rodada-testers
+
+- E-mail: `mais-uma-rodada-testers@googlegroups.com`.
+- Qualquer pessoa da Web pode localizar o grupo e participar voluntariamente.
+- Conversas disponíveis aos participantes; lista de membros e postagem restritas ao
+  proprietário. Descrição e boas-vindas em português e inglês explicam os links e
+  a aprovação ainda pendente.
+- Na conferência da criação havia apenas um participante, o proprietário. Entrar no
+  grupo não equivale a aderir ao teste nem comprova os 14 dias.
+- No Alpha, foi selecionado **Grupos do Google**, adicionado esse e-mail e salva a
+  configuração. A mudança foi enviada para revisão com reinício da análise.
+- A visão geral confirmou **Alterações em análise**, incluindo explicitamente o
+  grupo, a versão 22 e os 20 países; nenhuma mudança de testadores ficou sem envio.
+- Adesão após aprovação: https://play.google.com/apps/testing/mais.uma.rodada
+- Download após aderir: https://play.google.com/store/apps/details?id=mais.uma.rodada
+- Usar a mesma conta Google no grupo, na adesão e na Play. O download ainda não foi
+  confirmado disponível; a aprovação continua pendente.
+
+Atualizações publicadas nos convites existentes, sem remover as imagens:
+
+- AndroidClosedTesting:
+  https://www.reddit.com/r/AndroidClosedTesting/comments/1xcqhnr/comment/19rhwzw7jcvwj/
+- JogosIndiesBR:
+  https://www.reddit.com/r/JogosIndiesBR/comments/1xcqglg/comment/19rhx1c5jl6o0/
+- alphaandbetausers:
+  https://www.reddit.com/r/alphaandbetausers/comments/1xcqjbq/comment/19rhx2acmac83/
+- OneMoreMatch:
+  https://www.reddit.com/r/OneMoreMatch/comments/1xcr527/comment/19rhx2xcvvfq9/
+- Resposta no convite original do X:
+  https://x.com/murilopsx/status/2113347068727267725
+
+`u/Undeon` respondeu que quer participar. Foi avisado do grupo e dos links, sem
+afirmar que o download já está disponível:
+https://www.reddit.com/r/AndroidClosedTesting/comments/1xcqhnr/comment/19rhwyv7uhnk1/
+Isso é uma manifestação de interesse, não inscrição confirmada na Play. Outra
+pessoa ofereceu troca de testes; nenhum compromisso de troca foi assumido.
+
+Comprovantes locais: `publicacao-local/play-grupo-em-analise.png`,
+`grupo-instrucoes.png`, `x-grupo-publicado.png` e `reddit-*-grupo.png`.
