@@ -53,3 +53,10 @@ WHAT'S NEW (1.0.0)
 • National teams with their full historical honours
 • Club history with the managers of every era
 • Faster simulation on multi-core phones
+
+WHAT'S NEW (1.0.1)
+• Market searches now run in the background, with a shared-cache threading issue fixed
+• Tables load progressively to keep the interface responsive
+• Match preparation and resource loading moved to the background
+• Fixed table-cell translations and added over 1,100 English texts
+• Improved translation of combined text and protected the language cache

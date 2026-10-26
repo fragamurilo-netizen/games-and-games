@@ -9,9 +9,11 @@ const _CACHE_MAX := 4000
 ## Títulos em caixa alta ("CENTRAL DO CLUBE") usam cópias em maiúsculas das chaves.
 var _exact: Dictionary = {}
 var _exact_upper: Dictionary = {}
+var _exact_lower: Dictionary = {}
 var _patterns: Array = [] # {re: RegEx, anchor: String, names: Array, target: String, upper: bool}
 var _patterns_upper: Array = []
 var _cache: Dictionary = {}
+var _cache_mutex := Mutex.new()
 var _token_re := RegEx.create_from_string(_TOKEN)
 var _target_re := RegEx.create_from_string("%(?:\\.\\d+)?[sdf]|\\{[A-Za-z0-9_]+\\}")
 var _letter_re := RegEx.create_from_string("\\p{L}")
@@ -26,6 +28,7 @@ func load_entries(entries: Dictionary) -> void:
 			continue
 		_exact[src] = _ordinals(dst) if not dst.contains("%") else dst
 		_exact_upper[src.to_upper()] = _exact[src].to_upper()
+		_exact_lower[src.to_lower()] = _exact[src].to_lower()
 		if _token_re.search(src) != null:
 			_add_pattern(src, dst, false)
 			_add_pattern(src, dst, true)
@@ -46,13 +49,24 @@ func lookup(src: String, depth: int = 0) -> String:
 	var hit: Variant = _exact.get(src, null)
 	if hit != null:
 		return hit
-	if depth == 0 and _cache.has(src):
-		return _cache[src]
+	if depth == 0:
+		_cache_mutex.lock()
+		var cached: Variant = _cache.get(src, null)
+		_cache_mutex.unlock()
+		if cached != null:
+			return cached
 	var upper := src == src.to_upper()
 	if upper:
 		hit = _exact_upper.get(src, null)
 		if hit != null:
 			return hit
+	elif src == src.to_lower():
+		hit = _exact_lower.get(src, null)
+		if hit != null:
+			return hit
+	# Números, placares e valores não precisam percorrer milhares de moldes.
+	if _letter_re.search(src) == null:
+		return ""
 	var out := ""
 	for p in (_patterns_upper if upper else _patterns):
 		if not src.contains(p["anchor"]):
@@ -64,10 +78,36 @@ func lookup(src: String, depth: int = 0) -> String:
 		if upper:
 			out = out.to_upper()
 		break
+	# Linhas de metadados são compostas por vários textos independentes. Traduzir
+	# cada trecho preserva nomes próprios e números sem exigir uma chave para cada combinação.
+	if out == "" and depth < 2:
+		var clean := src.strip_edges()
+		if clean != src and clean != "":
+			var translated := lookup(clean, depth + 1)
+			if translated != "":
+				var at := src.find(clean)
+				out = src.substr(0, at) + translated + src.substr(at + clean.length())
+		for separator in ["\n", " · ", "  ·  ", " • "]:
+			if out != "":
+				break
+			if not src.contains(separator):
+				continue
+			var parts := src.split(separator)
+			var changed := false
+			for i in parts.size():
+				var translated := lookup(parts[i], depth + 1)
+				if translated != "":
+					parts[i] = translated
+					changed = true
+			if changed:
+				out = separator.join(parts)
+				break
 	if depth == 0:
+		_cache_mutex.lock()
 		if _cache.size() >= _CACHE_MAX:
 			_cache.clear()
 		_cache[src] = out
+		_cache_mutex.unlock()
 	return out
 
 

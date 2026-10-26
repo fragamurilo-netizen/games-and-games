@@ -1021,5 +1021,6 @@ func _start() -> void:
 		GameManager.play_instant_async(func(report: Dictionary) -> void:
 			UIManager.replace("results", {"report": report}))
 	else:
-		GameManager.begin_match()
-		UIManager.replace("match")
+		GameManager.begin_match_async(func(md: Dictionary):
+			if not md.get("user", {}).is_empty():
+				UIManager.replace("match"))

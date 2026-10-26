@@ -13,6 +13,8 @@ var matchday: Dictionary = {} # data em andamento (begin_match → finish_match)
 var last_report: Dictionary = {}
 var last_summary: Dictionary = {}
 var _ai_queue: Array = [] # entradas da data ainda não simuladas (modo rápido, em segundo plano)
+var _prepared_match_scene: PackedScene
+var _prepared_market_scene: PackedScene
 ## Mundo padrão carregado pelo Editor geral (sem carreira) para editar jogadores.
 var preview_world: GameWorld = null
 var _gen_task: int = -1
@@ -72,15 +74,21 @@ func generate_world_async(seed_value: int, world_type: String, callback: Callabl
 		return
 	_gen_result = null
 	_gen_callback = callback
-	_gen_task = WorkerThreadPool.add_task(func(): _gen_result = WorldGenerator.generate(seed_value, world_type), true, "gerar_mundo")
+	_gen_task = WorkerThreadPool.add_task(func():
+		_prepared_market_scene = load("res://scenes/screens/market.tscn")
+		_gen_result = WorldGenerator.generate(seed_value, world_type), true, "gerar_mundo")
 
 
 func _process(_delta: float) -> void:
 	if _gen_task >= 0 and WorkerThreadPool.is_task_completed(_gen_task):
 		WorkerThreadPool.wait_for_task_completion(_gen_task)
 		_gen_task = -1
-		if _gen_callback.is_valid():
-			_gen_callback.call(_gen_result)
+		var generated := _gen_result
+		var callback := _gen_callback
+		_gen_result = null
+		_gen_callback = Callable()
+		if callback.is_valid():
+			callback.call(generated)
 	if _work_task >= 0 and WorkerThreadPool.is_task_completed(_work_task):
 		_complete_work()
 
@@ -253,6 +261,7 @@ func load_career_async(save_slot: int, done: Callable) -> void:
 
 ## A parte pesada do carregamento: só mexe no mundo novo (ainda fora do GameManager).
 func _load_core(save_slot: int) -> GameWorld:
+	_prepared_market_scene = load("res://scenes/screens/market.tscn")
 	var w := SaveManager.load_world(save_slot)
 	if w == null:
 		return null
@@ -474,6 +483,16 @@ func begin_match() -> Dictionary:
 	if is_busy():
 		return {}
 	return _begin_match_core()
+
+
+## Preparar calendário, escalações e contexto pode demorar num celular. A tela continua
+## respondendo, com a mesma exclusão de acesso ao mundo usada ao fechar a rodada.
+func begin_match_async(done: Callable) -> bool:
+	return run_work(func():
+		# A primeira leitura também compila os scripts do campo, TV e narração. Manter
+		# o recurso vivo evita repetir esse carregamento na thread da interface.
+		_prepared_match_scene = load("res://scenes/screens/match.tscn")
+		return _begin_match_core(), done, "Preparando a partida...")
 
 
 ## Called only by the owner of the world (UI thread or the active worker).

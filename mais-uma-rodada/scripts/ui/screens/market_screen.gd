@@ -69,6 +69,17 @@ func refresh() -> void:
 	if w == null:
 		return
 	var club := w.user_club()
+	if _tab == "search" and _pool == "all" and _base_key == "":
+		# Não bloquear a thread de entrada do Android avaliando o mundo inteiro. O trabalho
+		# usa um único dono dos caches; a UI só monta Controls depois da conclusão.
+		GameManager.run_work(func():
+			var weakest := _weakest_starter_by_group(w, club)
+			var scouted: Dictionary = w.stats["scouting"]["ids"] if w.stats.has("scouting") else {}
+			_search_base(w, club, weakest, float(maxi(1, club.transfer_budget)), scouted)
+			_sug = BoardRequests.suggestions(w)
+			_sug_turn = w.current_turn(),
+			func(_r: Variant): refresh(), "Buscando jogadores...")
+		return
 	screen_subtitle = "Janela aberta" if w.transfer_window_open() else "Janela fechada"
 	UIManager.refresh_chrome()
 	var c := content()
@@ -449,22 +460,24 @@ func _search_base(w: GameWorld, club: Club, weakest: Array, budget: float, scout
 	if key == _base_key:
 		return _base
 	_base_key = key
-	# Avaliação dos ~27 mil jogadores dividida entre os núcleos (só leitura; a ordem é a do mundo).
-	# A régua do elenco e a comissão ficam prontas antes, nesta thread.
+	# Um único worker é dono da avaliação. report() usa um cache de régua por frame;
+	# vários workers limpavam/escreviam esse Dictionary enquanto os frames avançavam.
 	People.data(w)
+	var references: Array = []
 	for pos in Pos.COUNT:
-		PlayerAssessment.squad_reference(w, pos)
+		references.append(PlayerAssessment.squad_reference(w, pos))
 	var all: Array = w.players.values()
 	var uid := club.id
-	_base = Parallel.map_chunks(all.size(), func(a: int, b: int) -> Array:
-		var out: Array = []
-		for i in range(a, b):
-			var p: Player = all[i]
-			if p.club_id < 0 or p.club_id == uid or p.retiring:
-				continue
-			var est := int(round(PlayerAssessment.score(w, p)))
-			out.append([p, est, _relevance(w, p, float(est) - float(weakest[Pos.group(p.position)]), budget)])
-		return out, 512)
+	_base = []
+	for p: Player in all:
+		if p.club_id < 0 or p.club_id == uid or p.retiring:
+			continue
+		var score := PlayerAssessment.score(w, p)
+		var est := int(round(score))
+		var report := {}
+		if p.age(w.year) <= 22:
+			report = PlayerAssessment.report_from_score(w, p, score, references[p.position], PlayerAssessment.confidence(w, p))
+		_base.append([p, est, _relevance(w, p, float(est) - float(weakest[Pos.group(p.position)]), budget, report)])
 	return _base
 
 
@@ -1089,11 +1102,11 @@ func _move_row(w: GameWorld, t: Transfer, club: Club) -> Control:
 
 ## Relevância: o quanto melhora o time (ou promete, se for jovem), com desconto pelo que custa
 ## além da verba. Jogador que não melhora nada ainda aparece, mas lá embaixo.
-static func _relevance(w: GameWorld, p: Player, gain: float, budget: float) -> float:
+static func _relevance(w: GameWorld, p: Player, gain: float, budget: float, assessment: Dictionary = {}) -> float:
 	var v := clampf(gain, -12.0, 12.0) * 2.0
 	var age := p.age(w.year)
 	if age <= 22:
-		var r := PlayerAssessment.report(w, p) # o mesmo relatório das duas estrelas (agora e futuro)
+		var r := assessment if not assessment.is_empty() else PlayerAssessment.report(w, p)
 		var now := (float(r["low"]) + float(r["high"])) * 0.5
 		var fut := (float(r["future_low"]) + float(r["future_high"])) * 0.5
 		v += clampf((fut - now) * 10.0, 0.0, 15.0) * 0.4

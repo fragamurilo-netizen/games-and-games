@@ -53,3 +53,10 @@ NOVIDADES (1.0.0)
 • Seleções com todos os títulos históricos
 • História dos clubes com os técnicos de cada época
 • Simulação mais rápida em celulares com vários núcleos
+
+NOVIDADES (1.0.1)
+• Busca no Mercado processada em segundo plano, com correção de disputa entre threads
+• Tabelas carregadas progressivamente para manter a interface responsiva
+• Preparação das partidas em segundo plano e carregamento antecipado de recursos
+• Tradução das células de tabelas corrigida e mais de 1.100 textos adicionados em inglês
+• Melhorias na tradução de textos compostos e proteção do cache de idiomas
