@@ -60,3 +60,11 @@ NOVIDADES (1.0.1)
 • Preparação das partidas em segundo plano e carregamento antecipado de recursos
 • Tradução das células de tabelas corrigida e mais de 1.100 textos adicionados em inglês
 • Melhorias na tradução de textos compostos e proteção do cache de idiomas
+
+NOVIDADES (1.0.2)
+• Todas as 218 bandeiras atualizadas
+• Mais 14 ligas e 194 clubes, incluindo Índia, Indonésia e Nova Zelândia
+• Metas corrigidas após mudança de clube e melhorias na simulação
+• Agenda de seleções com datas, adversários e competições
+• Correções de estabilidade no áudio, no Mercado e no carregamento de carreiras
+• Carreiras antigas recebem as novas ligas na próxima temporada
