@@ -294,6 +294,15 @@ func _kits_card(w: GameWorld) -> Control:
 ## Últimos jogos da seleção (eliminatórias, amistosos e torneios).
 func _games_card(w: GameWorld) -> Control:
 	var card := UIKit.card("Card", 4)
+	card.add_child(UIKit.section("Próximos jogos"))
+	var upcoming := NationalSchedule.upcoming(w, _nation, 8)
+	if upcoming.is_empty():
+		card.add_child(UIKit.label("Sem novos jogos nesta temporada. O calendário é renovado na próxima temporada.", "Muted", true))
+	for game in upcoming:
+		var row := UIKit.vbox(0)
+		row.add_child(UIKit.label("%s · %s" % [NationalTeamManager.day_label(w, int(game["day"])), I18n.t(String(game["tag"]))], "Small", true))
+		row.add_child(_match_row(w, [game["a"], game["b"], -1, -1, -1, -1, false, ""]))
+		card.add_child(row)
 	card.add_child(UIKit.section("Últimos jogos"))
 	var games := NationalTeamManager.recent_games(w, _nation, 8)
 	if games.is_empty():
@@ -413,7 +422,7 @@ func _match_row(w: GameWorld, m: Array) -> Control:
 	a.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	h.add_child(a)
 	h.add_child(UIKit.flag(m[0], 30))
-	var score := "%d x %d" % [int(m[2]), int(m[3])]
+	var score := "vs" if int(m[2]) < 0 else "%d x %d" % [int(m[2]), int(m[3])]
 	if int(m[4]) >= 0:
 		score += "\n(%d x %d pên.)" % [int(m[4]), int(m[5])]
 	elif bool(m[6]):

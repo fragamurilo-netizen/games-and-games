@@ -1,0 +1,246 @@
+{
+	"nation": "THA",
+	"_doc": "Expansão Alpha 1.0.2. Clubes da temporada 2026/27 (2026 nas ligas de ano civil). Nomes reais; elencos fictícios, finanças, capacidades e força do jogo. Fontes e adaptações em docs/ALPHA-1.0.2-2026-10-28.md.",
+	"clubs": [
+		{
+			"key": "THA_BURIRAMUNITED",
+			"name": "Buriram United",
+			"short": "Buriram United",
+			"abbr": "BUR",
+			"city": "Buriram",
+			"league": "THA1",
+			"rep": 68,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#172A51",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "THA_PORTFC",
+			"name": "Port FC",
+			"short": "Port FC",
+			"abbr": "POR",
+			"city": "Bangkok",
+			"league": "THA1",
+			"rep": 65,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E87522",
+				"#173A7C"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "THA_BGPATHUMUNITED",
+			"name": "BG Pathum United",
+			"short": "BG Pathum United",
+			"abbr": "BPU",
+			"city": "Pathum Thani",
+			"league": "THA1",
+			"rep": 65,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#194A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "THA_TRUEBANGKOKUNITED",
+			"name": "True Bangkok United",
+			"short": "True Bangkok United",
+			"abbr": "TBU",
+			"city": "Bangkok",
+			"league": "THA1",
+			"rep": 65,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "THA_RATCHABURIFC",
+			"name": "Ratchaburi FC",
+			"short": "Ratchaburi FC",
+			"abbr": "RAT",
+			"city": "Ratchaburi",
+			"league": "THA1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E87522",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "THA_SINGHACHIANGRAIUNITED",
+			"name": "Singha Chiangrai United",
+			"short": "Singha Chiangrai United",
+			"abbr": "SCU",
+			"city": "Chiang Rai",
+			"league": "THA1",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E87522",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "THA_PTPRACHUAPFC",
+			"name": "PT Prachuap FC",
+			"short": "PT Prachuap FC",
+			"abbr": "PTP",
+			"city": "Prachuap Khiri Khan",
+			"league": "THA1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E87522",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "THA_CHONBURIFC",
+			"name": "Chonburi FC",
+			"short": "Chonburi FC",
+			"abbr": "CHO",
+			"city": "Chonburi",
+			"league": "THA1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "THA_LAMPHUNWARRIORS",
+			"name": "Lamphun Warriors",
+			"short": "Lamphun Warriors",
+			"abbr": "LAM",
+			"city": "Lamphun",
+			"league": "THA1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E6BD2B",
+				"#871F35"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "THA_RAYONGFC",
+			"name": "Rayong FC",
+			"short": "Rayong FC",
+			"abbr": "RAY",
+			"city": "Rayong",
+			"league": "THA1",
+			"rep": 57,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "THA_SUKHOTHAIFC",
+			"name": "Sukhothai FC",
+			"short": "Sukhothai FC",
+			"abbr": "SUK",
+			"city": "Sukhothai",
+			"league": "THA1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E87522",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "THA_UTHAITHANIFC",
+			"name": "Uthai Thani FC",
+			"short": "Uthai Thani FC",
+			"abbr": "UTH",
+			"city": "Uthai Thani",
+			"league": "THA1",
+			"rep": 57,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#702E83",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "THA_AYUTTHAYAUNITED",
+			"name": "Ayutthaya United",
+			"short": "Ayutthaya United",
+			"abbr": "AYU",
+			"city": "Ayutthaya",
+			"league": "THA1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#9F2034",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "THA_SISAKETUNITED",
+			"name": "Sisaket United",
+			"short": "Sisaket United",
+			"abbr": "SIS",
+			"city": "Sisaket",
+			"league": "THA1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E87522",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "THA_PATTANIFC",
+			"name": "Pattani FC",
+			"short": "Pattani FC",
+			"abbr": "PAT",
+			"city": "Pattani",
+			"league": "THA1",
+			"rep": 54,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#235B43",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "THA_RASISALAIUNITED",
+			"name": "Rasisalai United",
+			"short": "Rasisalai United",
+			"abbr": "RAS",
+			"city": "Sisaket",
+			"league": "THA1",
+			"rep": 54,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#C8202D",
+				"#111111"
+			],
+			"kit": "plain"
+		}
+	]
+}

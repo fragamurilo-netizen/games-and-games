@@ -46,6 +46,8 @@ static func of(world: GameWorld, f: Fixture) -> Dictionary:
 	var home_wins: bool
 	if th != ta:
 		home_wins = th > ta
+	elif LeagueFormat.draw_advantage_winner(world, f) >= 0:
+		home_wins = LeagueFormat.draw_advantage_winner(world, f) == f.home
 	elif f.has_penalties():
 		home_wins = f.pen_h > f.pen_a
 	else:

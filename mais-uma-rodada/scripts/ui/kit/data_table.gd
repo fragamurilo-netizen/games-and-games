@@ -16,6 +16,7 @@ signal sort_changed(key: String, desc: bool)
 const ROW_H := 76
 const HEAD_H := 52
 const PAGE := 80
+const MOBILE_PAGE := 20
 ## Respiro entre colunas de números.
 const GAP := 12
 
@@ -29,6 +30,11 @@ var lead_width := 300.0
 var lead_min := 220.0
 var row_height := ROW_H
 var zebra := false
+var _pending_lead: VBoxContainer
+var _pending_grid: VBoxContainer
+var _pending_index := 0
+var _pending_count := 0
+var _more: Button
 ## Item destacado (o clube do usuário na classificação, o jogador aberto no painel lateral).
 var highlight: Callable = Callable()
 ## Filete colorido à esquerda da linha (zona da tabela, lesionado...). Color(0,0,0,0) = nenhum.
@@ -97,6 +103,7 @@ func _col(key: String) -> Dictionary:
 
 
 func _build() -> void:
+	set_process(false)
 	if _layout_fit.is_valid() and resized.is_connected(_layout_fit):
 		resized.disconnect(_layout_fit)
 	for ch in get_children():
@@ -161,15 +168,43 @@ func _build() -> void:
 	sc.get_h_scroll_bar().value_changed.connect(func(v: float): state["hx"] = int(v))
 	lead.add_child(_head_cell(columns[0], true))
 	grid.add_child(_head_row())
-	var shown := mini(items.size(), maxi(PAGE, int(state.get("shown", PAGE))))
-	for i in shown:
-		_add_row(lead, grid, items[i], i)
+	var page := _page_size()
+	var shown := mini(items.size(), maxi(page, int(state.get("shown", page))))
+	# As linhas têm retratos e muitas colunas. Criar 80 de uma vez bloqueava a entrada
+	# por segundos no Android. Preserva a página e o layout, monta por orçamento de frame.
+	_pending_lead = lead
+	_pending_grid = grid
+	_pending_index = 0
+	_pending_count = shown
+	_more = null
 	if shown < items.size():
-		var more := UIKit.button("Mostrar mais %d de %d" % [mini(PAGE, items.size() - shown), items.size() - shown], "TextButton", func():
-			state["shown"] = shown + PAGE
+		var more := UIKit.button("Mostrar mais %d de %d" % [mini(page, items.size() - shown), items.size() - shown], "TextButton", func():
+			state["shown"] = shown + page
 			_build())
 		more.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		_more = more
+		more.visible = false
 		add_child(more)
+	set_process(true)
+
+
+func _page_size() -> int:
+	# Evita manter 80 retratos e milhares de células só para uma lista no celular.
+	return MOBILE_PAGE if OS.has_feature("mobile") or UILayout.size_class() == UILayout.COMPACT else PAGE
+
+
+func _process(_delta: float) -> void:
+	if not is_visible_in_tree():
+		return
+	var until := Time.get_ticks_usec() + 3000
+	while _pending_index < _pending_count:
+		_add_row(_pending_lead, _pending_grid, items[_pending_index], _pending_index)
+		_pending_index += 1
+		if Time.get_ticks_usec() >= until:
+			return
+	if is_instance_valid(_more):
+		_more.visible = true
+	set_process(false)
 
 
 func _head_row() -> HBoxContainer:
@@ -207,7 +242,7 @@ func _head_cell(c: Dictionary, lead: bool) -> Control:
 			else:
 				state["sort"] = key
 				state["desc"] = String(c.get("first", "desc")) == "desc"
-			state["shown"] = PAGE
+			state["shown"] = _page_size()
 			sort_changed.emit(key, bool(state["desc"]))
 			_apply_sort()
 			_build())
@@ -292,6 +327,7 @@ func _cell(c: Dictionary, item: Variant, lead: bool) -> Control:
 		return ctl
 	var l := Label.new()
 	l.text = String((c["text"] as Callable).call(item)) if c.has("text") else ""
+	l.text = I18n.t(l.text)
 	l.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	l.horizontal_alignment = _align(String(c.get("align", "l" if lead else "r")))
 	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER

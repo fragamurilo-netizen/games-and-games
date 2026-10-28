@@ -53,3 +53,21 @@ WHAT'S NEW (1.0.0)
 • National teams with their full historical honours
 • Club history with the managers of every era
 • Faster simulation on multi-core phones
+
+WHAT'S NEW (1.0.1)
+• Market searches now run in the background, with a shared-cache threading issue fixed
+• Tables load progressively to keep the interface responsive
+• Match preparation and resource loading moved to the background
+• Fixed table-cell translations and added over 1,100 English texts
+• Improved translation of combined text and protected the language cache
+
+WHAT'S NEW (1.0.2)
+• Updated all 218 flags
+• Added 14 leagues and 194 clubs, including India, Indonesia and New Zealand
+• Fixed objectives after changing clubs and improved match simulation
+• National-team fixtures with dates, opponents and competitions
+• Audio, transfer market and career loading stability fixes
+• Existing careers receive the new leagues at the next season rollover
+
+WHAT'S NEW (1.0.3)
+England now has 4 divisions and 24 Championship clubs. New second divisions in the Netherlands, Turkey, Scotland, Austria, Switzerland and Japan: 148 additional clubs. More English and Spanish translations. Fixes for calendars, playoffs, club names and memory leaks on league tables. Stability improvements for portraits and mod images. Existing careers receive the new divisions at the start of the next season.

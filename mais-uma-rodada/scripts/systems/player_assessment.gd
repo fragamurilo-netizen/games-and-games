@@ -80,6 +80,11 @@ static func report(w: GameWorld, p: Player, position: int = -1) -> Dictionary:
 	var now := score(w,p,pos)
 	var base := squad_reference(w,pos)
 	var trust := confidence(w,p)
+	return report_from_score(w, p, now, base, trust, pos)
+
+## Permite avaliar um lote com uma régua já capturada, sem tocar no cache por frame.
+static func report_from_score(w: GameWorld, p: Player, now: float, base: float, trust: float, position: int = -1) -> Dictionary:
+	var pos := p.position if position < 0 else position
 	var error := (1.0-trust)*10.0
 	var low := clampf(floorf(_stars(now-error,base)*2.0)/2.0,0.5,5.0)
 	var high := clampf(ceilf(_stars(now+error,base)*2.0)/2.0,low,5.0)

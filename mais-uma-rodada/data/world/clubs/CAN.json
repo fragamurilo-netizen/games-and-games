@@ -1,0 +1,126 @@
+{
+	"nation": "CAN",
+	"_doc": "Expansão Alpha 1.0.2. Clubes da temporada 2026/27 (2026 nas ligas de ano civil). Nomes reais; elencos fictícios, finanças, capacidades e força do jogo. Fontes e adaptações em docs/ALPHA-1.0.2-2026-10-28.md.",
+	"clubs": [
+		{
+			"key": "CAN_FORGEFC",
+			"name": "Forge FC",
+			"short": "Forge FC",
+			"abbr": "FOR",
+			"city": "Hamilton",
+			"league": "CAN1",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E97425",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "CAN_CAVALRYFC",
+			"name": "Cavalry FC",
+			"short": "Cavalry FC",
+			"abbr": "CAV",
+			"city": "Calgary",
+			"league": "CAN1",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#16854A"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "CAN_ATLETICOOTTAWA",
+			"name": "Atlético Ottawa",
+			"short": "Atlético Ottawa",
+			"abbr": "ATL",
+			"city": "Ottawa",
+			"league": "CAN1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "CAN_PACIFICFC",
+			"name": "Pacific FC",
+			"short": "Pacific FC",
+			"abbr": "PAC",
+			"city": "Langford",
+			"league": "CAN1",
+			"rep": 57,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#692F83",
+				"#23A69B"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "CAN_VANCOUVERFC",
+			"name": "Vancouver FC",
+			"short": "Vancouver FC",
+			"abbr": "VAN",
+			"city": "Langley",
+			"league": "CAN1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#C71E2D"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "CAN_HALIFAXWANDERERS",
+			"name": "Halifax Wanderers",
+			"short": "Halifax Wanderers",
+			"abbr": "HAL",
+			"city": "Halifax",
+			"league": "CAN1",
+			"rep": 57,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174A9B",
+				"#69ADDA"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "CAN_INTERTORONTOFC",
+			"name": "Inter Toronto FC",
+			"short": "Inter Toronto FC",
+			"abbr": "INT",
+			"city": "Toronto",
+			"league": "CAN1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#16854A",
+				"#194A91"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "CAN_FCSUPRADUQUEBEC",
+			"name": "FC Supra du Québec",
+			"short": "FC Supra du Québec",
+			"abbr": "SDQ",
+			"city": "Laval",
+			"league": "CAN1",
+			"rep": 54,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		}
+	]
+}

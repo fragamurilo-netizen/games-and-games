@@ -43,7 +43,7 @@ func slot_type(slot: int) -> String:
 
 
 func is_weekend(slot: int) -> bool:
-	return slot_type(slot) == "W"
+	return slot_type(slot) == "W" and bool(calendar[slot].get("weekly", true))
 
 
 ## Fim de semana de estadual (calendário de ano civil, "E3@" no modelo): não é rodada de liga, mas

@@ -8,10 +8,15 @@ extends Control
 	set(v):
 		code = v
 		_spec = DatabaseManager.nation(v).get("flag", {}) if not Engine.is_editor_hint() else {}
+		_art = null
+		var path := String(_spec.get("svg", ""))
+		if path.begins_with("res://") and ResourceLoader.exists(path, "Texture2D"):
+			_art = load(path) as Texture2D
 		tooltip_text = DatabaseManager.nation_name(v) if not Engine.is_editor_hint() else v
 		queue_redraw()
 
 var _spec: Dictionary = {}
+var _art: Texture2D
 
 
 func set_nation(c: String) -> void:
@@ -27,6 +32,14 @@ func _draw() -> void:
 	var fw := minf(w, h * 1.5)
 	var fh := fw / 1.5
 	var r := Rect2((w - fw) * 0.5, (h - fh) * 0.5, fw, fh)
+	if _art != null:
+		# A arte vetorial preserva brasões e detalhes também nas nações pequenas.
+		# Cabe no mesmo espaço do componente, respeitando a proporção da imagem.
+		var fitted := _art.get_size() * minf(fw / _art.get_width(), fh / _art.get_height())
+		var target := Rect2((size - fitted) * 0.5, fitted)
+		draw_texture_rect(_art, target, false)
+		draw_rect(target, Color(0, 0, 0, 0.35), false, 1.0)
+		return
 	var spec := _spec
 	if spec.is_empty():
 		# A federation without artwork is identified by its code, never a made-up flag.

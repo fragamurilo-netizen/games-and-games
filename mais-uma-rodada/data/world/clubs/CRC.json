@@ -1,0 +1,156 @@
+{
+	"nation": "CRC",
+	"_doc": "Expansão Alpha 1.0.2. Clubes da temporada 2026/27 (2026 nas ligas de ano civil). Nomes reais; elencos fictícios, finanças, capacidades e força do jogo. Fontes e adaptações em docs/ALPHA-1.0.2-2026-10-28.md.",
+	"clubs": [
+		{
+			"key": "CRC_DEPORTIVOSAPRISSA",
+			"name": "Deportivo Saprissa",
+			"short": "Deportivo Saprissa",
+			"abbr": "DEP",
+			"city": "San José",
+			"league": "CRC1",
+			"rep": 67,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#751F35",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "CRC_LDALAJUELENSE",
+			"name": "LD Alajuelense",
+			"short": "LD Alajuelense",
+			"abbr": "LDA",
+			"city": "Alajuela",
+			"league": "CRC1",
+			"rep": 67,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "CRC_CSHEREDIANO",
+			"name": "CS Herediano",
+			"short": "CS Herediano",
+			"abbr": "CSH",
+			"city": "Heredia",
+			"league": "CRC1",
+			"rep": 66,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#F2CA27"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "CRC_CSCARTAGINES",
+			"name": "CS Cartaginés",
+			"short": "CS Cartaginés",
+			"abbr": "CSC",
+			"city": "Cartago",
+			"league": "CRC1",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#194A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "CRC_ADSANCARLOS",
+			"name": "AD San Carlos",
+			"short": "AD San Carlos",
+			"abbr": "ASC",
+			"city": "Ciudad Quesada",
+			"league": "CRC1",
+			"rep": 59,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#174A9B"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "CRC_MUNICIPALLIBERIA",
+			"name": "Municipal Liberia",
+			"short": "Municipal Liberia",
+			"abbr": "MUN",
+			"city": "Liberia",
+			"league": "CRC1",
+			"rep": 57,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#F0CA27",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "CRC_PUNTARENASFC",
+			"name": "Puntarenas FC",
+			"short": "Puntarenas FC",
+			"abbr": "PUN",
+			"city": "Puntarenas",
+			"league": "CRC1",
+			"rep": 57,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E87522",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "CRC_SPORTINGFC",
+			"name": "Sporting FC",
+			"short": "Sporting FC",
+			"abbr": "SPO",
+			"city": "San José",
+			"league": "CRC1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "CRC_MUNICIPALPEREZZELEDON",
+			"name": "Municipal Pérez Zeledón",
+			"short": "Municipal Pérez Zeledón",
+			"abbr": "MPZ",
+			"city": "San Isidro de El General",
+			"league": "CRC1",
+			"rep": 57,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "CRC_INTERSANCARLOS",
+			"name": "Inter San Carlos",
+			"short": "Inter San Carlos",
+			"abbr": "ISC",
+			"city": "Ciudad Quesada",
+			"league": "CRC1",
+			"rep": 54,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174A9B",
+				"#F0C925"
+			],
+			"kit": "plain"
+		}
+	]
+}

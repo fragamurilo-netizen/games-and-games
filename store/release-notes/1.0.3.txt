@@ -1,0 +1,7 @@
+<pt-BR>
+Inglaterra com 4 divisões e 24 clubes na Championship. Novas segundas divisões de Holanda, Turquia, Escócia, Áustria, Suíça e Japão: 148 clubes adicionais. Mais traduções em inglês e espanhol. Correções de calendário, playoffs, nomes de clubes e acúmulo de memória nas tabelas. Melhorias de estabilidade em retratos e imagens de mods. Em saves existentes, as novas divisões entram na virada da temporada.
+</pt-BR>
+
+<en-US>
+England now has 4 divisions and 24 Championship clubs. New second divisions in the Netherlands, Turkey, Scotland, Austria, Switzerland and Japan: 148 additional clubs. More English and Spanish translations. Fixes for calendars, playoffs, club names and memory leaks on league tables. Stability improvements for portraits and mod images. Existing careers receive the new divisions at the start of the next season.
+</en-US>

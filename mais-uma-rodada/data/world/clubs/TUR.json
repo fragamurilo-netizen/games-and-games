@@ -62,7 +62,11 @@
 				"stars": 5,
 				"c3": "#FFED00"
 			},
-			"rivals": ["TUR_IAS", "TUR_IKR", "TUR_FIR"]
+			"rivals": [
+				"TUR_IAS",
+				"TUR_IKR",
+				"TUR_FIR"
+			]
 		},
 		{
 			"key": "TUR_IKR",
@@ -125,7 +129,9 @@
 				"year": "1967",
 				"tc": "#6E1F37"
 			},
-			"rivals": ["TUR_IKN"]
+			"rivals": [
+				"TUR_IKN"
+			]
 		},
 		{
 			"key": "TUR_BSK",
@@ -498,6 +504,287 @@
 				"initials": "FK",
 				"sc": "#FFFFFF"
 			}
+		},
+		{
+			"key": "TUR_D2_ERZ",
+			"name": "Erzurumspor",
+			"short": "Erzurumspor",
+			"abbr": "ERZ",
+			"city": "Erzurum",
+			"league": "TUR2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#239ad1",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "TUR_D2_ERO",
+			"name": "Esenler Erokspor",
+			"short": "Esenler Erokspor",
+			"abbr": "ERO",
+			"city": "Istanbul",
+			"league": "TUR2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00844a",
+				"#f4c430"
+			]
+		},
+		{
+			"key": "TUR_D2_AME",
+			"name": "Amed Sportif",
+			"short": "Amed Sportif",
+			"abbr": "AME",
+			"city": "Diyarbakır",
+			"league": "TUR2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00844a",
+				"#cc2222"
+			]
+		},
+		{
+			"key": "TUR_D2_COR",
+			"name": "Çorum FK",
+			"short": "Çorum FK",
+			"abbr": "COR",
+			"city": "Çorum",
+			"league": "TUR2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#111111"
+			]
+		},
+		{
+			"key": "TUR_D2_BOD",
+			"name": "Bodrum FK",
+			"short": "Bodrum FK",
+			"abbr": "BOD",
+			"city": "Bodrum",
+			"league": "TUR2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00844a",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "TUR_D2_PEN",
+			"name": "Pendikspor",
+			"short": "Pendikspor",
+			"abbr": "PEN",
+			"city": "Istanbul",
+			"league": "TUR2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "TUR_D2_KEC",
+			"name": "Ankara Keçiörengücü",
+			"short": "Ankara Keçiörengücü",
+			"abbr": "KEC",
+			"city": "Ankara",
+			"league": "TUR2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#6e3a8a",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "TUR_D2_BAN",
+			"name": "Bandırmaspor",
+			"short": "Bandırmaspor",
+			"abbr": "BAN",
+			"city": "Bandırma",
+			"league": "TUR2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#7c2335",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "TUR_D2_SIV",
+			"name": "Sivasspor",
+			"short": "Sivasspor",
+			"abbr": "SIV",
+			"city": "Sivas",
+			"league": "TUR2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "TUR_D2_MFK",
+			"name": "Manisa FK",
+			"short": "Manisa FK",
+			"abbr": "MFK",
+			"city": "Manisa",
+			"league": "TUR2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "TUR_D2_VAN",
+			"name": "Vanspor",
+			"short": "Vanspor",
+			"abbr": "VAN",
+			"city": "Van",
+			"league": "TUR2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#111111"
+			]
+		},
+		{
+			"key": "TUR_D2_SAR",
+			"name": "Sarıyer",
+			"short": "Sarıyer",
+			"abbr": "SAR",
+			"city": "Istanbul",
+			"league": "TUR2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "TUR_D2_IGD",
+			"name": "Iğdır FK",
+			"short": "Iğdır FK",
+			"abbr": "IGD",
+			"city": "Iğdır",
+			"league": "TUR2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00844a",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "TUR_D2_IST",
+			"name": "İstanbulspor",
+			"short": "İstanbulspor",
+			"abbr": "IST",
+			"city": "Istanbul",
+			"league": "TUR2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#f4c430",
+				"#111111"
+			]
+		},
+		{
+			"key": "TUR_D2_UMR",
+			"name": "Ümraniyespor",
+			"short": "Ümraniyespor",
+			"abbr": "UMR",
+			"city": "Istanbul",
+			"league": "TUR2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "TUR_D2_BOL",
+			"name": "Boluspor",
+			"short": "Boluspor",
+			"abbr": "BOL",
+			"city": "Bolu",
+			"league": "TUR2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "TUR_D2_SER",
+			"name": "Serikspor",
+			"short": "Serikspor",
+			"abbr": "SER",
+			"city": "Serik",
+			"league": "TUR2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00844a",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "TUR_D2_SAK",
+			"name": "Sakaryaspor",
+			"short": "Sakaryaspor",
+			"abbr": "SAK",
+			"city": "Adapazarı",
+			"league": "TUR2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00844a",
+				"#111111"
+			]
+		},
+		{
+			"key": "TUR_D2_HAT",
+			"name": "Hatayspor",
+			"short": "Hatayspor",
+			"abbr": "HAT",
+			"city": "Antakya",
+			"league": "TUR2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#7c2335",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "TUR_D2_DEM",
+			"name": "Adana Demirspor",
+			"short": "Adana Demirspor",
+			"abbr": "DEM",
+			"city": "Adana",
+			"league": "TUR2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#239ad1",
+				"#142b50"
+			]
 		}
-	]
+	],
+	"_expansion_doc": "Divisões inferiores: identidades de clubes reais, atributos econômicos/esportivos e escudos gerados pelo modelo do jogo. Composição compatível com a elite existente: ENG/NED/TUR 2025/26, JPN 2025, SCO/AUT/SUI 2024/25. Fontes e adaptações em docs/DIVISOES-2026-10-28.md."
 }

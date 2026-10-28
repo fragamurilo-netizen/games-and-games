@@ -212,7 +212,7 @@ func _test_fixtures() -> void:
 		var league: League = w.season.leagues[id]
 		var cfg := league.cfg()
 		var teams := int(cfg["teams"])
-		var expect_rounds := (teams - 1) * int(cfg["rr"])
+		var expect_rounds := (teams - 1 + teams % 2) * int(cfg["rr"])
 		check(league.rounds.size() == expect_rounds, "%s com %d rodadas (esperado %d)" % [id, league.rounds.size(), expect_rounds])
 		var home := {}
 		var last_slot := -1
@@ -227,10 +227,10 @@ func _test_fixtures() -> void:
 				seen[f.away] = true
 				home[f.home] = int(home.get(f.home, 0)) + 1
 				check(f.slot == slot and f.comp == id, "%s: jogo com data/competição errada" % id)
-			check(seen.size() == teams, "%s: rodada %d não tem todos os clubes" % [id, r + 1])
+			check(seen.size() == teams - teams % 2, "%s: rodada %d tem quantidade incorreta de clubes/folgas" % [id, r + 1])
 		for cid in league.club_ids:
 			var hg := int(home.get(cid, 0))
-			check(absi(hg * 2 - expect_rounds) <= int(cfg["rr"]), "%s: %s com %d jogos em casa" % [id, w.club(cid).short_name, hg])
+			check(absi(hg * 2 - (teams - 1) * int(cfg["rr"])) <= int(cfg["rr"]), "%s: %s com %d jogos em casa" % [id, w.club(cid).short_name, hg])
 
 
 func _test_engine() -> void:
@@ -574,7 +574,8 @@ func _test_season_cycle() -> void:
 		var order := CompetitionManager.sorted_ids(sco)
 		for cid in sco.phase_groups[0]:
 			check(order.find(cid) < 6, "clube do grupo de cima terminou abaixo do 6º na Escócia")
-		check(sco.rounds.size() == 38, "Escócia com %d rodadas (38 na vida real)" % sco.rounds.size())
+		var league_rounds := sco.rounds.filter(func(rr): return not rr.is_empty() and rr[0].stage == Fixture.STAGE_LEAGUE).size()
+		check(league_rounds == 38, "Escócia com %d rodadas de liga (38, fora repescagem)" % league_rounds)
 	for lid in ["MEX1", "USA1", "AUS1"]:
 		var pl: League = w.season.leagues[lid]
 		var champ := int(pl.po.get("champ", -1))
@@ -652,7 +653,7 @@ func _test_season_cycle() -> void:
 	check(cdb.club_ids.size() == 80 and cdb.plan == ["pre", "r64", "r32", "r16", "qf", "sf", "f"] and cdb.byes.size() == 48, "Copa do Brasil com fases erradas: %s" % [cdb.plan])
 	check(Array(cdb.plan_slots[6]).size() == 2 and Array(cdb.plan_slots[0]).size() == 1, "Copa do Brasil: final deveria ser em ida e volta")
 	var fac: Cup = w.season.cups["FAC"]
-	check(fac.club_ids.size() == 40 and fac.plan[0] == "pre" and fac.plan.size() == 6, "FA Cup com fases erradas: %s" % [fac.plan])
+	check(fac.club_ids.size() == 92 and fac.plan == ["pre", "r64", "r32", "r16", "qf", "sf", "f"], "FA Cup com fases erradas: %s" % [fac.plan])
 	for f in fac.fixtures:
 		check(w.season.slot_type(f.slot).begins_with("N"), "FA Cup fora das datas de copa nacional")
 		if f.round == fac.plan.size() - 1:
@@ -1608,6 +1609,10 @@ func _test_squad_events() -> void:
 			a.squad_status = Player.STATUS_STARTER
 			a.overall = maxi(a.overall, 70)
 			a.birth_year = w.year - 24
+			if k == "homesick":
+				a.hid("ada") # personalidade já gerada também recebe uma condição controlada
+				a.hidden["ada"] = 3
+				a.injury_weeks = 0
 			var ev := EventManager._build(w, k)
 			check(not ev.is_empty(), "evento %s não montou" % k)
 			if ev.is_empty():
@@ -1979,8 +1984,12 @@ func _test_deals() -> void:
 	# Revenda: o clube antigo recebe sua parte
 	var buyer: Club = w.clubs_in_league("ENG1")[0]
 	var sbal := seller.balance
+	var solidarity_before := int(seller.ledger.get("solidariedade", 0))
+	var sales_before := int(seller.ledger.get("vendas", 0))
 	TransferManager.complete_transfer(w, p, buyer, 2_000_000, p.wage, 3)
-	check(seller.balance - sbal == 200000, "revenda de 10%% não paga (%d)" % (seller.balance - sbal))
+	var solidarity := int(seller.ledger.get("solidariedade", 0)) - solidarity_before
+	check(int(seller.ledger.get("vendas", 0)) - sales_before == 200000, "revenda de 10% não registrada")
+	check(seller.balance - sbal == 200000 + solidarity, "revenda e solidariedade não pagas (%d)" % (seller.balance - sbal))
 	# Empréstimo de ida e volta
 	var mine: Player = w.squad(c)[18]
 	var r := TransferManager.loan_out(w, mine)

@@ -133,6 +133,23 @@ func current() -> BaseScreen:
 	return stack.back() if not stack.is_empty() else null
 
 
+## Telas escondidas guardam jogadores e Callables da carreira anterior. Ao trocar
+## de carreira, descarte essas referências e preserve só a tela de transição atual.
+func forget_career_views() -> void:
+	var keep := current()
+	for a in stacks:
+		for screen: BaseScreen in stacks[a]:
+			if is_instance_valid(screen) and screen != keep:
+				screen.queue_free()
+	stacks.clear()
+	area = "hub"
+	stack = []
+	stacks[area] = stack
+	if is_instance_valid(keep):
+		stack.append(keep)
+	_stale = false
+
+
 func _instance(name: String, params: Dictionary) -> BaseScreen:
 	if name in GATED and Store.locked(GameManager.world):
 		name = "paywall"

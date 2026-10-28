@@ -286,6 +286,7 @@ func _notification(what: int) -> void:
 		_trim_portrait_cache(0)
 		Face3DStudio._mem.clear()
 		Face3DStudio._mem_order.clear()
+		CustomAssets.clear_cache()
 	elif what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		UIManager.handle_back()
 	elif what == NOTIFICATION_APPLICATION_RESUMED or what == NOTIFICATION_APPLICATION_FOCUS_IN:

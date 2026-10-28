@@ -1,0 +1,246 @@
+{
+	"nation": "NOR",
+	"_doc": "Expansão Alpha 1.0.2. Clubes da temporada 2026/27 (2026 nas ligas de ano civil). Nomes reais; elencos fictícios, finanças, capacidades e força do jogo. Fontes e adaptações em docs/ALPHA-1.0.2-2026-10-28.md.",
+	"clubs": [
+		{
+			"key": "NOR_BODGLIMT",
+			"name": "Bodø/Glimt",
+			"short": "Bodø/Glimt",
+			"abbr": "BOD",
+			"city": "Bodø",
+			"league": "NOR1",
+			"rep": 76,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#F4D21F",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NOR_MOLDEFK",
+			"name": "Molde FK",
+			"short": "Molde FK",
+			"abbr": "MOL",
+			"city": "Molde",
+			"league": "NOR1",
+			"rep": 72,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1953A6",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NOR_ROSENBORGBK",
+			"name": "Rosenborg BK",
+			"short": "Rosenborg BK",
+			"abbr": "ROS",
+			"city": "Trondheim",
+			"league": "NOR1",
+			"rep": 72,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NOR_VIKINGFK",
+			"name": "Viking FK",
+			"short": "Viking FK",
+			"abbr": "VIK",
+			"city": "Stavanger",
+			"league": "NOR1",
+			"rep": 71,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#192E52",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NOR_SKBRANN",
+			"name": "SK Brann",
+			"short": "SK Brann",
+			"abbr": "SKB",
+			"city": "Bergen",
+			"league": "NOR1",
+			"rep": 72,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71F2C",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NOR_TROMSIL",
+			"name": "Tromsø IL",
+			"short": "Tromsø IL",
+			"abbr": "TRO",
+			"city": "Tromsø",
+			"league": "NOR1",
+			"rep": 67,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NOR_LILLESTRMSK",
+			"name": "Lillestrøm SK",
+			"short": "Lillestrøm SK",
+			"abbr": "LIL",
+			"city": "Lillestrøm",
+			"league": "NOR1",
+			"rep": 67,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E8C924",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NOR_VALERENGA",
+			"name": "Vålerenga",
+			"short": "Vålerenga",
+			"abbr": "VAL",
+			"city": "Oslo",
+			"league": "NOR1",
+			"rep": 67,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174A9B",
+				"#C91E2B"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NOR_FREDRIKSTADFK",
+			"name": "Fredrikstad FK",
+			"short": "Fredrikstad FK",
+			"abbr": "FRE",
+			"city": "Fredrikstad",
+			"league": "NOR1",
+			"rep": 66,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NOR_SARPSBORG08",
+			"name": "Sarpsborg 08",
+			"short": "Sarpsborg 08",
+			"abbr": "SAR",
+			"city": "Sarpsborg",
+			"league": "NOR1",
+			"rep": 64,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1953A6",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NOR_KFUMOSLO",
+			"name": "KFUM Oslo",
+			"short": "KFUM Oslo",
+			"abbr": "KFU",
+			"city": "Oslo",
+			"league": "NOR1",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#174A9B"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NOR_HAMKAM",
+			"name": "HamKam",
+			"short": "HamKam",
+			"abbr": "HAM",
+			"city": "Hamar",
+			"league": "NOR1",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#21824A",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NOR_SANDEFJORDFOTBALL",
+			"name": "Sandefjord Fotball",
+			"short": "Sandefjord Fotball",
+			"abbr": "SAN",
+			"city": "Sandefjord",
+			"league": "NOR1",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174A9B",
+				"#C7202D"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NOR_AALESUNDSFK",
+			"name": "Aalesunds FK",
+			"short": "Aalesunds FK",
+			"abbr": "AAL",
+			"city": "Ålesund",
+			"league": "NOR1",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E97621",
+				"#174A9B"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NOR_KRISTIANSUNDBK",
+			"name": "Kristiansund BK",
+			"short": "Kristiansund BK",
+			"abbr": "KRI",
+			"city": "Kristiansund",
+			"league": "NOR1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#16326B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NOR_IKSTART",
+			"name": "IK Start",
+			"short": "IK Start",
+			"abbr": "IKS",
+			"city": "Kristiansand",
+			"league": "NOR1",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#EDCE27",
+				"#111111"
+			],
+			"kit": "plain"
+		}
+	]
+}

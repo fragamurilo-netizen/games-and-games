@@ -1,0 +1,246 @@
+{
+	"nation": "SWE",
+	"_doc": "Expansão Alpha 1.0.2. Clubes da temporada 2026/27 (2026 nas ligas de ano civil). Nomes reais; elencos fictícios, finanças, capacidades e força do jogo. Fontes e adaptações em docs/ALPHA-1.0.2-2026-10-28.md.",
+	"clubs": [
+		{
+			"key": "SWE_MALMOFF",
+			"name": "Malmö FF",
+			"short": "Malmö FF",
+			"abbr": "MAL",
+			"city": "Malmö",
+			"league": "SWE1",
+			"rep": 73,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#6CABDD",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "SWE_HAMMARBY",
+			"name": "Hammarby",
+			"short": "Hammarby",
+			"abbr": "HAM",
+			"city": "Stockholm",
+			"league": "SWE1",
+			"rep": 71,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#16864D",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "SWE_DJURGARDENSIF",
+			"name": "Djurgårdens IF",
+			"short": "Djurgårdens IF",
+			"abbr": "DJU",
+			"city": "Stockholm",
+			"league": "SWE1",
+			"rep": 70,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#6BACE4",
+				"#173D78"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "SWE_AIK",
+			"name": "AIK",
+			"short": "AIK",
+			"abbr": "AIK",
+			"city": "Stockholm",
+			"league": "SWE1",
+			"rep": 70,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#E8C429"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "SWE_BKHACKEN",
+			"name": "BK Häcken",
+			"short": "BK Häcken",
+			"abbr": "BKH",
+			"city": "Göteborg",
+			"league": "SWE1",
+			"rep": 69,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#F4CE22",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "SWE_MJALLBYAIF",
+			"name": "Mjällby AIF",
+			"short": "Mjällby AIF",
+			"abbr": "MJA",
+			"city": "Hällevik",
+			"league": "SWE1",
+			"rep": 67,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#F0CB22",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "SWE_IFELFSBORG",
+			"name": "IF Elfsborg",
+			"short": "IF Elfsborg",
+			"abbr": "IFE",
+			"city": "Borås",
+			"league": "SWE1",
+			"rep": 69,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#F0CD25",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "SWE_IFKGOTEBORG",
+			"name": "IFK Göteborg",
+			"short": "IFK Göteborg",
+			"abbr": "IFK",
+			"city": "Göteborg",
+			"league": "SWE1",
+			"rep": 68,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "SWE_GAIS",
+			"name": "GAIS",
+			"short": "GAIS",
+			"abbr": "GAI",
+			"city": "Göteborg",
+			"league": "SWE1",
+			"rep": 65,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#15854A",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "SWE_IKSIRIUS",
+			"name": "IK Sirius",
+			"short": "IK Sirius",
+			"abbr": "IKS",
+			"city": "Uppsala",
+			"league": "SWE1",
+			"rep": 64,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#194A90",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "SWE_IFBROMMAPOJKARNA",
+			"name": "IF Brommapojkarna",
+			"short": "IF Brommapojkarna",
+			"abbr": "IFB",
+			"city": "Stockholm",
+			"league": "SWE1",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#C8202D",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "SWE_HALMSTADSBK",
+			"name": "Halmstads BK",
+			"short": "Halmstads BK",
+			"abbr": "HAL",
+			"city": "Halmstad",
+			"league": "SWE1",
+			"rep": 63,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#164A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "SWE_KALMARFF",
+			"name": "Kalmar FF",
+			"short": "Kalmar FF",
+			"abbr": "KAL",
+			"city": "Kalmar",
+			"league": "SWE1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "SWE_DEGERFORSIF",
+			"name": "Degerfors IF",
+			"short": "Degerfors IF",
+			"abbr": "DEG",
+			"city": "Degerfors",
+			"league": "SWE1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "SWE_VASTERASSK",
+			"name": "Västerås SK",
+			"short": "Västerås SK",
+			"abbr": "VAS",
+			"city": "Västerås",
+			"league": "SWE1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#17834A",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "SWE_ORGRYTEIS",
+			"name": "Örgryte IS",
+			"short": "Örgryte IS",
+			"abbr": "ORG",
+			"city": "Göteborg",
+			"league": "SWE1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#1F468B"
+			],
+			"kit": "plain"
+		}
+	]
+}

@@ -29,7 +29,9 @@
 				"c2": "#E30613",
 				"sc": "#E30613"
 			},
-			"rivals": ["AUT_HUT"]
+			"rivals": [
+				"AUT_HUT"
+			]
 		},
 		{
 			"key": "AUT_HUT",
@@ -58,7 +60,11 @@
 				"year": "1899",
 				"sc": "#FFFFFF"
 			},
-			"rivals": ["AUT_VEI", "AUT_MOZ", "AUT_GRZ"]
+			"rivals": [
+				"AUT_VEI",
+				"AUT_MOZ",
+				"AUT_GRZ"
+			]
 		},
 		{
 			"key": "AUT_VEI",
@@ -112,7 +118,10 @@
 				"field": "halves",
 				"symbol": "cat"
 			},
-			"rivals": ["AUT_GAK", "AUT_HUT"]
+			"rivals": [
+				"AUT_GAK",
+				"AUT_HUT"
+			]
 		},
 		{
 			"key": "AUT_LAS",
@@ -328,7 +337,240 @@
 				"border": "double",
 				"ribbon": "1902"
 			},
-			"rivals": ["AUT_GRZ"]
+			"rivals": [
+				"AUT_GRZ"
+			]
+		},
+		{
+			"key": "AUT_D2_RIE",
+			"name": "SV Ried",
+			"short": "SV Ried",
+			"abbr": "RIE",
+			"city": "Ried im Innkreis",
+			"league": "AUT2",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00844a",
+				"#111111"
+			]
+		},
+		{
+			"key": "AUT_D2_ADM",
+			"name": "Admira Wacker",
+			"short": "Admira Wacker",
+			"abbr": "ADM",
+			"city": "Maria Enzersdorf",
+			"league": "AUT2",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#111111"
+			]
+		},
+		{
+			"key": "AUT_D2_KAP",
+			"name": "Kapfenberger SV",
+			"short": "Kapfenberger SV",
+			"abbr": "KAP",
+			"city": "Kapfenberg",
+			"league": "AUT2",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "AUT_D2_SKN",
+			"name": "SKN St. Pölten",
+			"short": "SKN St. Pölten",
+			"abbr": "SKN",
+			"city": "St. Pölten",
+			"league": "AUT2",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#f4c430"
+			]
+		},
+		{
+			"key": "AUT_D2_VIE",
+			"name": "First Vienna",
+			"short": "First Vienna",
+			"abbr": "VIE",
+			"city": "Wien",
+			"league": "AUT2",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#f4c430"
+			]
+		},
+		{
+			"key": "AUT_D2_LIE",
+			"name": "FC Liefering",
+			"short": "FC Liefering",
+			"abbr": "LIE",
+			"city": "Salzburg",
+			"league": "AUT2",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			],
+			"promotion_eligible": false,
+			"domestic_cup_eligible": false
+		},
+		{
+			"key": "AUT_D2_AMS",
+			"name": "SKU Amstetten",
+			"short": "SKU Amstetten",
+			"abbr": "AMS",
+			"city": "Amstetten",
+			"league": "AUT2",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#f4c430"
+			]
+		},
+		{
+			"key": "AUT_D2_SG2",
+			"name": "Sturm Graz II",
+			"short": "Sturm Graz II",
+			"abbr": "SG2",
+			"city": "Graz",
+			"league": "AUT2",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#ffffff"
+			],
+			"promotion_eligible": false,
+			"domestic_cup_eligible": false
+		},
+		{
+			"key": "AUT_D2_FAC",
+			"name": "Floridsdorfer AC",
+			"short": "Floridsdorfer AC",
+			"abbr": "FAC",
+			"city": "Wien",
+			"league": "AUT2",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "AUT_D2_BRE",
+			"name": "Schwarz-Weiß Bregenz",
+			"short": "Schwarz-Weiß Bregenz",
+			"abbr": "BRE",
+			"city": "Bregenz",
+			"league": "AUT2",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "AUT_D2_RW2",
+			"name": "Rapid Wien II",
+			"short": "Rapid Wien II",
+			"abbr": "RW2",
+			"city": "Wien",
+			"league": "AUT2",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00844a",
+				"#ffffff"
+			],
+			"promotion_eligible": false,
+			"domestic_cup_eligible": false
+		},
+		{
+			"key": "AUT_D2_LUS",
+			"name": "Austria Lustenau",
+			"short": "Austria Lustenau",
+			"abbr": "LUS",
+			"city": "Lustenau",
+			"league": "AUT2",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00844a",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "AUT_D2_STR",
+			"name": "SV Stripfing",
+			"short": "SV Stripfing",
+			"abbr": "STR",
+			"city": "Stripfing",
+			"league": "AUT2",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#f4c430"
+			]
+		},
+		{
+			"key": "AUT_D2_VOI",
+			"name": "ASK Voitsberg",
+			"short": "ASK Voitsberg",
+			"abbr": "VOI",
+			"city": "Voitsberg",
+			"league": "AUT2",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "AUT_D2_HOR",
+			"name": "SV Horn",
+			"short": "SV Horn",
+			"abbr": "HOR",
+			"city": "Horn",
+			"league": "AUT2",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "AUT_D2_LAF",
+			"name": "SV Lafnitz",
+			"short": "SV Lafnitz",
+			"abbr": "LAF",
+			"city": "Lafnitz",
+			"league": "AUT2",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#f4c430"
+			]
 		}
-	]
+	],
+	"_expansion_doc": "Divisões inferiores: identidades de clubes reais, atributos econômicos/esportivos e escudos gerados pelo modelo do jogo. Composição compatível com a elite existente: ENG/NED/TUR 2025/26, JPN 2025, SCO/AUT/SUI 2024/25. Fontes e adaptações em docs/DIVISOES-2026-10-28.md."
 }

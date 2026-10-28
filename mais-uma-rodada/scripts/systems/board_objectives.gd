@@ -15,8 +15,8 @@ static func list(world: GameWorld) -> Array:
 	if not world.has_user():
 		return []
 	var d: Dictionary = world.stats.get(KEY, {})
-	if int(d.get("y", -1)) != world.year:
-		d = {"y": world.year, "list": _build(world)}
+	if int(d.get("y", -1)) != world.year or int(d.get("club", -1)) != world.user_club_id:
+		d = {"y": world.year, "club": world.user_club_id, "list": _build(world)}
 		world.stats[KEY] = d
 		world.stats[CONF_KEY] = {}
 	return d["list"]

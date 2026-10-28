@@ -193,6 +193,7 @@ func refresh() -> void:
 			UIManager.toast("As dicas voltam a aparecer no início da carreira.")),
 		UIKit.menu_row("list", "Como jogar", "", func(): Tutorial.show_all()),
 		UIKit.menu_row("star", "Créditos", "", func(): MainMenuScreen.show_credits()),
+		UIKit.menu_row("info", "Política de privacidade", "", func(): OS.shell_open("https://fragamurilo-netizen.github.io/games-and-games/privacidade/")),
 	]))
 	tabs["about"].append(UIKit.card_panel(card3))
 	var card4 := UIKit.card("Card", 8)

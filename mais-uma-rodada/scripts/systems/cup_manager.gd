@@ -658,6 +658,10 @@ static func _setup_domestic_cups(world: GameWorld, s: SeasonState) -> void:
 			var l: League = s.leagues.get(lid, null)
 			if l != null:
 				list.append_array(l.club_ids)
+		var excluded: Array = c.get("exclude_keys", [])
+		list = list.filter(func(cid): return world.club(int(cid)).domestic_cup_eligible)
+		if not excluded.is_empty():
+			list = list.filter(func(cid): return not excluded.has(world.club(int(cid)).key))
 		if list.size() < 4:
 			continue
 		list.sort_custom(func(a, b): return _strength_key(world, a) > _strength_key(world, b) or (_strength_key(world, a) == _strength_key(world, b) and a < b))

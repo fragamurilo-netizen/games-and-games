@@ -153,6 +153,8 @@ static func take_job(world: GameWorld, club_id: int) -> void:
 	var mid := bool(world.stats.get("fired", {}).get("mid", false)) or (world.season != null and not world.season.finished and world.current_turn() > 0)
 	CoachIdentity.mem(world) # garante o registro do emprego antigo antes da troca
 	world.user_club_id = club_id
+	world.stats.erase(BoardObjectives.KEY)
+	world.stats.erase(BoardObjectives.CONF_KEY)
 	CoachIdentity.on_new_job(world, world.club(old_id), c)
 	world.stats.erase("fired")
 	c.board_confidence = 60.0
@@ -166,6 +168,7 @@ static func take_job(world: GameWorld, club_id: int) -> void:
 	YouthManager.ensure_academy(world)
 	YouthManager.build_league(world)
 	People.on_new_job(world, old_id)
+	BoardObjectives.list(world)
 	NewsManager.post(world, "novo_tecnico", {"club": c.short_name, "manager": world.manager_name}, c.id, -1, NewsEvent.IMP_HEADLINE)
 	InboxManager.on_new_job(world)
 	# No meio da temporada o calendário segue: joga as datas até o próximo jogo do clube novo.

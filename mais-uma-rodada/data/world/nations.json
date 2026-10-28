@@ -34,7 +34,8 @@
 				"c": [
 					"#FFFFFF",
 					"#CE1124"
-				]
+				],
+				"svg": "res://assets/flags/ENG.svg"
 			},
 			"coef": 100,
 			"origins": [
@@ -406,7 +407,8 @@
 					"x": 0.3,
 					"y": 0.5,
 					"s": 0.28
-				}
+				},
+				"svg": "res://assets/flags/ESP.svg"
 			},
 			"coef": 95,
 			"origins": [
@@ -804,7 +806,8 @@
 					"#000000",
 					"#DD0000",
 					"#FFCE00"
-				]
+				],
+				"svg": "res://assets/flags/GER.svg"
 			},
 			"coef": 88,
 			"origins": [
@@ -1116,7 +1119,8 @@
 					"#009246",
 					"#FFFFFF",
 					"#CE2B37"
-				]
+				],
+				"svg": "res://assets/flags/ITA.svg"
 			},
 			"coef": 90,
 			"origins": [
@@ -1374,7 +1378,8 @@
 					"#002395",
 					"#FFFFFF",
 					"#ED2939"
-				]
+				],
+				"svg": "res://assets/flags/FRA.svg"
 			},
 			"coef": 80,
 			"origins": [
@@ -1701,7 +1706,8 @@
 					"y": 0.5,
 					"s": 0.34,
 					"c2": "#FF0000"
-				}
+				},
+				"svg": "res://assets/flags/POR.svg"
 			},
 			"coef": 72,
 			"origins": [
@@ -1901,7 +1907,8 @@
 					"#AE1C28",
 					"#FFFFFF",
 					"#21468B"
-				]
+				],
+				"svg": "res://assets/flags/NED.svg"
 			},
 			"coef": 70,
 			"origins": [
@@ -2137,7 +2144,8 @@
 					"x": 0.42,
 					"y": 0.5,
 					"s": 0.5
-				}
+				},
+				"svg": "res://assets/flags/TUR.svg"
 			},
 			"coef": 55,
 			"origins": [
@@ -2350,7 +2358,8 @@
 					"#000000",
 					"#FAE042",
 					"#ED2939"
-				]
+				],
+				"svg": "res://assets/flags/BEL.svg"
 			},
 			"coef": 60,
 			"origins": [
@@ -2582,7 +2591,8 @@
 				"c": [
 					"#005EB8",
 					"#FFFFFF"
-				]
+				],
+				"svg": "res://assets/flags/SCO.svg"
 			},
 			"coef": 50,
 			"origins": [
@@ -2794,7 +2804,8 @@
 						"y": 0.5,
 						"s": 0.8
 					}
-				}
+				},
+				"svg": "res://assets/flags/GRE.svg"
 			},
 			"coef": 46,
 			"origins": [
@@ -2989,7 +3000,8 @@
 					"#ED2939",
 					"#FFFFFF",
 					"#ED2939"
-				]
+				],
+				"svg": "res://assets/flags/AUT.svg"
 			},
 			"coef": 50,
 			"origins": [
@@ -3184,7 +3196,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.55
-				}
+				},
+				"svg": "res://assets/flags/SUI.svg"
 			},
 			"coef": 48,
 			"origins": [
@@ -3391,7 +3404,8 @@
 				"c": [
 					"#0057B7",
 					"#FFD700"
-				]
+				],
+				"svg": "res://assets/flags/UKR.svg"
 			},
 			"coef": 45,
 			"origins": [
@@ -3585,7 +3599,8 @@
 					"y": 0.5,
 					"s": 0.36,
 					"c2": "#FFFFFF"
-				}
+				},
+				"svg": "res://assets/flags/CRO.svg"
 			},
 			"coef": 42,
 			"origins": [
@@ -3764,7 +3779,8 @@
 					"x": 0.35,
 					"y": 0.45,
 					"s": 0.4
-				}
+				},
+				"svg": "res://assets/flags/SRB.svg"
 			},
 			"coef": 42,
 			"origins": [
@@ -3935,7 +3951,8 @@
 					"#FFFFFF",
 					"#D7141A"
 				],
-				"t": "#11457E"
+				"t": "#11457E",
+				"svg": "res://assets/flags/CZE.svg"
 			},
 			"coef": 45,
 			"origins": [
@@ -4103,7 +4120,8 @@
 				"c": [
 					"#C8102E",
 					"#FFFFFF"
-				]
+				],
+				"svg": "res://assets/flags/DEN.svg"
 			},
 			"coef": 45,
 			"origins": [
@@ -4303,7 +4321,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.5
-				}
+				},
+				"svg": "res://assets/flags/WAL.svg"
 			},
 			"origins": [
 				{
@@ -4354,7 +4373,8 @@
 					"#169B62",
 					"#FFFFFF",
 					"#FF883E"
-				]
+				],
+				"svg": "res://assets/flags/IRL.svg"
 			},
 			"origins": [
 				{
@@ -4407,7 +4427,8 @@
 					"#BA0C2F",
 					"#FFFFFF",
 					"#00205B"
-				]
+				],
+				"svg": "res://assets/flags/NOR.svg"
 			},
 			"origins": [
 				{
@@ -4480,7 +4501,8 @@
 				"c": [
 					"#006AA7",
 					"#FECC02"
-				]
+				],
+				"svg": "res://assets/flags/SWE.svg"
 			},
 			"origins": [
 				{
@@ -4562,7 +4584,8 @@
 					"#02529C",
 					"#FFFFFF",
 					"#DC1E35"
-				]
+				],
+				"svg": "res://assets/flags/ISL.svg"
 			},
 			"origins": [
 				{
@@ -4594,7 +4617,8 @@
 				"c": [
 					"#FFFFFF",
 					"#002F6C"
-				]
+				],
+				"svg": "res://assets/flags/FIN.svg"
 			},
 			"origins": [
 				{
@@ -4644,7 +4668,8 @@
 				"c": [
 					"#FFFFFF",
 					"#DC143C"
-				]
+				],
+				"svg": "res://assets/flags/POL.svg"
 			},
 			"origins": [
 				{
@@ -4696,7 +4721,8 @@
 					"x": 0.35,
 					"y": 0.5,
 					"s": 0.42
-				}
+				},
+				"svg": "res://assets/flags/SVK.svg"
 			},
 			"origins": [
 				{
@@ -4749,7 +4775,8 @@
 					"x": 0.3,
 					"y": 0.4,
 					"s": 0.36
-				}
+				},
+				"svg": "res://assets/flags/SVN.svg"
 			},
 			"origins": [
 				{
@@ -4788,7 +4815,8 @@
 					"#CD2A3E",
 					"#FFFFFF",
 					"#436F4D"
-				]
+				],
+				"svg": "res://assets/flags/HUN.svg"
 			},
 			"origins": [
 				{
@@ -4834,7 +4862,8 @@
 					"#002B7F",
 					"#FCD116",
 					"#CE1126"
-				]
+				],
+				"svg": "res://assets/flags/ROU.svg"
 			},
 			"origins": [
 				{
@@ -4886,7 +4915,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.3
-				}
+				},
+				"svg": "res://assets/flags/BIH.svg"
 			},
 			"origins": [
 				{
@@ -4929,7 +4959,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.45
-				}
+				},
+				"svg": "res://assets/flags/MNE.svg"
 			},
 			"origins": [
 				{
@@ -4972,7 +5003,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.55
-				}
+				},
+				"svg": "res://assets/flags/MKD.svg"
 			},
 			"origins": [
 				{
@@ -5022,7 +5054,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.55
-				}
+				},
+				"svg": "res://assets/flags/ALB.svg"
 			},
 			"origins": [
 				{
@@ -5065,7 +5098,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.4
-				}
+				},
+				"svg": "res://assets/flags/KOS.svg"
 			},
 			"origins": [
 				{
@@ -5109,7 +5143,8 @@
 				"c": [
 					"#FFFFFF",
 					"#FF0000"
-				]
+				],
+				"svg": "res://assets/flags/GEO.svg"
 			},
 			"origins": [
 				{
@@ -5147,7 +5182,8 @@
 					"#FFFFFF",
 					"#0039A6",
 					"#D52B1E"
-				]
+				],
+				"svg": "res://assets/flags/RUS.svg"
 			},
 			"origins": [
 				{
@@ -5194,7 +5230,8 @@
 					"#009B3A",
 					"#FEDF00",
 					"#002776"
-				]
+				],
+				"svg": "res://assets/flags/BRA.svg"
 			},
 			"coef": 85,
 			"origins": [
@@ -5777,7 +5814,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.3
-				}
+				},
+				"svg": "res://assets/flags/ARG.svg"
 			},
 			"coef": 82,
 			"origins": [
@@ -6031,7 +6069,8 @@
 						"y": 0.5,
 						"s": 0.7
 					}
-				}
+				},
+				"svg": "res://assets/flags/URU.svg"
 			},
 			"coef": 60,
 			"origins": [
@@ -6165,7 +6204,8 @@
 					2,
 					1,
 					1
-				]
+				],
+				"svg": "res://assets/flags/COL.svg"
 			},
 			"coef": 58,
 			"origins": [
@@ -6328,7 +6368,8 @@
 						"y": 0.5,
 						"s": 0.5
 					}
-				}
+				},
+				"svg": "res://assets/flags/CHI.svg"
 			},
 			"coef": 50,
 			"origins": [
@@ -6498,7 +6539,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.3
-				}
+				},
+				"svg": "res://assets/flags/ECU.svg"
 			},
 			"coef": 55,
 			"origins": [
@@ -6617,7 +6659,8 @@
 					"#D91023",
 					"#FFFFFF",
 					"#D91023"
-				]
+				],
+				"svg": "res://assets/flags/PER.svg"
 			},
 			"coef": 42,
 			"origins": [
@@ -6762,7 +6805,8 @@
 					"y": 0.5,
 					"s": 0.22,
 					"c2": "#0B7A3E"
-				}
+				},
+				"svg": "res://assets/flags/PAR.svg"
 			},
 			"coef": 52,
 			"origins": [
@@ -6876,7 +6920,8 @@
 					"#D52B1E",
 					"#F9E300",
 					"#007934"
-				]
+				],
+				"svg": "res://assets/flags/BOL.svg"
 			},
 			"coef": 35,
 			"origins": [
@@ -6983,7 +7028,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.36
-				}
+				},
+				"svg": "res://assets/flags/VEN.svg"
 			},
 			"coef": 35,
 			"origins": [
@@ -7109,7 +7155,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.3
-				}
+				},
+				"svg": "res://assets/flags/MEX.svg"
 			},
 			"coef": 70,
 			"origins": [
@@ -7285,7 +7332,8 @@
 						"y": 0.5,
 						"s": 0.8
 					}
-				}
+				},
+				"svg": "res://assets/flags/USA.svg"
 			},
 			"coef": 65,
 			"origins": [
@@ -7581,7 +7629,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.4
-				}
+				},
+				"svg": "res://assets/flags/CAN.svg"
 			},
 			"origins": [
 				{
@@ -7685,7 +7734,8 @@
 					2,
 					1,
 					1
-				]
+				],
+				"svg": "res://assets/flags/CRC.svg"
 			},
 			"origins": [
 				{
@@ -7724,7 +7774,8 @@
 					"#FED100",
 					"#009B3A",
 					"#000000"
-				]
+				],
+				"svg": "res://assets/flags/JAM.svg"
 			},
 			"origins": [
 				{
@@ -7768,7 +7819,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.3
-				}
+				},
+				"svg": "res://assets/flags/HON.svg"
 			},
 			"origins": [
 				{
@@ -7807,7 +7859,8 @@
 					"#DA121A",
 					"#005293",
 					"#FFFFFF"
-				]
+				],
+				"svg": "res://assets/flags/PAN.svg"
 			},
 			"origins": [
 				{
@@ -7852,7 +7905,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.26
-				}
+				},
+				"svg": "res://assets/flags/EGY.svg"
 			},
 			"coef": 65,
 			"origins": [
@@ -7980,7 +8034,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.4
-				}
+				},
+				"svg": "res://assets/flags/MAR.svg"
 			},
 			"coef": 62,
 			"origins": [
@@ -8127,7 +8182,8 @@
 					"y": 0.5,
 					"s": 0.5,
 					"c2": "#E70013"
-				}
+				},
+				"svg": "res://assets/flags/TUN.svg"
 			},
 			"coef": 55,
 			"origins": [
@@ -8242,7 +8298,8 @@
 					"#FFFFFF",
 					"#FFB81C",
 					"#000000"
-				]
+				],
+				"svg": "res://assets/flags/RSA.svg"
 			},
 			"coef": 50,
 			"origins": [
@@ -8390,7 +8447,8 @@
 					"#008751",
 					"#FFFFFF",
 					"#008751"
-				]
+				],
+				"svg": "res://assets/flags/NGA.svg"
 			},
 			"coef": 40,
 			"origins": [
@@ -8510,7 +8568,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.3
-				}
+				},
+				"svg": "res://assets/flags/SEN.svg"
 			},
 			"coef": 40,
 			"origins": [
@@ -8612,7 +8671,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.3
-				}
+				},
+				"svg": "res://assets/flags/GHA.svg"
 			},
 			"origins": [
 				{
@@ -8648,7 +8708,8 @@
 					"#F77F00",
 					"#FFFFFF",
 					"#009E60"
-				]
+				],
+				"svg": "res://assets/flags/CIV.svg"
 			},
 			"origins": [
 				{
@@ -8691,7 +8752,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.28
-				}
+				},
+				"svg": "res://assets/flags/CMR.svg"
 			},
 			"origins": [
 				{
@@ -8732,7 +8794,8 @@
 					"#14B53A",
 					"#FCD116",
 					"#CE1126"
-				]
+				],
+				"svg": "res://assets/flags/MLI.svg"
 			},
 			"origins": [
 				{
@@ -8775,7 +8838,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.5
-				}
+				},
+				"svg": "res://assets/flags/ALG.svg"
 			},
 			"origins": [
 				{
@@ -8814,7 +8878,8 @@
 					"#CE1126",
 					"#FCD116",
 					"#009460"
-				]
+				],
+				"svg": "res://assets/flags/GUI.svg"
 			},
 			"origins": [
 				{
@@ -8857,7 +8922,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.3
-				}
+				},
+				"svg": "res://assets/flags/BFA.svg"
 			},
 			"origins": [
 				{
@@ -8897,7 +8963,8 @@
 					"x": 0.18,
 					"y": 0.25,
 					"s": 0.28
-				}
+				},
+				"svg": "res://assets/flags/COD.svg"
 			},
 			"origins": [
 				{
@@ -8933,7 +9000,8 @@
 					"#009E60",
 					"#FCD116",
 					"#3A75C4"
-				]
+				],
+				"svg": "res://assets/flags/GAB.svg"
 			},
 			"origins": [
 				{
@@ -8975,7 +9043,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.36
-				}
+				},
+				"svg": "res://assets/flags/ANG.svg"
 			},
 			"origins": [
 				{
@@ -9027,7 +9096,8 @@
 					"x": 0.38,
 					"y": 0.6,
 					"s": 0.36
-				}
+				},
+				"svg": "res://assets/flags/CPV.svg"
 			},
 			"origins": [
 				{
@@ -9063,7 +9133,8 @@
 					"#FFFFFF",
 					"#FCE100"
 				],
-				"t": "#D21034"
+				"t": "#D21034",
+				"svg": "res://assets/flags/MOZ.svg"
 			},
 			"origins": [
 				{
@@ -9106,7 +9177,8 @@
 					"x": 0.17,
 					"y": 0.5,
 					"s": 0.2
-				}
+				},
+				"svg": "res://assets/flags/GNB.svg"
 			},
 			"origins": [
 				{
@@ -9147,7 +9219,8 @@
 					"#D40000",
 					"#FFD200",
 					"#006400"
-				]
+				],
+				"svg": "res://assets/flags/ZIM.svg"
 			},
 			"origins": [
 				{
@@ -9188,7 +9261,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.5
-				}
+				},
+				"svg": "res://assets/flags/KSA.svg"
 			},
 			"coef": 65,
 			"origins": [
@@ -9340,7 +9414,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.6
-				}
+				},
+				"svg": "res://assets/flags/JPN.svg"
 			},
 			"coef": 62,
 			"origins": [
@@ -9517,7 +9592,8 @@
 					"y": 0.5,
 					"s": 0.5,
 					"c2": "#0047A0"
-				}
+				},
+				"svg": "res://assets/flags/KOR.svg"
 			},
 			"coef": 60,
 			"origins": [
@@ -9655,7 +9731,8 @@
 				"c": [
 					"#FFFFFF",
 					"#8A1538"
-				]
+				],
+				"svg": "res://assets/flags/QAT.svg"
 			},
 			"coef": 55,
 			"origins": [
@@ -9754,7 +9831,8 @@
 					"#00732F",
 					"#FFFFFF",
 					"#000000"
-				]
+				],
+				"svg": "res://assets/flags/UAE.svg"
 			},
 			"coef": 50,
 			"origins": [
@@ -9859,7 +9937,8 @@
 					"x": 0.5,
 					"y": 0.5,
 					"s": 0.5
-				}
+				},
+				"svg": "res://assets/flags/CHN.svg"
 			},
 			"coef": 45,
 			"origins": [
@@ -10029,7 +10108,8 @@
 					"x": 0.72,
 					"y": 0.5,
 					"s": 0.45
-				}
+				},
+				"svg": "res://assets/flags/AUS.svg"
 			},
 			"coef": 45,
 			"origins": [
@@ -10242,7 +10322,8 @@
 					"y": 0.5,
 					"s": 0.22,
 					"c2": "#FFFFFF"
-				}
+				},
+				"svg": "res://assets/flags/IRN.svg"
 			},
 			"origins": [
 				{
@@ -10300,7 +10381,8 @@
 					"x": 0.75,
 					"y": 0.5,
 					"s": 0.45
-				}
+				},
+				"svg": "res://assets/flags/NZL.svg"
 			},
 			"origins": [
 				{
@@ -10337,952 +10419,1698 @@
 			"confed": "UEFA",
 			"coef": 57,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/NIR.svg"
+			}
 		},
 		"BUL": {
 			"name": "Bulgária",
 			"confed": "UEFA",
 			"coef": 54,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/BUL.svg"
+			}
 		},
 		"BLR": {
 			"name": "Belarus",
 			"confed": "UEFA",
 			"coef": 42,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/BLR.svg"
+			}
 		},
 		"EST": {
 			"name": "Estônia",
 			"confed": "UEFA",
 			"coef": 38,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/EST.svg"
+			}
 		},
 		"LVA": {
 			"name": "Letônia",
 			"confed": "UEFA",
 			"coef": 37,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/LVA.svg"
+			}
 		},
 		"LTU": {
 			"name": "Lituânia",
 			"confed": "UEFA",
 			"coef": 39,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/LTU.svg"
+			}
 		},
 		"LUX": {
 			"name": "Luxemburgo",
 			"confed": "UEFA",
 			"coef": 44,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/LUX.svg"
+			}
 		},
 		"MDA": {
 			"name": "Moldávia",
 			"confed": "UEFA",
 			"coef": 38,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/MDA.svg"
+			}
 		},
 		"ARM": {
 			"name": "Armênia",
 			"confed": "UEFA",
 			"coef": 48,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/ARM.svg"
+			}
 		},
 		"AZE": {
 			"name": "Azerbaijão",
 			"confed": "UEFA",
 			"coef": 45,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/AZE.svg"
+			}
 		},
 		"CYP": {
 			"name": "Chipre",
 			"confed": "UEFA",
 			"coef": 42,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/CYP.svg"
+			}
 		},
 		"ISR": {
 			"name": "Israel",
 			"confed": "UEFA",
 			"coef": 60,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/ISR.svg"
+			}
 		},
 		"KAZ": {
 			"name": "Cazaquistão",
 			"confed": "UEFA",
 			"coef": 45,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/KAZ.svg"
+			}
 		},
 		"MLT": {
 			"name": "Malta",
 			"confed": "UEFA",
 			"coef": 31,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/MLT.svg"
+			}
 		},
 		"AND": {
 			"name": "Andorra",
 			"confed": "UEFA",
 			"coef": 22,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/AND.svg"
+			}
 		},
 		"LIE": {
 			"name": "Liechtenstein",
 			"confed": "UEFA",
 			"coef": 20,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/LIE.svg"
+			}
 		},
 		"FRO": {
 			"name": "Ilhas Faroé",
 			"confed": "UEFA",
 			"coef": 35,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/FRO.svg"
+			}
 		},
 		"GIB": {
 			"name": "Gibraltar",
 			"confed": "UEFA",
 			"coef": 21,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/GIB.svg"
+			}
 		},
 		"SMR": {
 			"name": "San Marino",
 			"confed": "UEFA",
 			"coef": 15,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/SMR.svg"
+			}
 		},
 		"KEN": {
 			"name": "Quênia",
 			"confed": "CAF",
 			"coef": 41,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/KEN.svg"
+			}
 		},
 		"UGA": {
 			"name": "Uganda",
 			"confed": "CAF",
 			"coef": 43,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/UGA.svg"
+			}
 		},
 		"TAN": {
 			"name": "Tanzânia",
 			"confed": "CAF",
 			"coef": 41,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/TAN.svg"
+			}
 		},
 		"ZAM": {
 			"name": "Zâmbia",
 			"confed": "CAF",
 			"coef": 56,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/ZAM.svg"
+			}
 		},
 		"BEN": {
 			"name": "Benim",
 			"confed": "CAF",
 			"coef": 46,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/BEN.svg"
+			}
 		},
 		"BOT": {
 			"name": "Botsuana",
 			"confed": "CAF",
 			"coef": 36,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/BOT.svg"
+			}
 		},
 		"BDI": {
 			"name": "Burundi",
 			"confed": "CAF",
 			"coef": 34,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/BDI.svg"
+			}
 		},
 		"CTA": {
 			"name": "República Centro-Africana",
 			"confed": "CAF",
 			"coef": 33,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/CTA.svg"
+			}
 		},
 		"CHA": {
 			"name": "Chade",
 			"confed": "CAF",
 			"coef": 29,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/CHA.svg"
+			}
 		},
 		"COM": {
 			"name": "Comores",
 			"confed": "CAF",
 			"coef": 43,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/COM.svg"
+			}
 		},
 		"CGO": {
 			"name": "Congo",
 			"confed": "CAF",
 			"coef": 45,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/CGO.svg"
+			}
 		},
 		"DJI": {
 			"name": "Djibuti",
 			"confed": "CAF",
 			"coef": 22,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/DJI.svg"
+			}
 		},
 		"EQG": {
 			"name": "Guiné Equatorial",
 			"confed": "CAF",
 			"coef": 49,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/EQG.svg"
+			}
 		},
 		"ERI": {
 			"name": "Eritreia",
 			"confed": "CAF",
 			"coef": 25,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/ERI.svg"
+			}
 		},
 		"SWZ": {
 			"name": "Essuatíni",
 			"confed": "CAF",
 			"coef": 29,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/SWZ.svg"
+			}
 		},
 		"ETH": {
 			"name": "Etiópia",
 			"confed": "CAF",
 			"coef": 39,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/ETH.svg"
+			}
 		},
 		"GAM": {
 			"name": "Gâmbia",
 			"confed": "CAF",
 			"coef": 43,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/GAM.svg"
+			}
 		},
 		"LES": {
 			"name": "Lesoto",
 			"confed": "CAF",
 			"coef": 30,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/LES.svg"
+			}
 		},
 		"LBR": {
 			"name": "Libéria",
 			"confed": "CAF",
 			"coef": 34,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/LBR.svg"
+			}
 		},
 		"LBY": {
 			"name": "Líbia",
 			"confed": "CAF",
 			"coef": 43,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/LBY.svg"
+			}
 		},
 		"MAD": {
 			"name": "Madagascar",
 			"confed": "CAF",
 			"coef": 44,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/MAD.svg"
+			}
 		},
 		"MWI": {
 			"name": "Malawi",
 			"confed": "CAF",
 			"coef": 38,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/MWI.svg"
+			}
 		},
 		"MTN": {
 			"name": "Mauritânia",
 			"confed": "CAF",
 			"coef": 40,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/MTN.svg"
+			}
 		},
 		"MRI": {
 			"name": "Maurício",
 			"confed": "CAF",
 			"coef": 29,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/MRI.svg"
+			}
 		},
 		"NAM": {
 			"name": "Namíbia",
 			"confed": "CAF",
 			"coef": 41,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/NAM.svg"
+			}
 		},
 		"NIG": {
 			"name": "Níger",
 			"confed": "CAF",
 			"coef": 35,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/NIG.svg"
+			}
 		},
 		"RWA": {
 			"name": "Ruanda",
 			"confed": "CAF",
 			"coef": 36,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/RWA.svg"
+			}
 		},
 		"STP": {
 			"name": "São Tomé e Príncipe",
 			"confed": "CAF",
 			"coef": 23,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/STP.svg"
+			}
 		},
 		"SEY": {
 			"name": "Seicheles",
 			"confed": "CAF",
 			"coef": 20,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/SEY.svg"
+			}
 		},
 		"SLE": {
 			"name": "Serra Leoa",
 			"confed": "CAF",
 			"coef": 39,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/SLE.svg"
+			}
 		},
 		"SOM": {
 			"name": "Somália",
 			"confed": "CAF",
 			"coef": 22,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/SOM.svg"
+			}
 		},
 		"SSD": {
 			"name": "Sudão do Sul",
 			"confed": "CAF",
 			"coef": 28,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/SSD.svg"
+			}
 		},
 		"SDN": {
 			"name": "Sudão",
 			"confed": "CAF",
 			"coef": 42,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/SDN.svg"
+			}
 		},
 		"TOG": {
 			"name": "Togo",
 			"confed": "CAF",
 			"coef": 43,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/TOG.svg"
+			}
 		},
 		"AFG": {
 			"name": "Afeganistão",
 			"confed": "AFC",
 			"coef": 30,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/AFG.svg"
+			}
 		},
 		"BAN": {
 			"name": "Bangladesh",
 			"confed": "AFC",
 			"coef": 26,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/BAN.svg"
+			}
 		},
 		"BHU": {
 			"name": "Butão",
 			"confed": "AFC",
 			"coef": 20,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/BHU.svg"
+			}
 		},
 		"BRU": {
 			"name": "Brunei",
 			"confed": "AFC",
 			"coef": 19,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/BRU.svg"
+			}
 		},
 		"CAM": {
 			"name": "Camboja",
 			"confed": "AFC",
 			"coef": 27,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/CAM.svg"
+			}
 		},
 		"TPE": {
 			"name": "Taipé Chinês",
 			"confed": "AFC",
 			"coef": 27,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/TPE.svg"
+			}
 		},
 		"GUM": {
 			"name": "Guam",
 			"confed": "AFC",
 			"coef": 20,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/GUM.svg"
+			}
 		},
 		"HKG": {
 			"name": "Hong Kong",
 			"confed": "AFC",
 			"coef": 35,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/HKG.svg"
+			}
 		},
 		"IND": {
 			"name": "Índia",
 			"confed": "AFC",
 			"coef": 42,
-			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"origins": [
+				{
+					"c": "sas",
+					"w": 100,
+					"eth": {
+						"sas": 97,
+						"eur": 3
+					}
+				}
+			],
+			"lang": "en",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#FF9933",
+					"#FFFFFF",
+					"#138808"
+				],
+				"svg": "res://assets/flags/IND.svg"
+			},
+			"foreign": [
+				0.22
+			],
+			"imports": {
+				"BRA": 35,
+				"ARG": 15,
+				"JPN": 10,
+				"KOR": 10,
+				"AUS": 10,
+				"NGA": 10,
+				"ENG": 10
+			},
+			"cities": [
+				[
+					"Kolkata",
+					2
+				],
+				[
+					"Mumbai",
+					2
+				],
+				[
+					"Margao",
+					2
+				],
+				[
+					"Bengaluru",
+					2
+				],
+				[
+					"Kochi",
+					2
+				],
+				[
+					"Guwahati",
+					2
+				],
+				[
+					"Bhubaneswar",
+					2
+				],
+				[
+					"Chennai",
+					2
+				],
+				[
+					"Mohali",
+					2
+				],
+				[
+					"Varanasi",
+					2
+				],
+				[
+					"Delhi",
+					2
+				]
+			]
 		},
 		"IDN": {
 			"name": "Indonésia",
 			"confed": "AFC",
 			"coef": 47,
-			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"origins": [
+				{
+					"c": "id",
+					"w": 100,
+					"eth": {
+						"sea": 92,
+						"eas": 5,
+						"mix": 3
+					}
+				}
+			],
+			"lang": "en",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#FF0000",
+					"#FFFFFF"
+				],
+				"svg": "res://assets/flags/IDN.svg"
+			},
+			"foreign": [
+				0.22
+			],
+			"imports": {
+				"BRA": 35,
+				"ARG": 15,
+				"JPN": 10,
+				"KOR": 10,
+				"AUS": 10,
+				"NGA": 10,
+				"ENG": 10
+			},
+			"cities": [
+				[
+					"Bandung",
+					2
+				],
+				[
+					"Jakarta",
+					2
+				],
+				[
+					"Samarinda",
+					2
+				],
+				[
+					"Gianyar",
+					2
+				],
+				[
+					"Surabaya",
+					2
+				],
+				[
+					"Tangerang",
+					2
+				],
+				[
+					"Makassar",
+					2
+				],
+				[
+					"Malang",
+					2
+				],
+				[
+					"Bangkalan",
+					2
+				],
+				[
+					"Kediri",
+					2
+				],
+				[
+					"Bandar Lampung",
+					2
+				],
+				[
+					"Sleman",
+					2
+				],
+				[
+					"Yogyakarta",
+					2
+				],
+				[
+					"Jepara",
+					2
+				],
+				[
+					"Surakarta",
+					2
+				],
+				[
+					"Bekasi",
+					2
+				],
+				[
+					"Palangka Raya",
+					2
+				]
+			]
 		},
 		"IRQ": {
 			"name": "Iraque",
 			"confed": "AFC",
 			"coef": 63,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/IRQ.svg"
+			}
 		},
 		"JOR": {
 			"name": "Jordânia",
 			"confed": "AFC",
 			"coef": 61,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/JOR.svg"
+			}
 		},
 		"KUW": {
 			"name": "Kuwait",
 			"confed": "AFC",
 			"coef": 44,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/KUW.svg"
+			}
 		},
 		"KGZ": {
 			"name": "Quirguistão",
 			"confed": "AFC",
 			"coef": 41,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/KGZ.svg"
+			}
 		},
 		"LAO": {
 			"name": "Laos",
 			"confed": "AFC",
 			"coef": 24,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/LAO.svg"
+			}
 		},
 		"LBN": {
 			"name": "Líbano",
 			"confed": "AFC",
 			"coef": 45,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/LBN.svg"
+			}
 		},
 		"MAC": {
 			"name": "Macau",
 			"confed": "AFC",
 			"coef": 20,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/MAC.svg"
+			}
 		},
 		"MAS": {
 			"name": "Malásia",
 			"confed": "AFC",
 			"coef": 39,
-			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"origins": [
+				{
+					"c": "ms",
+					"w": 100,
+					"eth": {
+						"sea": 70,
+						"eas": 22,
+						"sas": 8
+					}
+				}
+			],
+			"lang": "en",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#CC0001",
+					"#FFFFFF"
+				],
+				"svg": "res://assets/flags/MAS.svg"
+			},
+			"foreign": [
+				0.22
+			],
+			"imports": {
+				"BRA": 35,
+				"ARG": 15,
+				"JPN": 10,
+				"KOR": 10,
+				"AUS": 10,
+				"NGA": 10,
+				"ENG": 10
+			},
+			"cities": [
+				[
+					"Johor Bahru",
+					2
+				],
+				[
+					"Shah Alam",
+					2
+				],
+				[
+					"Kuching",
+					2
+				],
+				[
+					"Kuala Terengganu",
+					2
+				],
+				[
+					"Kuala Lumpur",
+					2
+				],
+				[
+					"Kota Kinabalu",
+					2
+				],
+				[
+					"Seremban",
+					2
+				],
+				[
+					"George Town",
+					2
+				],
+				[
+					"Bandar Seri Begawan",
+					2
+				],
+				[
+					"Melaka",
+					2
+				],
+				[
+					"Putrajaya",
+					2
+				],
+				[
+					"Kota Bharu",
+					2
+				]
+			]
 		},
 		"MDV": {
 			"name": "Maldivas",
 			"confed": "AFC",
 			"coef": 28,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/MDV.svg"
+			}
 		},
 		"MNG": {
 			"name": "Mongólia",
 			"confed": "AFC",
 			"coef": 22,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/MNG.svg"
+			}
 		},
 		"MYA": {
 			"name": "Myanmar",
 			"confed": "AFC",
 			"coef": 29,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/MYA.svg"
+			}
 		},
 		"NEP": {
 			"name": "Nepal",
 			"confed": "AFC",
 			"coef": 25,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/NEP.svg"
+			}
 		},
 		"PRK": {
 			"name": "Coreia do Norte",
 			"confed": "AFC",
 			"coef": 47,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/PRK.svg"
+			}
 		},
 		"OMA": {
 			"name": "Omã",
 			"confed": "AFC",
 			"coef": 53,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/OMA.svg"
+			}
 		},
 		"PAK": {
 			"name": "Paquistão",
 			"confed": "AFC",
 			"coef": 23,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/PAK.svg"
+			}
 		},
 		"PLE": {
 			"name": "Palestina",
 			"confed": "AFC",
 			"coef": 46,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/PLE.svg"
+			}
 		},
 		"PHI": {
 			"name": "Filipinas",
 			"confed": "AFC",
 			"coef": 34,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/PHI.svg"
+			}
 		},
 		"SGP": {
 			"name": "Singapura",
 			"confed": "AFC",
 			"coef": 32,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/SGP.svg"
+			}
 		},
 		"SRI": {
 			"name": "Sri Lanka",
 			"confed": "AFC",
 			"coef": 21,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/SRI.svg"
+			}
 		},
 		"SYR": {
 			"name": "Síria",
 			"confed": "AFC",
 			"coef": 49,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/SYR.svg"
+			}
 		},
 		"TJK": {
 			"name": "Tajiquistão",
 			"confed": "AFC",
 			"coef": 47,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/TJK.svg"
+			}
 		},
 		"THA": {
 			"name": "Tailândia",
 			"confed": "AFC",
 			"coef": 49,
-			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"origins": [
+				{
+					"c": "th",
+					"w": 100,
+					"eth": {
+						"sea": 94,
+						"eas": 6
+					}
+				}
+			],
+			"lang": "en",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#A51931",
+					"#FFFFFF",
+					"#2D2A4A",
+					"#FFFFFF",
+					"#A51931"
+				],
+				"svg": "res://assets/flags/THA.svg"
+			},
+			"foreign": [
+				0.22
+			],
+			"imports": {
+				"BRA": 35,
+				"ARG": 15,
+				"JPN": 10,
+				"KOR": 10,
+				"AUS": 10,
+				"NGA": 10,
+				"ENG": 10
+			},
+			"cities": [
+				[
+					"Buriram",
+					2
+				],
+				[
+					"Bangkok",
+					2
+				],
+				[
+					"Pathum Thani",
+					2
+				],
+				[
+					"Ratchaburi",
+					2
+				],
+				[
+					"Chiang Rai",
+					2
+				],
+				[
+					"Prachuap Khiri Khan",
+					2
+				],
+				[
+					"Chonburi",
+					2
+				],
+				[
+					"Lamphun",
+					2
+				],
+				[
+					"Rayong",
+					2
+				],
+				[
+					"Sukhothai",
+					2
+				],
+				[
+					"Uthai Thani",
+					2
+				],
+				[
+					"Ayutthaya",
+					2
+				],
+				[
+					"Sisaket",
+					2
+				],
+				[
+					"Pattani",
+					2
+				]
+			]
 		},
 		"TLS": {
 			"name": "Timor-Leste",
 			"confed": "AFC",
 			"coef": 20,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/TLS.svg"
+			}
 		},
 		"TKM": {
 			"name": "Turcomenistão",
 			"confed": "AFC",
 			"coef": 38,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/TKM.svg"
+			}
 		},
 		"UZB": {
 			"name": "Uzbequistão",
 			"confed": "AFC",
 			"coef": 63,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/UZB.svg"
+			}
 		},
 		"VIE": {
 			"name": "Vietnã",
 			"confed": "AFC",
 			"coef": 42,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/VIE.svg"
+			}
 		},
 		"YEM": {
 			"name": "Iêmen",
 			"confed": "AFC",
 			"coef": 30,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/YEM.svg"
+			}
 		},
 		"BHR": {
 			"name": "Bahrein",
 			"confed": "AFC",
 			"coef": 50,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/BHR.svg"
+			}
 		},
 		"NMI": {
 			"name": "Ilhas Marianas do Norte",
 			"confed": "AFC",
 			"coef": 15,
 			"national_only": true,
-			"fifa_member": false
+			"fifa_member": false,
+			"flag": {
+				"svg": "res://assets/flags/NMI.svg"
+			}
 		},
 		"FIJ": {
 			"name": "Fiji",
 			"confed": "OFC",
 			"coef": 37,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/FIJ.svg"
+			}
 		},
 		"NCL": {
 			"name": "Nova Caledônia",
 			"confed": "OFC",
 			"coef": 39,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/NCL.svg"
+			}
 		},
 		"PNG": {
 			"name": "Papua-Nova Guiné",
 			"confed": "OFC",
 			"coef": 32,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/PNG.svg"
+			}
 		},
 		"SOL": {
 			"name": "Ilhas Salomão",
 			"confed": "OFC",
 			"coef": 37,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/SOL.svg"
+			}
 		},
 		"TAH": {
 			"name": "Taiti",
 			"confed": "OFC",
 			"coef": 36,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/TAH.svg"
+			}
 		},
 		"VAN": {
 			"name": "Vanuatu",
 			"confed": "OFC",
 			"coef": 35,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/VAN.svg"
+			}
 		},
 		"COK": {
 			"name": "Ilhas Cook",
 			"confed": "OFC",
 			"coef": 22,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/COK.svg"
+			}
 		},
 		"SAM": {
 			"name": "Samoa",
 			"confed": "OFC",
 			"coef": 23,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/SAM.svg"
+			}
 		},
 		"ASA": {
 			"name": "Samoa Americana",
 			"confed": "OFC",
 			"coef": 17,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/ASA.svg"
+			}
 		},
 		"TGA": {
 			"name": "Tonga",
 			"confed": "OFC",
 			"coef": 18,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/TGA.svg"
+			}
 		},
 		"HAI": {
 			"name": "Haiti",
 			"confed": "CONCACAF",
 			"coef": 54,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/HAI.svg"
+			}
 		},
 		"TRI": {
 			"name": "Trinidad e Tobago",
 			"confed": "CONCACAF",
 			"coef": 47,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/TRI.svg"
+			}
 		},
 		"CUW": {
 			"name": "Curaçao",
 			"confed": "CONCACAF",
 			"coef": 51,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/CUW.svg"
+			}
 		},
 		"NCA": {
 			"name": "Nicarágua",
 			"confed": "CONCACAF",
 			"coef": 39,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/NCA.svg"
+			}
 		},
 		"DOM": {
 			"name": "República Dominicana",
 			"confed": "CONCACAF",
 			"coef": 39,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/DOM.svg"
+			}
 		},
 		"GUA": {
 			"name": "Guatemala",
 			"confed": "CONCACAF",
 			"coef": 48,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/GUA.svg"
+			}
 		},
 		"SUR": {
 			"name": "Suriname",
 			"confed": "CONCACAF",
 			"coef": 46,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/SUR.svg"
+			}
 		},
 		"MTQ": {
 			"name": "Martinica",
 			"confed": "CONCACAF",
 			"coef": 44,
 			"national_only": true,
-			"fifa_member": false
+			"fifa_member": false,
+			"flag": {
+				"svg": "res://assets/flags/MTQ.svg"
+			}
 		},
 		"SLV": {
 			"name": "El Salvador",
 			"confed": "CONCACAF",
 			"coef": 43,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/SLV.svg"
+			}
 		},
 		"GUY": {
 			"name": "Guiana",
 			"confed": "CONCACAF",
 			"coef": 36,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/GUY.svg"
+			}
 		},
 		"PUR": {
 			"name": "Porto Rico",
 			"confed": "CONCACAF",
 			"coef": 34,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/PUR.svg"
+			}
 		},
 		"DMA": {
 			"name": "Dominica",
 			"confed": "CONCACAF",
 			"coef": 26,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/DMA.svg"
+			}
 		},
 		"CAY": {
 			"name": "Ilhas Cayman",
 			"confed": "CONCACAF",
 			"coef": 22,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/CAY.svg"
+			}
 		},
 		"GLP": {
 			"name": "Guadalupe",
 			"confed": "CONCACAF",
 			"coef": 42,
 			"national_only": true,
-			"fifa_member": false
+			"fifa_member": false,
+			"flag": {
+				"svg": "res://assets/flags/GLP.svg"
+			}
 		},
 		"BER": {
 			"name": "Bermudas",
 			"confed": "CONCACAF",
 			"coef": 31,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/BER.svg"
+			}
 		},
 		"LCA": {
 			"name": "Santa Lúcia",
 			"confed": "CONCACAF",
 			"coef": 28,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/LCA.svg"
+			}
 		},
 		"BRB": {
 			"name": "Barbados",
 			"confed": "CONCACAF",
 			"coef": 28,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/BRB.svg"
+			}
 		},
 		"CUB": {
 			"name": "Cuba",
 			"confed": "CONCACAF",
 			"coef": 37,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/CUB.svg"
+			}
 		},
 		"GRN": {
 			"name": "Granada",
 			"confed": "CONCACAF",
 			"coef": 28,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/GRN.svg"
+			}
 		},
 		"SKN": {
 			"name": "São Cristóvão e Névis",
 			"confed": "CONCACAF",
 			"coef": 32,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/SKN.svg"
+			}
 		},
 		"BOE": {
 			"name": "Bonaire",
 			"confed": "CONCACAF",
 			"coef": 22,
 			"national_only": true,
-			"fifa_member": false
+			"fifa_member": false,
+			"flag": {
+				"svg": "res://assets/flags/BOE.svg"
+			}
 		},
 		"GUF": {
 			"name": "Guiana Francesa",
 			"confed": "CONCACAF",
 			"coef": 35,
 			"national_only": true,
-			"fifa_member": false
+			"fifa_member": false,
+			"flag": {
+				"svg": "res://assets/flags/GUF.svg"
+			}
 		},
 		"VIN": {
 			"name": "São Vicente e Granadinas",
 			"confed": "CONCACAF",
 			"coef": 28,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/VIN.svg"
+			}
 		},
 		"BLZ": {
 			"name": "Belize",
 			"confed": "CONCACAF",
 			"coef": 27,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/BLZ.svg"
+			}
 		},
 		"SMA": {
 			"name": "Sint Maarten",
 			"confed": "CONCACAF",
 			"coef": 21,
 			"national_only": true,
-			"fifa_member": false
+			"fifa_member": false,
+			"flag": {
+				"svg": "res://assets/flags/SMA.svg"
+			}
 		},
 		"MSR": {
 			"name": "Montserrat",
 			"confed": "CONCACAF",
 			"coef": 27,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/MSR.svg"
+			}
 		},
 		"TCA": {
 			"name": "Ilhas Turcas e Caicos",
 			"confed": "CONCACAF",
 			"coef": 17,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/TCA.svg"
+			}
 		},
 		"VGB": {
 			"name": "Ilhas Virgens Britânicas",
 			"confed": "CONCACAF",
 			"coef": 16,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/VGB.svg"
+			}
 		},
 		"ATG": {
 			"name": "Antígua e Barbuda",
 			"confed": "CONCACAF",
 			"coef": 30,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/ATG.svg"
+			}
 		},
 		"ARU": {
 			"name": "Aruba",
 			"confed": "CONCACAF",
 			"coef": 27,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/ARU.svg"
+			}
 		},
 		"AIA": {
 			"name": "Anguilla",
 			"confed": "CONCACAF",
 			"coef": 14,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/AIA.svg"
+			}
 		},
 		"SMN": {
 			"name": "Saint Martin",
 			"confed": "CONCACAF",
 			"coef": 21,
 			"national_only": true,
-			"fifa_member": false
+			"fifa_member": false,
+			"flag": {
+				"svg": "res://assets/flags/SMN.svg"
+			}
 		},
 		"BAH": {
 			"name": "Bahamas",
 			"confed": "CONCACAF",
 			"coef": 21,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/BAH.svg"
+			}
 		},
 		"VIR": {
 			"name": "Ilhas Virgens Americanas",
 			"confed": "CONCACAF",
 			"coef": 17,
 			"national_only": true,
-			"fifa_member": true
+			"fifa_member": true,
+			"flag": {
+				"svg": "res://assets/flags/VIR.svg"
+			}
 		}
 	},
 	"lang": {

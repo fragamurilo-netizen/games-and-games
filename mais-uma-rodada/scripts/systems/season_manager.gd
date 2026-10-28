@@ -99,13 +99,57 @@ static func build_calendar(year: int, kind: String = "") -> Array:
 	var ret := int(cc.get("retire_announce", -1))
 	if ret >= 0 and ret < out.size():
 		out[ret]["ret"] = true
-	return LeaguePhase.extend_calendar(out)
+	# Inclui ligas de 46 rodadas sem empurrar a fase regular para depois das finais.
+	var required := 0
+	var postseason := 0
+	for id in DatabaseManager.league_ids():
+		var lc := DatabaseManager.league_cfg(id)
+		var n := int(lc["teams"])
+		var extra := LeagueFormat.extra_rounds(lc, n) if String(lc.get("format", {}).get("type", "")) != "promo" else 0
+		required = maxi(required, (n - 1 + n % 2) * int(lc.get("rr", 2)) + extra)
+		var po := LeagueFormat.extra_rounds(lc, n) if String(lc.get("format", {}).get("type", "")) == "promo" else 0
+		var upper := DatabaseManager.league_cfg(DatabaseManager.league_at(String(lc["nation"]), int(lc["tier"]) - 1)) if int(lc["tier"]) > 1 else {}
+		postseason = maxi(postseason, po + int(upper.get("barrage", {}).get("legs", 0)))
+	var count := out.filter(func(e): return e["t"] == "W").size()
+	var candidates: Array = []
+	for i in range(out.size() - 1):
+		var e: Dictionary = out[i]
+		if e["t"] == "W" and not bool(e.get("fifa", false)) and int(out[i + 1]["d"]) - int(e["d"]) >= 4:
+			candidates.append(e)
+	var missing := maxi(0, required - count)
+	for i in mini(missing, candidates.size()):
+		var e: Dictionary = candidates[int(i * candidates.size() / missing)]
+		out.append({"t": "W", "d": int(e["d"]) + 2, "mid": true, "weekly": false, "win": bool(e.get("win", false))})
+	# Fallback para modelos de calendário personalizados com poucos intervalos.
+	for i in maxi(0, missing - candidates.size()):
+		out.sort_custom(func(a, b): return int(a["d"]) < int(b["d"]))
+		var last_w: Dictionary = out.filter(func(e): return e["t"] == "W").back()
+		var day := int(last_w["d"]) + 7
+		for e in out:
+			if int(e["d"]) >= day: e["d"] = int(e["d"]) + 7
+		out.append({"t": "W", "d": day, "win": false})
+	out.sort_custom(func(a, b): return int(a["d"]) < int(b["d"]))
+	out = LeaguePhase.extend_calendar(out)
+	# Datas exclusivas: playoffs não compartilham uma data com final continental/Mundial.
+	var last_regular := int(out.filter(func(e): return e["t"] == "W").back()["d"])
+	var day := last_regular + 3
+	for i in postseason:
+		while out.any(func(e): return absi(int(e["d"]) - day) < 2): day += 1
+		out.append({"t": "P", "d": day, "win": false})
+		day += 2
+	out.sort_custom(func(a, b): return int(a["d"]) < int(b["d"]))
+	return out
 
 
 ## Modelo de calendário da carreira: fixado no início pela liga do usuário (world.stats["cal"]);
 ## "" = europeu. O mundo inteiro segue um calendário só (as competições dependem disso).
 static func calendar_kind(world: GameWorld) -> String:
 	return String(world.stats.get("cal", ""))
+
+
+static func active_division(world: GameWorld, id: String) -> bool:
+	var league := world.league(id) if id != "" else null
+	return league != null and league.club_ids.size() >= 2
 
 
 ## Cria as ligas (clubes pela liga atual de cada um), os jogos, as copas e o calendário de `world.year`.
@@ -124,8 +168,9 @@ static func _league_format_news(world: GameWorld, league: League, ev: Dictionary
 				-1, -1, NewsEvent.IMP_HIGH if mine else NewsEvent.IMP_NORMAL, "liga")
 		"playoff_start":
 			var cl: Array = ev["clubs"]
+			if cl.is_empty(): return
 			NewsManager.post_raw(world, "Playoffs da %s definidos" % league.short_name,
-				"%d clubes disputam o título em mata-mata. %s termina a fase regular na liderança." % [cl.size(), world.club(int(cl[0])).short_name],
+				("%d clubes disputam o acesso em mata-mata. %s é o melhor classificado entre os participantes." if LeagueFormat.kind(league) == "promo" else "%d clubes disputam o título em mata-mata. %s termina a fase regular na liderança.") % [cl.size(), world.club(int(cl[0])).short_name],
 				int(cl[0]), -1, NewsEvent.IMP_HIGH if mine else NewsEvent.IMP_NORMAL, "liga")
 		"barrage_start":
 			var cl2: Array = ev["clubs"]
@@ -143,6 +188,11 @@ static func _league_format_news(world: GameWorld, league: League, ev: Dictionary
 				wc.id, -1, NewsEvent.IMP_HEADLINE if world.is_user_club(wc.id) else (NewsEvent.IMP_HIGH if mine else NewsEvent.IMP_NORMAL), "liga")
 		"playoff_champion":
 			var c := world.club(int(ev["club"]))
+			if LeagueFormat.kind(league) == "promo":
+				NewsManager.post_raw(world, "%s vence os playoffs da %s!" % [c.short_name, league.short_name],
+					("O %s venceu os playoffs e vai disputar a repescagem pela vaga na divisão superior." if LeagueFormat.barrage_upper(world, league) != null else "O %s venceu os playoffs e conquistou o acesso à divisão superior.") % c.name,
+					c.id, -1, NewsEvent.IMP_HEADLINE if world.is_user_club(c.id) else NewsEvent.IMP_HIGH, "liga")
+				return
 			NewsManager.post_raw(world, "%s é campeão da %s!" % [c.short_name, league.short_name],
 				"O %s venceu os playoffs e levantou a taça da %s." % [c.name, league.name],
 				c.id, -1, NewsEvent.IMP_HEADLINE if world.is_user_club(c.id) else NewsEvent.IMP_HIGH, "liga")
@@ -189,7 +239,7 @@ static func build_season(world: GameWorld) -> SeasonState:
 			# Playoffs de acesso depois da temporada regular (datas que sobram no fim do calendário)
 			var after: Array = []
 			for i in range(int(weekends.back()) + 1, s.calendar.size()):
-				after.append(i)
+				if s.calendar[i]["t"] == "P": after.append(i)
 			l.phase_slots = after.slice(0, extra)
 		elif extra > 0:
 			l.phase_slots = weekends.slice(weekends.size() - extra)
@@ -657,7 +707,7 @@ static func _days_to_next(s: SeasonState, slot: int) -> int:
 static func _weekend_index(s: SeasonState, slot: int) -> int:
 	var n := 0
 	for i in slot:
-		if s.calendar[i]["t"] == "W":
+		if s.is_weekend(i):
 			n += 1
 	return n
 
@@ -855,10 +905,12 @@ static func user_plays_now(world: GameWorld) -> bool:
 ## Retorna os relatórios dessas datas.
 static func advance_to_user(world: GameWorld) -> Array:
 	var reports: Array = []
-	var guard := 0
-	while world.season != null and not world.season.finished and not user_plays_now(world) and guard < 80:
+	while world.season != null and not world.season.finished and not user_plays_now(world):
+		var before := world.season.day
 		reports.append(play_matchday_instant(world))
-		guard += 1
+		if world.season.day <= before and not world.season.finished:
+			push_error("O calendário não avançou ao simular a data %d." % before)
+			break
 	return reports
 
 
@@ -906,6 +958,10 @@ static func end_season(world: GameWorld) -> Dictionary:
 		var down := league.relegated_count()
 		var upper := DatabaseManager.league_at(league.nation, league.tier - 1) if league.tier > 1 else ""
 		var lower := DatabaseManager.league_at(league.nation, league.tier + 1)
+		# A configuração nova não pode rebaixar clubes para uma liga ainda ausente
+		# no save. A expansão só entra depois de encerrar esta temporada.
+		if not active_division(world, upper): upper = ""
+		if not active_division(world, lower): lower = ""
 		var promoted: Array = LeagueFormat.promoted(league, ids, up, world) if up > 0 and upper != "" else []
 		var relegated: Array = ids.slice(teams - down) if down > 0 and lower != "" else []
 		if LeagueFormat.uses_promedios(league) and lower != "":
@@ -1252,6 +1308,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 	tt = _time("es_elencos", tt)
 	progress = 84
 	# Nova temporada
+	LeagueExpansion.apply(world)
 	world.season = build_season(world)
 	NationalTeamManager.start_season(world)
 	YouthManager.build_league(world)

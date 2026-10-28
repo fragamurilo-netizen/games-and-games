@@ -1,0 +1,186 @@
+{
+	"nation": "HUN",
+	"_doc": "Expansão Alpha 1.0.2. Clubes da temporada 2026/27 (2026 nas ligas de ano civil). Nomes reais; elencos fictícios, finanças, capacidades e força do jogo. Fontes e adaptações em docs/ALPHA-1.0.2-2026-10-28.md.",
+	"clubs": [
+		{
+			"key": "HUN_FERENCVAROSITC",
+			"name": "Ferencvárosi TC",
+			"short": "Ferencvárosi TC",
+			"abbr": "FER",
+			"city": "Budapest",
+			"league": "HUN1",
+			"rep": 73,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#16854A",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "HUN_PUSKASAKADEMIAFC",
+			"name": "Puskás Akadémia FC",
+			"short": "Puskás Akadémia FC",
+			"abbr": "PUS",
+			"city": "Felcsút",
+			"league": "HUN1",
+			"rep": 68,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#163B81",
+				"#E8C732"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "HUN_ETOFC",
+			"name": "ETO FC",
+			"short": "ETO FC",
+			"abbr": "ETO",
+			"city": "Győr",
+			"league": "HUN1",
+			"rep": 68,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#16854A",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "HUN_PAKSIFC",
+			"name": "Paksi FC",
+			"short": "Paksi FC",
+			"abbr": "PAK",
+			"city": "Paks",
+			"league": "HUN1",
+			"rep": 66,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#16854A",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "HUN_DVSC",
+			"name": "DVSC",
+			"short": "DVSC",
+			"abbr": "DVS",
+			"city": "Debrecen",
+			"league": "HUN1",
+			"rep": 66,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "HUN_UJPESTFC",
+			"name": "Újpest FC",
+			"short": "Újpest FC",
+			"abbr": "UJP",
+			"city": "Budapest",
+			"league": "HUN1",
+			"rep": 65,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#682B83",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "HUN_MTKBUDAPEST",
+			"name": "MTK Budapest",
+			"short": "MTK Budapest",
+			"abbr": "MTK",
+			"city": "Budapest",
+			"league": "HUN1",
+			"rep": 63,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "HUN_KISVARDA",
+			"name": "Kisvárda",
+			"short": "Kisvárda",
+			"abbr": "KIS",
+			"city": "Kisvárda",
+			"league": "HUN1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "HUN_ZTEFC",
+			"name": "ZTE FC",
+			"short": "ZTE FC",
+			"abbr": "ZTE",
+			"city": "Zalaegerszeg",
+			"league": "HUN1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#164A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "HUN_NYIREGYHAZASPARTACUSFC",
+			"name": "Nyíregyháza Spartacus FC",
+			"short": "Nyíregyháza Spartacus FC",
+			"abbr": "NYI",
+			"city": "Nyíregyháza",
+			"league": "HUN1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#174A9B"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "HUN_VASASFC",
+			"name": "Vasas FC",
+			"short": "Vasas FC",
+			"abbr": "VAS",
+			"city": "Budapest",
+			"league": "HUN1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#174A9B"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "HUN_KISPESTHONVEDFC",
+			"name": "Kispest-Honvéd FC",
+			"short": "Kispest-Honvéd FC",
+			"abbr": "KI1",
+			"city": "Budapest",
+			"league": "HUN1",
+			"rep": 63,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#111111"
+			],
+			"kit": "plain"
+		}
+	]
+}

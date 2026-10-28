@@ -67,6 +67,12 @@ static func forget_static_state() -> void:
 	LeagueReputation.reset()
 	Valuation._club_factor.clear()
 	PlayerAssessment.invalidate()
+	# Estes índices guardam objetos Player, não apenas números. Liberá-los evita
+	# reter o elenco inteiro da carreira fechada enquanto o próximo mundo carrega.
+	NationalTeamManager._elo_pool_cache.clear()
+	NationalTeamManager._elo_pool_key = 0
+	ClubScoutNet._league_pool.clear()
+	ClubScoutNet._pool_key = -1
 
 
 ## Histórico compactado na memória (o celular agradece), em paralelo: cada jogador é independente.

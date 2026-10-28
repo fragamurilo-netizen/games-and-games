@@ -1,0 +1,246 @@
+{
+	"nation": "ROU",
+	"_doc": "Expansão Alpha 1.0.2. Clubes da temporada 2026/27 (2026 nas ligas de ano civil). Nomes reais; elencos fictícios, finanças, capacidades e força do jogo. Fontes e adaptações em docs/ALPHA-1.0.2-2026-10-28.md.",
+	"clubs": [
+		{
+			"key": "ROU_FCSB",
+			"name": "FCSB",
+			"short": "FCSB",
+			"abbr": "FCS",
+			"city": "București",
+			"league": "ROU1",
+			"rep": 72,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#CD2030",
+				"#194A91"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "ROU_CFRCLUJ",
+			"name": "CFR Cluj",
+			"short": "CFR Cluj",
+			"abbr": "CFR",
+			"city": "Cluj-Napoca",
+			"league": "ROU1",
+			"rep": 72,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#751F35",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "ROU_UNIVERSITATEACRAIOVA",
+			"name": "Universitatea Craiova",
+			"short": "Universitatea Craiova",
+			"abbr": "UNI",
+			"city": "Craiova",
+			"league": "ROU1",
+			"rep": 70,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#184C9A",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "ROU_FCRAPIDBUCURESTI",
+			"name": "FC Rapid București",
+			"short": "FC Rapid București",
+			"abbr": "FCR",
+			"city": "București",
+			"league": "ROU1",
+			"rep": 69,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#7B1F37",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "ROU_DINAMOBUCURESTI",
+			"name": "Dinamo București",
+			"short": "Dinamo București",
+			"abbr": "DIN",
+			"city": "București",
+			"league": "ROU1",
+			"rep": 69,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "ROU_FCUNIVERSITATEACLUJ",
+			"name": "FC Universitatea Cluj",
+			"short": "FC Universitatea Cluj",
+			"abbr": "FCU",
+			"city": "Cluj-Napoca",
+			"league": "ROU1",
+			"rep": 67,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "ROU_SEPSIOSK",
+			"name": "Sepsi OSK",
+			"short": "Sepsi OSK",
+			"abbr": "SEP",
+			"city": "Sfântu Gheorghe",
+			"league": "ROU1",
+			"rep": 64,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "ROU_FCFARULCONSTANTA",
+			"name": "FC Farul Constanța",
+			"short": "FC Farul Constanța",
+			"abbr": "FCF",
+			"city": "Constanța",
+			"league": "ROU1",
+			"rep": 65,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#154A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "ROU_PETROLULPLOIESTI",
+			"name": "Petrolul Ploiești",
+			"short": "Petrolul Ploiești",
+			"abbr": "PET",
+			"city": "Ploiești",
+			"league": "ROU1",
+			"rep": 63,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#F0CE25",
+				"#184A93"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "ROU_UTAARAD",
+			"name": "UTA Arad",
+			"short": "UTA Arad",
+			"abbr": "UTA",
+			"city": "Arad",
+			"league": "ROU1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "ROU_OTELULGALATI",
+			"name": "Oțelul Galați",
+			"short": "Oțelul Galați",
+			"abbr": "OTE",
+			"city": "Galați",
+			"league": "ROU1",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "ROU_FCBOTOSANI",
+			"name": "FC Botoșani",
+			"short": "FC Botoșani",
+			"abbr": "FCB",
+			"city": "Botoșani",
+			"league": "ROU1",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "ROU_FCARGES",
+			"name": "FC Argeș",
+			"short": "FC Argeș",
+			"abbr": "FCA",
+			"city": "Pitești",
+			"league": "ROU1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#6A2E83",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "ROU_FCCORVINULHUNEDOARA",
+			"name": "FC Corvinul Hunedoara",
+			"short": "FC Corvinul Hunedoara",
+			"abbr": "FCC",
+			"city": "Hunedoara",
+			"league": "ROU1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#194A90",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "ROU_FCVOLUNTARI",
+			"name": "FC Voluntari",
+			"short": "FC Voluntari",
+			"abbr": "FCV",
+			"city": "Voluntari",
+			"league": "ROU1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#751F35",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "ROU_FKCSIKSZEREDA",
+			"name": "FK Csikszereda",
+			"short": "FK Csikszereda",
+			"abbr": "FKC",
+			"city": "Miercurea Ciuc",
+			"league": "ROU1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#111111"
+			],
+			"kit": "plain"
+		}
+	]
+}

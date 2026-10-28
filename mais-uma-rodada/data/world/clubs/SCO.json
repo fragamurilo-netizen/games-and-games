@@ -342,6 +342,147 @@
 				"text": "DUNDEE"
 			},
 			"rivals": []
+		},
+		{
+			"key": "SCO_D2_FAL",
+			"name": "Falkirk",
+			"short": "Falkirk",
+			"abbr": "FAL",
+			"city": "Falkirk",
+			"league": "SCO2",
+			"rep": 40,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#142b50",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "SCO_D2_LIV",
+			"name": "Livingston",
+			"short": "Livingston",
+			"abbr": "LIV",
+			"city": "Livingston",
+			"league": "SCO2",
+			"rep": 40,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#e4ac23",
+				"#111111"
+			]
+		},
+		{
+			"key": "SCO_D2_AYR",
+			"name": "Ayr United",
+			"short": "Ayr United",
+			"abbr": "AYR",
+			"city": "Ayr",
+			"league": "SCO2",
+			"rep": 40,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#ffffff",
+				"#111111"
+			]
+		},
+		{
+			"key": "SCO_D2_PAR",
+			"name": "Partick Thistle",
+			"short": "Partick Thistle",
+			"abbr": "PAR",
+			"city": "Glasgow",
+			"league": "SCO2",
+			"rep": 40,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#f4c430",
+				"#cc2222"
+			]
+		},
+		{
+			"key": "SCO_D2_RAI",
+			"name": "Raith Rovers",
+			"short": "Raith Rovers",
+			"abbr": "RAI",
+			"city": "Kirkcaldy",
+			"league": "SCO2",
+			"rep": 40,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#142b50",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "SCO_D2_MOR",
+			"name": "Greenock Morton",
+			"short": "Greenock Morton",
+			"abbr": "MOR",
+			"city": "Greenock",
+			"league": "SCO2",
+			"rep": 40,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "SCO_D2_DUN",
+			"name": "Dunfermline Athletic",
+			"short": "Dunfermline Athletic",
+			"abbr": "DFA",
+			"city": "Dunfermline",
+			"league": "SCO2",
+			"rep": 40,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "SCO_D2_QUE",
+			"name": "Queen's Park",
+			"short": "Queen's Park",
+			"abbr": "QUE",
+			"city": "Glasgow",
+			"league": "SCO2",
+			"rep": 40,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#ffffff",
+				"#111111"
+			]
+		},
+		{
+			"key": "SCO_D2_AIR",
+			"name": "Airdrieonians",
+			"short": "Airdrieonians",
+			"abbr": "AIR",
+			"city": "Airdrie",
+			"league": "SCO2",
+			"rep": 40,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#ffffff",
+				"#cc2222"
+			]
+		},
+		{
+			"key": "SCO_D2_HAM",
+			"name": "Hamilton Academical",
+			"short": "Hamilton Academical",
+			"abbr": "HAM",
+			"city": "Hamilton",
+			"league": "SCO2",
+			"rep": 40,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
 		}
-	]
+	],
+	"_expansion_doc": "Divisões inferiores: identidades de clubes reais, atributos econômicos/esportivos e escudos gerados pelo modelo do jogo. Composição compatível com a elite existente: ENG/NED/TUR 2025/26, JPN 2025, SCO/AUT/SUI 2024/25. Fontes e adaptações em docs/DIVISOES-2026-10-28.md."
 }

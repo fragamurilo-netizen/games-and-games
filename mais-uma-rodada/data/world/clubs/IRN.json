@@ -1,0 +1,276 @@
+{
+	"nation": "IRN",
+	"_doc": "Expansão Alpha 1.0.2. Clubes da temporada 2026/27 (2026 nas ligas de ano civil). Nomes reais; elencos fictícios, finanças, capacidades e força do jogo. Fontes e adaptações em docs/ALPHA-1.0.2-2026-10-28.md.",
+	"clubs": [
+		{
+			"key": "IRN_PERSEPOLISFC",
+			"name": "Persepolis FC",
+			"short": "Persepolis FC",
+			"abbr": "PER",
+			"city": "Tehran",
+			"league": "IRN1",
+			"rep": 71,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRN_ESTEGHLALFC",
+			"name": "Esteghlal FC",
+			"short": "Esteghlal FC",
+			"abbr": "EST",
+			"city": "Tehran",
+			"league": "IRN1",
+			"rep": 71,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#164A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRN_TRACTORFC",
+			"name": "Tractor FC",
+			"short": "Tractor FC",
+			"abbr": "TRA",
+			"city": "Tabriz",
+			"league": "IRN1",
+			"rep": 70,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRN_SEPAHANSC",
+			"name": "Sepahan SC",
+			"short": "Sepahan SC",
+			"abbr": "SEP",
+			"city": "Isfahan",
+			"league": "IRN1",
+			"rep": 70,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E8C324",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRN_FOOLADKHUZESTAN",
+			"name": "Foolad Khuzestan",
+			"short": "Foolad Khuzestan",
+			"abbr": "FOO",
+			"city": "Ahvaz",
+			"league": "IRN1",
+			"rep": 65,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#C9202D",
+				"#E8C324"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRN_GOLGOHARSIRJAN",
+			"name": "Gol Gohar Sirjan",
+			"short": "Gol Gohar Sirjan",
+			"abbr": "GGS",
+			"city": "Sirjan",
+			"league": "IRN1",
+			"rep": 64,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRN_ZOBAHAN",
+			"name": "Zob Ahan",
+			"short": "Zob Ahan",
+			"abbr": "ZOB",
+			"city": "Isfahan",
+			"league": "IRN1",
+			"rep": 64,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#18814A",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRN_ALUMINIUMARAK",
+			"name": "Aluminium Arak",
+			"short": "Aluminium Arak",
+			"abbr": "ALU",
+			"city": "Arak",
+			"league": "IRN1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#17854A",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRN_MALAVAN",
+			"name": "Malavan",
+			"short": "Malavan",
+			"abbr": "MAL",
+			"city": "Bandar Anzali",
+			"league": "IRN1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#164A9B"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRN_NASSAJIMAZANDARAN",
+			"name": "Nassaji Mazandaran",
+			"short": "Nassaji Mazandaran",
+			"abbr": "NAS",
+			"city": "Qaem Shahr",
+			"league": "IRN1",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#174A9B"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRN_PAYKANFC",
+			"name": "Paykan FC",
+			"short": "Paykan FC",
+			"abbr": "PAY",
+			"city": "Tehran",
+			"league": "IRN1",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRN_CHADORMALU",
+			"name": "Chador Malu",
+			"short": "Chador Malu",
+			"abbr": "CHA",
+			"city": "Ardakan",
+			"league": "IRN1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRN_KHEYBARKHORRAMABAD",
+			"name": "Kheybar Khorramabad",
+			"short": "Kheybar Khorramabad",
+			"abbr": "KHE",
+			"city": "Khorramabad",
+			"league": "IRN1",
+			"rep": 59,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#17854A",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRN_ESTEGHLALKHUZESTAN",
+			"name": "Esteghlal Khuzestan",
+			"short": "Esteghlal Khuzestan",
+			"abbr": "ES3",
+			"city": "Ahvaz",
+			"league": "IRN1",
+			"rep": 59,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRN_FAJRSEPASI",
+			"name": "Fajr Sepasi",
+			"short": "Fajr Sepasi",
+			"abbr": "FAJ",
+			"city": "Shiraz",
+			"league": "IRN1",
+			"rep": 59,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E8C324",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRN_SHAMSAZAR",
+			"name": "Shams Azar",
+			"short": "Shams Azar",
+			"abbr": "SHA",
+			"city": "Qazvin",
+			"league": "IRN1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#17854A",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRN_MESSHAHRBABAK",
+			"name": "Mes Shahr Babak",
+			"short": "Mes Shahr Babak",
+			"abbr": "MSB",
+			"city": "Shahr-e Babak",
+			"league": "IRN1",
+			"rep": 57,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E57822",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRN_SANATNAFT",
+			"name": "Sanat Naft",
+			"short": "Sanat Naft",
+			"abbr": "SAN",
+			"city": "Abadan",
+			"league": "IRN1",
+			"rep": 59,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E8C324",
+				"#174A9B"
+			],
+			"kit": "plain"
+		}
+	]
+}

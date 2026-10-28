@@ -202,8 +202,8 @@ func _team_block(w: GameWorld, cl: Club, f: Fixture) -> VBoxContainer:
 
 func _next_match_card(w: GameWorld, club: Club) -> Control:
 	var f := FixtureManager.next_fixture_for(w, club.id)
-	var card := UIKit.card("CardHighlight", 14)
 	if f == null:
+		var card := UIKit.card("CardHighlight", 14)
 		card.add_child(UIKit.section("Temporada"))
 		card.add_child(UIKit.label("Seu time não joga mais nesta temporada.", "Title", true))
 		card.add_child(UIKit.label("Outras ligas e copas ainda estão em andamento.", "Muted", true))

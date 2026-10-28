@@ -14,12 +14,41 @@ const MAX_WIDE := 640
 const EXTENSIONS: Array[String] = ["png", "jpg", "jpeg", "webp"]
 ## Prefixos de importação que guardam a imagem inteira (fotos largas).
 const WIDE_PREFIXES: Array[String] = ["stadium"]
+## O catálogo pode conter milhares de fotos. O cache só retém as visitadas recentemente;
+## telas ainda abertas mantêm suas próprias referências até serem fechadas.
+const MAX_CACHE_BYTES := 24 * 1024 * 1024
+const MAX_CACHE_ENTRIES := 192
 
 static var _cache: Dictionary = {}
+static var _cache_order: Array[String] = []
+static var _cache_sizes: Dictionary = {}
+static var _cache_bytes := 0
 
 
 static func clear_cache() -> void:
 	_cache.clear()
+	_cache_order.clear()
+	_cache_sizes.clear()
+	_cache_bytes = 0
+
+
+static func _forget(file: String) -> void:
+	_cache.erase(file)
+	_cache_order.erase(file)
+	_cache_bytes -= int(_cache_sizes.get(file, 0))
+	_cache_sizes.erase(file)
+
+
+static func _remember(file: String, tex: Texture2D) -> void:
+	var bytes := tex.get_width() * tex.get_height() * 4 if tex != null else 0
+	if bytes > MAX_CACHE_BYTES:
+		return
+	while not _cache_order.is_empty() and (_cache.size() >= MAX_CACHE_ENTRIES or _cache_bytes + bytes > MAX_CACHE_BYTES):
+		_forget(_cache_order[0])
+	_cache[file] = tex
+	_cache_order.append(file)
+	_cache_sizes[file] = bytes
+	_cache_bytes += bytes
 
 
 ## Caminho real de uma imagem citada nos dados ("" se não existir em lugar nenhum).
@@ -41,6 +70,8 @@ static func texture(file: String) -> Texture2D:
 	if file == "":
 		return null
 	if _cache.has(file):
+		_cache_order.erase(file)
+		_cache_order.append(file)
 		return _cache[file]
 	var path := path_of(file)
 	var tex: Texture2D = null
@@ -51,8 +82,12 @@ static func texture(file: String) -> Texture2D:
 		if img != null and not img.is_empty():
 			if file.begins_with("@"):
 				_shrink(img, DropIns.MAX_WIDE if file.begins_with("@stadiums/") else DropIns.MAX_SIDE)
+			else:
+				# Pacotes também podem referenciar caminhos completos/relativos. Antes só
+				# os atalhos @ recebiam limite, deixando fotos enormes na GPU.
+				_shrink(img, DropIns.MAX_WIDE)
 			tex = ImageTexture.create_from_image(img)
-	_cache[file] = tex
+	_remember(file, tex)
 	return tex
 
 
@@ -89,7 +124,7 @@ static func save_image(img: Image, prefix: String) -> String:
 	var file := "%s_%d_%d.png" % [prefix, Time.get_unix_time_from_system(), randi() % 100000]
 	if out.save_png("%s/%s" % [DIR, file]) != OK:
 		return ""
-	_cache.erase(file)
+	_forget(file)
 	return file
 
 
@@ -97,7 +132,7 @@ static func save_image(img: Image, prefix: String) -> String:
 static func remove(file: String) -> void:
 	if file == "" or file.contains("/"):
 		return
-	_cache.erase(file)
+	_forget(file)
 	var path := "%s/%s" % [DIR, file]
 	if FileAccess.file_exists(path):
 		DirAccess.remove_absolute(path)

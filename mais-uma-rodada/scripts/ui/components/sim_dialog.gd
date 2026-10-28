@@ -97,6 +97,8 @@ static func _toggle(text: String, on: bool, cb: Callable) -> Control:
 
 
 static func start(m: int, n: int, done: Callable) -> void:
+	if (is_instance_valid(_active) and _active._running) or GameManager.is_busy():
+		return
 	var d := SimDialog.new()
 	d.mode = m
 	d.games_target = n
@@ -199,18 +201,15 @@ func _step() -> void:
 			if w.window_open_at(f.slot) or w.transfer_window_open():
 				_stop_reason = "A janela de transferências abriu."
 				return
-	if auto_lineup and club.sheet != null:
-		club.sheet = ClubAI.auto_sheet(w, club, club.sheet.formation)
-		Autopilot.prepare_match(w, club) # o auxiliar estuda o rival e ajusta o plano
-	else:
-		ClubAI.validate_user_sheet(w, club)
 	_offers_before = TransferManager.pending_offers(w).size()
 	_injured_before = {}
 	for p: Player in w.squad(club):
 		if p.is_injured():
 			_injured_before[p.id] = true
 	GameManager.begin_batch()
-	GameManager.sim_step_start()
+	_status.text = I18n.t("Preparando a partida...")
+	if not GameManager.sim_step_start(auto_lineup):
+		_stop_reason = "Não foi possível iniciar a simulação. Tente novamente."
 
 
 ## Depois de cada data: resultado na lista e as paradas automáticas.
@@ -288,7 +287,8 @@ func _finish() -> void:
 				draws += 1
 			_:
 				losses += 1
-	add_child(UIKit.label("Simulação concluída", "Title"))
+	var reached := w.season.finished or (mode == MODE_GAMES and _results.size() >= games_target) or _stop_reason in ["Fim do mês.", "A janela de transferências fechou.", "A janela de transferências abriu."]
+	add_child(UIKit.label("Simulação concluída" if reached else "Simulação pausada", "Title"))
 	var sub := Fmt.n_of(_results.size(), "%d jogo", "%d jogos") + " · " + w.season.date_label(w.season.day, false)
 	if _stop_reason != "" and _stop_reason != "Pronto.":
 		sub = _stop_reason + "  ·  " + sub
@@ -350,6 +350,11 @@ func _finish() -> void:
 			EventDialog.open(ev, on_done), "info")
 		UIKit.shrink_button(rb)
 		add_child(rb)
+	elif not reached and BoardManager.pending_job_offers(w).is_empty() and FixtureManager.next_fixture_for(w, w.user_club_id) != null:
+		add_child(UIKit.button("Continuar simulação", "PrimaryButton", func():
+			var remaining := maxi(1, games_target - _results.size())
+			UIManager.close_modal()
+			start(mode, remaining, on_done), "play"))
 	add_child(UIKit.button("OK", "GhostButton" if not pending.is_empty() else "PrimaryButton", func():
 		UIManager.close_modal()
 		if on_done.is_valid():
