@@ -34,6 +34,8 @@ Os loops sintetizados usavam a quantidade de frames como `loop_end`. O mixer des
 
 Fonte técnica: https://docs.godotengine.org/en/stable/tutorials/platform/android/resolving_crashes_on_android.html
 
+Os dois grupos de renderização foram consultados em seguida: ambos mostravam Galaxy S23 / Android 16 na versão 22, com falha no driver Adreno durante `RasterizerCanvasGLES3::_render_batch`. O quarto grupo mostrava Galaxy S20 FE 5G / Android 13, versão 22, durante `_redraw_callback` e uma chamada GDScript a um método que retorna `Vector2`. Essas pilhas não identificam uma linha do jogo com informação suficiente para afirmar uma correção específica. Não foram marcadas como resolvidas nem ocultadas na Console.
+
 ## Expansão de ligas
 
 14 países, 194 clubes: Índia (13), Indonésia (18), Nova Zelândia (11), Polônia (18), Suécia (16), Noruega (16), Romênia (16), Hungria (12), Irã (18), Tailândia (16), Malásia (12), Canadá (8), Costa Rica (10) e Irlanda (10).
@@ -74,12 +76,16 @@ Também foram completados os nomes de países em inglês. As bandeiras são cons
 - Regressão específica dos relatos: migração idempotente das 14 ligas, metas após troca de clube, agenda persistida das seleções, simular três jogos e restante da temporada, exclusão de trabalho concorrente e save/load: zero falhas.
 - Mixer de áudio nativo, loops PCM mono/estéreo e trocas rápidas de torcida: zero falhas.
 - Regressão mobile de layout e ciclo de vida: zero falhas.
+- Uma segunda execução gráfica com áudio habilitado repetiu Mercado, save/load e partida completa e também terminou com zero falhas. Os avisos no encerramento permaneceram.
 - Fluxo gráfico com áudio habilitado: Mercado em PT/EN/ES, paginação, filtros, save/load, preparação e conclusão de partida; capturas em 390×844, 844×390, 800×1280 e 1280×800. Zero falhas. O carregamento com uma pausa entre os workers falhou inicialmente e passou após o encadeamento contínuo. Houve um crash nativo em uma execução gráfica anterior; a execução final concluiu sem crash. Persistem avisos de recursos no encerramento do harness de testes.
 - `bundletool validate`, manifesto e assinatura: aprovados. Código 24, nome 1.0.2, pacote `mais.uma.rodada`, SDK mínimo 24/alvo 36, ARM64, segmentos ELF alinhados a 16 KB. Certificado de upload idêntico ao Alpha anterior. As 218 texturas de bandeiras, a licença/origem e os 14 arquivos de clubes estão no AAB. Testes, ferramentas e arquivos temporários ficaram fora.
 - AAB: `mais-uma-rodada/build/MaisUmaRodada-1.0.2-alpha.aab`, 52.023.003 bytes. SHA-256: `f8e408dc08136279320ad1a2bbe7d10472b60ce445421c3563f8fd14f73d5420`.
+- `release_check.py`: o único erro é a ausência das oito capturas da loja que já estavam removidas no checkout antes deste trabalho. Essas remoções não foram incluídas no commit; a ficha existente na Play foi preservada. As novidades 1.0.2 também foram registradas nos textos locais PT/EN.
 
 Os testes foram executados na Godot 4.7.2 para Windows, com execução gráfica e headless. Não havia aparelho Android conectado. A confirmação nos aparelhos dos testadores e nos novos relatórios de Android vitals continua necessária.
 
 O preset `Android Alpha` continua com `sem_trava`: tudo liberado no teste fechado. A faixa continua Alpha, sem publicação em produção.
 
-Em 28/10, o AAB 24 foi aceito pela Play Console na faixa Alpha, com notas em português e inglês e o ZIP de símbolos nativos oficiais da Godot anexado. A revisão local da Console manteve a mesma cobertura de dispositivos. O único aviso foi a ausência de arquivo ReTrace para código Java ofuscado. A versão foi salva e o comando de envio à revisão foi confirmado. A Console ainda executava as verificações rápidas automáticas antes de encaminhar a alteração à análise; a versão 23 continuava sendo a última publicada. Isso não confirma disponibilidade da versão 24 para download.
+Em 28/10, o AAB 24 foi aceito pela Play Console na faixa Alpha, com notas em português e inglês e o ZIP de símbolos nativos oficiais da Godot anexado. A revisão local da Console manteve a mesma cobertura de dispositivos. O único aviso foi a ausência de arquivo ReTrace para código Java ofuscado.
+
+As verificações rápidas terminaram e o envio foi confirmado. A Console exibiu **“Alterações em análise”** para **“1.0.2 (24) - Alpha: correções, ligas e bandeiras”**, com a mensagem **“As mudanças estão sendo revisadas”**. A versão 23 continuava sendo a última publicada; o status em análise não confirma disponibilidade da versão 24 para download. A captura da confirmação foi salva localmente em `publicacao-local/alpha24-in-review.jpg`.

@@ -60,3 +60,11 @@ WHAT'S NEW (1.0.1)
 • Match preparation and resource loading moved to the background
 • Fixed table-cell translations and added over 1,100 English texts
 • Improved translation of combined text and protected the language cache
+
+WHAT'S NEW (1.0.2)
+• Updated all 218 flags
+• Added 14 leagues and 194 clubs, including India, Indonesia and New Zealand
+• Fixed objectives after changing clubs and improved match simulation
+• National-team fixtures with dates, opponents and competitions
+• Audio, transfer market and career loading stability fixes
+• Existing careers receive the new leagues at the next season rollover
