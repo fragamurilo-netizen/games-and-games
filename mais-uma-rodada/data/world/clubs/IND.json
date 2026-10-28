@@ -1,0 +1,201 @@
+{
+	"nation": "IND",
+	"_doc": "Expansão Alpha 1.0.2. Clubes da temporada 2026/27 (2026 nas ligas de ano civil). Nomes reais; elencos fictícios, finanças, capacidades e força do jogo. Fontes e adaptações em docs/ALPHA-1.0.2-2026-10-28.md.",
+	"clubs": [
+		{
+			"key": "IND_MOHUNBAGANSUPERGIANT",
+			"name": "Mohun Bagan Super Giant",
+			"short": "Mohun Bagan Super Giant",
+			"abbr": "MBS",
+			"city": "Kolkata",
+			"league": "IND1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#7B1634",
+				"#008A45"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IND_MUMBAICITYFC",
+			"name": "Mumbai City FC",
+			"short": "Mumbai City FC",
+			"abbr": "MUM",
+			"city": "Mumbai",
+			"league": "IND1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#6CABDD",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IND_FCGOA",
+			"name": "FC Goa",
+			"short": "FC Goa",
+			"abbr": "FCG",
+			"city": "Margao",
+			"league": "IND1",
+			"rep": 55,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#F06B21",
+				"#2246A8"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IND_BENGALURUFC",
+			"name": "Bengaluru FC",
+			"short": "Bengaluru FC",
+			"abbr": "BEN",
+			"city": "Bengaluru",
+			"league": "IND1",
+			"rep": 54,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#17479E",
+				"#D71920"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IND_EASTBENGALFC",
+			"name": "East Bengal FC",
+			"short": "East Bengal FC",
+			"abbr": "EAS",
+			"city": "Kolkata",
+			"league": "IND1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E31B23",
+				"#FFCC00"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IND_KERALABLASTERSFC",
+			"name": "Kerala Blasters FC",
+			"short": "Kerala Blasters FC",
+			"abbr": "KER",
+			"city": "Kochi",
+			"league": "IND1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#F9DD16",
+				"#1652A3"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IND_NORTHEASTUNITEDFC",
+			"name": "NorthEast United FC",
+			"short": "NorthEast United FC",
+			"abbr": "NOR",
+			"city": "Guwahati",
+			"league": "IND1",
+			"rep": 51,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IND_ODISHAFC",
+			"name": "Odisha FC",
+			"short": "Odisha FC",
+			"abbr": "ODI",
+			"city": "Bhubaneswar",
+			"league": "IND1",
+			"rep": 51,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#512D80",
+				"#F1A12C"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IND_CHENNAIYINFC",
+			"name": "Chennaiyin FC",
+			"short": "Chennaiyin FC",
+			"abbr": "CHE",
+			"city": "Chennai",
+			"league": "IND1",
+			"rep": 50,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#194A9A",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IND_PUNJABFC",
+			"name": "Punjab FC",
+			"short": "Punjab FC",
+			"abbr": "PUN",
+			"city": "Mohali",
+			"league": "IND1",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#ED7723",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IND_INTERKASHI",
+			"name": "Inter Kashi",
+			"short": "Inter Kashi",
+			"abbr": "INT",
+			"city": "Varanasi",
+			"league": "IND1",
+			"rep": 47,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E66B22",
+				"#63267C"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IND_CHURCHILLBROTHERSSC",
+			"name": "Churchill Brothers SC",
+			"short": "Churchill Brothers SC",
+			"abbr": "CHU",
+			"city": "Margao",
+			"league": "IND1",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IND_SPORTINGCLUBDELHI",
+			"name": "Sporting Club Delhi",
+			"short": "Sporting Club Delhi",
+			"abbr": "SCD",
+			"city": "Delhi",
+			"league": "IND1",
+			"rep": 45,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#EA6C20",
+				"#101010"
+			],
+			"kit": "plain"
+		}
+	]
+}

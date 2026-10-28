@@ -211,6 +211,12 @@ e texto de giz (`text-primary`) em três níveis (`text-secondary`, `text-muted`
 - **Campo**: grama em duas faixas com linhas de giz. Só existe onde há futebol.
 - Existe o modo claro (`UIColors.LIGHT`) com os mesmos papéis; tela não escreve cor solta.
 
+Todas as 218 seleções usam a arte SVG em `assets/flags/` (flag-icons, licença MIT
+preservada junto dos arquivos e mapeamento FIFA/ISO em `index.json`). O desenho
+procedural fica apenas como compatibilidade para dados de mods. A arte mantém sua proporção
+dentro do espaço 3:2 do `FlagView`, sem esticar ou cortar brasões. Cores de bandeira
+pertencem à identidade do país, como as cores do clube e da transmissão.
+
 ## Typography
 
 Duas larguras da mesma família, com papéis claros:

@@ -1,0 +1,186 @@
+{
+	"nation": "MAS",
+	"_doc": "Expansão Alpha 1.0.2. Clubes da temporada 2026/27 (2026 nas ligas de ano civil). Nomes reais; elencos fictícios, finanças, capacidades e força do jogo. Fontes e adaptações em docs/ALPHA-1.0.2-2026-10-28.md.",
+	"clubs": [
+		{
+			"key": "MAS_JOHORDARULTAZIM",
+			"name": "Johor Darul Ta'zim",
+			"short": "Johor Darul Ta'zim",
+			"abbr": "JDT",
+			"city": "Johor Bahru",
+			"league": "MAS1",
+			"rep": 67,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174A9B",
+				"#D71920"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "MAS_SELANGORFC",
+			"name": "Selangor FC",
+			"short": "Selangor FC",
+			"abbr": "SEL",
+			"city": "Shah Alam",
+			"league": "MAS1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#F0C82B"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "MAS_KUCHINGCITYFC",
+			"name": "Kuching City FC",
+			"short": "Kuching City FC",
+			"abbr": "KUC",
+			"city": "Kuching",
+			"league": "MAS1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#18854A",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "MAS_TERENGGANUFC",
+			"name": "Terengganu FC",
+			"short": "Terengganu FC",
+			"abbr": "TER",
+			"city": "Kuala Terengganu",
+			"league": "MAS1",
+			"rep": 57,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "MAS_KUALALUMPURCITYFC",
+			"name": "Kuala Lumpur City FC",
+			"short": "Kuala Lumpur City FC",
+			"abbr": "KLC",
+			"city": "Kuala Lumpur",
+			"league": "MAS1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#C8202D",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "MAS_SABAHFC",
+			"name": "Sabah FC",
+			"short": "Sabah FC",
+			"abbr": "SAB",
+			"city": "Kota Kinabalu",
+			"league": "MAS1",
+			"rep": 55,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "MAS_NEGERISEMBILANFC",
+			"name": "Negeri Sembilan FC",
+			"short": "Negeri Sembilan FC",
+			"abbr": "NEG",
+			"city": "Seremban",
+			"league": "MAS1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#EDCC2A",
+				"#C8202D"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "MAS_PENANGFC",
+			"name": "Penang FC",
+			"short": "Penang FC",
+			"abbr": "PEN",
+			"city": "George Town",
+			"league": "MAS1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "MAS_DPMMFC",
+			"name": "DPMM FC",
+			"short": "DPMM FC",
+			"abbr": "DPM",
+			"city": "Bandar Seri Begawan",
+			"league": "MAS1",
+			"rep": 51,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D7B62A",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "MAS_MELAKAFC",
+			"name": "Melaka FC",
+			"short": "Melaka FC",
+			"abbr": "MEL",
+			"city": "Melaka",
+			"league": "MAS1",
+			"rep": 50,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#18834A",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "MAS_STARCITYFC",
+			"name": "Star City FC",
+			"short": "Star City FC",
+			"abbr": "STA",
+			"city": "Putrajaya",
+			"league": "MAS1",
+			"rep": 50,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "MAS_KELANTANREDWARRIORFC",
+			"name": "Kelantan Red Warrior FC",
+			"short": "Kelantan Red Warrior FC",
+			"abbr": "KRW",
+			"city": "Kota Bharu",
+			"league": "MAS1",
+			"rep": 49,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		}
+	]
+}

@@ -99,6 +99,20 @@ static func build_calendar(year: int, kind: String = "") -> Array:
 	var ret := int(cc.get("retire_announce", -1))
 	if ret >= 0 and ret < out.size():
 		out[ret]["ret"] = true
+	# Uma liga com split pode precisar de 40 rodadas (30 + 10). O calendário
+	# comum deve comportá-las; reduzir silenciosamente um turno mutilava a liga.
+	var required := 0
+	for id in DatabaseManager.league_ids():
+		var lc := DatabaseManager.league_cfg(id)
+		var n := int(lc["teams"])
+		var extra := LeagueFormat.extra_rounds(lc, n) if String(lc.get("format", {}).get("type", "")) != "promo" else 0
+		required = maxi(required, (n - 1 + n % 2) * int(lc.get("rr", 2)) + extra)
+	var count := out.filter(func(e): return e["t"] == "W").size()
+	for i in range(count, required):
+		var last := int(out.back()["d"])
+		var dt := Time.get_datetime_dict_from_unix_time(jan1 + last * 86400)
+		var offset := (6 - int(dt["weekday"]) + 7) % 7
+		out.append({"t": "W", "d": last + (7 if offset == 0 else offset), "win": false})
 	return LeaguePhase.extend_calendar(out)
 
 
@@ -855,10 +869,12 @@ static func user_plays_now(world: GameWorld) -> bool:
 ## Retorna os relatórios dessas datas.
 static func advance_to_user(world: GameWorld) -> Array:
 	var reports: Array = []
-	var guard := 0
-	while world.season != null and not world.season.finished and not user_plays_now(world) and guard < 80:
+	while world.season != null and not world.season.finished and not user_plays_now(world):
+		var before := world.season.day
 		reports.append(play_matchday_instant(world))
-		guard += 1
+		if world.season.day <= before and not world.season.finished:
+			push_error("O calendário não avançou ao simular a data %d." % before)
+			break
 	return reports
 
 
@@ -1252,6 +1268,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 	tt = _time("es_elencos", tt)
 	progress = 84
 	# Nova temporada
+	LeagueExpansion.apply(world)
 	world.season = build_season(world)
 	NationalTeamManager.start_season(world)
 	YouthManager.build_league(world)

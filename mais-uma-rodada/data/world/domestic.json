@@ -1093,6 +1093,198 @@
 			"neutral_final": false,
 			"prize_scale": 0.2,
 			"confed": "CONCACAF"
+		},
+		"INC": {
+			"name": "AIFF Super Cup",
+			"short": "AIFF Super Cup",
+			"kind": "national",
+			"nation": "IND",
+			"pool": "N",
+			"neutral_final": true,
+			"prize_scale": 0.25,
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			]
+		},
+		"IDC": {
+			"name": "Copa da Indonésia",
+			"short": "Copa da Indonésia",
+			"kind": "national",
+			"nation": "IDN",
+			"pool": "N",
+			"neutral_final": true,
+			"prize_scale": 0.25,
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			]
+		},
+		"NZC": {
+			"name": "Chatham Cup",
+			"short": "Chatham Cup",
+			"kind": "national",
+			"nation": "NZL",
+			"pool": "N",
+			"neutral_final": true,
+			"prize_scale": 0.25,
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			],
+			"exclude_keys": [
+				"NZL_AUCKLANDFCRESERVES",
+				"NZL_WELLINGTONPHOENIXRESERVES"
+			]
+		},
+		"PLC": {
+			"name": "Puchar Polski",
+			"short": "Puchar Polski",
+			"kind": "national",
+			"nation": "POL",
+			"pool": "N",
+			"neutral_final": true,
+			"prize_scale": 0.25,
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			],
+			"qualifies": "UEL"
+		},
+		"SWC": {
+			"name": "Svenska Cupen",
+			"short": "Svenska Cupen",
+			"kind": "national",
+			"nation": "SWE",
+			"pool": "N",
+			"neutral_final": true,
+			"prize_scale": 0.25,
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			],
+			"qualifies": "UEL"
+		},
+		"NOC": {
+			"name": "Norgesmesterskapet",
+			"short": "Norgesmesterskapet",
+			"kind": "national",
+			"nation": "NOR",
+			"pool": "N",
+			"neutral_final": true,
+			"prize_scale": 0.25,
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			],
+			"qualifies": "UEL"
+		},
+		"ROC": {
+			"name": "Cupa României",
+			"short": "Cupa României",
+			"kind": "national",
+			"nation": "ROU",
+			"pool": "N",
+			"neutral_final": true,
+			"prize_scale": 0.25,
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			],
+			"qualifies": "UEL"
+		},
+		"HUC": {
+			"name": "Magyar Kupa",
+			"short": "Magyar Kupa",
+			"kind": "national",
+			"nation": "HUN",
+			"pool": "N",
+			"neutral_final": true,
+			"prize_scale": 0.25,
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			],
+			"qualifies": "UEL"
+		},
+		"IRC": {
+			"name": "Hazfi Cup",
+			"short": "Hazfi Cup",
+			"kind": "national",
+			"nation": "IRN",
+			"pool": "N",
+			"neutral_final": true,
+			"prize_scale": 0.25,
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			]
+		},
+		"THC": {
+			"name": "Thai FA Cup",
+			"short": "Thai FA Cup",
+			"kind": "national",
+			"nation": "THA",
+			"pool": "N",
+			"neutral_final": true,
+			"prize_scale": 0.25,
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			]
+		},
+		"MAC": {
+			"name": "Piala FA",
+			"short": "Piala FA",
+			"kind": "national",
+			"nation": "MAS",
+			"pool": "N",
+			"neutral_final": true,
+			"prize_scale": 0.25,
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			]
+		},
+		"CNC": {
+			"name": "Canadian Championship",
+			"short": "Canadian Championship",
+			"kind": "national",
+			"nation": "CAN",
+			"pool": "N",
+			"neutral_final": true,
+			"prize_scale": 0.25,
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			]
+		},
+		"IEC": {
+			"name": "FAI Cup",
+			"short": "FAI Cup",
+			"kind": "national",
+			"nation": "IRL",
+			"pool": "N",
+			"neutral_final": true,
+			"prize_scale": 0.25,
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			],
+			"qualifies": "UEL"
+		},
+		"CRN": {
+			"name": "Torneo de Copa",
+			"short": "Torneo de Copa",
+			"kind": "national",
+			"nation": "CRC",
+			"pool": "N",
+			"neutral_final": true,
+			"prize_scale": 0.25,
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			]
 		}
 	}
 }

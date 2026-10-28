@@ -1,0 +1,276 @@
+{
+	"nation": "POL",
+	"_doc": "Expansão Alpha 1.0.2. Clubes da temporada 2026/27 (2026 nas ligas de ano civil). Nomes reais; elencos fictícios, finanças, capacidades e força do jogo. Fontes e adaptações em docs/ALPHA-1.0.2-2026-10-28.md.",
+	"clubs": [
+		{
+			"key": "POL_LECHPOZNAN",
+			"name": "Lech Poznań",
+			"short": "Lech Poznań",
+			"abbr": "LEC",
+			"city": "Poznań",
+			"league": "POL1",
+			"rep": 73,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174AA5",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "POL_LEGIAWARSZAWA",
+			"name": "Legia Warszawa",
+			"short": "Legia Warszawa",
+			"abbr": "LEG",
+			"city": "Warszawa",
+			"league": "POL1",
+			"rep": 73,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#007A42"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "POL_RAKOWCZESTOCHOWA",
+			"name": "Raków Częstochowa",
+			"short": "Raków Częstochowa",
+			"abbr": "RAK",
+			"city": "Częstochowa",
+			"league": "POL1",
+			"rep": 71,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D72027",
+				"#183C83"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "POL_JAGIELLONIABIAYSTOK",
+			"name": "Jagiellonia Białystok",
+			"short": "Jagiellonia Białystok",
+			"abbr": "JAG",
+			"city": "Białystok",
+			"league": "POL1",
+			"rep": 70,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#F5CF24"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "POL_POGONSZCZECIN",
+			"name": "Pogoń Szczecin",
+			"short": "Pogoń Szczecin",
+			"abbr": "POG",
+			"city": "Szczecin",
+			"league": "POL1",
+			"rep": 68,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#122A54",
+				"#861D31"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "POL_GORNIKZABRZE",
+			"name": "Górnik Zabrze",
+			"short": "Górnik Zabrze",
+			"abbr": "GOR",
+			"city": "Zabrze",
+			"league": "POL1",
+			"rep": 67,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#224992"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "POL_CRACOVIA",
+			"name": "Cracovia",
+			"short": "Cracovia",
+			"abbr": "CRA",
+			"city": "Kraków",
+			"league": "POL1",
+			"rep": 65,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "POL_WISAKRAKOW",
+			"name": "Wisła Kraków",
+			"short": "Wisła Kraków",
+			"abbr": "WIS",
+			"city": "Kraków",
+			"league": "POL1",
+			"rep": 66,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "POL_PIASTGLIWICE",
+			"name": "Piast Gliwice",
+			"short": "Piast Gliwice",
+			"abbr": "PIA",
+			"city": "Gliwice",
+			"league": "POL1",
+			"rep": 64,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174A9B",
+				"#C8202F"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "POL_ZAGEBIELUBIN",
+			"name": "Zagłębie Lubin",
+			"short": "Zagłębie Lubin",
+			"abbr": "ZAG",
+			"city": "Lubin",
+			"league": "POL1",
+			"rep": 64,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E97621",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "POL_WIDZEWODZ",
+			"name": "Widzew Łódź",
+			"short": "Widzew Łódź",
+			"abbr": "WID",
+			"city": "Łódź",
+			"league": "POL1",
+			"rep": 65,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "POL_GKSKATOWICE",
+			"name": "GKS Katowice",
+			"short": "GKS Katowice",
+			"abbr": "GKS",
+			"city": "Katowice",
+			"league": "POL1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#EACC24",
+				"#1C713F"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "POL_KORONAKIELCE",
+			"name": "Korona Kielce",
+			"short": "Korona Kielce",
+			"abbr": "KOR",
+			"city": "Kielce",
+			"league": "POL1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E6BA28",
+				"#C71F2D"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "POL_MOTORLUBLIN",
+			"name": "Motor Lublin",
+			"short": "Motor Lublin",
+			"abbr": "MOT",
+			"city": "Lublin",
+			"league": "POL1",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#EFCE25",
+				"#1D4A92"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "POL_WISAPOCK",
+			"name": "Wisła Płock",
+			"short": "Wisła Płock",
+			"abbr": "WI4",
+			"city": "Płock",
+			"league": "POL1",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#2357A4",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "POL_SLASKWROCAW",
+			"name": "Śląsk Wrocław",
+			"short": "Śląsk Wrocław",
+			"abbr": "SLA",
+			"city": "Wrocław",
+			"league": "POL1",
+			"rep": 63,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#176842",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "POL_RADOMIAKRADOM",
+			"name": "Radomiak Radom",
+			"short": "Radomiak Radom",
+			"abbr": "RAD",
+			"city": "Radom",
+			"league": "POL1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#207342",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "POL_WIECZYSTAKRAKOW",
+			"name": "Wieczysta Kraków",
+			"short": "Wieczysta Kraków",
+			"abbr": "WIE",
+			"city": "Kraków",
+			"league": "POL1",
+			"rep": 59,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#F6D32B",
+				"#111111"
+			],
+			"kit": "plain"
+		}
+	]
+}

@@ -1,5 +1,5 @@
 extends SceneTree
-## Fluxos relatados pelos testadores; usa o espaço 99, fora dos saves do jogador.
+## Fluxos relatados pelos testadores; usa o espaço 97, fora dos saves do jogador.
 
 func _initialize() -> void:
 	process_frame.connect(_start, CONNECT_ONE_SHOT)

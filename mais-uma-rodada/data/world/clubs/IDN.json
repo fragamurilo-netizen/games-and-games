@@ -1,0 +1,276 @@
+{
+	"nation": "IDN",
+	"_doc": "Expansão Alpha 1.0.2. Clubes da temporada 2026/27 (2026 nas ligas de ano civil). Nomes reais; elencos fictícios, finanças, capacidades e força do jogo. Fontes e adaptações em docs/ALPHA-1.0.2-2026-10-28.md.",
+	"clubs": [
+		{
+			"key": "IDN_PERSIBBANDUNG",
+			"name": "Persib Bandung",
+			"short": "Persib Bandung",
+			"abbr": "PER",
+			"city": "Bandung",
+			"league": "IDN1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IDN_PERSIJAJAKARTA",
+			"name": "Persija Jakarta",
+			"short": "Persija Jakarta",
+			"abbr": "PE1",
+			"city": "Jakarta",
+			"league": "IDN1",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IDN_BORNEOFCSAMARINDA",
+			"name": "Borneo FC Samarinda",
+			"short": "Borneo FC Samarinda",
+			"abbr": "BOR",
+			"city": "Samarinda",
+			"league": "IDN1",
+			"rep": 59,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#F58220",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IDN_BALIUNITEDFC",
+			"name": "Bali United FC",
+			"short": "Bali United FC",
+			"abbr": "BAL",
+			"city": "Gianyar",
+			"league": "IDN1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IDN_PERSEBAYASURABAYA",
+			"name": "Persebaya Surabaya",
+			"short": "Persebaya Surabaya",
+			"abbr": "PE4",
+			"city": "Surabaya",
+			"league": "IDN1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00854A",
+				"#FFCC00"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IDN_DEWAUNITEDBANTENFC",
+			"name": "Dewa United Banten FC",
+			"short": "Dewa United Banten FC",
+			"abbr": "DUB",
+			"city": "Tangerang",
+			"league": "IDN1",
+			"rep": 57,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#C9A44C",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IDN_PSMMAKASSAR",
+			"name": "PSM Makassar",
+			"short": "PSM Makassar",
+			"abbr": "PSM",
+			"city": "Makassar",
+			"league": "IDN1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#861A22",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IDN_AREMAFC",
+			"name": "Arema FC",
+			"short": "Arema FC",
+			"abbr": "ARE",
+			"city": "Malang",
+			"league": "IDN1",
+			"rep": 55,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IDN_MADURAUNITEDFC",
+			"name": "Madura United FC",
+			"short": "Madura United FC",
+			"abbr": "MAD",
+			"city": "Bangkalan",
+			"league": "IDN1",
+			"rep": 54,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IDN_PERSIKKEDIRI",
+			"name": "Persik Kediri",
+			"short": "Persik Kediri",
+			"abbr": "PE9",
+			"city": "Kediri",
+			"league": "IDN1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#6D2C91",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IDN_PERSITA",
+			"name": "Persita",
+			"short": "Persita",
+			"abbr": "PE0",
+			"city": "Tangerang",
+			"league": "IDN1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#632C91",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IDN_BHAYANGKARAPRESISILAMPUNGF",
+			"name": "Bhayangkara Presisi Lampung FC",
+			"short": "Bhayangkara Presisi Lampung FC",
+			"abbr": "BPL",
+			"city": "Bandar Lampung",
+			"league": "IDN1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E8CB35",
+				"#145B3A"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IDN_PSSSLEMAN",
+			"name": "PSS Sleman",
+			"short": "PSS Sleman",
+			"abbr": "PSS",
+			"city": "Sleman",
+			"league": "IDN1",
+			"rep": 51,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#16854A",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IDN_PSIMYOGYAKARTA",
+			"name": "PSIM Yogyakarta",
+			"short": "PSIM Yogyakarta",
+			"abbr": "PSI",
+			"city": "Yogyakarta",
+			"league": "IDN1",
+			"rep": 50,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#164A93",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IDN_PERSIJAPJEPARA",
+			"name": "Persijap Jepara",
+			"short": "Persijap Jepara",
+			"abbr": "PEA",
+			"city": "Jepara",
+			"league": "IDN1",
+			"rep": 49,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D22228",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IDN_JAVAUNITEDFC",
+			"name": "Java United FC",
+			"short": "Java United FC",
+			"abbr": "JAV",
+			"city": "Surakarta",
+			"league": "IDN1",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IDN_GARUDAYAKSAFC",
+			"name": "Garudayaksa FC",
+			"short": "Garudayaksa FC",
+			"abbr": "GAR",
+			"city": "Bekasi",
+			"league": "IDN1",
+			"rep": 47,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#C51E2D",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IDN_ISENMULANGKALTENGFC",
+			"name": "Isenmulang Kalteng FC",
+			"short": "Isenmulang Kalteng FC",
+			"abbr": "ISE",
+			"city": "Palangka Raya",
+			"league": "IDN1",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D98B25",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		}
+	]
+}

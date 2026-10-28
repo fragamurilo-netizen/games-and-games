@@ -1,0 +1,171 @@
+{
+	"nation": "NZL",
+	"_doc": "Expansão Alpha 1.0.2. Clubes da temporada 2026/27 (2026 nas ligas de ano civil). Nomes reais; elencos fictícios, finanças, capacidades e força do jogo. Fontes e adaptações em docs/ALPHA-1.0.2-2026-10-28.md.",
+	"clubs": [
+		{
+			"key": "NZL_AUCKLANDCITY",
+			"name": "Auckland City",
+			"short": "Auckland City",
+			"abbr": "AUC",
+			"city": "Auckland",
+			"league": "NZL1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#164A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NZL_AUCKLANDFCRESERVES",
+			"name": "Auckland FC Reserves",
+			"short": "Auckland FC Reserves",
+			"abbr": "AU1",
+			"city": "Auckland",
+			"league": "NZL1",
+			"rep": 50,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1232A0",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NZL_AUCKLANDUNITED",
+			"name": "Auckland United",
+			"short": "Auckland United",
+			"abbr": "AU2",
+			"city": "Auckland",
+			"league": "NZL1",
+			"rep": 49,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1C1C1C",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NZL_BIRKENHEADUNITED",
+			"name": "Birkenhead United",
+			"short": "Birkenhead United",
+			"abbr": "BIR",
+			"city": "Auckland",
+			"league": "NZL1",
+			"rep": 49,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NZL_CASHMERETECHNICAL",
+			"name": "Cashmere Technical",
+			"short": "Cashmere Technical",
+			"abbr": "CAS",
+			"city": "Christchurch",
+			"league": "NZL1",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#F0C928",
+				"#174A9B"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NZL_EASTERNSUBURBS",
+			"name": "Eastern Suburbs",
+			"short": "Eastern Suburbs",
+			"abbr": "EAS",
+			"city": "Auckland",
+			"league": "NZL1",
+			"rep": 50,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NZL_FERRYMEADBAYS",
+			"name": "Ferrymead Bays",
+			"short": "Ferrymead Bays",
+			"abbr": "FER",
+			"city": "Christchurch",
+			"league": "NZL1",
+			"rep": 44,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#154A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NZL_MIRAMARRANGERS",
+			"name": "Miramar Rangers",
+			"short": "Miramar Rangers",
+			"abbr": "MIR",
+			"city": "Wellington",
+			"league": "NZL1",
+			"rep": 47,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#164A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NZL_NAPIERCITYROVERS",
+			"name": "Napier City Rovers",
+			"short": "Napier City Rovers",
+			"abbr": "NCR",
+			"city": "Napier",
+			"league": "NZL1",
+			"rep": 47,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#164A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NZL_WELLINGTONOLYMPIC",
+			"name": "Wellington Olympic",
+			"short": "Wellington Olympic",
+			"abbr": "WEL",
+			"city": "Wellington",
+			"league": "NZL1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "NZL_WELLINGTONPHOENIXRESERVES",
+			"name": "Wellington Phoenix Reserves",
+			"short": "Wellington Phoenix Reserves",
+			"abbr": "WPR",
+			"city": "Wellington",
+			"league": "NZL1",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#F5D72B",
+				"#111111"
+			],
+			"kit": "plain"
+		}
+	]
+}

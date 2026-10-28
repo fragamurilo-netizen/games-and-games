@@ -10940,5 +10940,9 @@
 	"Apelido: %s": "Apodo: %s",
 	"Acontecendo agora": "Pasando ahora",
 	"▲ Subiu do %dº para o %dº lugar": "▲ Subió del %dº al %dº lugar",
-	"▼ Caiu do %dº para o %dº lugar": "▼ Bajó del %dº al %dº lugar"
+	"▼ Caiu do %dº para o %dº lugar": "▼ Bajó del %dº al %dº lugar",
+	"Simulação pausada": "Simulación en pausa",
+	"Continuar simulação": "Continuar simulación",
+	"Não foi possível iniciar a simulação. Tente novamente.": "No se pudo iniciar la simulación. Inténtalo de nuevo.",
+	"Sem novos jogos nesta temporada. O calendário é renovado na próxima temporada.": "No quedan partidos esta temporada. El calendario se renueva en la próxima temporada."
 }

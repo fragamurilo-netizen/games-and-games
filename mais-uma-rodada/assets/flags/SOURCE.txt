@@ -1,0 +1,6 @@
+flag-icons by Panayiotis Lipiridis and contributors. MIT License.
+https://github.com/lipis/flag-icons
+Pinned commit: ac7e0eb3259eb62aa6100c435607e2fe03896a97
+Complete 4x3 vector artwork for all 218 nations/federations.
+FIFA-to-ISO mapping is recorded in index.json (NIR: gb-nir; TPE: tw; BOE: bq; SMN: mf).
+Bonaire (BOE.svg): original vector reconstruction from the official flag design, https://repository.officiele-overheidspublicaties.nl/cvdr/CVDR812/2/html/CVDR812_2.html . ISO BQ covers Bonaire, Sint Eustatius and Saba; its Netherlands icon is not used for the Bonaire team.

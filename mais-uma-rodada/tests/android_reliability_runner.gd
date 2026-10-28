@@ -61,7 +61,7 @@ func _large_table(n: Node) -> DataTable:
 func _shot(name_: String) -> void:
 	if pictures == "" or DisplayServer.get_name() == "headless":
 		return
-	await RenderingServer.frame_post_draw
+	RenderingServer.force_draw() # Windows pode suspender o desenho da janela ocluída
 	get_viewport().get_texture().get_image().save_png(pictures.path_join(name_ + ".png"))
 
 
@@ -79,6 +79,9 @@ func _sizes(name_: String) -> void:
 
 func _run() -> void:
 	get_tree().root.gui_disable_input = true
+	AppSettings.sound = true
+	AppSettings.music = true
+	AudioServer.set_bus_mute(0, true) # exercício real de áudio sem ruído durante o teste
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--out="):
 			pictures = a.substr(6)
@@ -92,7 +95,7 @@ func _run() -> void:
 	var w: GameWorld = generated["world"]
 	generated.clear()
 	check(GameManager._gen_result == null, "generator releases the delivered world")
-	GameManager.start_career(w, w.clubs_in_league("BRA1")[0].id, "Reliability", GameWorld.DIFF_NORMAL, 99)
+	GameManager.start_career(w, w.clubs_in_league("BRA1")[0].id, "Reliability", GameWorld.DIFF_NORMAL, 97)
 	GameManager.save_blocking()
 	main = load("res://scenes/main.tscn").instantiate()
 	get_tree().root.add_child(main)
@@ -149,11 +152,14 @@ func _run() -> void:
 		UIManager.goto("hub")
 		await _frames(4)
 	# Reproduce reopening Mercado after loading the same career, rather than only a new game.
+	print("RELIABILITY load begin")
 	w = null
 	UIManager.goto("menu")
 	await _frames(3)
-	GameManager.load_career_async(99, func(ok: bool): check(ok, "career loads"))
+	GameManager.load_career_async(97, func(ok: bool): check(ok, "career loads"))
 	await _idle()
+	print("RELIABILITY load settled")
+	check(not UIManager.stacks.has("market"), "previous career market cache released")
 	UIManager.goto("market")
 	await _idle()
 	await _table_frames()
@@ -187,6 +193,7 @@ func _run() -> void:
 	GameManager.finish_match_async(func(report: Dictionary): check(not report.is_empty(), "match settlement"))
 	await _idle()
 	GameManager.save_blocking()
+	SaveManager.delete_slot(97)
 	print("ANDROID_RELIABILITY_RESULT failures=", failures)
 	if failures == 0:
 		print("ANDROID_RELIABILITY_OK")

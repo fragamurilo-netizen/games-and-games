@@ -111,7 +111,9 @@
 			"foreign_limit": {
 				"max": 3,
 				"scope": "non_eu",
-				"exempt": ["ACP"]
+				"exempt": [
+					"ACP"
+				]
 			}
 		},
 		{
@@ -147,7 +149,9 @@
 			"foreign_limit": {
 				"max": 3,
 				"scope": "non_eu",
-				"exempt": ["ACP"]
+				"exempt": [
+					"ACP"
+				]
 			},
 			"format": {
 				"type": "promo",
@@ -928,7 +932,8 @@
 		},
 		{
 			"id": "BRA1",
-			"gross": 2.58, "opex": 0.55,
+			"gross": 2.58,
+			"opex": 0.55,
 			"nation": "BRA",
 			"tier": 1,
 			"name": "Brasileirão Série A",
@@ -965,7 +970,8 @@
 		},
 		{
 			"id": "BRA2",
-			"gross": 4.0, "opex": 0.6,
+			"gross": 4.0,
+			"opex": 0.6,
 			"nation": "BRA",
 			"tier": 2,
 			"name": "Brasileirão Série B",
@@ -1003,7 +1009,8 @@
 		},
 		{
 			"id": "BRA3",
-			"gross": 3.3, "opex": 0.7,
+			"gross": 3.3,
+			"opex": 0.7,
 			"nation": "BRA",
 			"tier": 3,
 			"name": "Brasileirão Série C",
@@ -1041,7 +1048,8 @@
 		},
 		{
 			"id": "BRA4",
-			"gross": 2.0, "opex": 0.75,
+			"gross": 2.0,
+			"opex": 0.75,
 			"nation": "BRA",
 			"tier": 4,
 			"name": "Brasileirão Série D",
@@ -2039,6 +2047,484 @@
 				},
 				"desc": "Temporada regular e a Finals Series: os 6 primeiros vão aos playoffs (os 2 melhores direto na semifinal); a Grande Final é em jogo único na casa do melhor."
 			}
+		},
+		{
+			"id": "IND1",
+			"nation": "IND",
+			"tier": 1,
+			"name": "Indian Super League",
+			"short": "Indian Super League",
+			"teams": 13,
+			"rr": 2,
+			"level": [
+				45,
+				58
+			],
+			"rep": [
+				43,
+				58
+			],
+			"wage": 0.2,
+			"att": 0.55,
+			"ticket": 7,
+			"culture": {
+				"goals": 1.02,
+				"home": 1.06,
+				"cards": 1.0
+			},
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			],
+			"format": {
+				"type": "playoff",
+				"teams": 6,
+				"ko": [
+					"ef",
+					"sf",
+					"f"
+				],
+				"legs": {
+					"ef": 1,
+					"sf": 2,
+					"f": 1
+				},
+				"neutral_final": false,
+				"byes": 2
+			}
+		},
+		{
+			"id": "IDN1",
+			"nation": "IDN",
+			"tier": 1,
+			"name": "Super League Indonesia",
+			"short": "Super League Indonesia",
+			"teams": 18,
+			"rr": 2,
+			"level": [
+				50,
+				63
+			],
+			"rep": [
+				46,
+				62
+			],
+			"wage": 0.25,
+			"att": 0.9,
+			"ticket": 6,
+			"culture": {
+				"goals": 1.02,
+				"home": 1.06,
+				"cards": 1.0
+			},
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			]
+		},
+		{
+			"id": "NZL1",
+			"nation": "NZL",
+			"tier": 1,
+			"name": "National League Championship",
+			"short": "National League Championship",
+			"teams": 11,
+			"rr": 1,
+			"level": [
+				43,
+				56
+			],
+			"rep": [
+				44,
+				56
+			],
+			"wage": 0.12,
+			"att": 0.45,
+			"ticket": 10,
+			"culture": {
+				"goals": 1.02,
+				"home": 1.06,
+				"cards": 1.0
+			},
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			],
+			"calendar": "ano",
+			"format": {
+				"type": "playoff",
+				"teams": 2,
+				"ko": [
+					"f"
+				],
+				"legs": {
+					"f": 1
+				},
+				"neutral_final": false
+			},
+			"desc": "Modelo da Championship 2026: 11 clubes, turno único e final entre os dois primeiros, integrado ao calendário unificado do jogo. A reforma nacional de 2027 ainda não é reproduzida."
+		},
+		{
+			"id": "POL1",
+			"nation": "POL",
+			"tier": 1,
+			"name": "Ekstraklasa",
+			"short": "Ekstraklasa",
+			"teams": 18,
+			"rr": 2,
+			"level": [
+				61,
+				73
+			],
+			"rep": [
+				59,
+				73
+			],
+			"wage": 0.58,
+			"att": 0.9,
+			"ticket": 20,
+			"culture": {
+				"goals": 1.02,
+				"home": 1.06,
+				"cards": 1.0
+			},
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			]
+		},
+		{
+			"id": "SWE1",
+			"nation": "SWE",
+			"tier": 1,
+			"name": "Allsvenskan",
+			"short": "Allsvenskan",
+			"teams": 16,
+			"rr": 2,
+			"level": [
+				59,
+				73
+			],
+			"rep": [
+				60,
+				73
+			],
+			"wage": 0.57,
+			"att": 0.95,
+			"ticket": 25,
+			"culture": {
+				"goals": 1.02,
+				"home": 1.06,
+				"cards": 1.0
+			},
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			],
+			"calendar": "ano"
+		},
+		{
+			"id": "NOR1",
+			"nation": "NOR",
+			"tier": 1,
+			"name": "Eliteserien",
+			"short": "Eliteserien",
+			"teams": 16,
+			"rr": 2,
+			"level": [
+				59,
+				76
+			],
+			"rep": [
+				60,
+				76
+			],
+			"wage": 0.62,
+			"att": 0.95,
+			"ticket": 30,
+			"culture": {
+				"goals": 1.02,
+				"home": 1.06,
+				"cards": 1.0
+			},
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			],
+			"calendar": "ano"
+		},
+		{
+			"id": "ROU1",
+			"nation": "ROU",
+			"tier": 1,
+			"name": "SuperLiga Romênia",
+			"short": "SuperLiga Romênia",
+			"teams": 16,
+			"rr": 2,
+			"level": [
+				58,
+				72
+			],
+			"rep": [
+				58,
+				72
+			],
+			"wage": 0.45,
+			"att": 0.85,
+			"ticket": 12,
+			"culture": {
+				"goals": 1.02,
+				"home": 1.06,
+				"cards": 1.0
+			},
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			],
+			"format": {
+				"type": "split",
+				"groups": [
+					6,
+					10
+				],
+				"legs": [
+					2,
+					1
+				],
+				"halve": true
+			}
+		},
+		{
+			"id": "HUN1",
+			"nation": "HUN",
+			"tier": 1,
+			"name": "NB I",
+			"short": "NB I",
+			"teams": 12,
+			"rr": 3,
+			"level": [
+				58,
+				73
+			],
+			"rep": [
+				60,
+				73
+			],
+			"wage": 0.45,
+			"att": 0.75,
+			"ticket": 14,
+			"culture": {
+				"goals": 1.02,
+				"home": 1.06,
+				"cards": 1.0
+			},
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			]
+		},
+		{
+			"id": "IRN1",
+			"nation": "IRN",
+			"tier": 1,
+			"name": "Persian Gulf Pro League",
+			"short": "Persian Gulf Pro League",
+			"teams": 18,
+			"rr": 2,
+			"level": [
+				56,
+				71
+			],
+			"rep": [
+				57,
+				71
+			],
+			"wage": 0.4,
+			"att": 1.0,
+			"ticket": 7,
+			"culture": {
+				"goals": 1.02,
+				"home": 1.06,
+				"cards": 1.0
+			},
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			]
+		},
+		{
+			"id": "THA1",
+			"nation": "THA",
+			"tier": 1,
+			"name": "Thai League 1",
+			"short": "Thai League 1",
+			"teams": 16,
+			"rr": 2,
+			"level": [
+				51,
+				68
+			],
+			"rep": [
+				54,
+				68
+			],
+			"wage": 0.28,
+			"att": 0.75,
+			"ticket": 7,
+			"culture": {
+				"goals": 1.02,
+				"home": 1.06,
+				"cards": 1.0
+			},
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			]
+		},
+		{
+			"id": "MAS1",
+			"nation": "MAS",
+			"tier": 1,
+			"name": "Liga Super Malaysia",
+			"short": "Liga Super Malaysia",
+			"teams": 12,
+			"rr": 2,
+			"level": [
+				45,
+				67
+			],
+			"rep": [
+				49,
+				67
+			],
+			"wage": 0.23,
+			"att": 0.75,
+			"ticket": 6,
+			"culture": {
+				"goals": 1.02,
+				"home": 1.06,
+				"cards": 1.0
+			},
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			]
+		},
+		{
+			"id": "CAN1",
+			"nation": "CAN",
+			"tier": 1,
+			"name": "Canadian Premier League",
+			"short": "Canadian Premier League",
+			"teams": 8,
+			"rr": 4,
+			"level": [
+				50,
+				61
+			],
+			"rep": [
+				54,
+				61
+			],
+			"wage": 0.28,
+			"att": 0.65,
+			"ticket": 20,
+			"culture": {
+				"goals": 1.02,
+				"home": 1.06,
+				"cards": 1.0
+			},
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			],
+			"calendar": "ano",
+			"format": {
+				"type": "playoff",
+				"teams": 4,
+				"ko": [
+					"sf",
+					"f"
+				],
+				"legs": {
+					"sf": 2,
+					"f": 1
+				},
+				"neutral_final": false
+			}
+		},
+		{
+			"id": "CRC1",
+			"nation": "CRC",
+			"tier": 1,
+			"name": "Primera División Costa Rica",
+			"short": "Primera División Costa Rica",
+			"teams": 10,
+			"rr": 2,
+			"level": [
+				51,
+				67
+			],
+			"rep": [
+				54,
+				67
+			],
+			"wage": 0.3,
+			"att": 0.75,
+			"ticket": 10,
+			"culture": {
+				"goals": 1.02,
+				"home": 1.06,
+				"cards": 1.0
+			},
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			],
+			"format": {
+				"type": "playoff",
+				"teams": 4,
+				"ko": [
+					"sf",
+					"f"
+				],
+				"legs": {
+					"sf": 2,
+					"f": 1
+				},
+				"neutral_final": false
+			},
+			"desc": "Adaptação da Alpha: uma fase regular de 18 rodadas seguida de semifinais e final. Os torneios separados Apertura/Clausura e a eventual grande final ainda não são reproduzidos."
+		},
+		{
+			"id": "IRL1",
+			"nation": "IRL",
+			"tier": 1,
+			"name": "Premier Division Irlanda",
+			"short": "Premier Division Irlanda",
+			"teams": 10,
+			"rr": 4,
+			"level": [
+				51,
+				64
+			],
+			"rep": [
+				57,
+				64
+			],
+			"wage": 0.32,
+			"att": 0.75,
+			"ticket": 20,
+			"culture": {
+				"goals": 1.02,
+				"home": 1.06,
+				"cards": 1.0
+			},
+			"colors": [
+				"#183F75",
+				"#FFFFFF"
+			],
+			"calendar": "ano"
 		}
 	]
 }

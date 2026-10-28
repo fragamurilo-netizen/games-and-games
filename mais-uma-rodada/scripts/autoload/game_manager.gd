@@ -189,7 +189,13 @@ func ensure_preview_world(done: Callable) -> void:
 # ---------------------------------------------------------------------------
 
 func start_career(w: GameWorld, club_id: int, manager_name: String, difficulty: int, save_slot: int) -> void:
+	if is_busy():
+		return
 	_cancel_save()
+	matchday = {}
+	_ai_queue.clear()
+	UIManager.forget_career_views()
+	preview_world = null
 	world = w
 	_start_core(club_id, manager_name, difficulty, save_slot)
 	save_now()
@@ -198,18 +204,24 @@ func start_career(w: GameWorld, club_id: int, manager_name: String, difficulty: 
 
 ## Mesmo começo de carreira numa thread (vários segundos no celular: temporada, base, pré-temporada
 ## e o avanço até o primeiro jogo); `done()` na principal, já com o save pedido.
-func start_career_async(w: GameWorld, club_id: int, manager_name: String, difficulty: int, save_slot: int, done: Callable) -> void:
+func start_career_async(w: GameWorld, club_id: int, manager_name: String, difficulty: int, save_slot: int, done: Callable) -> bool:
+	# Um toque repetido não pode trocar o mundo que a thread ainda está usando.
+	if is_busy():
+		return false
 	_cancel_save()
+	matchday = {}
+	_ai_queue.clear()
+	UIManager.forget_career_views()
+	preview_world = null
 	world = w
 	var after := func(_r: Variant) -> void:
 		save_now()
 		world_changed.emit()
-		done.call()
-	if not run_work(func() -> bool:
+		if done.is_valid():
+			done.call()
+	return run_work(func() -> bool:
 			_start_core(club_id, manager_name, difficulty, save_slot)
-			return true, after, "Preparando a carreira..."):
-		_start_core(club_id, manager_name, difficulty, save_slot)
-		after.call(true)
+			return true, after, "Preparando a carreira...")
 
 
 func _start_core(club_id: int, manager_name: String, difficulty: int, save_slot: int) -> void:
@@ -254,18 +266,32 @@ func load_career(save_slot: int) -> bool:
 
 ## Carrega numa thread (o save grande leva vários segundos no celular); `done(ok)` na principal.
 func load_career_async(save_slot: int, done: Callable) -> void:
+	if is_busy():
+		if done.is_valid():
+			done.call(false)
+		return
+	if world != null:
+		# Não manter dois mundos completos na memória do celular durante o load.
+		close_career_async(func(): _load_after_close(save_slot, done))
+		return
 	if not run_work(_load_core.bind(save_slot), func(w: Variant) -> void:
 			done.call(_adopt_loaded(w, save_slot)), "Carregando a carreira..."):
 		done.call(false)
 
 
+func _load_after_close(save_slot: int, done: Callable) -> void:
+	# Emenda o trabalho mantendo a proteção da interface. As telas antigas são
+	# liberadas no próximo frame, enquanto a thread ainda abre o arquivo do save.
+	load_career_async(save_slot, done)
+
+
 ## A parte pesada do carregamento: só mexe no mundo novo (ainda fora do GameManager).
 func _load_core(save_slot: int) -> GameWorld:
 	_prepared_market_scene = load("res://scenes/screens/market.tscn")
+	WorldGenerator.forget_static_state()
 	var w := SaveManager.load_world(save_slot)
 	if w == null:
 		return null
-	WorldGenerator.forget_static_state() # nada da carreira que estava aberta antes
 	# Entropia nova a cada abertura: reabrir o save não repete os mesmos jogos, gols e minutos.
 	var fresh := RandomNumberGenerator.new()
 	fresh.randomize()
@@ -290,7 +316,9 @@ func _adopt_loaded(w: Variant, save_slot: int) -> bool:
 	if not w is GameWorld:
 		return false
 	_cancel_save()
+	UIManager.forget_career_views()
 	world = w
+	preview_world = null
 	slot = save_slot
 	matchday = {}
 	world_changed.emit()
@@ -301,7 +329,17 @@ func _adopt_loaded(w: Variant, save_slot: int) -> bool:
 ## serializados aos poucos (alguns milissegundos por quadro) e a compressão e a escrita rodam em
 ## outra thread. Sem vídeo (testes) grava na hora.
 func save_now() -> bool:
-	if world == null or slot <= 0 or not matchday.is_empty():
+	if world == null or slot <= 0:
+		return false
+	if is_busy():
+		_work_mutex.lock()
+		if _work_in_fn:
+			_save_on_finish = true
+		else:
+			_resave_after_work = true
+		_work_mutex.unlock()
+		return true
+	if not matchday.is_empty():
 		return false
 	if _batch:
 		_batch_save = true
@@ -430,9 +468,17 @@ func close_career() -> void:
 
 func _drop_career() -> void:
 	_save_gen += 1
+	UIManager.forget_career_views()
 	world = null
+	preview_world = null
+	WorldGenerator.forget_static_state()
 	slot = -1
 	matchday = {}
+	_ai_queue.clear()
+	_sim_has = false
+	_sim_report = {}
+	last_report = {}
+	last_summary = {}
 
 
 ## Sai da carreira gravando numa thread (o save completo leva segundos no celular); `done` depois.
@@ -671,12 +717,12 @@ func is_simulating() -> bool:
 
 
 ## Joga a próxima data do usuário numa thread de trabalho. Acompanhe com sim_step_poll().
-func sim_step_start() -> bool:
+func sim_step_start(prepare_lineup: bool = false) -> bool:
 	if is_busy() or world == null:
 		return false
 	_sim_has = false
 	_sim_report = {}
-	return run_work(_sim_step_work, func(r: Variant) -> void:
+	return run_work(_sim_step_work.bind(prepare_lineup), func(r: Variant) -> void:
 		_sim_report = r if r is Dictionary else {}
 		_sim_has = true
 		if not _sim_report.is_empty():
@@ -685,8 +731,15 @@ func sim_step_start() -> bool:
 			world_changed.emit())
 
 
-func _sim_step_work() -> Dictionary:
+func _sim_step_work(prepare_lineup: bool = false) -> Dictionary:
 	var t0 := Time.get_ticks_usec()
+	if world != null and world.has_user() and matchday.is_empty():
+		var club := world.user_club()
+		if prepare_lineup and club.sheet != null:
+			club.sheet = ClubAI.auto_sheet(world, club, club.sheet.formation)
+			Autopilot.prepare_match(world, club)
+		else:
+			ClubAI.validate_user_sheet(world, club)
 	_begin_match_core(false)
 	SeasonManager._time("batch_preparar",t0)
 	t0 = Time.get_ticks_usec()

@@ -212,7 +212,7 @@ func _test_fixtures() -> void:
 		var league: League = w.season.leagues[id]
 		var cfg := league.cfg()
 		var teams := int(cfg["teams"])
-		var expect_rounds := (teams - 1) * int(cfg["rr"])
+		var expect_rounds := (teams - 1 + teams % 2) * int(cfg["rr"])
 		check(league.rounds.size() == expect_rounds, "%s com %d rodadas (esperado %d)" % [id, league.rounds.size(), expect_rounds])
 		var home := {}
 		var last_slot := -1
@@ -227,10 +227,10 @@ func _test_fixtures() -> void:
 				seen[f.away] = true
 				home[f.home] = int(home.get(f.home, 0)) + 1
 				check(f.slot == slot and f.comp == id, "%s: jogo com data/competição errada" % id)
-			check(seen.size() == teams, "%s: rodada %d não tem todos os clubes" % [id, r + 1])
+			check(seen.size() == teams - teams % 2, "%s: rodada %d tem quantidade incorreta de clubes/folgas" % [id, r + 1])
 		for cid in league.club_ids:
 			var hg := int(home.get(cid, 0))
-			check(absi(hg * 2 - expect_rounds) <= int(cfg["rr"]), "%s: %s com %d jogos em casa" % [id, w.club(cid).short_name, hg])
+			check(absi(hg * 2 - (teams - 1) * int(cfg["rr"])) <= int(cfg["rr"]), "%s: %s com %d jogos em casa" % [id, w.club(cid).short_name, hg])
 
 
 func _test_engine() -> void:
@@ -1608,6 +1608,10 @@ func _test_squad_events() -> void:
 			a.squad_status = Player.STATUS_STARTER
 			a.overall = maxi(a.overall, 70)
 			a.birth_year = w.year - 24
+			if k == "homesick":
+				a.hid("ada") # personalidade já gerada também recebe uma condição controlada
+				a.hidden["ada"] = 3
+				a.injury_weeks = 0
 			var ev := EventManager._build(w, k)
 			check(not ev.is_empty(), "evento %s não montou" % k)
 			if ev.is_empty():
@@ -1979,8 +1983,12 @@ func _test_deals() -> void:
 	# Revenda: o clube antigo recebe sua parte
 	var buyer: Club = w.clubs_in_league("ENG1")[0]
 	var sbal := seller.balance
+	var solidarity_before := int(seller.ledger.get("solidariedade", 0))
+	var sales_before := int(seller.ledger.get("vendas", 0))
 	TransferManager.complete_transfer(w, p, buyer, 2_000_000, p.wage, 3)
-	check(seller.balance - sbal == 200000, "revenda de 10%% não paga (%d)" % (seller.balance - sbal))
+	var solidarity := int(seller.ledger.get("solidariedade", 0)) - solidarity_before
+	check(int(seller.ledger.get("vendas", 0)) - sales_before == 200000, "revenda de 10% não registrada")
+	check(seller.balance - sbal == 200000 + solidarity, "revenda e solidariedade não pagas (%d)" % (seller.balance - sbal))
 	# Empréstimo de ida e volta
 	var mine: Player = w.squad(c)[18]
 	var r := TransferManager.loan_out(w, mine)

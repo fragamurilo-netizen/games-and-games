@@ -385,6 +385,7 @@ class Env:
 	var called := {} # id -> true (quem entrou em campo nesta data ou torneio)
 	var goals := {} # id -> gols nesta data ou torneio
 	var tag := "" # rótulo dos jogos no histórico (Amistoso, Eliminatórias, fase do torneio)
+	var day := -1 # dia da partida no calendário da temporada; -1 para históricos antigos/torneios
 	var tournament_finals := false
 	var cuts := {} # nação -> [[cortado, substituto]] (lesões entre o anúncio e a data)
 
@@ -508,7 +509,7 @@ static func _log(env: Env, r: Dictionary) -> void:
 	if not d.has("log"):
 		d["log"] = []
 	var log: Array = d["log"]
-	log.append([env.world.year, String(r["a"]), String(r["b"]), int(r["ga"]), int(r["gb"]), int(r["pa"]), int(r["pb"]), env.tag])
+	log.append([env.world.year, String(r["a"]), String(r["b"]), int(r["ga"]), int(r["gb"]), int(r["pa"]), int(r["pb"]), env.tag, env.day])
 	if log.size() > LOG_MAX:
 		d["log"] = log.slice(log.size() - LOG_MAX)
 
@@ -520,7 +521,7 @@ static func recent_games(world: GameWorld, code: String, n: int = 12) -> Array:
 	for i in range(log.size() - 1, -1, -1):
 		var e: Array = log[i]
 		if e[1] == code or e[2] == code:
-			out.append({"y": int(e[0]), "a": String(e[1]), "b": String(e[2]), "ga": int(e[3]), "gb": int(e[4]), "pa": int(e[5]), "pb": int(e[6]), "tag": String(e[7])})
+			out.append({"y": int(e[0]), "a": String(e[1]), "b": String(e[2]), "ga": int(e[3]), "gb": int(e[4]), "pa": int(e[5]), "pb": int(e[6]), "tag": String(e[7]), "day": int(e[8]) if e.size() > 8 else -1})
 			if out.size() >= n:
 				break
 	return out
@@ -714,6 +715,7 @@ static func start_season(world: GameWorld) -> void:
 	release_duty(world)
 	d.erase("next")
 	d.erase("nw")
+	d.erase("calendar")
 	NationalCoach.season_offers(world)
 	WorldCupBuildup.on_season_start(world)
 	NationalLeagues.start(world)
@@ -758,7 +760,22 @@ static func _open_campaigns(world: GameWorld, id: String, y: int) -> void:
 		if teams.size() <= spots:
 			continue # todos passam direto
 		teams.sort_custom(func(a, b): return elo_of(world, a) > elo_of(world, b) or (elo_of(world, a) == elo_of(world, b) and a < b))
-		var n_groups := clampi(int(q[confed].get("groups", 1)), 1, maxi(1, teams.size() / 3))
+		# A primeira temporada pode começar no meio do ciclo. Os grupos devem caber
+		# nas janelas que de fato restam, sem dezenas de jogos na mesma semana.
+		var available := maxi(1, y - world.year) * fifa_dates(world).size() * 2
+		for nl_id in NationalLeagues.IDS:
+			if (tcfg(nl_id).get("entry", {}) as Dictionary).has(confed):
+				for sy in range(world.year, y):
+					if next_edition(nl_id, sy + 1) == sy + 1:
+						available -= 6
+		for other in data(world)["camps"]:
+			if other["confed"] == confed and not bool(other["done"]):
+				available -= maxi(0, int(other["mdt"]) - int(other["md"]))
+		# Grupo ímpar precisa de uma rodada de folga por turno: arredondar para
+		# um tamanho par impede que um grupo de cinco exija dez datas, não oito.
+		var max_group := maxi(4, (maxi(2, available) / 2 + 1) / 2 * 2)
+		var minimum_groups := int(ceil(float(teams.size()) / max_group))
+		var n_groups := clampi(maxi(int(q[confed].get("groups", 1)), minimum_groups), 1, maxi(1, teams.size() / 3))
 		var camp := {"t": id, "y": y, "confed": confed, "name": "Eliminatórias %s · %s" % [String(c.get("short", id)), CONFED_NAMES.get(confed, confed)],
 			"groups": _draw_groups(rng, teams, n_groups), "fx": [], "md": 0, "mdt": 0, "spots": spots, "done": false, "q": [],
 			"end": y - 1}
@@ -795,40 +812,14 @@ static func after_weekend(world: GameWorld, weekend_index: int) -> Array:
 	var preset: Dictionary = d.get("next", {}) if int(d.get("nw", -1)) == weekend_index else {}
 	d.erase("next")
 	d.erase("nw")
-	var active: Array = d["camps"].filter(func(c): return not bool(c["done"]))
+	var agenda := NationalSchedule.ensure(world)
+	if agenda["played"].has(str(weekend_index)):
+		return []
 	var env := _make_env(world, 1000 + weekend_index, 30.0, preset)
-	var lines: Array = []
-	lines.append_array(NationalLeagues.play_window(world, env))
-	for camp in active:
-		var left := _fifa_left(world, camp)
-		var remaining := int(camp["mdt"]) - int(camp["md"])
-		var n := remaining if left <= 1 else int(ceil(float(remaining) / left))
-		env.tag = "Eliminatórias"
-		for i in n:
-			lines.append_array(_play_matchday(env, camp))
+	var games := NationalSchedule.play_window(world, weekend_index, env)
 	d["fifa"] = int(d["fifa"]) + 1
-	# Amistosos completam a janela: cada seleção faz dois jogos por data FIFA, como nas janelas reais.
-	var games := {}
-	for r in lines:
-		games[r["a"]] = int(games.get(r["a"], 0)) + 1
-		games[r["b"]] = int(games.get(r["b"], 0)) + 1
-	env.k = 12.0
-	env.tag = "Amistoso"
-	var friendlies: Array = []
-	for rnd in 2:
-		var free: Array = []
-		for code in DatabaseManager.nations():
-			if int(games.get(code, 0)) < 2:
-				free.append(code)
-		RngUtil.shuffle(env.rng, free)
-		for i in range(0, free.size() - 1, 2):
-			var fr := play(env, free[i], free[i + 1], rnd == 0, false)
-			fr["fr"] = true
-			friendlies.append(fr)
-			games[free[i]] = int(games.get(free[i], 0)) + 1
-			games[free[i + 1]] = int(games.get(free[i + 1], 0)) + 1
-	_after_date(world, env, lines + friendlies, weekend_index)
-	return lines
+	_after_date(world, env, games, weekend_index)
+	return games.filter(func(r): return not bool(r.get("fr", false)))
 
 
 ## Convocações anunciadas uma semana antes da data FIFA: listas de todas as seleções, moral de quem

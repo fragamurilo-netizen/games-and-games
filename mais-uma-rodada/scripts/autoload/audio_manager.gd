@@ -29,6 +29,7 @@ var _crowd_task: Array[int] = [-1, -1]
 var _crowd_out: Array = [[], []] # resultado da thread: [PackedByteArray]
 var _crowd_cache: Dictionary = {} # chave do perfil -> AudioStreamWAV
 var _crowd_keys: Array[String] = ["", ""]
+var _crowd_render_keys: Array[String] = ["", ""]
 var _crowd_base: Array[float] = [0.0, 0.0] # volume de repouso de cada torcida (0..1)
 var _crowd_level: Array[float] = [0.0, 0.0]
 var _crowd_boost: Array[float] = [0.0, 0.0] # empurrão temporário (+/-)
@@ -190,9 +191,7 @@ func _process(delta: float) -> void:
 	_music_task = -1
 	var wav := _to_wav(_music_samples)
 	_music_samples = PackedFloat32Array()
-	wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	wav.loop_begin = 0
-	wav.loop_end = wav.data.size() / 2
+	_loop_pcm(wav)
 	_music_streams[_music_task_track] = wav
 	var f := FileAccess.open(MUSIC_CACHE % _music_task_track, FileAccess.WRITE)
 	if f != null:
@@ -206,16 +205,25 @@ func _load_cached(track: int) -> AudioStreamWAV:
 	if not FileAccess.file_exists(path):
 		return null
 	var data := FileAccess.get_file_as_bytes(path)
-	if data.size() < RATE * 2:
+	if data.size() < RATE * 2 or data.size() % 2 != 0:
 		return null
 	var wav := AudioStreamWAV.new()
 	wav.format = AudioStreamWAV.FORMAT_16_BITS
 	wav.mix_rate = RATE
 	wav.stereo = false
 	wav.data = data
-	wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	wav.loop_end = data.size() / 2
+	_loop_pcm(wav)
 	return wav
+
+
+## O mixer WAV da versão usada inclui loop_end na leitura. Informar a quantidade
+## de frames (em vez do último índice) acessava um sample depois do buffer PCM.
+## Android vitals: SIGSEGV em AudioStreamPlaybackWAV::decode_samples<int16_t>.
+func _loop_pcm(wav: AudioStreamWAV) -> void:
+	var frames := wav.data.size() / (4 if wav.stereo else 2)
+	wav.loop_begin = 0
+	wav.loop_end = maxi(0, frames - 1)
+	wav.loop_mode = AudioStreamWAV.LOOP_FORWARD if frames > 1 else AudioStreamWAV.LOOP_DISABLED
 
 
 ## A faixa já foi gerada (ou está no cache do aparelho)?
@@ -374,11 +382,19 @@ func crowd_start(home: Dictionary, away: Dictionary, fill: float, away_share: fl
 		if _crowd_cache.has(key):
 			_crowd_play(i, _crowd_cache[key])
 			continue
-		var holder: Array = []
-		_crowd_out[i] = holder
-		var prof: Dictionary = profs[i]
-		_crowd_task[i] = WorkerThreadPool.add_task(func():
-			holder.append(CrowdSynth.to_pcm16(CrowdSynth.render(prof))), false, "torcida")
+		_render_crowd(i, profs[i])
+
+
+func _render_crowd(i: int, prof: Dictionary) -> void:
+	# Reter o job anterior até a conclusão: uma troca rápida de partida não pode
+	# perder a tarefa que ainda usa este autoload, nem aplicar sua torcida à nova.
+	if _crowd_task[i] >= 0:
+		return
+	var holder: Array = []
+	_crowd_out[i] = holder
+	_crowd_render_keys[i] = CrowdProfile.key_of(prof)
+	_crowd_task[i] = WorkerThreadPool.add_task(func():
+		holder.append(CrowdSynth.to_pcm16(CrowdSynth.render(prof))), false, "torcida")
 
 
 ## Desliga a torcida (com fade, a não ser que `now`).
@@ -515,20 +531,23 @@ func _crowd_tick(delta: float) -> void:
 			WorkerThreadPool.wait_for_task_completion(_crowd_task[i])
 			_crowd_task[i] = -1
 			var holder: Array = _crowd_out[i]
+			_crowd_out[i] = []
 			if not holder.is_empty():
 				var wav := AudioStreamWAV.new()
 				wav.format = AudioStreamWAV.FORMAT_16_BITS
 				wav.mix_rate = CrowdSynth.RATE
 				wav.stereo = false
 				wav.data = holder[0]
-				wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
-				wav.loop_begin = 0
-				wav.loop_end = (holder[0] as PackedByteArray).size() / 2
+				_loop_pcm(wav)
 				if _crowd_cache.size() > 8:
 					_crowd_cache.clear()
-				_crowd_cache[_crowd_keys[i]] = wav
-				if _crowd_on:
-					_crowd_play(i, wav)
+				_crowd_cache[_crowd_render_keys[i]] = wav
+				if _crowd_on and _crowd_real[i].is_empty():
+					var wanted := CrowdProfile.key_of(_crowd_prof[i])
+					if _crowd_cache.has(wanted):
+						_crowd_play(i, _crowd_cache[wanted])
+					else:
+						_render_crowd(i, _crowd_prof[i])
 		if not _crowd_p[i].playing:
 			continue
 		if _crowd_boost_t[i] > 0.0:

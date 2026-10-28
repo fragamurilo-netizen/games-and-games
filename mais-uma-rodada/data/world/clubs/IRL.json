@@ -1,0 +1,156 @@
+{
+	"nation": "IRL",
+	"_doc": "Expansão Alpha 1.0.2. Clubes da temporada 2026/27 (2026 nas ligas de ano civil). Nomes reais; elencos fictícios, finanças, capacidades e força do jogo. Fontes e adaptações em docs/ALPHA-1.0.2-2026-10-28.md.",
+	"clubs": [
+		{
+			"key": "IRL_SHAMROCKROVERS",
+			"name": "Shamrock Rovers",
+			"short": "Shamrock Rovers",
+			"abbr": "SHA",
+			"city": "Dublin",
+			"league": "IRL1",
+			"rep": 64,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#16854A",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRL_SHELBOURNEFC",
+			"name": "Shelbourne FC",
+			"short": "Shelbourne FC",
+			"abbr": "SHE",
+			"city": "Dublin",
+			"league": "IRL1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRL_DERRYCITY",
+			"name": "Derry City",
+			"short": "Derry City",
+			"abbr": "DER",
+			"city": "Derry",
+			"league": "IRL1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRL_STPATRICKSATHLETIC",
+			"name": "St Patrick's Athletic",
+			"short": "St Patrick's Athletic",
+			"abbr": "SPA",
+			"city": "Dublin",
+			"league": "IRL1",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRL_BOHEMIANFC",
+			"name": "Bohemian FC",
+			"short": "Bohemian FC",
+			"abbr": "BOH",
+			"city": "Dublin",
+			"league": "IRL1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRL_DUNDALKFC",
+			"name": "Dundalk FC",
+			"short": "Dundalk FC",
+			"abbr": "DUN",
+			"city": "Dundalk",
+			"league": "IRL1",
+			"rep": 59,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRL_DROGHEDAUNITED",
+			"name": "Drogheda United",
+			"short": "Drogheda United",
+			"abbr": "DRO",
+			"city": "Drogheda",
+			"league": "IRL1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#751F35",
+				"#69ADDA"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRL_GALWAYUNITED",
+			"name": "Galway United",
+			"short": "Galway United",
+			"abbr": "GAL",
+			"city": "Galway",
+			"league": "IRL1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#751F35",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRL_SLIGOROVERS",
+			"name": "Sligo Rovers",
+			"short": "Sligo Rovers",
+			"abbr": "SLI",
+			"city": "Sligo",
+			"league": "IRL1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		},
+		{
+			"key": "IRL_WATERFORDFC",
+			"name": "Waterford FC",
+			"short": "Waterford FC",
+			"abbr": "WAT",
+			"city": "Waterford",
+			"league": "IRL1",
+			"rep": 57,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#174A9B",
+				"#FFFFFF"
+			],
+			"kit": "plain"
+		}
+	]
+}
