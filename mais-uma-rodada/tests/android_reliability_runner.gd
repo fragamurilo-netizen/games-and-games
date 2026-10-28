@@ -100,6 +100,15 @@ func _run() -> void:
 	main = load("res://scenes/main.tscn").instantiate()
 	get_tree().root.add_child(main)
 	await _frames(8)
+	UIManager.goto("hub")
+	await _idle()
+	var orphans := int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT))
+	for i in 18:
+		UIManager.current().refresh()
+		await _frames(3)
+	var orphan_growth := int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)) - orphans
+	print("RELIABILITY hub_refresh_orphan_growth=", orphan_growth)
+	check(orphan_growth == 0, "refreshing the next-match card leaves no orphan nodes")
 	for code in ["pt", "en", "es", "en"]:
 		I18n.apply(code)
 		var started := Time.get_ticks_msec()

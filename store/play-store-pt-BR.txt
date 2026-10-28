@@ -68,3 +68,11 @@ NOVIDADES (1.0.2)
 • Agenda de seleções com datas, adversários e competições
 • Correções de estabilidade no áudio, no Mercado e no carregamento de carreiras
 • Carreiras antigas recebem as novas ligas na próxima temporada
+
+NOVIDADES (1.0.3)
+Correções de estabilidade e uso de memória.
+- Corrigidas texturas de escudos e patrocinadores que ficavam inválidas após navegar por vários clubes.
+- Corrigido acúmulo de elementos ao atualizar a tela inicial.
+- Limitado o cache de imagens de mods, com liberação quando o Android sinaliza pouca memória.
+- Imagens externas grandes agora são reduzidas antes de virar texturas.
+Tudo continua liberado no teste fechado. Seus saves são preservados.

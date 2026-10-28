@@ -68,3 +68,11 @@ WHAT'S NEW (1.0.2)
 • National-team fixtures with dates, opponents and competitions
 • Audio, transfer market and career loading stability fixes
 • Existing careers receive the new leagues at the next season rollover
+
+WHAT'S NEW (1.0.3)
+Stability and memory fixes.
+- Fixed crest and sponsor textures becoming invalid after browsing multiple clubs.
+- Fixed interface elements accumulating when refreshing the home screen.
+- Limited the mod image cache and release it when Android reports low memory.
+- Large external images are resized before creating textures.
+Everything remains unlocked in the closed test. Existing saves are preserved.

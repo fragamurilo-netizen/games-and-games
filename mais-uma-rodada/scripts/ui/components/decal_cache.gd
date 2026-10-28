@@ -1,7 +1,7 @@
 class_name DecalCache
 extends RefCounted
 ## Texturas de estampas (escudo do clube, nome do patrocinador) desenhadas uma vez num
-## SubViewport e reaproveitadas: o retrato as "imprime" no peito da camisa pelo shader, com a
+## SubViewport e copiadas para ImageTexture: o retrato as "imprime" no peito da camisa com a
 ## curvatura e a luz do tecido. Sem vídeo (testes headless) as texturas nunca ficam prontas e o
 ## retrato simplesmente não mostra a estampa.
 
@@ -9,7 +9,7 @@ const CREST_PX := 128
 const TEXT_H := 72
 const MAX_ENTRIES := 96
 
-static var _entries: Dictionary = {} # chave -> {vp, tex, ready, aspect, waiting: Array[WeakRef]}
+static var _entries: Dictionary = {} # chave -> {vp, tex, image, ready, aspect, waiting: Array[WeakRef]}
 static var _order: Array = []
 static var _by_tex: Dictionary = {} # instance_id da textura -> chave
 static var _pending: Array = []
@@ -72,25 +72,28 @@ class LogoCanvas:
 		BrandLogo.draw(self, brand, Rect2(Vector2.ZERO, size).grow(-2.0), Color.WHITE)
 
 
-## Volta do segundo plano: o conteúdo dos SubViewports pode ter sido perdido junto com a
-## superfície; pede um novo desenho de todos.
+## Volta do segundo plano: restaura as estampas a partir da cópia em memória, sem manter
+## render targets vivos para cada clube visitado.
 static func refresh() -> void:
-	for key in _entries:
-		var vp := _entries[key]["vp"] as SubViewport
-		if vp != null and is_instance_valid(vp):
-			vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+	for e: Dictionary in _entries.values():
+		if bool(e["ready"]):
+			(e["tex"] as ImageTexture).update(e["image"])
 
 
 ## A textura já foi desenhada ao menos uma vez?
 static func is_ready(tex: Texture2D) -> bool:
+	if tex == null:
+		return false
 	var key: Variant = _by_tex.get(tex.get_instance_id())
 	return key != null and _entries.has(key) and bool(_entries[key]["ready"])
 
 
 static func aspect(tex: Texture2D) -> float:
+	if tex == null:
+		return 1.0
 	var key: Variant = _by_tex.get(tex.get_instance_id())
 	if key == null or not _entries.has(key):
-		return 1.0
+		return float(tex.get_width()) / maxf(1.0, tex.get_height())
 	return float(_entries[key]["aspect"])
 
 
@@ -112,19 +115,24 @@ static func _make(key: String, content: Control, px: Vector2i, asp: float) -> vo
 	vp.disable_3d = true
 	vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 	vp.add_child(content)
+	# Um pedido feito dentro de _draw só entra na árvore depois. Não capturar o quadro
+	# anterior à entrada: isso marcava texturas ainda vazias como prontas.
+	if DisplayServer.get_name() != "headless":
+		vp.tree_entered.connect(_schedule.bind(key), CONNECT_ONE_SHOT)
 	tree.root.add_child.call_deferred(vp)
-	var tex := vp.get_texture()
-	_entries[key] = {"vp": vp, "tex": tex, "ready": false, "aspect": asp, "waiting": []}
+	# O cache de comandos do PortraitView retém esta textura mesmo após a expulsão
+	# da entrada. Uma ViewportTexture ficava inválida quando o viewport era liberado.
+	var tex := ImageTexture.new()
+	_entries[key] = {"vp": vp, "tex": tex, "image": null, "ready": false, "aspect": asp, "waiting": []}
 	_by_tex[tex.get_instance_id()] = key
 	_order.append(key)
-	if DisplayServer.get_name() != "headless":
-		_schedule(key)
 	while _order.size() > MAX_ENTRIES:
 		var old: String = _order.pop_front()
 		var e: Dictionary = _entries.get(old, {})
 		if not e.is_empty():
 			_by_tex.erase((e["tex"] as Texture2D).get_instance_id())
-			(e["vp"] as SubViewport).queue_free()
+			if is_instance_valid(e["vp"]):
+				(e["vp"] as SubViewport).queue_free()
 		_entries.erase(old)
 
 
@@ -154,7 +162,17 @@ static func _on_post_draw() -> void:
 		if not _entries.has(key):
 			continue
 		var e: Dictionary = _entries[key]
+		var vp := e["vp"] as SubViewport
+		if not is_instance_valid(vp) or not vp.is_inside_tree() or vp.is_queued_for_deletion():
+			continue
+		var img := vp.get_texture().get_image()
+		if img == null or img.is_empty():
+			continue
+		(e["tex"] as ImageTexture).set_image(img)
+		e["image"] = img
 		e["ready"] = true
+		e["vp"] = null
+		vp.queue_free()
 		for w: WeakRef in e["waiting"]:
 			var ci := w.get_ref() as CanvasItem
 			if ci != null and is_instance_valid(ci):

@@ -1,0 +1,16 @@
+<pt-BR>
+Correções de estabilidade e uso de memória.
+- Corrigidas texturas de escudos e patrocinadores que ficavam inválidas após navegar por vários clubes.
+- Corrigido acúmulo de elementos ao atualizar a tela inicial.
+- Limitado o cache de imagens de mods, com liberação quando o Android sinaliza pouca memória.
+- Imagens externas grandes agora são reduzidas antes de virar texturas.
+Tudo continua liberado no teste fechado. Seus saves são preservados.
+</pt-BR>
+<en-US>
+Stability and memory fixes.
+- Fixed crest and sponsor textures becoming invalid after browsing multiple clubs.
+- Fixed interface elements accumulating when refreshing the home screen.
+- Limited the mod image cache and release it when Android reports low memory.
+- Large external images are resized before creating textures.
+Everything remains unlocked in the closed test. Existing saves are preserved.
+</en-US>
