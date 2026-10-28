@@ -99,7 +99,9 @@ func _picker_row(w: GameWorld) -> Control:
 		if ids.size() > 1 or _cup_id != "":
 			var divs: Array = []
 			for lid in ids:
-				divs.append([String(lid), String(DatabaseManager.league_cfg(String(lid)).get("short", lid))])
+				var lc := DatabaseManager.league_cfg(String(lid))
+				var short := String(lc.get("short", lid))
+				divs.append([String(lid), String(lc.get("tab_short", short)) if content_width() < 560.0 else short])
 			v.add_child(UIKit.segment(divs, _league_id if _cup_id == "" else "", func(id: String): _pick_league(id)))
 		var crow := UIKit.flow(8)
 		for cid in CupManager.cups_of_country(nation):

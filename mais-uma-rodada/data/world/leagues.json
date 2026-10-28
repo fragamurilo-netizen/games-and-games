@@ -30,7 +30,8 @@
 				"goals": 1.13,
 				"home": 1.0,
 				"cards": 0.9
-			}
+			},
+			"tab_short": "Premier"
 		},
 		{
 			"id": "ENG2",
@@ -77,7 +78,8 @@
 				"neutral_final": true,
 				"desc": "Os 2 primeiros sobem direto; do 3º ao 6º disputam os playoffs de acesso (semifinal em ida e volta e final em Wembley, campo neutro) pela terceira vaga."
 			},
-			"down": 3
+			"down": 3,
+			"tab_short": "Champ."
 		},
 		{
 			"id": "ESP1",
@@ -2596,7 +2598,8 @@
 				},
 				"desc": "46 rodadas. Os 2 primeiros sobem direto; do 3º ao 6º disputam a terceira vaga, com semifinal em ida e volta e final em campo neutro. Os 4 últimos caem.",
 				"neutral_final": true
-			}
+			},
+			"tab_short": "L1"
 		},
 		{
 			"id": "ENG4",
@@ -2643,7 +2646,8 @@
 				},
 				"desc": "46 rodadas. Os 3 primeiros sobem direto; do 4º ao 7º disputam a quarta vaga, com semifinal em ida e volta e final em campo neutro. Não há rebaixamento para uma quinta divisão inglesa nesta versão.",
 				"neutral_final": true
-			}
+			},
+			"tab_short": "L2"
 		},
 		{
 			"id": "NED2",
