@@ -15,6 +15,8 @@ var founded: int = 1920
 var nation: String = ""
 var league_id: String = ""
 var tier: int = 1 # divisão dentro da nação (1 = primeira)
+var promotion_eligible: bool = true
+var domestic_cup_eligible: bool = true
 
 var reputation: float = 50.0 # 1..100 (escala mundial)
 var fan_base: int = 10000 # torcedores "de estádio" potenciais
@@ -261,6 +263,7 @@ func to_dict() -> Dictionary:
 	return {
 		"id": id, "key": key, "name": name, "short": short_name, "abbr": abbr, "nick": nickname,
 		"city": city, "region": region, "founded": founded, "nat": nation, "lg": league_id, "tier": tier,
+		"promotion_eligible": promotion_eligible, "domestic_cup_eligible": domestic_cup_eligible,
 		"cmk": commercial, "rvk": rev_k, "af": affairs, "rep": reputation, "fans": fan_base, "mood": fan_mood, "board": board_confidence,
 		"rivals": rivals, "stadium": stadium, "cap": capacity, "ven": venue, "off": official,
 		"bal": balance, "debt": debt, "tb": transfer_budget, "wb": wage_budget, "ledger": ledger,
@@ -292,6 +295,8 @@ static func from_dict(d: Dictionary) -> Club:
 	c.nation = d.get("nat", "")
 	c.league_id = d.get("lg", "")
 	c.tier = int(d.get("tier", 1))
+	c.promotion_eligible = bool(d.get("promotion_eligible", true))
+	c.domestic_cup_eligible = bool(d.get("domestic_cup_eligible", true))
 	c.reputation = float(d.get("rep", 50.0))
 	c.fan_base = int(d.get("fans", 10000))
 	c.fan_mood = float(d.get("mood", 60.0))

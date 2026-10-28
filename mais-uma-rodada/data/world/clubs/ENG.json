@@ -1,6 +1,6 @@
 {
 	"nation": "ENG",
-	"_doc": "Inglaterra: 1ª e 2ª divisão. Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"_doc": "Inglaterra: quatro divisões (20/24/24/24 clubes). Identidades reais; força, finanças e elencos são do jogo. Ver _expansion_doc para a base das divisões inferiores.",
 	"clubs": [
 		{
 			"key": "ENG_MSK",
@@ -1292,6 +1292,735 @@
 			"rivals": [
 				"ENG_AST"
 			]
+		},
+		{
+			"key": "ENG_D2_SWA",
+			"name": "Swansea City",
+			"short": "Swansea City",
+			"abbr": "SWA",
+			"city": "Swansea",
+			"league": "ENG2",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#ffffff",
+				"#111111"
+			]
+		},
+		{
+			"key": "ENG_D2_WRE",
+			"name": "Wrexham",
+			"short": "Wrexham",
+			"abbr": "WRE",
+			"city": "Wrexham",
+			"league": "ENG2",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D2_CHA",
+			"name": "Charlton Athletic",
+			"short": "Charlton Athletic",
+			"abbr": "CHA",
+			"city": "London",
+			"league": "ENG2",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D2_OXF",
+			"name": "Oxford United",
+			"short": "Oxford United",
+			"abbr": "OXF",
+			"city": "Oxford",
+			"league": "ENG2",
+			"rep": 61,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#f4c430",
+				"#142b50"
+			]
+		},
+		{
+			"key": "ENG_D3_LIN",
+			"name": "Lincoln City",
+			"short": "Lincoln City",
+			"abbr": "LIN",
+			"city": "Lincoln",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D3_CAR",
+			"name": "Cardiff City",
+			"short": "Cardiff City",
+			"abbr": "CAR",
+			"city": "Cardiff",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D3_STP",
+			"name": "Stockport County",
+			"short": "Stockport County",
+			"abbr": "STP",
+			"city": "Stockport",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D3_BFD",
+			"name": "Bradford City",
+			"short": "Bradford City",
+			"abbr": "BFD",
+			"city": "Bradford",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#7c2335",
+				"#e4ac23"
+			]
+		},
+		{
+			"key": "ENG_D3_BOL",
+			"name": "Bolton Wanderers",
+			"short": "Bolton Wanderers",
+			"abbr": "BOL",
+			"city": "Bolton",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#ffffff",
+				"#172b50"
+			]
+		},
+		{
+			"key": "ENG_D3_STE",
+			"name": "Stevenage",
+			"short": "Stevenage",
+			"abbr": "STE",
+			"city": "Stevenage",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D3_LUT",
+			"name": "Luton Town",
+			"short": "Luton Town",
+			"abbr": "LUT",
+			"city": "Luton",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#f47621",
+				"#142b50"
+			]
+		},
+		{
+			"key": "ENG_D3_PLY",
+			"name": "Plymouth Argyle",
+			"short": "Plymouth Argyle",
+			"abbr": "PLY",
+			"city": "Plymouth",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#006b46",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D3_HUD",
+			"name": "Huddersfield Town",
+			"short": "Huddersfield Town",
+			"abbr": "HUD",
+			"city": "Huddersfield",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#238ac7",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D3_MAN",
+			"name": "Mansfield Town",
+			"short": "Mansfield Town",
+			"abbr": "MAN",
+			"city": "Mansfield",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#e4ac23",
+				"#142b50"
+			]
+		},
+		{
+			"key": "ENG_D3_WYC",
+			"name": "Wycombe Wanderers",
+			"short": "Wycombe Wanderers",
+			"abbr": "WYC",
+			"city": "High Wycombe",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#75b9df",
+				"#142b50"
+			]
+		},
+		{
+			"key": "ENG_D3_REA",
+			"name": "Reading",
+			"short": "Reading",
+			"abbr": "REA",
+			"city": "Reading",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D3_BPL",
+			"name": "Blackpool",
+			"short": "Blackpool",
+			"abbr": "BPL",
+			"city": "Blackpool",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#f47621",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D3_DON",
+			"name": "Doncaster Rovers",
+			"short": "Doncaster Rovers",
+			"abbr": "DON",
+			"city": "Doncaster",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D3_BAR",
+			"name": "Barnsley",
+			"short": "Barnsley",
+			"abbr": "BAR",
+			"city": "Barnsley",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D3_WIG",
+			"name": "Wigan Athletic",
+			"short": "Wigan Athletic",
+			"abbr": "WIG",
+			"city": "Wigan",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D3_BUR",
+			"name": "Burton Albion",
+			"short": "Burton Albion",
+			"abbr": "BTA",
+			"city": "Burton upon Trent",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#f4c430",
+				"#111111"
+			]
+		},
+		{
+			"key": "ENG_D3_PET",
+			"name": "Peterborough United",
+			"short": "Peterborough United",
+			"abbr": "PET",
+			"city": "Peterborough",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D3_WIM",
+			"name": "AFC Wimbledon",
+			"short": "AFC Wimbledon",
+			"abbr": "WIM",
+			"city": "London",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#f4c430"
+			]
+		},
+		{
+			"key": "ENG_D3_LEY",
+			"name": "Leyton Orient",
+			"short": "Leyton Orient",
+			"abbr": "LEY",
+			"city": "London",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D3_EXE",
+			"name": "Exeter City",
+			"short": "Exeter City",
+			"abbr": "EXE",
+			"city": "Exeter",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D3_PVA",
+			"name": "Port Vale",
+			"short": "Port Vale",
+			"abbr": "PVA",
+			"city": "Stoke-on-Trent",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#ffffff",
+				"#111111"
+			]
+		},
+		{
+			"key": "ENG_D3_ROT",
+			"name": "Rotherham United",
+			"short": "Rotherham United",
+			"abbr": "ROT",
+			"city": "Rotherham",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D3_NOR",
+			"name": "Northampton Town",
+			"short": "Northampton Town",
+			"abbr": "NTH",
+			"city": "Northampton",
+			"league": "ENG3",
+			"rep": 48,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#7c2335",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D4_BRO",
+			"name": "Bromley",
+			"short": "Bromley",
+			"abbr": "BRO",
+			"city": "London",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#ffffff",
+				"#111111"
+			]
+		},
+		{
+			"key": "ENG_D4_MKD",
+			"name": "MK Dons",
+			"short": "MK Dons",
+			"abbr": "MKD",
+			"city": "Milton Keynes",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#ffffff",
+				"#cc2222"
+			]
+		},
+		{
+			"key": "ENG_D4_CAM",
+			"name": "Cambridge United",
+			"short": "Cambridge United",
+			"abbr": "CAM",
+			"city": "Cambridge",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#e4ac23",
+				"#111111"
+			]
+		},
+		{
+			"key": "ENG_D4_SAL",
+			"name": "Salford City",
+			"short": "Salford City",
+			"abbr": "SAL",
+			"city": "Salford",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D4_NTC",
+			"name": "Notts County",
+			"short": "Notts County",
+			"abbr": "NTC",
+			"city": "Nottingham",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D4_CHT",
+			"name": "Chesterfield",
+			"short": "Chesterfield",
+			"abbr": "CHT",
+			"city": "Chesterfield",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D4_GRI",
+			"name": "Grimsby Town",
+			"short": "Grimsby Town",
+			"abbr": "GRI",
+			"city": "Grimsby",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D4_BNT",
+			"name": "Barnet",
+			"short": "Barnet",
+			"abbr": "BNT",
+			"city": "London",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#e4ac23",
+				"#111111"
+			]
+		},
+		{
+			"key": "ENG_D4_SWI",
+			"name": "Swindon Town",
+			"short": "Swindon Town",
+			"abbr": "SWI",
+			"city": "Swindon",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D4_OLD",
+			"name": "Oldham Athletic",
+			"short": "Oldham Athletic",
+			"abbr": "OLD",
+			"city": "Oldham",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D4_CRE",
+			"name": "Crewe Alexandra",
+			"short": "Crewe Alexandra",
+			"abbr": "CRE",
+			"city": "Crewe",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D4_COL",
+			"name": "Colchester United",
+			"short": "Colchester United",
+			"abbr": "COL",
+			"city": "Colchester",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D4_WAL",
+			"name": "Walsall",
+			"short": "Walsall",
+			"abbr": "WAL",
+			"city": "Walsall",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D4_BRV",
+			"name": "Bristol Rovers",
+			"short": "Bristol Rovers",
+			"abbr": "BRV",
+			"city": "Bristol",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D4_FLE",
+			"name": "Fleetwood Town",
+			"short": "Fleetwood Town",
+			"abbr": "FLE",
+			"city": "Fleetwood",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D4_ACC",
+			"name": "Accrington Stanley",
+			"short": "Accrington Stanley",
+			"abbr": "ACC",
+			"city": "Accrington",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D4_GIL",
+			"name": "Gillingham",
+			"short": "Gillingham",
+			"abbr": "GIL",
+			"city": "Gillingham",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D4_CHL",
+			"name": "Cheltenham Town",
+			"short": "Cheltenham Town",
+			"abbr": "CHL",
+			"city": "Cheltenham",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "ENG_D4_SHR",
+			"name": "Shrewsbury Town",
+			"short": "Shrewsbury Town",
+			"abbr": "SHR",
+			"city": "Shrewsbury",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#e4ac23"
+			]
+		},
+		{
+			"key": "ENG_D4_NEW",
+			"name": "Newport County",
+			"short": "Newport County",
+			"abbr": "NPC",
+			"city": "Newport",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#e4ac23",
+				"#111111"
+			]
+		},
+		{
+			"key": "ENG_D4_TRA",
+			"name": "Tranmere Rovers",
+			"short": "Tranmere Rovers",
+			"abbr": "TRA",
+			"city": "Birkenhead",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#ffffff",
+				"#1646a0"
+			]
+		},
+		{
+			"key": "ENG_D4_CRA",
+			"name": "Crawley Town",
+			"short": "Crawley Town",
+			"abbr": "CRA",
+			"city": "Crawley",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#111111"
+			]
+		},
+		{
+			"key": "ENG_D4_HAR",
+			"name": "Harrogate Town",
+			"short": "Harrogate Town",
+			"abbr": "HAR",
+			"city": "Harrogate",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#e4ac23",
+				"#111111"
+			]
+		},
+		{
+			"key": "ENG_D4_BRW",
+			"name": "Barrow",
+			"short": "Barrow",
+			"abbr": "BRW",
+			"city": "Barrow-in-Furness",
+			"league": "ENG4",
+			"rep": 38,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
 		}
-	]
+	],
+	"_expansion_doc": "Divisões inferiores: identidades de clubes reais, atributos econômicos/esportivos e escudos gerados pelo modelo do jogo. Composição compatível com a elite existente: ENG/NED/TUR 2025/26, JPN 2025, SCO/AUT/SUI 2024/25. Fontes e adaptações em docs/DIVISOES-2026-10-28.md."
 }

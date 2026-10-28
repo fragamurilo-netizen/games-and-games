@@ -143,7 +143,7 @@ static func _tie_winner(world: GameWorld, f: Fixture) -> int:
 		return f.home if f.pen_h > f.pen_a else f.away
 	if th != ta:
 		return f.home if th > ta else f.away
-	return -1
+	return LeagueFormat.draw_advantage_winner(world, f)
 
 
 static func _h2h_add(world: GameWorld, m: Dictionary, f: Fixture, kind: int, tie_w: int) -> void:

@@ -556,6 +556,287 @@
 				"border": "double"
 			},
 			"rivals": []
+		},
+		{
+			"key": "JPN_D2_MIT",
+			"name": "Mito HollyHock",
+			"short": "Mito HollyHock",
+			"abbr": "MIT",
+			"city": "Mito",
+			"league": "JPN2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "JPN_D2_VVA",
+			"name": "V-Varen Nagasaki",
+			"short": "V-Varen Nagasaki",
+			"abbr": "VVA",
+			"city": "Nagasaki",
+			"league": "JPN2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#f47621"
+			]
+		},
+		{
+			"key": "JPN_D2_JEF",
+			"name": "JEF United Chiba",
+			"short": "JEF United Chiba",
+			"abbr": "JEF",
+			"city": "Chiba",
+			"league": "JPN2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#f4c430",
+				"#00844a"
+			]
+		},
+		{
+			"key": "JPN_D2_TOK",
+			"name": "Tokushima Vortis",
+			"short": "Tokushima Vortis",
+			"abbr": "VOR",
+			"city": "Tokushima",
+			"league": "JPN2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#00844a"
+			]
+		},
+		{
+			"key": "JPN_D2_JUB",
+			"name": "Júbilo Iwata",
+			"short": "Júbilo Iwata",
+			"abbr": "JUB",
+			"city": "Iwata",
+			"league": "JPN2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#75b9df",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "JPN_D2_OMI",
+			"name": "RB Omiya Ardija",
+			"short": "RB Omiya Ardija",
+			"abbr": "OMI",
+			"city": "Saitama",
+			"league": "JPN2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#f47621",
+				"#142b50"
+			]
+		},
+		{
+			"key": "JPN_D2_VEG",
+			"name": "Vegalta Sendai",
+			"short": "Vegalta Sendai",
+			"abbr": "VEG",
+			"city": "Sendai",
+			"league": "JPN2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#f4c430",
+				"#1646a0"
+			]
+		},
+		{
+			"key": "JPN_D2_TOS",
+			"name": "Sagan Tosu",
+			"short": "Sagan Tosu",
+			"abbr": "TOS",
+			"city": "Tosu",
+			"league": "JPN2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#239ad1",
+				"#e86f9c"
+			]
+		},
+		{
+			"key": "JPN_D2_IWA",
+			"name": "Iwaki FC",
+			"short": "Iwaki FC",
+			"abbr": "IWA",
+			"city": "Iwaki",
+			"league": "JPN2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#142b50"
+			]
+		},
+		{
+			"key": "JPN_D2_MON",
+			"name": "Montedio Yamagata",
+			"short": "Montedio Yamagata",
+			"abbr": "MON",
+			"city": "Yamagata",
+			"league": "JPN2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "JPN_D2_IMA",
+			"name": "FC Imabari",
+			"short": "FC Imabari",
+			"abbr": "IMA",
+			"city": "Imabari",
+			"league": "JPN2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#f4c430"
+			]
+		},
+		{
+			"key": "JPN_D2_CON",
+			"name": "Consadole Sapporo",
+			"short": "Consadole Sapporo",
+			"abbr": "CON",
+			"city": "Sapporo",
+			"league": "JPN2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#111111"
+			]
+		},
+		{
+			"key": "JPN_D2_VEN",
+			"name": "Ventforet Kofu",
+			"short": "Ventforet Kofu",
+			"abbr": "VEN",
+			"city": "Kofu",
+			"league": "JPN2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#cc2222"
+			]
+		},
+		{
+			"key": "JPN_D2_AKI",
+			"name": "Blaublitz Akita",
+			"short": "Blaublitz Akita",
+			"abbr": "AKI",
+			"city": "Akita",
+			"league": "JPN2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "JPN_D2_FUJ",
+			"name": "Fujieda MYFC",
+			"short": "Fujieda MYFC",
+			"abbr": "FUJ",
+			"city": "Fujieda",
+			"league": "JPN2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#6e3a8a",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "JPN_D2_OIT",
+			"name": "Oita Trinita",
+			"short": "Oita Trinita",
+			"abbr": "OIT",
+			"city": "Oita",
+			"league": "JPN2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#f4c430"
+			]
+		},
+		{
+			"key": "JPN_D2_TOY",
+			"name": "Kataller Toyama",
+			"short": "Kataller Toyama",
+			"abbr": "TOY",
+			"city": "Toyama",
+			"league": "JPN2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "JPN_D2_ROA",
+			"name": "Roasso Kumamoto",
+			"short": "Roasso Kumamoto",
+			"abbr": "ROA",
+			"city": "Kumamoto",
+			"league": "JPN2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#111111"
+			]
+		},
+		{
+			"key": "JPN_D2_REN",
+			"name": "Renofa Yamaguchi",
+			"short": "Renofa Yamaguchi",
+			"abbr": "REN",
+			"city": "Yamaguchi",
+			"league": "JPN2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#f47621",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "JPN_D2_EHI",
+			"name": "Ehime FC",
+			"short": "Ehime FC",
+			"abbr": "EHI",
+			"city": "Matsuyama",
+			"league": "JPN2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#f47621",
+				"#1646a0"
+			]
 		}
-	]
+	],
+	"_expansion_doc": "Divisões inferiores: identidades de clubes reais, atributos econômicos/esportivos e escudos gerados pelo modelo do jogo. Composição compatível com a elite existente: ENG/NED/TUR 2025/26, JPN 2025, SCO/AUT/SUI 2024/25. Fontes e adaptações em docs/DIVISOES-2026-10-28.md."
 }

@@ -70,9 +70,4 @@ NOVIDADES (1.0.2)
 • Carreiras antigas recebem as novas ligas na próxima temporada
 
 NOVIDADES (1.0.3)
-Correções de estabilidade e uso de memória.
-- Corrigidas texturas de escudos e patrocinadores que ficavam inválidas após navegar por vários clubes.
-- Corrigido acúmulo de elementos ao atualizar a tela inicial.
-- Limitado o cache de imagens de mods, com liberação quando o Android sinaliza pouca memória.
-- Imagens externas grandes agora são reduzidas antes de virar texturas.
-Tudo continua liberado no teste fechado. Seus saves são preservados.
+Inglaterra com 4 divisões e 24 clubes na Championship. Novas segundas divisões de Holanda, Turquia, Escócia, Áustria, Suíça e Japão: 148 clubes adicionais. Mais traduções em inglês e espanhol. Correções de calendário, playoffs, nomes de clubes e acúmulo de memória nas tabelas. Melhorias de estabilidade em retratos e imagens de mods. Em saves existentes, as novas divisões entram na virada da temporada.

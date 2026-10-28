@@ -7,7 +7,8 @@ extends RefCounted
 static func fixture_title(w: GameWorld, f: Fixture) -> String:
 	if f.is_league():
 		var league := w.league(f.comp)
-		return "Rodada %d de %d · %s" % [f.round + 1, league.rounds.size() if league != null else 0, w.league_short(f.comp)]
+		var rounds := league.rounds.filter(func(rr): return not rr.is_empty() and rr[0].stage == Fixture.STAGE_LEAGUE).size() if league != null else 0
+		return "Rodada %d de %d · %s" % [f.round + 1, rounds, w.league_short(f.comp)]
 	var pl := w.league(f.comp)
 	if pl != null:
 		return "%s · %s" % [pl.short_name, LeagueFormat.round_label(pl, f)]

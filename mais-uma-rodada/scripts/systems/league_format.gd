@@ -176,7 +176,10 @@ static func _playoff_step(world: GameWorld, league: League) -> Array:
 		var n := int(f.get("teams", 8))
 		var byes := int(f.get("byes", 0))
 		var first := maxi(0, int(f.get("from", 1)) - 1) if kind(league) == "promo" else 0
-		var seeds := CompetitionManager.sort_table(league.club_ids, league.table).slice(first, first + n)
+		var ranked := CompetitionManager.sort_table(league.club_ids, league.table)
+		if kind(league) == "promo":
+			ranked = promotion_candidates(world, ranked)
+		var seeds := ranked.slice(first, first + n)
 		po["seeds"] = seeds
 		po["ties"] = []
 		po["champ"] = -1
@@ -214,7 +217,7 @@ static func _playoff_step(world: GameWorld, league: League) -> Array:
 		po["runner"] = int(final_tie["a"]) if int(final_tie["w"]) == int(final_tie["b"]) else int(final_tie["b"])
 		events.append({"t": "playoff_champion", "league": league.id, "club": po["champ"]})
 		return events
-	if last_r == 0:
+	if last_r + 1 == int(f.get("bye_round", 1)):
 		var byes2 := int(f.get("byes", 0))
 		winners = Array(po["seeds"]).slice(0, byes2) + winners
 	# Os mais bem colocados na fase regular enfrentam os piores que restaram.
@@ -289,6 +292,10 @@ static func _tie_winner(world: GameWorld, t: Dictionary, fx: Array) -> int:
 	if ga != gb:
 		return a if ga > gb else b
 	var last: Fixture = fx[fx.size() - 1]
+	var league := world.league(last.comp)
+	if league != null and bool(cfg(league).get("draw_advantage", false)):
+		var seeds: Array = league.po.get("seeds", [])
+		return a if seeds.find(a) < seeds.find(b) else b
 	if last.has_penalties():
 		return last.home if last.pen_h > last.pen_a else last.away
 	return a if world.club(a).reputation >= world.club(b).reputation else b
@@ -346,6 +353,9 @@ static func round_label(league: League, f: Fixture) -> String:
 static func promoted(league: League, ids: Array, up: int, world: GameWorld = null) -> Array:
 	if up <= 0:
 		return []
+	ids = promotion_candidates(world, ids)
+	if ids.is_empty():
+		return []
 	# Com repescagem na divisão de cima, "up" conta só as vagas diretas; o vencedor da
 	# repescagem sobe junto (os playoffs de acesso, se houver, só decidem quem vai a ela).
 	var upl := barrage_upper(world, league) if world != null else null
@@ -362,6 +372,25 @@ static func promoted(league: League, ids: Array, up: int, world: GameWorld = nul
 	var w := int(league.po.get("champ", -1))
 	out.append(w if w >= 0 and not out.has(w) else ids[mini(up - 1, ids.size() - 1)])
 	return out
+
+
+static func promotion_candidates(world: GameWorld, ids: Array) -> Array:
+	if world == null:
+		return ids
+	return ids.filter(func(cid): return world.club(int(cid)) != null and world.club(int(cid)).promotion_eligible)
+
+
+static func requires_tiebreak(world: GameWorld, f: Fixture) -> bool:
+	var league := world.league(f.comp)
+	return is_deciding_leg(world, f) and (league == null or not bool(cfg(league).get("draw_advantage", false)))
+
+
+static func draw_advantage_winner(world: GameWorld, f: Fixture) -> int:
+	var league := world.league(f.comp)
+	if league == null or not bool(cfg(league).get("draw_advantage", false)) or not is_deciding_leg(world, f):
+		return -1
+	var seeds: Array = league.po.get("seeds", sorted_ids(league))
+	return f.home if seeds.find(f.home) < seeds.find(f.away) else f.away
 
 
 # ---------------------------------------------------------------------------
@@ -507,7 +536,9 @@ static func _barrage_step(world: GameWorld, upper: League) -> Array:
 			if entrant < 0:
 				return [] # os playoffs de acesso ainda não terminaram
 		else:
-			var lids := sorted_ids(lower)
+			var lids := promotion_candidates(world, sorted_ids(lower))
+			if lids.is_empty():
+				return []
 			entrant = int(lids[clampi(int(b.get("vs", 3)), 1, lids.size()) - 1])
 		var uids := sorted_ids(upper)
 		var pos := clampi(int(b.get("pos", uids.size() - upper.relegated_count())), 1, uids.size())
@@ -520,7 +551,8 @@ static func _barrage_step(world: GameWorld, upper: League) -> Array:
 				last_w = i
 		var free: Array = []
 		for i in range(maxi(last_w + 1, s.day + 1), s.calendar.size()):
-			free.append(i)
+			if s.calendar[i]["t"] == "P" or not s.calendar.any(func(e): return e["t"] == "P"):
+				free.append(i)
 		var legs := mini(int(b.get("legs", 2)), free.size())
 		bar = {"r": BAR_R, "a": elite, "b": entrant, "w": -1, "legs": legs}
 		upper.po["bar"] = bar

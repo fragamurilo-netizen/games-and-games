@@ -73,7 +73,7 @@ static func windows(world: GameWorld) -> Array:
 	var dates := fifa_dates(world)
 	var wk := 0
 	for i in s.calendar.size():
-		if s.calendar[i]["t"] != "W":
+		if not s.is_weekend(i):
 			continue
 		if dates.has(wk):
 			var d := int(s.calendar[i]["d"])

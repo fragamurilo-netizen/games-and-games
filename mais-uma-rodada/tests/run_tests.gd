@@ -574,7 +574,8 @@ func _test_season_cycle() -> void:
 		var order := CompetitionManager.sorted_ids(sco)
 		for cid in sco.phase_groups[0]:
 			check(order.find(cid) < 6, "clube do grupo de cima terminou abaixo do 6º na Escócia")
-		check(sco.rounds.size() == 38, "Escócia com %d rodadas (38 na vida real)" % sco.rounds.size())
+		var league_rounds := sco.rounds.filter(func(rr): return not rr.is_empty() and rr[0].stage == Fixture.STAGE_LEAGUE).size()
+		check(league_rounds == 38, "Escócia com %d rodadas de liga (38, fora repescagem)" % league_rounds)
 	for lid in ["MEX1", "USA1", "AUS1"]:
 		var pl: League = w.season.leagues[lid]
 		var champ := int(pl.po.get("champ", -1))
@@ -652,7 +653,7 @@ func _test_season_cycle() -> void:
 	check(cdb.club_ids.size() == 80 and cdb.plan == ["pre", "r64", "r32", "r16", "qf", "sf", "f"] and cdb.byes.size() == 48, "Copa do Brasil com fases erradas: %s" % [cdb.plan])
 	check(Array(cdb.plan_slots[6]).size() == 2 and Array(cdb.plan_slots[0]).size() == 1, "Copa do Brasil: final deveria ser em ida e volta")
 	var fac: Cup = w.season.cups["FAC"]
-	check(fac.club_ids.size() == 40 and fac.plan[0] == "pre" and fac.plan.size() == 6, "FA Cup com fases erradas: %s" % [fac.plan])
+	check(fac.club_ids.size() == 92 and fac.plan == ["pre", "r64", "r32", "r16", "qf", "sf", "f"], "FA Cup com fases erradas: %s" % [fac.plan])
 	for f in fac.fixtures:
 		check(w.season.slot_type(f.slot).begins_with("N"), "FA Cup fora das datas de copa nacional")
 		if f.round == fac.plan.size() - 1:

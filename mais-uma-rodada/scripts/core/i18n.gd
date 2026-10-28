@@ -81,5 +81,12 @@ static func _build(code: String) -> PatternTranslation:
 		return null
 	var t := PatternTranslation.new()
 	t.locale = _LOCALES[code]
+	# Um molde como "De %s" é texto de interface, mas "De Graafschap" é
+	# uma identidade. Protege também nomes capturados dentro de notícias.
+	for nation in DatabaseManager.nations():
+		for club: Dictionary in DatabaseManager.club_data(nation):
+			for field in ["name", "short", "official"]:
+				var name := String(club.get(field, ""))
+				if name != "": parsed[name] = name
 	t.load_entries(parsed)
 	return t

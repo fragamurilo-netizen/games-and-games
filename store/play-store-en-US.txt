@@ -70,9 +70,4 @@ WHAT'S NEW (1.0.2)
 • Existing careers receive the new leagues at the next season rollover
 
 WHAT'S NEW (1.0.3)
-Stability and memory fixes.
-- Fixed crest and sponsor textures becoming invalid after browsing multiple clubs.
-- Fixed interface elements accumulating when refreshing the home screen.
-- Limited the mod image cache and release it when Android reports low memory.
-- Large external images are resized before creating textures.
-Everything remains unlocked in the closed test. Existing saves are preserved.
+England now has 4 divisions and 24 Championship clubs. New second divisions in the Netherlands, Turkey, Scotland, Austria, Switzerland and Japan: 148 additional clubs. More English and Spanish translations. Fixes for calendars, playoffs, club names and memory leaks on league tables. Stability improvements for portraits and mod images. Existing careers receive the new divisions at the start of the next season.

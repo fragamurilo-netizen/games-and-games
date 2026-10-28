@@ -110,6 +110,8 @@ func _picker_row(w: GameWorld) -> Control:
 			crow.add_child(chip)
 		if crow.get_child_count() > 0:
 			v.add_child(crow)
+		else:
+			crow.free()
 	var tabs: Array = LEAGUE_TABS
 	if _cup_id != "":
 		tabs = CUP_TABS.filter(func(t): return t[0] != "groups" or not w.season.cups[_cup_id].groups.is_empty())
@@ -184,6 +186,8 @@ func _open_picker(w: GameWorld) -> void:
 	if states.get_child_count() > 0:
 		v.add_child(UIKit.section("Estaduais do Brasil"))
 		v.add_child(states)
+	else:
+		states.free()
 	var confeds := {"UEFA": "Europa", "CONMEBOL": "América do Sul", "CONCACAF": "América do Norte", "CAF": "África", "AFC": "Ásia"}
 	for cf in confeds:
 		var flow := UIKit.flow(8)
@@ -698,9 +702,7 @@ func _table(c: VBoxContainer, w: GameWorld, league: League) -> void:
 	c.add_child(vrow)
 	var card := UIKit.card("Card", 2)
 	# Playoffs e repescagem não contam como rodadas da classificação
-	var total := league.rounds.size()
-	if league.phase_groups.is_empty() and (LeagueFormat.kind(league) in ["playoff", "promo"] or not LeagueFormat.barrage_cfg(league).is_empty()):
-		total = league.regular_rounds
+	var total := league.rounds.filter(func(rr): return not rr.is_empty() and rr[0].stage == Fixture.STAGE_LEAGUE).size()
 	var played := mini(league.rounds_played(), total)
 	var head := UIKit.hbox(8)
 	var rl := UIKit.label(("Rodada %d de %d" % [played, total]) if played > 0 else "Antes da 1ª rodada", "Caps")
@@ -1096,6 +1098,8 @@ func _highlights(c: VBoxContainer, w: GameWorld, league: League) -> void:
 		info.add_child(UIKit.kv("Últimos campeões", ", ".join(champs)))
 	if info.get_child_count() > 1:
 		c.add_child(UIKit.card_panel(info))
+	else:
+		UIKit.card_panel(info).free()
 
 
 func _ranking(c: VBoxContainer, w: GameWorld, stat: int, title: String) -> void:

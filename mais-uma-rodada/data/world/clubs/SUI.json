@@ -328,6 +328,147 @@
 				"sc": "#FFFFFF"
 			},
 			"rivals": []
+		},
+		{
+			"key": "SUI_D2_THU",
+			"name": "FC Thun",
+			"short": "FC Thun",
+			"abbr": "THU",
+			"city": "Thun",
+			"league": "SUI2",
+			"rep": 41,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "SUI_D2_AAR",
+			"name": "FC Aarau",
+			"short": "FC Aarau",
+			"abbr": "AAR",
+			"city": "Aarau",
+			"league": "SUI2",
+			"rep": 41,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#ffffff",
+				"#111111"
+			]
+		},
+		{
+			"key": "SUI_D2_ETO",
+			"name": "Étoile Carouge",
+			"short": "Étoile Carouge",
+			"abbr": "ETO",
+			"city": "Carouge",
+			"league": "SUI2",
+			"rep": 41,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "SUI_D2_VAD",
+			"name": "FC Vaduz",
+			"short": "FC Vaduz",
+			"abbr": "VAD",
+			"city": "Vaduz",
+			"league": "SUI2",
+			"rep": 41,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "SUI_D2_XAM",
+			"name": "Neuchâtel Xamax",
+			"short": "Neuchâtel Xamax",
+			"abbr": "XAM",
+			"city": "Neuchâtel",
+			"league": "SUI2",
+			"rep": 41,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#111111"
+			]
+		},
+		{
+			"key": "SUI_D2_SLO",
+			"name": "Stade Lausanne Ouchy",
+			"short": "Stade Lausanne Ouchy",
+			"abbr": "SLO",
+			"city": "Lausanne",
+			"league": "SUI2",
+			"rep": 41,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "SUI_D2_BEL",
+			"name": "AC Bellinzona",
+			"short": "AC Bellinzona",
+			"abbr": "BEL",
+			"city": "Bellinzona",
+			"league": "SUI2",
+			"rep": 41,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#7c2335",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "SUI_D2_SCH",
+			"name": "FC Schaffhausen",
+			"short": "FC Schaffhausen",
+			"abbr": "SCH",
+			"city": "Schaffhausen",
+			"league": "SUI2",
+			"rep": 41,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#f4c430",
+				"#111111"
+			]
+		},
+		{
+			"key": "SUI_D2_WIL",
+			"name": "FC Wil",
+			"short": "FC Wil",
+			"abbr": "WIL",
+			"city": "Wil",
+			"league": "SUI2",
+			"rep": 41,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "SUI_D2_NYO",
+			"name": "Stade Nyonnais",
+			"short": "Stade Nyonnais",
+			"abbr": "NYO",
+			"city": "Nyon",
+			"league": "SUI2",
+			"rep": 41,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#f4c430",
+				"#111111"
+			]
 		}
-	]
+	],
+	"_expansion_doc": "Divisões inferiores: identidades de clubes reais, atributos econômicos/esportivos e escudos gerados pelo modelo do jogo. Composição compatível com a elite existente: ENG/NED/TUR 2025/26, JPN 2025, SCO/AUT/SUI 2024/25. Fontes e adaptações em docs/DIVISOES-2026-10-28.md."
 }

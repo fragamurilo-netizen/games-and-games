@@ -4,6 +4,7 @@ var failures := 0
 var main: Node
 var pictures := ""
 var _pictured_market := false
+var league_id := "BRA1"
 
 
 func check(ok: bool, message: String) -> void:
@@ -85,6 +86,8 @@ func _run() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--out="):
 			pictures = a.substr(6)
+		if a.begins_with("--league="):
+			league_id = a.substr(9)
 	if pictures != "":
 		DirAccess.make_dir_recursive_absolute(pictures)
 	AppSettings.tutorial_done = true
@@ -95,7 +98,7 @@ func _run() -> void:
 	var w: GameWorld = generated["world"]
 	generated.clear()
 	check(GameManager._gen_result == null, "generator releases the delivered world")
-	GameManager.start_career(w, w.clubs_in_league("BRA1")[0].id, "Reliability", GameWorld.DIFF_NORMAL, 97)
+	GameManager.start_career(w, w.clubs_in_league(league_id)[0].id, "Reliability", GameWorld.DIFF_NORMAL, 97)
 	GameManager.save_blocking()
 	main = load("res://scenes/main.tscn").instantiate()
 	get_tree().root.add_child(main)
@@ -109,6 +112,26 @@ func _run() -> void:
 	var orphan_growth := int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)) - orphans
 	print("RELIABILITY hub_refresh_orphan_growth=", orphan_growth)
 	check(orphan_growth == 0, "refreshing the next-match card leaves no orphan nodes")
+	if league_id == "ENG4":
+		for code in ["en", "es"]:
+			I18n.apply(code)
+			check(I18n.t("De Graafschap") == "De Graafschap", "club names are not translated")
+			check(I18n.t("%s vence os playoffs da %s!" % ["De Graafschap", "Eerste Divisie"]).contains("De Graafschap"), "club names inside translated news")
+			for lid in ["ENG2", "ENG3", "ENG4", "NED2", "TUR2", "SCO2", "AUT2", "SUI2", "JPN2"]:
+				UIManager.goto("table", {"league": lid})
+				await _frames(4)
+				await _table_frames()
+				var before_refresh := int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT))
+				UIManager.current().refresh()
+				await _frames(4)
+				await _table_frames()
+				check(int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)) == before_refresh, "table refresh leaves no orphan nodes " + lid)
+				check(UIManager.current().get("_league_id") == lid, "new league table opens " + lid)
+				var desc := String(DatabaseManager.league_cfg(lid).get("format", {}).get("desc", ""))
+				check(desc == "" or I18n.t(desc) != desc, "regulations translated " + lid + " " + code)
+				await _shot("table-" + lid + "-" + code)
+		UIManager.goto("hub")
+		await _frames(3)
 	for code in ["pt", "en", "es", "en"]:
 		I18n.apply(code)
 		var started := Time.get_ticks_msec()
@@ -194,6 +217,8 @@ func _run() -> void:
 	UIManager.close_all_modals()
 	var screen := UIManager.current()
 	check(screen.get("_sim") != null and screen.get("_pitch") != null, "live match initialized")
+	var board_labels: Array = screen.get("_board").find_children("*", "Label", true, false)
+	check(board_labels.any(func(l): return String(l.text).contains("MATCHDAY")), "drawn match header translated before uppercasing")
 	await _sizes("match-en")
 	var sim := GameManager.user_sim()
 	sim.run_to_end()

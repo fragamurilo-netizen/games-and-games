@@ -510,6 +510,295 @@
 				"initials": "E",
 				"sc": "#FFFFFF"
 			}
+		},
+		{
+			"key": "NED_D2_ADO",
+			"name": "ADO Den Haag",
+			"short": "ADO Den Haag",
+			"abbr": "ADO",
+			"city": "Den Haag",
+			"league": "NED2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#f4c430",
+				"#00844a"
+			]
+		},
+		{
+			"key": "NED_D2_ALM",
+			"name": "Almere City",
+			"short": "Almere City",
+			"abbr": "ALM",
+			"city": "Almere",
+			"league": "NED2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#111111"
+			]
+		},
+		{
+			"key": "NED_D2_GRA",
+			"name": "De Graafschap",
+			"short": "De Graafschap",
+			"abbr": "GRA",
+			"city": "Doetinchem",
+			"league": "NED2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "NED_D2_DBO",
+			"name": "FC Den Bosch",
+			"short": "FC Den Bosch",
+			"abbr": "DBO",
+			"city": "Den Bosch",
+			"league": "NED2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "NED_D2_DOR",
+			"name": "FC Dordrecht",
+			"short": "FC Dordrecht",
+			"abbr": "DOR",
+			"city": "Dordrecht",
+			"league": "NED2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00844a",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "NED_D2_FCE",
+			"name": "FC Eindhoven",
+			"short": "FC Eindhoven",
+			"abbr": "FCE",
+			"city": "Eindhoven",
+			"league": "NED2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1646a0",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "NED_D2_EMM",
+			"name": "FC Emmen",
+			"short": "FC Emmen",
+			"abbr": "EMM",
+			"city": "Emmen",
+			"league": "NED2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "NED_D2_HEL",
+			"name": "Helmond Sport",
+			"short": "Helmond Sport",
+			"abbr": "HEL",
+			"city": "Helmond",
+			"league": "NED2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#111111"
+			]
+		},
+		{
+			"key": "NED_D2_JAX",
+			"name": "Jong Ajax",
+			"short": "Jong Ajax",
+			"abbr": "JAX",
+			"city": "Amsterdam",
+			"league": "NED2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			],
+			"promotion_eligible": false,
+			"domestic_cup_eligible": false
+		},
+		{
+			"key": "NED_D2_JAZ",
+			"name": "Jong AZ",
+			"short": "Jong AZ",
+			"abbr": "JAZ",
+			"city": "Alkmaar",
+			"league": "NED2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			],
+			"promotion_eligible": false,
+			"domestic_cup_eligible": false
+		},
+		{
+			"key": "NED_D2_JPS",
+			"name": "Jong PSV",
+			"short": "Jong PSV",
+			"abbr": "JPS",
+			"city": "Eindhoven",
+			"league": "NED2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			],
+			"promotion_eligible": false,
+			"domestic_cup_eligible": false
+		},
+		{
+			"key": "NED_D2_JUT",
+			"name": "Jong Utrecht",
+			"short": "Jong Utrecht",
+			"abbr": "JUT",
+			"city": "Utrecht",
+			"league": "NED2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			],
+			"promotion_eligible": false,
+			"domestic_cup_eligible": false
+		},
+		{
+			"key": "NED_D2_MVV",
+			"name": "MVV Maastricht",
+			"short": "MVV Maastricht",
+			"abbr": "MVV",
+			"city": "Maastricht",
+			"league": "NED2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "NED_D2_RKC",
+			"name": "RKC Waalwijk",
+			"short": "RKC Waalwijk",
+			"abbr": "RKC",
+			"city": "Waalwijk",
+			"league": "NED2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#f4c430",
+				"#1646a0"
+			]
+		},
+		{
+			"key": "NED_D2_ROD",
+			"name": "Roda JC",
+			"short": "Roda JC",
+			"abbr": "ROD",
+			"city": "Kerkrade",
+			"league": "NED2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#f4c430",
+				"#111111"
+			]
+		},
+		{
+			"key": "NED_D2_CAM",
+			"name": "SC Cambuur",
+			"short": "SC Cambuur",
+			"abbr": "CAM",
+			"city": "Leeuwarden",
+			"league": "NED2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#f4c430",
+				"#1646a0"
+			]
+		},
+		{
+			"key": "NED_D2_OSS",
+			"name": "TOP Oss",
+			"short": "TOP Oss",
+			"abbr": "OSS",
+			"city": "Oss",
+			"league": "NED2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#ffffff"
+			]
+		},
+		{
+			"key": "NED_D2_VIT",
+			"name": "Vitesse",
+			"short": "Vitesse",
+			"abbr": "VIT",
+			"city": "Arnhem",
+			"league": "NED2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#f4c430",
+				"#111111"
+			]
+		},
+		{
+			"key": "NED_D2_VVV",
+			"name": "VVV-Venlo",
+			"short": "VVV-Venlo",
+			"abbr": "VVV",
+			"city": "Venlo",
+			"league": "NED2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#f4c430",
+				"#111111"
+			]
+		},
+		{
+			"key": "NED_D2_WIL",
+			"name": "Willem II",
+			"short": "Willem II",
+			"abbr": "WIL",
+			"city": "Tilburg",
+			"league": "NED2",
+			"rep": 46,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#cc2222",
+				"#1646a0"
+			]
 		}
-	]
+	],
+	"_expansion_doc": "Divisões inferiores: identidades de clubes reais, atributos econômicos/esportivos e escudos gerados pelo modelo do jogo. Composição compatível com a elite existente: ENG/NED/TUR 2025/26, JPN 2025, SCO/AUT/SUI 2024/25. Fontes e adaptações em docs/DIVISOES-2026-10-28.md."
 }

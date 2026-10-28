@@ -89,6 +89,8 @@ static func from_data(_world: GameWorld, rng: RandomNumberGenerator, data: Dicti
 	c.nation = cfg["nation"]
 	c.league_id = cfg["id"]
 	c.tier = int(cfg["tier"])
+	c.promotion_eligible = bool(data.get("promotion_eligible", true))
+	c.domestic_cup_eligible = bool(data.get("domestic_cup_eligible", true))
 	c.region = region_of_city(c.nation, c.city)
 	c.founded = int(data.get("founded", 1920))
 	c.reputation = float(data.get("rep", 50))

@@ -66,7 +66,7 @@ static func context_for(world: GameWorld, f: Fixture) -> Dictionary:
 	if f.stage == Fixture.STAGE_KO and CupManager.is_deciding_leg(world, f):
 		ctx["ko"] = true
 		ctx["agg"] = CupManager.aggregate_before(world, f)
-	elif f.stage == Fixture.STAGE_KO and LeagueFormat.is_deciding_leg(world, f):
+	elif f.stage == Fixture.STAGE_KO and LeagueFormat.requires_tiebreak(world, f):
 		ctx["ko"] = true
 		ctx["agg"] = LeagueFormat.aggregate_before(world, f)
 	return ctx

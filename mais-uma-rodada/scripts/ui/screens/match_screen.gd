@@ -518,7 +518,7 @@ func _build_l3() -> PanelContainer:
 
 func _build_scoreboard(home: Club, away: Club) -> Control:
 	# Placar da transmissão com a cara da competição (desenho e cores dos dados, mods ou Editor).
-	var title := CompText.fixture_title(world(), _fx).to_upper() if _fx.comp != "F" else "AMISTOSO"
+	var title := I18n.t(CompText.fixture_title(world(), _fx)).to_upper() if _fx.comp != "F" else I18n.t("Amistoso").to_upper()
 	_conditions = _conditions_row()
 	_board = ScoreboardView.make(world(), _fx.comp, title, home, away, _colors, _conditions, true, _fx.leg == 1)
 	_score_lbl = _board.score_proxy
