@@ -11,6 +11,7 @@ const SCREENS := {
 	"market": "res://scripts/ui/screens/market_screen.gd",
 	"gym": "res://scripts/ui/screens/gym_screen.gd",
 	"fighter": "res://scripts/ui/screens/fighter_screen.gd",
+	"look": "res://scripts/ui/screens/look_screen.gd",
 	"offer": "res://scripts/ui/screens/offer_screen.gd",
 	"challenge": "res://scripts/ui/screens/challenge_screen.gd",
 	"fight_plan": "res://scripts/ui/screens/fight_plan_screen.gd",

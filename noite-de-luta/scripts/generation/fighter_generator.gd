@@ -183,6 +183,8 @@ static func _marks(f: Fighter, rng: RandomNumberGenerator) -> void:
 ## tronco (0 a 3, pela cultura: comuns no Brasil, nos EUA e no México, raras no Daguestão e no Japão).
 static func physique(f: Fighter, rng: RandomNumberGenerator, culture: String = "") -> void:
 	var wt := float(DataDB.division(f.division).get("wt", 0.5))
+	# A categoria mais pesada delas (66 kg) ainda é corpo de leve: a gordura não sobe como nos homens.
+	var wt_fat := wt * (0.55 if f.is_female() else 1.0)
 	var age := f.age(2027, 1) if f.birth_year > 0 else 28
 	var grap := 0.0
 	if f.base in ["wrestling", "folkstyle", "greco", "freestyle", "sambo", "sambo_combate", "judo", "kurash", "laamb", "catch"]:
@@ -190,9 +192,11 @@ static func physique(f: Fighter, rng: RandomNumberGenerator, culture: String = "
 	elif Styles.family(f.base) == "agarrada":
 		grap = 0.5
 	var ms := 0.45 + (f.a("forca") - 55.0) / 45.0 + grap * 0.12 + rng.randf_range(-0.12, 0.12)
-	var bf := 0.08 + wt * 0.16 + maxf(0.0, 60.0 - f.a("cardio")) / 90.0 + maxf(0.0, age - 32.0) * 0.02 + rng.randf_range(-0.04, 0.08)
+	var bf := 0.08 + wt_fat * 0.16 + maxf(0.0, 60.0 - f.a("cardio")) / 90.0 + maxf(0.0, age - 32.0) * 0.02 + rng.randf_range(-0.04, 0.08)
 	if wt > 0.85 and rng.randf() < 0.35:
-		bf += rng.randf_range(0.12, 0.3) # o pesado de barriga
+		var belly := rng.randf_range(0.12, 0.3) # o pesado de barriga (só nos homens; o sorteio fica igual)
+		if not f.is_female():
+			bf += belly
 	var tr := grap * rng.randf_range(0.45, 1.0) + (f.a("forca") - 60.0) / 80.0 + (0.15 if f.base == "muay_thai" else 0.0)
 	f.look["ms"] = snappedf(clampf(ms, 0.1, 1.0), 0.01)
 	f.look["bf"] = snappedf(clampf(bf, 0.04, 0.6), 0.01)

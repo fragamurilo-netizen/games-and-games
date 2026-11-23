@@ -485,12 +485,23 @@ static func torso_row(r: Rig2D, y: float) -> Array:
 	if y > 2.5:
 		w *= 0.86 + 0.14 * ck
 		bk *= 0.86 + 0.14 * ck
+	if r.fem:
+		# Corpo de mulher: busto à frente, costela estreita, cintura fina, quadril e glúteo cheios
+		var bust_t := exp(-pow((y - 1.87) / 0.21, 2.0))
+		var waist_g := exp(-pow((y - 1.0) / 0.4, 2.0))
+		var hip_g := exp(-pow((y - 0.05) / 0.33, 2.0))
+		var rib := smoothstep(1.3, 1.7, y) * (1.0 - smoothstep(2.3, 2.5, y))
+		f += (0.02 + 0.12 * r.bust) * bust_t
+		f *= 1.0 - (0.1 - 0.05 * r.waist) * waist_g
+		w *= (1.0 - (0.15 - 0.09 * r.waist) * waist_g) * (1.0 - 0.05 * rib) * (1.0 + (0.02 + 0.09 * r.hips) * hip_g)
+		bk *= (1.0 - 0.07 * waist_g) * (1.0 - 0.06 * rib)
+		bk += (0.03 + 0.08 * r.hips) * hip_g
 	return [w, f, bk]
 
 
 ## Escala de grossura do braço e da perna pelo físico (a mesma no 2D e no 3D).
 static func arm_scale(r: Rig2D) -> float:
-	return 1.1 + 0.5 * (r.arm_k - 0.85)
+	return (1.1 + 0.5 * (r.arm_k - 0.85)) * (0.9 if r.fem else 1.0)
 
 
 static func leg_scale(r: Rig2D) -> float:

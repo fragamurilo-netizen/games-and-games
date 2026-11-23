@@ -1590,23 +1590,42 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	if look.has("wt"):
 		_apply_weight(f, seed_value, clampf(float(look["wt"]), 0.0, 1.0))
 	_apply_physique(f, look)
+	if f["fem"]:
+		_fem_finish(f)
 	return f
+
+
+## Fecho das lutadoras, depois da categoria e do físico: o pescoço nunca chega perto da largura da
+## mandíbula, o rosto não passa de uma proporção oval, a bochecha não incha e o olho não some no
+## rosto. Sem isto, a pena de 66 kg (o `wt` mais alto delas) saía com cara e pescoço de peso-pesado.
+static func _fem_finish(f: Dictionary) -> void:
+	var trap := float(f.get("trap", 0.0))
+	var beauty := float(f.get("beauty", 0.6))
+	f["fat"] = minf(float(f["fat"]), 0.22 + 0.5 * maxf(0.0, float(f.get("body_fat", 0.15)) - 0.24))
+	f["neck_w"] = clampf(float(f["neck_w"]), 0.5, 0.585 + 0.035 * trap)
+	f["fw"] = minf(float(f["fw"]), float(f["fh"]) * lerpf(0.765, 0.74, beauty))
+	f["jaw"] = minf(float(f["jaw"]), lerpf(0.84, 0.8, beauty))
+	f["eye_w"] = maxf(float(f["eye_w"]), lerpf(0.265, 0.285, beauty))
+	f["eye_h"] = maxf(float(f["eye_h"]), float(f["eye_w"]) * 0.4)
+	f["build"] = minf(float(f.get("build", 0.4)), 0.55)
 
 
 ## Físico do lutador (FighterGenerator.physique): músculo, gordura, trapézio e tatuagens do tronco.
 static func _apply_physique(f: Dictionary, look: Dictionary) -> void:
 	var fem: bool = bool(f.get("fem", false))
 	if look.has("ms"):
-		f["muscle"] = clampf(float(look["ms"]) * (0.85 if fem else 1.0), 0.0, 1.0)
+		f["muscle"] = clampf(float(look["ms"]) * (0.8 if fem else 1.0), 0.0, 1.0)
 	if look.has("bf"):
 		var bf := float(look["bf"])
+		if fem:
+			bf = 0.1 + (bf - 0.1) * 0.7 # nelas a gordura vira curva antes de virar barriga
 		f["body_fat"] = bf
 		f["fat"] = clampf(float(f["fat"]) + maxf(0.0, bf - 0.25) * 0.5, 0.0, 0.8)
 	var tr := float(look.get("tr", 0.0))
-	f["trap"] = tr * (0.5 if fem else 1.0)
+	f["trap"] = tr * (0.4 if fem else 1.0)
 	if tr > 0.0:
-		f["build"] = clampf(float(f.get("build", 0.5)) + 0.12 * tr * (0.5 if fem else 1.0), 0.0, 1.0)
-		f["neck_w"] = float(f["neck_w"]) + 0.07 * tr * (0.4 if fem else 1.0)
+		f["build"] = clampf(float(f.get("build", 0.5)) + 0.12 * tr * (0.35 if fem else 1.0), 0.0, 1.0)
+		f["neck_w"] = float(f["neck_w"]) + 0.07 * tr * (0.3 if fem else 1.0)
 	f["body_tat"] = int(look.get("tt", 0))
 
 
@@ -1616,13 +1635,21 @@ static func _apply_physique(f: Dictionary, look: Dictionary) -> void:
 ## estreitos e o cabelo preso como se luta (rabo, tranças, coque), salvo escolha no editor.
 const FEM_STYLE_W := [
 	# liso e ondulado
-	{22: 5.0, 80: 3.0, 9: 2.0, 13: 3.0, 59: 2.0, 51: 0.8, 99: 0.8, 26: 0.5, 66: 0.5, 107: 1.0, 61: 1.0, 201: 1.5, 202: 1.5, 223: 1.5, 31: 0.6, 0: 0.2},
-	{22: 5.0, 80: 3.0, 9: 2.0, 13: 3.0, 59: 2.0, 51: 0.8, 99: 0.6, 26: 0.4, 66: 0.5, 107: 1.0, 61: 1.0, 201: 1.5, 202: 1.5, 223: 2.0, 31: 0.6, 0: 0.2},
+	{8: 4.0, 142: 4.0, 76: 4.0, 210: 3.0, 98: 2.5, 232: 2.5, 22: 4.0, 201: 3.0, 99: 1.2, 51: 1.5, 80: 1.5, 9: 1.2, 13: 1.0, 59: 1.2, 199: 0.8, 61: 1.0, 223: 1.0, 66: 0.3},
+	{76: 5.0, 210: 4.0, 8: 3.0, 142: 3.0, 98: 2.0, 232: 1.5, 22: 4.0, 201: 3.0, 99: 1.0, 51: 1.5, 80: 1.5, 9: 1.2, 13: 1.0, 59: 1.2, 199: 0.8, 61: 1.0, 223: 1.5, 66: 0.3},
 	# cacheado
-	{22: 3.0, 32: 0.8, 64: 0.8, 9: 2.0, 80: 2.0, 13: 3.0, 96: 2.0, 59: 2.0, 72: 1.0, 223: 1.0, 29: 1.0},
+	{32: 5.0, 108: 4.0, 64: 2.5, 151: 2.5, 137: 2.5, 76: 1.5, 22: 3.0, 9: 1.5, 80: 1.5, 13: 1.5, 96: 1.2, 59: 1.5, 72: 1.2, 223: 1.0, 29: 1.5, 200: 0.8},
 	# crespo
-	{13: 5.0, 96: 3.0, 29: 1.2, 74: 1.0, 95: 1.0, 72: 2.0, 112: 1.5, 30: 1.5, 0: 0.8, 23: 1.0, 94: 0.8, 9: 1.5},
+	{29: 4.0, 94: 3.0, 6: 2.5, 138: 2.5, 72: 2.5, 32: 2.0, 137: 2.0, 13: 2.5, 96: 2.0, 74: 1.0, 112: 1.5, 30: 1.2, 197: 1.2, 9: 1.2, 71: 1.5, 23: 0.8},
 ]
+## Batom: 0 é a cor natural do lábio.
+const LIP_NAMES: Array[String] = ["Natural", "Rosado", "Nude", "Coral", "Pink", "Vermelho", "Cereja", "Vinho", "Ameixa"]
+const LIP_COLORS: Array[Color] = [Color("#B4575C"), Color("#C96A78"), Color("#B9796A"), Color("#DA6A55"), Color("#DB4F86"), Color("#C4202E"), Color("#A3142F"), Color("#7C1A33"), Color("#6E2148")]
+## Maquiagem: do rosto lavado à produção de noite de luta (delineado, sombra e cílios).
+const MAKEUP_NAMES: Array[String] = ["Sem maquiagem", "Natural", "Marcada", "Noite de gala"]
+## Sombra dos olhos: 0 acompanha o tom da pele.
+const SHADOW_NAMES: Array[String] = ["Neutra", "Marrom", "Esfumado preto", "Bronze", "Ameixa", "Rosa", "Azul", "Verde"]
+const SHADOW_COLORS: Array[Color] = [Color("#6B4A3C"), Color("#5A3A2A"), Color("#1E1A1C"), Color("#9A6A3A"), Color("#5E2F4E"), Color("#B5607A"), Color("#2F4E8A"), Color("#2F6A52")]
 
 
 static func _apply_female(f: Dictionary, seed_value: int, age: int, look: Dictionary) -> void:
@@ -1630,7 +1657,10 @@ static func _apply_female(f: Dictionary, seed_value: int, age: int, look: Dictio
 	r.seed = hash([seed_value, "mulher"])
 	f["fw"] = float(f["fw"]) * r.randf_range(0.92, 0.96)
 	f["fh"] = float(f["fh"]) * r.randf_range(0.95, 0.98)
-	f["jaw"] = clampf(float(f["jaw"]) * r.randf_range(0.86, 0.92), 0.64, 0.84)
+	# Oval: a mandíbula afina pouco até a boca e fecha num queixo delicado (estreita demais na
+	# altura da boca, o rosto vira um triângulo de bochecha funda)
+	f["jaw"] = clampf(float(f["jaw"]) * r.randf_range(0.95, 1.0), 0.76, 0.86)
+	f["jaw_v"] = clampf(float(f["jaw_v"]) + 0.05, 0.52, 0.64)
 	f["chin_sq"] = lerpf(float(f["chin_sq"]), r.randf_range(0.9, 1.3), 0.7)
 	f["chin_width"] = float(f.get("chin_width", 1.0)) * r.randf_range(0.82, 0.92)
 	f["chin_cleft"] = bool(f["chin_cleft"]) and r.randf() < 0.3
@@ -1647,16 +1677,17 @@ static func _apply_female(f: Dictionary, seed_value: int, age: int, look: Dictio
 	for k: String in ["nose_bulb", "nose_bump", "nose_hook"]:
 		if f.has(k):
 			f[k] = float(f[k]) * 0.35
-	f["lip_u"] = float(f["lip_u"]) * r.randf_range(1.1, 1.22)
-	f["lip_l"] = float(f["lip_l"]) * r.randf_range(1.08, 1.18)
+	f["lip_u"] = float(f["lip_u"]) * r.randf_range(1.14, 1.28)
+	f["lip_l"] = float(f["lip_l"]) * r.randf_range(1.04, 1.14)
 	f["mouth_w"] = float(f["mouth_w"]) * r.randf_range(0.9, 0.97)
-	f["bow"] = maxf(float(f["bow"]), r.randf_range(0.55, 0.95))
-	f["eye_h"] = float(f["eye_h"]) * r.randf_range(1.03, 1.1)
-	f["eye_w"] = float(f["eye_w"]) * r.randf_range(1.0, 1.05)
+	f["bow"] = clampf(maxf(float(f["bow"]), r.randf_range(0.6, 0.9)), 0.0, 0.95)
+	f["eye_w"] = float(f["eye_w"]) * r.randf_range(1.07, 1.13)
+	# Olho amendoado: mais largo que alto (redondo demais vira olho de boneca)
+	f["eye_h"] = clampf(float(f["eye_h"]) * r.randf_range(1.03, 1.1), float(f["eye_w"]) * 0.4, float(f["eye_w"]) * 0.5)
 	f["lashes"] = r.randf_range(1.25, 1.6)
-	f["brow_t"] = float(f["brow_t"]) * r.randf_range(0.55, 0.7)
-	f["brow_arch"] = float(f["brow_arch"]) + r.randf_range(0.015, 0.04)
-	f["brow_gap"] = float(f["brow_gap"]) + 0.01
+	f["brow_t"] = clampf(float(f["brow_t"]) * r.randf_range(1.3, 1.5), 0.094, 0.116)
+	f["brow_arch"] = clampf(float(f["brow_arch"]) + r.randf_range(0.02, 0.04), 0.085, 0.125)
+	f["brow_gap"] = float(f["brow_gap"]) * 0.9
 	f["brow_dens"] = clampf(float(f["brow_dens"]) * 0.9 + 0.1, 0.5, 1.0)
 	f["unibrow"] = false
 	if int(f["brow_slit"]) != 0 and r.randf() < 0.7 and not look.has("sl"):
@@ -1701,6 +1732,97 @@ static func _apply_female(f: Dictionary, seed_value: int, age: int, look: Dictio
 		f["style"] = st
 		f["crown"] = 0.0
 	f["fw"] = clampf(float(f["fw"]), float(f["fh"]) * 0.74, float(f["fh"]) * 0.84)
+	_apply_glam(f, seed_value, age, look)
+
+
+## Pedido do dono (23/11): mulheres bonitas. Olhar aberto e levemente puxado, cílios, sobrancelha
+## desenhada, boca cheia e com cor, pele lisa com blush, e as curvas do corpo (busto, cintura e
+## quadril). Tudo sorteado por pessoa e trocável pelo editor de visual:
+## `mk` maquiagem (0 a 3), `lp` batom, `sd` sombra, `bu` busto, `ws` cintura, `hp` quadril (0 a 1).
+static func _apply_glam(f: Dictionary, seed_value: int, age: int, look: Dictionary) -> void:
+	var r := RandomNumberGenerator.new()
+	r.seed = hash([seed_value, "glam"])
+	# Olhos: abertos, sem pálpebra caída nem olheira, cantos de fora um pouco para cima
+	f["eye_tilt"] = float(f["eye_tilt"]) + r.randf_range(0.006, 0.014)
+	f["lid"] = float(f.get("lid", 0.0)) * 0.4
+	f["hood_outer"] = float(f.get("hood_outer", 0.0)) * 0.3
+	f["squint"] = float(f.get("squint", 0.0)) * 0.4
+	f["eye_uneven"] = 0.0
+	f["iris_scale"] = float(f.get("iris_scale", 1.0)) * r.randf_range(1.02, 1.07)
+	for k: String in ["dark_circles", "eyebags", "under_line", "scleral", "bulge"]:
+		if f.has(k):
+			f[k] = float(f[k]) * 0.3
+	# Pele de quem se cuida: as linhas de expressão chegam mais tarde e mais leves
+	var late := 0.35 + 0.65 * clampf((age - 36.0) / 16.0, 0.0, 1.0)
+	for k: String in ["wrinkles", "jowl"]:
+		f[k] = float(f.get(k, 0.0)) * late
+	# Sobrancelha limpa e desenhada, boca cheia de contorno marcado
+	f["brow_messy"] = 0.0
+	f["brow_dens"] = clampf(float(f["brow_dens"]) + 0.15, 0.8, 1.0)
+	f["brow_clean"] = 1.0
+	# Expressão: confiante em vez de carrancuda (testa menos franzida, canto da boca para cima)
+	if float(f.get("brow_in", 0.0)) > 0.0:
+		f["brow_in"] = float(f["brow_in"]) * 0.35
+	if float(f["smile"]) < 0.0:
+		f["smile"] = float(f["smile"]) * 0.35
+	f["corner"] = minf(float(f.get("corner", 0.0)), 0.0) - r.randf_range(0.15, 0.4)
+	f["jaw_soft"] = r.randf_range(0.5, 0.8)
+	f["lip_line"] = maxf(float(f.get("lip_line", 0.0)), r.randf_range(0.5, 0.9))
+	f["pout"] = maxf(float(f.get("pout", 0.0)), r.randf_range(0.25, 0.6))
+	f["lip_asym"] = float(f.get("lip_asym", 0.0)) * 0.3
+	f["mouth_tilt"] = float(f.get("mouth_tilt", 0.0)) * 0.3
+	f["corner_lines"] = 0.0
+	# Rosto: bochecha cheia (sem cova de magreza), pele lisa
+	f["thin"] = float(f.get("thin", 0.0)) * 0.25
+	f["temple"] = float(f.get("temple", 0.0)) * 0.3
+	f["skin_clear"] = maxf(float(f.get("skin_clear", 0.0)), r.randf_range(0.7, 1.0))
+	f["blemish"] = float(f.get("blemish", 0.0)) * 0.3
+	f["soft_light"] = 1.0
+	# Maquiagem: a maioria se produz para a foto; depois dos 40 pesa menos
+	var mk := int(RngUtil.weighted_index(r, [1.2, 4.0, 3.5, 1.3]))
+	var lip_i := int(RngUtil.weighted_index(r, [3.0, 2.5, 2.0, 1.2, 1.0, 1.6, 1.0, 0.9, 0.6]))
+	var shadow_i := int(RngUtil.weighted_index(r, [3.0, 3.0, 2.0, 1.5, 1.0, 0.8, 0.4, 0.3]))
+	if mk <= 1 and lip_i > 4:
+		lip_i = lip_i - 4
+	if mk == 0:
+		lip_i = 0
+	if look.has("mk"):
+		mk = clampi(int(look["mk"]), 0, MAKEUP_NAMES.size() - 1)
+	if look.has("lp"):
+		lip_i = clampi(int(look["lp"]), 0, LIP_COLORS.size() - 1)
+	if look.has("sd"):
+		shadow_i = clampi(int(look["sd"]), 0, SHADOW_COLORS.size() - 1)
+	f["makeup"] = mk
+	f["lip_i"] = lip_i
+	f["shadow_i"] = shadow_i
+	f["lip_tint"] = LIP_COLORS[lip_i]
+	f["lip_tint_k"] = [0.0, 0.5, 0.68, 0.82][mk] if lip_i > 0 else [0.22, 0.4, 0.5, 0.55][mk]
+	if look.has("lp") and lip_i > 0:
+		f["lip_tint_k"] = maxf(float(f["lip_tint_k"]), 0.6)
+	f["lip_gloss"] = [0.15, 0.4, 0.7, 1.0][mk]
+	f["liner"] = [0.12, 0.38, 0.72, 1.0][mk]
+	f["wing"] = [0.0, 0.15, 0.55, 1.0][mk]
+	f["shadow_k"] = [0.0, 0.22, 0.5, 0.85][mk]
+	f["shadow_col"] = SHADOW_COLORS[shadow_i]
+	f["blush"] = [0.25, 0.5, 0.75, 0.95][mk]
+	f["lash_heavy"] = maxf(float(f.get("lash_heavy", 0.0)), [0.25, 0.55, 0.85, 1.0][mk])
+	f["lashes"] = float(f["lashes"]) * [0.95, 1.1, 1.3, 1.5][mk]
+	f["brow_fill"] = [0.0, 0.3, 0.6, 0.85][mk]
+	# Corpo: busto, cintura (0 fina) e quadril, cada uma com o seu
+	var body := RandomNumberGenerator.new()
+	body.seed = hash([seed_value, "curvas"])
+	var bust := clampf(body.randfn(0.5, 0.2), 0.12, 0.95)
+	var waist := clampf(body.randfn(0.35, 0.16), 0.0, 0.8)
+	var hips := clampf(body.randfn(0.55, 0.18), 0.15, 1.0)
+	if look.has("bu"):
+		bust = clampf(float(look["bu"]), 0.0, 1.0)
+	if look.has("ws"):
+		waist = clampf(float(look["ws"]), 0.0, 1.0)
+	if look.has("hp"):
+		hips = clampf(float(look["hp"]), 0.0, 1.0)
+	f["bust"] = bust
+	f["waist"] = waist
+	f["hips"] = hips
 
 
 ## Físico pela categoria de peso (`wt`: 0 o mais leve, 1 o pesado): ombros, trapézio e pescoço
@@ -1709,6 +1831,8 @@ static func _apply_weight(f: Dictionary, seed_value: int, bw: float) -> void:
 	var r := RandomNumberGenerator.new()
 	r.seed = hash([seed_value, "categoria"])
 	var fem: bool = bool(f.get("fem", false))
+	if fem:
+		bw *= 0.55 # 52 a 66 kg: da mosca à pena dos homens, não do mosca ao pesado
 	var base := lerpf(0.15, 0.95, bw) + r.randf_range(-0.12, 0.12)
 	f["build"] = clampf(base * (0.7 if fem else 1.0), 0.0, 1.0)
 	f["neck_w"] = float(f["neck_w"]) + (0.02 + 0.1 * bw) * (0.5 if fem else 1.0)
@@ -1888,8 +2012,10 @@ static func _apply_mass(f: Dictionary, seed_value: int, age: int, look: Dictiona
 		thin = r.randf_range(0.0, 0.18)
 	var good := smoothstep(0.55, 1.0, float(f["beauty"]))
 	heavy *= 1.0 - good * 0.5
-	if look.has("ms"):
-		var m := clampf(float(look["ms"]), -1.0, 1.0)
+	# `fm` (massa do rosto, -1 chupado a 1 cheio). Antes lia `ms`, que no lutador é o músculo do
+	# físico (FighterGenerator.physique): quem era forte saía de rosto gordo e pescoço largo.
+	if look.has("fm"):
+		var m := clampf(float(look["fm"]), -1.0, 1.0)
 		thin = maxf(0.0, -m)
 		heavy = maxf(0.0, m)
 	f["thin"] = thin

@@ -83,6 +83,9 @@ func _header(w: GameWorld, f: Fighter) -> Control:
 		fb.add_theme_color_override(&"icon_normal_color", UIColors.GOLD)
 	fb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	srow.add_child(fb)
+	var lb := UIKit.button("Visual", "TextButton", func(): UIManager.push("look", {"id": f.id}), "palette")
+	lb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	srow.add_child(lb)
 	card.add_child(srow)
 	return UIKit.card_panel(card)
 
@@ -97,6 +100,7 @@ func _ficha(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 	ft.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	fig.add_child(ft)
 	body.add_child(fig)
+	body.add_child(UIKit.button("Editar visual", "GhostButton", func(): UIManager.push("look", {"id": f.id, "tab": "corpo"}), "palette"))
 	body.add_child(UIKit.kv("Estilo", f.style_label()))
 	body.add_child(UIKit.kv("Arte de base", Styles.describe(f)))
 	body.add_child(UIKit.kv("Altura · envergadura", "%s · %d cm" % [Fmt.height(f.height_cm), f.reach_cm]))

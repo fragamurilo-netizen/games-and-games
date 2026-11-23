@@ -22,6 +22,7 @@ var glove: Color = Color("#141416")
 
 var _f: Dictionary = {}
 var _head: PortraitView = null
+var _hair_back: PortraitView = null
 var _skin := Color.WHITE
 var _key := 0
 
@@ -63,6 +64,10 @@ func _draw() -> void:
 	var mus: float = float(f.get("muscle", 0.6))
 	var bf: float = float(f.get("body_fat", 0.15))
 	var trap: float = float(f.get("trap", 0.0))
+	# Curvas das lutadoras (FaceGen._apply_glam): busto, cintura (0 fina) e quadril, de 0 a 1.
+	var bust: float = float(f.get("bust", 0.5))
+	var waist_k: float = float(f.get("waist", 0.4))
+	var hips_k: float = float(f.get("hips", 0.5))
 	# Escala: a figura inteira (cabeça aos pés) tem 7,5 cabeças.
 	var fig_h := size.y * 0.97 * clampf(float(height_cm) / float(maxi(ref_cm, 140)), 0.5, 1.0)
 	var U := fig_h / 7.5
@@ -89,14 +94,32 @@ func _draw() -> void:
 	var y_short := chin + U * (3.4 if fem else 3.55)
 	var y_knee := chin + U * 4.65
 	var y_ankle := chin + U * 6.2
+	if fem:
+		# Ampulheta: ombro estreito, cintura alta e fina, quadril largo e coxa cheia.
+		var soft := maxf(0.0, bf - 0.16)
+		sw = U * (0.75 + 0.14 * build + 0.04 * trap)
+		chest_w = sw * (0.79 + 0.05 * bust)
+		waist_w = U * (0.4 + 0.11 * waist_k + 0.1 * build) + U * 0.7 * soft
+		hip_w = U * (0.66 + 0.19 * hips_k + 0.05 * build) + U * 0.35 * soft
+		y_waist = chin + U * 1.98
+		y_hip = chin + U * 2.72
 	var leg_x := hip_w * 0.5
-	var thigh := hip_w * 0.5 + U * 0.02 * mus
+	var thigh := hip_w * (0.515 if fem else 0.5) + U * 0.02 * mus
 	# Pernas (atrás dos shorts).
+	var leg_cl: Array = []
+	var leg_wd: Array = []
 	for sx: float in [-1.0, 1.0]:
 		var cl := PackedVector2Array([Vector2(cx + sx * leg_x, y_crotch - U * 0.3), Vector2(cx + sx * (leg_x + U * 0.02), y_knee),
 			Vector2(cx + sx * (leg_x + U * 0.03), y_ankle)])
 		var wd := PackedFloat32Array([thigh, U * (0.2 + 0.03 * mus), U * 0.12])
-		_limb(cl, wd, U * (0.27 + 0.05 * mus), y_knee + U * 0.5, _skin, sx)
+		if fem:
+			# Coxa cheia que afina até o joelho, panturrilha marcada e tornozelo fino
+			cl = PackedVector2Array([Vector2(cx + sx * leg_x, y_crotch - U * 0.3), Vector2(cx + sx * (leg_x * 0.97 + U * 0.01), y_crotch + U * 0.5),
+				Vector2(cx + sx * (leg_x * 0.9 + U * 0.03), y_knee), Vector2(cx + sx * (leg_x * 0.86 + U * 0.035), y_ankle)])
+			wd = PackedFloat32Array([thigh, thigh * 0.9, U * (0.185 + 0.03 * mus + 0.02 * hips_k), U * 0.105])
+		leg_cl.append(cl)
+		leg_wd.append(wd)
+		_limb(cl, wd, U * ((0.245 + 0.045 * mus) if fem else (0.27 + 0.05 * mus)), y_knee + U * 0.5, _skin, sx)
 		# Pé
 		var ft := Vector2(cx + sx * (leg_x + U * 0.05), feet - U * 0.08)
 		_blob(ft + Vector2(sx * U * 0.08, -U * 0.02), U * 0.17, U * 0.11, _skin, 0.75)
@@ -108,6 +131,10 @@ func _draw() -> void:
 		var wr := Vector2(cx + sx * (sw + U * 0.14 + U * 0.12 * bf), chin + U * 3.0)
 		var cl2 := PackedVector2Array([sh + Vector2(-sx * arm_w * 0.3, -U * 0.02), sh + (el - sh) * 0.45, el, wr])
 		var wd2 := PackedFloat32Array([arm_w * 1.12, arm_w, arm_w * 0.82, arm_w * 0.62])
+		if fem:
+			# Ombro arredondado: o braço nasce estreito junto do trapézio e abre no deltoide
+			cl2 = PackedVector2Array([Vector2(cx + sx * (sw - arm_w * 1.0), ys + U * 0.1), sh + Vector2(-sx * arm_w * 0.2, U * 0.04), sh + (el - sh) * 0.5, el, wr])
+			wd2 = PackedFloat32Array([arm_w * 0.35, arm_w * 1.08, arm_w * 0.96, arm_w * 0.8, arm_w * 0.6])
 		_limb(cl2, wd2, arm_w * 1.08, (sh.y + el.y) * 0.5, _skin, sx)
 		_glove(wr + Vector2(sx * U * 0.02, U * 0.22), U, sx)
 	# Tronco
@@ -115,11 +142,17 @@ func _draw() -> void:
 	var rows := [
 		[chin - U * 0.25, nw], [ys - U * 0.02, nw * 1.05], [ys + U * 0.03, lerpf(nw, sw, 0.55)], [ys + U * 0.1, sw * 0.86], [ys + U * 0.3, sw * 1.08],
 		[ys + U * 0.55, sw * 1.0], [y_chest, chest_w], [chin + U * 1.6, lerpf(chest_w, waist_w, 0.55)], [y_waist, waist_w], [y_hip, hip_w], [y_crotch, hip_w * 1.02]]
-	_torso(cx, rows, col_t, mus, bf, fem)
-	# Shorts
-	_shorts(cx, y_hip - U * 0.12, y_crotch, y_short, hip_w, leg_x, thigh, U)
 	if fem:
-		_top(cx, ys, y_chest, chest_w, sw, U)
+		rows = [
+			[chin - U * 0.25, nw], [ys - U * 0.03, nw * 1.05], [ys + U * 0.05, lerpf(nw, sw, 0.42)], [ys + U * 0.15, sw * 0.76], [ys + U * 0.34, sw * 1.0],
+			[ys + U * 0.6, sw * 0.95], [y_chest, chest_w], [chin + U * 1.5, lerpf(chest_w, waist_w, 0.5)], [y_waist, waist_w],
+			[chin + U * 2.38, lerpf(waist_w, hip_w, 0.68)], [y_hip, hip_w], [y_crotch, hip_w]]
+	_torso(cx, rows, col_t, mus, bf, fem)
+	if fem:
+		_shorts_fem(cx, rows, chin + U * 2.4, y_crotch, y_crotch + U * 0.36, leg_cl, leg_wd, U)
+		_top_fem(cx, rows, ys, y_chest, nw, U, bust)
+	else:
+		_shorts(cx, y_hip - U * 0.12, y_crotch, y_short, hip_w, leg_x, thigh, U)
 	_tattoos(cx, sw, ys, y_chest, arm_w, chin, U)
 	# Pescoço por cima dos ombros, até o queixo
 	var neck := PackedVector2Array()
@@ -139,18 +172,28 @@ func _draw() -> void:
 	_soft(Vector2(cx, chin + U * 0.06), nw * 0.95, U * 0.1, Color(_skin.darkened(0.55), 0.35))
 	# Cabeça
 	if _head == null:
-		_head = PortraitView.new()
-		_head.head_only = true
-		_head.cutout = true
-		_head.stage = false
-		_head.framing = PortraitView.FRAME_CLASSIC
-		_head.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		add_child(_head)
-	_head.size = Vector2(s, s)
-	_head.position = hc - Vector2(s * 0.5, s * 0.4)
-	if _head.face_seed != face_seed or _head.eth != eth or _head.age != age or _head.look != look:
-		_head.set_face(face_seed, eth, age, look)
-	_head.queue_redraw()
+		# Duas camadas do mesmo retrato: o cabelo de trás fica atrás do corpo (cabelo comprido cai
+		# pelas costas, não por cima do pescoço como uma barba) e a cabeça por cima de tudo.
+		for back: bool in [true, false]:
+			var pv := PortraitView.new()
+			pv.head_only = true
+			pv.cutout = true
+			pv.stage = false
+			pv.framing = PortraitView.FRAME_CLASSIC
+			pv.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			pv.layers = 1 if back else 6
+			pv.show_behind_parent = back
+			add_child(pv)
+			if back:
+				_hair_back = pv
+			else:
+				_head = pv
+	for pv: PortraitView in [_hair_back, _head]:
+		pv.size = Vector2(s, s)
+		pv.position = hc - Vector2(s * 0.5, s * 0.4)
+		if pv.face_seed != face_seed or pv.eth != eth or pv.age != age or pv.look != look:
+			pv.set_face(face_seed, eth, age, look)
+		pv.queue_redraw()
 
 
 ## Luz de cilindro: `x` de -1 (lado esquerdo, aceso) a 1, `y` desce a luz (0 em cima).
@@ -261,6 +304,18 @@ func _torso(cx: float, rows: Array, base: Color, mus: float, bf: float, fem: boo
 			# Oblíquos (o "V")
 			for sx: float in [-1.0, 1.0]:
 				draw_line(Vector2(cx + sx * U * 0.42, y_abs0 + U * 0.75), Vector2(cx + sx * U * 0.18, y_abs0 + U * 1.3), Color(shade, 0.25 * a), maxf(1.0, U * 0.025), true)
+	if fem:
+		# Barriga de atleta: a linha do meio até o umbigo, a lateral do abdômen e as covinhas do
+		# quadril por cima do cós; a cintura ganha sombra dos dois lados (volume da ampulheta)
+		var y_n := y_chest + U * 1.3
+		draw_line(Vector2(cx, y_chest + U * 0.5), Vector2(cx, y_n - U * 0.08), Color(shade, 0.1 + 0.2 * defn), maxf(1.0, U * 0.02), true)
+		for sx: float in [-1.0, 1.0]:
+			var wy := _row_w(rows, y_chest + U * 0.9)
+			draw_line(Vector2(cx + sx * wy * 0.55, y_chest + U * 0.55), Vector2(cx + sx * wy * 0.42, y_n + U * 0.1), Color(shade, 0.06 + 0.16 * defn), maxf(1.0, U * 0.022), true)
+			_soft(Vector2(cx + sx * wy * 0.9, y_chest + U * 0.92), wy * 0.22, U * 0.4, Color(shade, 0.22))
+			var hy := y_n + U * 0.22
+			var hw := _row_w(rows, hy)
+			draw_line(Vector2(cx + sx * hw * 0.78, hy - U * 0.04), Vector2(cx + sx * hw * 0.5, hy + U * 0.2), Color(shade, 0.14 + 0.12 * defn), maxf(1.0, U * 0.022), true)
 	# Barriga: brilho redondo e a sombra embaixo (pesado macio)
 	if bf > 0.22:
 		var b := clampf((bf - 0.22) / 0.3, 0.0, 1.0)
@@ -337,6 +392,117 @@ func _top(cx: float, ys: float, y_chest: float, cw: float, sw: float, U: float) 
 	for sx: float in [-1.0, 1.0]:
 		draw_line(Vector2(cx + sx * cw * 0.55, y0 + U * 0.02), Vector2(cx + sx * sw * 0.45, ys + U * 0.05), _lit(glove, sx * 0.5, 0.0), maxf(2.0, U * 0.12), true)
 	draw_line(Vector2(cx - cw * 0.9, y1), Vector2(cx + cw * 0.9, y1), trim, maxf(1.5, U * 0.06), true)
+
+
+## Shorts justos das lutadoras: acompanham o quadril e descem até o alto da coxa.
+func _shorts_fem(cx: float, rows: Array, y0: float, y_crotch: float, y1: float, leg_cl: Array, leg_wd: Array, U: float) -> void:
+	# Pernas do shorts: a mesma coxa, um pouco mais larga, só até a barra
+	for k in 2:
+		var sx := -1.0 if k == 0 else 1.0
+		var cl: PackedVector2Array = leg_cl[k]
+		var wd: PackedFloat32Array = leg_wd[k]
+		var t := clampf((y1 - cl[0].y) / maxf(1.0, cl[1].y - cl[0].y), 0.0, 1.0)
+		var end := cl[0].lerp(cl[1], t)
+		var w_end := lerpf(wd[0], wd[1], t) * 1.03
+		_limb(PackedVector2Array([cl[0], end]), PackedFloat32Array([wd[0] * 1.03, w_end]), 0.0, 0.0, shorts, sx)
+		# Barra na cor de destaque
+		draw_line(end + Vector2(-w_end, 0), end + Vector2(w_end, 0), Color(trim, 0.9), maxf(1.5, U * 0.05), true)
+	# Quadril
+	var cols := 10
+	var pts: Array = []
+	var n := 8
+	for i in n + 1:
+		var t := float(i) / n
+		var y := lerpf(y0, y_crotch, t)
+		var w := _row_w(rows, y) * 1.02
+		var row: Array = []
+		for k in cols + 1:
+			var u := lerpf(-1.0, 1.0, float(k) / cols)
+			row.append([Vector2(cx + u * w, y), _lit(shorts, u * 0.85, t * 0.5)])
+		pts.append(row)
+	_grid(pts)
+	# Cós e listra lateral
+	var w0 := _row_w(rows, y0) * 1.03
+	var w1 := _row_w(rows, y0 + U * 0.12) * 1.03
+	var band := PackedVector2Array([Vector2(cx - w0, y0), Vector2(cx + w0, y0), Vector2(cx + w1, y0 + U * 0.12), Vector2(cx - w1, y0 + U * 0.12)])
+	draw_polygon(band, PackedColorArray([_lit(trim, -0.9, 0.0), _lit(trim, 0.9, 0.0), _lit(trim, 0.9, 0.1), _lit(trim, -0.9, 0.1)]))
+	for sx: float in [-1.0, 1.0]:
+		var side := PackedVector2Array()
+		for i in 7:
+			var y := lerpf(y0 + U * 0.12, y_crotch, float(i) / 6.0)
+			side.append(Vector2(cx + sx * _row_w(rows, y) * 0.93, y))
+		draw_polyline(side, Color(trim, 0.85), maxf(1.5, U * 0.06), true)
+	# Dobras: o meio e o encontro da coxa com o quadril
+	draw_line(Vector2(cx, y_crotch - U * 0.22), Vector2(cx, y_crotch + U * 0.06), Color(shorts.darkened(0.6), 0.5), maxf(1.0, U * 0.03), true)
+	for sx: float in [-1.0, 1.0]:
+		var hw := _row_w(rows, y_crotch)
+		draw_line(Vector2(cx + sx * hw * 0.08, y_crotch + U * 0.04), Vector2(cx + sx * hw * 0.62, y_crotch - U * 0.26), Color(shorts.darkened(0.55), 0.32), maxf(1.0, U * 0.025), true)
+
+
+## Top esportivo das lutadoras: decote redondo, alças, cava e o volume do busto na luz de cima.
+func _top_fem(cx: float, rows: Array, ys: float, y_chest: float, nw: float, U: float, bust: float) -> void:
+	var col := shorts.darkened(0.15)
+	if col.get_luminance() < 0.07:
+		col = col.lightened(0.08)
+	var y_neck := y_chest - U * (0.13 - 0.07 * bust)
+	var y_strap := ys + U * 0.3
+	var y_arm := y_chest - U * 0.12
+	var y_bot := y_chest + U * (0.4 + 0.06 * bust)
+	var yb := y_chest + U * (0.08 + 0.05 * bust)
+	var amp := 0.3 + 0.7 * bust
+	var ru := 0.4 + 0.04 * bust
+	var ry := U * (0.24 + 0.1 * bust)
+	var shade := _skin.darkened(0.55)
+	if bust > 0.4:
+		# Colo: a sombra discreta entre os seios, acima do decote
+		_soft(Vector2(cx, y_neck - U * 0.02), U * 0.035, U * 0.17 * bust, Color(shade, 0.32 * bust))
+	var top_y := func(a: float) -> float:
+		if a <= 0.55:
+			return y_neck - (y_neck - y_strap) * pow(a / 0.55, 2.4)
+		return lerpf(y_strap, y_arm, smoothstep(0.55, 1.0, a))
+	var nu := 24
+	var nv := 12
+	var pts: Array = []
+	for j in nv + 1:
+		var t := float(j) / nv
+		var row: Array = []
+		for i in nu + 1:
+			var u := lerpf(-1.0, 1.0, float(i) / nu)
+			var au := absf(u)
+			var y := lerpf(top_y.call(au), y_bot + U * 0.03 * (1.0 - u * u), t)
+			var w := _row_w(rows, y) * (0.975 + 0.035 * bust * exp(-pow((y - yb) / ry, 2.0)))
+			# Bojo: luz no alto do seio (mais do lado do refletor), sombra na dobra de baixo e no meio
+			var du := (au - 0.46) / ru
+			var dy := (y - yb) / ry
+			var g := exp(-du * du - dy * dy)
+			var hi := exp(-pow(du + 0.15 * signf(u), 2.0) - pow(dy + 0.55, 2.0))
+			var under := exp(-du * du * 0.8 - pow((dy - 1.0) / 0.42, 2.0))
+			var seam := exp(-pow(u / 0.08, 2.0)) * smoothstep(y_neck - U * 0.02, y_neck + U * 0.12, y) * (1.0 - smoothstep(yb + ry * 0.6, y_bot, y))
+			var c := _lit(col, clampf(u * 0.82 + signf(u) * amp * 0.35 * du * g, -1.0, 1.0), 0.2 + t * 0.2)
+			c = c.lightened(clampf(0.2 * amp * hi * (1.25 if u < 0.0 else 0.8), 0.0, 0.4))
+			c = c.darkened(clampf(0.42 * amp * under + 0.38 * bust * seam, 0.0, 0.6))
+			row.append([Vector2(cx + u * w, y), c])
+		pts.append(row)
+	# Alças por baixo da malha do top
+	for sx: float in [-1.0, 1.0]:
+		var w_s := _row_w(rows, y_strap)
+		var a0 := Vector2(cx + sx * w_s * 0.46, y_strap + U * 0.03)
+		var a1 := Vector2(cx + sx * w_s * 0.64, y_strap + U * 0.03)
+		var b0 := Vector2(cx + sx * (nw + U * 0.12), ys + U * 0.03)
+		var b1 := Vector2(cx + sx * (nw + U * 0.25), ys + U * 0.07)
+		var poly := PackedVector2Array([a0, b0, b1, a1])
+		if sx < 0.0:
+			poly.reverse()
+		draw_polygon(poly, PackedColorArray([_lit(col, sx * 0.4, 0.1), _lit(col, sx * 0.4, 0.0), _lit(col, sx * 0.5, 0.0), _lit(col, sx * 0.5, 0.1)]))
+	_grid(pts)
+	# Barra de baixo na cor de destaque e o friso do decote
+	var hem := PackedVector2Array()
+	var edge := PackedVector2Array()
+	for i in nu + 1:
+		hem.append((pts[nv][i] as Array)[0] + Vector2(0, -U * 0.025))
+		edge.append((pts[0][i] as Array)[0])
+	draw_polyline(hem, Color(trim, 0.92), maxf(1.5, U * 0.06), true)
+	draw_polyline(edge, Color(col.lightened(0.22), 0.7), maxf(1.0, U * 0.022), true)
 
 
 ## Luva de MMA: punho fechado e a faixa do velcro na cor de destaque.

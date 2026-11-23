@@ -234,6 +234,8 @@ static func yearly_look(w: GameWorld) -> void:
 		f.look["ms"] = snappedf(clampf(ms, 0.1, 1.0), 0.01)
 		if f.is_female():
 			continue # o penteado delas já muda por fase no gerador de rostos
+		if f.look.has("ed"):
+			continue # visual escolhido no editor: cabelo e barba ficam como o jogador deixou
 		var note := ""
 		# Careca assumida: quem está perdendo cabelo raspa de vez.
 		if f.look.has("hs") and int(f.look["hs"]) not in [FaceGen.H_BALD, FaceGen.H_BUZZ] and age >= 29:

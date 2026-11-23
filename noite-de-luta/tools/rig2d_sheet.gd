@@ -1,6 +1,7 @@
 extends SceneTree
 ## Bonecos 2D (Rig2D) grandes, em várias guardas e físicos, para afinar o desenho.
 ## xvfb-run -a -s "-screen 0 1700x1000x24" godot --path . --resolution 1600x900 --script res://tools/rig2d_sheet.gd -- --out=/tmp/rig2d.png
+## Com --fem, só lutadoras.
 
 class Sheet extends Control:
 	var rigs: Array = []
@@ -14,9 +15,12 @@ class Sheet extends Control:
 
 func _initialize() -> void:
 	var out := "/tmp/rig2d.png"
+	var fem := false
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--out="):
 			out = a.substr(6)
+		elif a == "--fem":
+			fem = true
 	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
 	var w := GameWorld.new()
 	w.rng.seed = 21
@@ -24,6 +28,10 @@ func _initialize() -> void:
 	sh.size = Vector2(1600, 900)
 	var specs := [["M61", "BRA", "boxe", 1.0], ["M77", "USA", "muay_thai", -1.0], ["M120", "NGA", "wrestling", 1.0], ["F57", "JPN", "karate", -1.0],
 		["M84", "RUS", "sambo", 1.0], ["M70", "IRL", "boxe", -1.0], ["M93", "BRA", "jiu_jitsu", 1.0], ["F61", "USA", "muay_thai", -1.0]]
+	if fem:
+		# Só lutadoras (--fem): as quatro categorias e as guardas, para afinar o corpo feminino.
+		specs = [["F52", "BRA", "boxe", 1.0], ["F57", "USA", "muay_thai", -1.0], ["F61", "NGA", "wrestling", 1.0], ["F66", "JPN", "karate", -1.0],
+			["F52", "RUS", "sambo", 1.0], ["F57", "IRL", "boxe", -1.0], ["F61", "BRA", "jiu_jitsu", 1.0], ["F66", "USA", "muay_thai", -1.0]]
 	var x := 170.0
 	for i in specs.size():
 		var sp: Array = specs[i]

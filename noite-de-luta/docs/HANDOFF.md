@@ -1,5 +1,46 @@
 # Noite de Luta — nota de passagem (23/11/2026)
 
+## Rodada 7 de 23/11/2026: lutadoras mais bonitas e editor de visual (APK 0.2.1)
+
+Mudança de direção do dono ("Quero poder deixar as mulheres bonitas, gostosas" e "Vamos deixar o
+3d de lado e evoluir de forma ABSURDA o 2d"). Ordem combinada: 0.2.1 (esta), 0.2.2 salto grande
+na luta 2D, 0.2.3 retratos melhores para todo mundo, depois 0.3 em diante. **Sem tempo novo no
+3D por enquanto.** Limite de conteúdo: atletas adultas em roupa de luta (top e shorts), sem nudez.
+
+- **Rosto feminino** (`FaceGen._apply_female`, `_apply_glam`, `_fem_finish`): rosto oval
+  (`jaw_soft`, mistura em `PortraitView._hw`), olhos amendoados maiores, cílios, delineado com
+  gatinho, sombra, sobrancelha limpa e preenchida, batom com brilho, blush, luz de beleza
+  (`soft_light`: refletor mais de frente e sombras macias), linhas de expressão mais tardias.
+  `_fem_finish` roda por último e segura pescoço, largura do rosto, bochecha e ombro, para a
+  categoria e o físico não deixarem a lutadora com cara de peso-pesado. `FEM_STYLE_W` agora
+  prefere cabelo solto e comprido.
+- **Chaves novas de `look`**: `mk` maquiagem 0–3, `lp` batom 0–8, `sd` sombra 0–7, `bu` busto,
+  `ws` cintura (0 = fina), `hp` quadril (todas 0–1), `fm` massa do rosto (-1 a 1) e `ed` (marca de
+  "editado": `Development.yearly_look` não troca cabelo nem barba de quem tem).
+- **Erro antigo corrigido**: `_apply_mass` lia `ms` como massa do rosto, mas no lutador `ms` é o
+  músculo do físico. Todo lutador forte saía de rosto gordo, olho pequeno e pescoço largo. A massa
+  do rosto agora é `fm`; os rostos de homens e mulheres do elenco ficaram mais secos.
+- **Corpo feminino**: `BodyView` com ampulheta por `bust`/`waist`/`hips`, shorts justo
+  (`_shorts_fem`) e top esportivo com volume (`_top_fem`); `Body3D.torso_row` ganhou busto, cintura
+  e quadril (vale para o 2D e o 3D); `Rig2D` tem perna, shorts, pescoço e detalhes de rosto
+  femininos. A cabeça do `BodyView` são dois `PortraitView` (`layers`): o cabelo de trás fica
+  atrás do corpo, não por cima do pescoço. No gerador, a gordura delas usa `wt * 0.55`.
+- **Editor de visual** (`scripts/ui/screens/look_screen.gd`, tela `look`): aberto pelo perfil
+  ("Visual" no cabeçalho e "Editar visual" no Físico), para qualquer lutador. Quadro fixo com
+  retrato, corpo inteiro e boneco da luta; abas Cabelo (cor e miniaturas por tipo), Rosto (beleza,
+  pele, olhos, formato, nariz, boca...), Maquiagem (elas) ou Barba (eles) e Corpo (barras). Cada
+  ajuste vai direto para `Fighter.look`; `Fighter.look0` guarda o visual de antes ("Original").
+  "Sortear" troca penteado e maquiagem/barba. Salva ao sair.
+- **Ferramentas novas**: `fem_lab` (a mesma pessoa variando uma chave do `look`), `roster_sheet`
+  (elenco como o jogo gera, retrato e corpo), `look_shots` (capturas do editor),
+  `rig2d_sheet --fem`.
+- **Verificado**: `check_scripts` 108 scripts, 0 erros; `fight_soak --n=100` igual (KO 10,8% TKO
+  10,6% FIN 23,6% DEC 53,6%); `world_sim --weeks=156` nos dois papéis sem erro; `design_shots`
+  nos dois papéis sem erro; `looks_sheet`, `roster_sheet` e `look_shots` conferidos.
+  **Não testado em celular de verdade.**
+- **Próximo**: 0.2.2 (salto na luta 2D). Ideias que ficaram: penteados novos de luta para elas
+  (duas tranças boxeadoras, rabo alto); `BodyView._top` antigo não é mais usado.
+
 ## Rodada 6 de 23/11/2026: mundo vivo e realismo do 2D e do 3D (APK 0.2.0)
 
 Primeira etapa do roteiro da 1.0 (documento "Noite de Luta: roteiro para a versão 1.0", nos
@@ -290,5 +331,8 @@ xvfb-run -a -s "-screen 0 1600x1600x24" godot --path . --resolution 1400x1300 --
 xvfb-run -a -s "-screen 0 1400x1400x24" godot --path . --resolution 390x844 --script res://tools/design_shots.gd -- --out=/tmp/telas [--role=presidente]
 xvfb-run -a -s "-screen 0 1700x2600x24" godot --path . --resolution 1600x2460 --script res://tools/stage_sheet.gd -- --out=/tmp/palco.png [--3d]
 xvfb-run -a -s "-screen 0 1700x1300x24" godot --path . --resolution 1600x1230 --script res://tools/looks_sheet.gd -- --out=/tmp/visuais.png [--3d] [--seed=9]
-xvfb-run -a -s "-screen 0 1700x1000x24" godot --path . --resolution 1600x900 --script res://tools/rig2d_sheet.gd -- --out=/tmp/bonecos.png
+xvfb-run -a -s "-screen 0 1700x1000x24" godot --path . --resolution 1600x900 --script res://tools/rig2d_sheet.gd -- --out=/tmp/bonecos.png [--fem]
+xvfb-run -a -s "-screen 0 1900x1500x24" godot --path . --resolution 1860x1080 --script res://tools/roster_sheet.gd -- --out=/tmp/elenco.png --fem --n=20 --cols=5 --size=240
+xvfb-run -a -s "-screen 0 1700x1500x24" godot --path . --resolution 1640x1440 --script res://tools/fem_lab.gd -- --out=/tmp/lab.png --key=bu --vals=0.1,0.5,0.9 [--body] [--look=mk:2,lp:5]
+xvfb-run -a -s "-screen 0 1900x1900x24" godot --path . --resolution 780x1688 --script res://tools/look_shots.gd -- --out=/tmp/editor
 ```

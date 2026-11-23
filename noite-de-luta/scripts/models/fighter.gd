@@ -59,6 +59,8 @@ var city: String = ""
 var eth: int = 1
 var face_seed: int = 0
 var look: Dictionary = {}
+## Visual de antes da primeira edição no editor (tela "look"), para o botão Original. Vazio = nunca editado.
+var look0: Dictionary = {}
 var birth_year: int = 2000
 var birth_month: int = 1
 var height_cm: int = 178
@@ -108,6 +110,15 @@ var challenge_lock: int = -999
 var progress: Dictionary = {}
 ## Personalidade: dois traços (ver Persona).
 var traits: Array = []
+## Números da carreira (ver CareerStats): totais de golpes, quedas, finalizações e tempo.
+var stats: Dictionary = {}
+## Curva do nível: uma marcação a cada `CareerStats.SAMPLE_WEEKS`, a primeira na semana `curve_w0`.
+var curve: Array = []
+var curve_w0: int = 0
+## Marcos da carreira já alcançados: [[chave, semana], ...].
+var marks: Array = []
+## Fotos dos atributos de meses atrás (só equipe do jogador e seguidos): [{w, a}].
+var snaps: Array = []
 
 
 func display_name() -> String:
@@ -220,6 +231,7 @@ func to_dict() -> Dictionary:
 		"hist": history, "rating": rating, "streak": streak, "last_fw": last_fight_week, "cond": condition,
 		"inj": injury, "susp": suspension, "pop": popularity, "wear": wear, "ret": retired, "rw": retired_week, "titles": titles_won,
 		"defs": title_defenses, "train": training, "bout": bout_id, "ch_lock": challenge_lock, "prog": progress, "traits": traits,
+		"st": stats, "cv": curve, "cv0": curve_w0, "marks": marks, "snaps": snaps, "lk0": look0,
 	}
 
 
@@ -236,6 +248,7 @@ static func from_dict(d: Dictionary) -> Fighter:
 	f.eth = int(d.get("eth", 1))
 	f.face_seed = int(d.get("face", 0))
 	f.look = d.get("look", {})
+	f.look0 = d.get("lk0", {})
 	f.birth_year = int(d.get("by", 2000))
 	f.birth_month = int(d.get("bm", 1))
 	f.height_cm = int(d.get("h", 178))
@@ -270,4 +283,9 @@ static func from_dict(d: Dictionary) -> Fighter:
 	f.challenge_lock = int(d.get("ch_lock", -999))
 	f.progress = d.get("prog", {})
 	f.traits = d.get("traits", [])
+	f.stats = d.get("st", {})
+	f.curve = (d.get("cv", []) as Array).map(func(v): return int(v))
+	f.curve_w0 = int(d.get("cv0", 0))
+	f.marks = d.get("marks", [])
+	f.snaps = d.get("snaps", [])
 	return f

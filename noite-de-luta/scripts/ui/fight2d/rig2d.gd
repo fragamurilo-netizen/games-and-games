@@ -33,6 +33,10 @@ var trim := Color("#C8102E")
 var glove := Color("#232327")
 var corner := Color("#C8102E")
 var fem := false
+## Curvas das lutadoras (0 a 1, do FaceGen): busto, cintura (0 fina) e quadril.
+var bust := 0.5
+var waist := 0.4
+var hips := 0.5
 ## Grossura dos membros e do tronco pelo físico.
 var arm_k := 1.0
 var leg_k := 1.0
@@ -76,6 +80,10 @@ static func from_fighter(w: GameWorld, f: Fighter, facing: float) -> Rig2D:
 	r.beard = r.face.get("beard_col", r.hair)
 	r._read_face()
 	r.fem = f.is_female()
+	if r.fem:
+		r.bust = float(r.face.get("bust", 0.5))
+		r.waist = float(r.face.get("waist", 0.4))
+		r.hips = float(r.face.get("hips", 0.5))
 	var ms := float(f.look.get("ms", 0.5))
 	var bf := float(f.look.get("bf", 0.15))
 	var build := float(r.face.get("build", 0.5))
@@ -111,6 +119,8 @@ func _read_face() -> void:
 	has_beard = beard_kind >= HairShape.BD_GOATEE
 	bald = bool(hair_shape["bald"])
 	neck_k = clampf(float(face.get("neck_w", 0.7)) / 0.7, 0.88, 1.25)
+	if bool(face.get("fem", false)):
+		neck_k = clampf(neck_k * 0.92, 0.8, 1.0)
 
 
 ## Árbitro: camisa escura, calça cinza, sem luvas; cabeça de alguém comum.
@@ -394,12 +404,23 @@ static func _profile(tab: Array, k: float, cuts: Array = []) -> Array:
 
 func _prep() -> void:
 	var key := arm_k * 3.1 + leg_k * 5.3 + chest_k * 7.7 + belly * 11.0 + (100.0 if fem else 0.0) + (1000.0 if outfit == "ref" else 0.0) + float(tattoo) * 10000.0
+	if fem:
+		key += bust * 13.0 + waist * 17.0 + hips * 19.0
 	if is_equal_approx(key, _ready_k):
 		return
 	_ready_k = key
 	var is_ref := outfit == "ref"
 	_arm_p = _profile(Body3D.ARM_TAB, Body3D.arm_scale(self), [0.75] if is_ref else ([0.12, 2.25] if tattoo >= 3 else []))
 	_leg_p = _profile(Body3D.LEG_TAB, Body3D.leg_scale(self) * (1.07 if is_ref else 1.0))
+	if fem and not is_ref:
+		# Coxa cheia e tornozelo fino
+		var lts: PackedFloat32Array = _leg_p[0]
+		var lfr: PackedFloat32Array = _leg_p[1]
+		var lbk: PackedFloat32Array = _leg_p[2]
+		for i in lts.size():
+			var kk := 1.0 + (0.03 + 0.1 * hips) * (1.0 - smoothstep(0.6, 1.5, lts[i])) - 0.05 * smoothstep(2.9, 3.4, lts[i])
+			lfr[i] *= kk
+			lbk[i] *= kk + 0.05 * hips * (1.0 - smoothstep(0.1, 0.7, lts[i]))
 	# Tronco: [y, frente, trás, faixa]. Faixas: 0 calção, 1 cós, 2 pele, 3 top, 4 camisa.
 	var ys: Array = []
 	for row: Array in Body3D.TORSO_TAB:
@@ -410,6 +431,9 @@ func _prep() -> void:
 			ys.append(c)
 	if fem and not is_ref:
 		ys.append(2.19)
+		for c: float in [1.72, 1.9, 2.09, 1.0, 0.0]:
+			if not ys.has(c):
+				ys.append(c)
 	ys.sort()
 	var zone := func(y: float) -> int:
 		if y <= 0.38:
@@ -805,17 +829,22 @@ func _shorts_leg(j: Dictionary, side: String, off: Vector2, dim: float, Uh: floa
 	var seg := (kn - hip) / L_THIGH
 	if not _load(side + "c"):
 		_begin()
-		for row: Array in [[-0.14, 1.04, 0], [0.12, 1.1, 0], [0.45, 1.14, 0], [0.8, 1.2, 0], [0.9, 1.23, 0], [0.9, 1.23, 1], [0.98, 1.25, 1]]:
+		var cut: Array = [[-0.14, 1.04, 0], [0.12, 1.1, 0], [0.45, 1.14, 0], [0.8, 1.2, 0], [0.9, 1.23, 0], [0.9, 1.23, 1], [0.98, 1.25, 1]]
+		if fem:
+			# Shorts justo das lutadoras, até o alto da coxa
+			cut = [[-0.14, 1.03, 0], [0.12, 1.04, 0], [0.36, 1.05, 0], [0.52, 1.05, 0], [0.52, 1.06, 1], [0.6, 1.06, 1]]
+		for row: Array in cut:
 			var t := float(row[0])
 			var i := 0
 			while i < ts.size() - 2 and ts[i + 1] < t:
 				i += 1
 			var k := clampf((t - ts[i]) / maxf(0.0001, ts[i + 1] - ts[i]), 0.0, 1.0)
 			var g := float(row[1]) * Uh
-			_row(hip + seg * t, n, lerpf(fr[i], fr[i + 1], k) * g + 0.025 * Uh, lerpf(bk[i], bk[i + 1], k) * g + 0.025 * Uh, trim if int(row[2]) == 1 else shorts, t)
+			var pad := (0.012 if fem else 0.025) * Uh
+			_row(hip + seg * t, n, lerpf(fr[i], fr[i + 1], k) * g + pad, lerpf(bk[i], bk[i + 1], k) * g + pad, trim if int(row[2]) == 1 else shorts, t)
 	_emit(side + "c", dim, 0.45 if dim >= 1.0 else 0.0, maxf(1.0, Uh * 0.03))
 	if _ol <= 0.0 and dim >= 1.0:
-		_ln(_at(-0.1, -0.12), _at(0.88, -0.15), Color(trim, 0.85), maxf(1.0, Uh * 0.09))
+		_ln(_at(-0.1, -0.12), _at(0.5 if fem else 0.88, -0.15), Color(trim, 0.85), maxf(1.0, Uh * 0.09))
 
 
 func _neck(j: Dictionary, sk: Color, tn: Vector2, Uh: float) -> void:
@@ -1144,14 +1173,25 @@ func _head(j: Dictionary, Uh: float, sk: Color) -> void:
 		_ln(c + X * 0.86 + Y * 0.5, c - X * 0.95 + Y * 0.38, corner, maxf(1.5, r * 0.14))
 	# Sobrancelha, olho e boca.
 	var e := c + X * 0.6 + Y * 0.1
-	_ln(c + X * 0.44 + Y * 0.3, c + X * 0.87 + Y * 0.25, Color(beard.darkened(0.2), 0.95), maxf(1.0, r * 0.09))
+	if fem:
+		# Lutadora: blush, sobrancelha fina e arqueada, cílios e a boca com cor
+		_ov(c + X * 0.5 - Y * 0.2, X * 0.2, Y * 0.12, 8, Color(0.92, 0.42, 0.44, 0.1 + 0.16 * float(face.get("blush", 0.4))))
+		_pl(PackedVector2Array([c + X * 0.9 + Y * 0.25, c + X * 0.66 + Y * 0.34, c + X * 0.4 + Y * 0.27]), Color(beard.darkened(0.2), 0.95), maxf(1.0, r * 0.065))
+	else:
+		_ln(c + X * 0.44 + Y * 0.3, c + X * 0.87 + Y * 0.25, Color(beard.darkened(0.2), 0.95), maxf(1.0, r * 0.09))
 	if ko:
 		_ln(e - X * 0.12, e + X * 0.14, Color(0.08, 0.06, 0.05), maxf(1.0, r * 0.08))
 	else:
 		if r >= 9.0:
 			_ov(e + X * 0.02, X * 0.14, Y * 0.08, 8, Color(0.93, 0.92, 0.9))
 		_dot(e + X * 0.07, maxf(1.0, r * 0.075), Color(0.08, 0.06, 0.05))
-	_ln(T * _hp[10] - X * 0.02, c + X * 0.72 - Y * 0.5, Color(dk, 0.85), maxf(1.0, r * 0.06))
+		if fem:
+			# Delineado: da frente do olho até o canto de trás, subindo
+			_pl(PackedVector2Array([e + X * 0.17 + Y * 0.06, e + X * 0.02 + Y * 0.1, e - X * 0.14 + Y * 0.07, e - X * 0.25 + Y * 0.15]), Color(0.07, 0.05, 0.05, 0.95), maxf(1.0, r * 0.055))
+	if fem:
+		var lipc := _tone(sk, 0.9).lerp(Color(0.72, 0.3, 0.33), 0.5).lerp(face.get("lip_tint", Color(0.72, 0.3, 0.33)) as Color, float(face.get("lip_tint_k", 0.3)))
+		_ov(T * Vector2(0.9, -0.51), X * 0.1, Y * 0.085, 8, lipc)
+	_ln(T * _hp[10] - X * 0.02, c + X * 0.72 - Y * 0.5, Color(dk, 0.85), maxf(1.0, r * (0.045 if fem else 0.06)))
 	_ln(T * _hp[8], c + X * 0.86 - Y * 0.3, Color(dk, 0.5), maxf(1.0, r * 0.05))
 	# Olho inchado, nariz sangrando e corte.
 	if bruise > 0.25:

@@ -258,16 +258,17 @@ static func physique_text(f: Fighter) -> String:
 	var parts: Array = []
 	var ms := float(lk.get("ms", 0.5))
 	var bf := float(lk.get("bf", 0.15))
+	var fem := f.is_female()
 	if bf >= 0.32:
-		parts.append("corpo pesado, de barriga")
+		parts.append("corpo cheio" if fem else "corpo pesado, de barriga")
 	elif bf <= 0.12 and ms >= 0.55:
-		parts.append("seco e definido")
+		parts.append("seca e definida" if fem else "seco e definido")
 	elif bf <= 0.12:
-		parts.append("magro")
+		parts.append("magra" if fem else "magro")
 	if ms >= 0.8:
-		parts.append("muito musculoso")
+		parts.append("muito forte")
 	elif ms >= 0.6:
-		parts.append("musculoso")
+		parts.append("forte")
 	elif ms < 0.35:
 		parts.append("pouco músculo")
 	if float(lk.get("tr", 0.0)) >= 0.6:
