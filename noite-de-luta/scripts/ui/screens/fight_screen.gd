@@ -159,6 +159,7 @@ func _mount_view() -> void:
 		var ev := world().event(_b.event_id)
 		var logo := ev.name.rstrip("0123456789 ") if ev != null else ""
 		_view3d.setup(_stage, UIColors.CORNER_RED, logo)
+		_view3d.custom_minimum_size.y = FightStage2D.stage_height()
 		_stage_holder.add_child(_view3d)
 	else:
 		_stage.visible = true
@@ -248,7 +249,10 @@ func _controls() -> void:
 func _process(delta: float) -> void:
 	if _state != "round" or _paused:
 		return
-	_clock += delta * AppSettings.FIGHT_SPEEDS[clampi(_speed, 0, AppSettings.FIGHT_SPEEDS.size() - 1)]
+	# Na apresentação dos lutadores (round 1, vista 2D) o relógio espera; "Pular" passa por cima.
+	var held := _stage != null and _stage_holder.visible and _stage.holding() and _clock < 9000.0
+	if not held:
+		_clock += delta * AppSettings.FIGHT_SPEEDS[clampi(_speed, 0, AppSettings.FIGHT_SPEEDS.size() - 1)]
 	var last_t := 0.0
 	while _shown < _events.size() and float((_events[_shown] as Dictionary)["t"]) <= _clock:
 		var ev: Dictionary = _events[_shown]

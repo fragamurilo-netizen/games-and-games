@@ -7,7 +7,12 @@ extends Control
 ##
 ## Cada quadro: pose de base do momento (em pé na guarda da escola, clinch, posição no chão, fim)
 ## + o movimento do lance em andamento (golpe com preparação, extensão e volta; queda; ground and
-## pound; finalização...) + vida (balanço, cansaço) → as poses andam suavemente até esse alvo.
+## pound; finalização...) + vida (balanço, cansaço, passos) → as poses andam suavemente até esse alvo.
+##
+## Por cima disso, a transmissão: uma câmera que enquadra a ação (abre nas quedas, fecha no clinch
+## e no chão), a pausa de impacto e os efeitos do golpe (onda, suor, rastro, clarão), a
+## apresentação dos dois no round 1 e as legendas. A vista 3D lê as mesmas poses e lances; o que é
+## só desta vista (câmera, placas, rastro) fica no desenho.
 
 const ARENA := 15.0 ## meia largura do octógono, em U
 const GAP := [5.4, 4.3, 3.3] ## distância entre as cinturas por distância do motor (longa, média, curta)
@@ -15,6 +20,11 @@ const GAP := [5.4, 4.3, 3.3] ## distância entre as cinturas por distância do m
 const DUR := {"golpe": 0.42, "chute": 0.58, "giro": 0.75, "kd": 1.7, "balanca": 0.9, "clinch": 0.55, "solta": 0.5, "estudo": 0.7,
 	"queda": 1.15, "puxa_guarda": 0.9, "segura_chute": 1.0, "pega_pescoco": 0.9, "gnp": 0.34, "passa": 0.75, "levanta": 0.9,
 	"mat_return": 1.0, "raspa": 1.0, "repoe": 0.7, "fin": 1.5, "escapa": 0.7, "fim": 2.2, "round": 1.1, "fim_round": 0.6}
+## Apresentação do round 1: duração e onde cada um espera (no seu canto), em U.
+const INTRO_S := 4.4
+const CORNER_X := 11.0
+## Quanto cada efeito fica na tela, em segundos.
+const FX_LIFE := {"hit": 0.5, "blood": 0.9, "dust": 0.5, "ring": 0.42, "sweat": 0.7, "block": 0.3, "mouth": 1.3}
 ## Em que ponto do lance o corpo já vai para a posição nova (quedas, raspagens).
 const SWITCH := {"queda": 0.5, "puxa_guarda": 0.35, "segura_chute": 0.6, "raspa": 0.5, "levanta": 0.35, "mat_return": 0.55, "passa": 0.3}
 const THROWS := ["suplex", "uchi_mata", "seoi", "harai", "quadril", "corpo", "levantamento", "pegada_cinto"]
@@ -87,9 +97,36 @@ var stains: Array = []
 var _hist: Array = []
 var replay: Dictionary = {}
 var _replayed := false
-var _zoom := 1.0
 ## Tremor da câmera no golpe forte (deslocamento do quadro).
 var _sh := Vector2.ZERO
+## Câmera: zoom do quadro (alvo e valor suave), quanto o chão desce (fração da altura), o empurrão
+## no golpe forte e a origem do quadro neste desenho.
+var _vz := 1.0
+var _vz_t := 1.0
+var _vy := 0.0
+var _vzd := 1.0
+var _vo := Vector2.ZERO
+var _punch := 0.0
+## Quem a câmera segue: -1 a dupla; 0 ou 1 um lutador só (apresentação).
+var _focus := -1
+## Pausa de impacto (segundos que faltam), clarão do golpe forte e empolgação da torcida (0 a 1).
+var _hitstop := 0.0
+var _flash := 0.0
+var _hype := 0.0
+## Rastro do golpe: pontos {x, y (em U, a partir do chão), a, w, n (qual lance)}.
+var _trail: Array = []
+var _act_n := 0
+## Passos: fase e velocidade de cada um.
+var _step := [0.0, 0.0]
+var _vel := [0.0, 0.0]
+var _cap_age := 0.0
+var _cap_big := false
+## Relógio de tela (não para na pausa de impacto) e o dos flashes da torcida.
+var _rt := 0.0
+var _fclock := 0.0
+## Apresentação do round 1 com as placas de nome (a tela desliga na vista 3D e no modo texto).
+var intro := true
+var _info: Array = []
 
 
 func setup(w: GameWorld, fa: Fighter, fb: Fighter, org_color: Color = Color("#C8102E")) -> void:
@@ -109,7 +146,16 @@ func setup(w: GameWorld, fa: Fighter, fb: Fighter, org_color: Color = Color("#C8
 	(rigs[0] as Rig2D).px = -GAP[1] * 0.5
 	(rigs[1] as Rig2D).px = GAP[1] * 0.5
 	_org = org_color
-	custom_minimum_size = Vector2(0, 300)
+	_info = []
+	for f: Fighter in [fa, fb]:
+		# Nome comprido demais para a placa: primeiro nome e sobrenome, ou só o sobrenome.
+		var nm := f.display_name()
+		if nm.length() > 18 and not f.family_first:
+			nm = f.first.get_slice(" ", 0) + " " + f.last
+		if nm.length() > 22:
+			nm = f.short_name()
+		_info.append({"name": nm.to_upper(), "nick": f.nickname, "sub": "%s  ·  %s  ·  %s" % [f.record_text(), f.nation, f.style_label()]})
+	custom_minimum_size = Vector2(0, stage_height())
 	clip_contents = true
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_rng.seed = hash(fa.id * 7919 + fb.id)
@@ -117,6 +163,11 @@ func setup(w: GameWorld, fa: Fighter, fb: Fighter, org_color: Color = Color("#C8
 	for i in 170:
 		_crowd.append(Vector3(_rng.randf_range(-40.0, 40.0), _rng.randf(), _rng.randf()))
 	_crowd.sort_custom(func(a: Vector3, b: Vector3) -> bool: return a.y < b.y)
+
+
+## Altura do palco: maior nas telas altas, para os lutadores aparecerem grandes.
+static func stage_height() -> float:
+	return clampf(UILayout.viewport.y * 0.36, 300.0, 440.0)
 
 
 ## Um lance do motor, na ordem. A fila acumulada demais (velocidade alta, "Pular") é resumida:
@@ -138,12 +189,36 @@ func skip() -> void:
 	_act = {}
 	replay = {}
 	_replayed = true
+	_focus = -1
+	_hitstop = 0.0
+	_trail = []
 	if not last_big.is_empty():
 		_start(last_big)
 
 
 func idle() -> bool:
 	return _act.is_empty() and _queue.is_empty() and replay.is_empty()
+
+
+## Apresentação em andamento: a tela segura o relógio do round até ela acabar.
+func holding() -> bool:
+	return _intro_p() >= 0.0
+
+
+## Progresso da apresentação do round 1 (0 a 1), ou -1 fora dela.
+func _intro_p() -> float:
+	if _act.is_empty() or not bool(_act.get("intro", false)):
+		return -1.0
+	return float(_act["p"])
+
+
+## Legenda na tela por `t` segundos. `big`: entra grande no meio do quadro (nocaute, knockdown)
+## antes de assentar na faixa de cima.
+func _say(text: String, t: float, big: bool = false) -> void:
+	_caption = text
+	_caption_t = t
+	_cap_age = 0.0
+	_cap_big = big
 
 
 # --- Fila e estado -------------------------------------------------------------------------
@@ -160,6 +235,15 @@ func _apply_state(b: Dictionary, silent: bool) -> void:
 	if bool(st["cage"]) and not was_cage and side >= 0:
 		# Quem leva para a grade empurra o outro: a grade fica atrás de quem é empurrado.
 		_cage_side = -1.0 if side == 1 else 1.0
+	if type == "golpe" and bool(b.get("hit", false)) and side >= 0 and String(b["pos"]) != "chao":
+		# O castigo fica no corpo: coxa da frente vermelha dos chutes baixos, costela marcada.
+		var hurt: Rig2D = rigs[1 - side]
+		var dmg := float(b.get("dmg", 0.3))
+		match String(b.get("z", "head")):
+			"leg":
+				hurt.leg_dmg = minf(1.0, hurt.leg_dmg + 0.06 + dmg * 0.1)
+			"body":
+				hurt.body_dmg = minf(1.0, hurt.body_dmg + 0.04 + dmg * 0.08)
 	match type:
 		"round":
 			for r: Rig2D in rigs:
@@ -194,25 +278,51 @@ func _start(b: Dictionary) -> void:
 	if type == "golpe":
 		d = DUR["giro"] if k in SPINS else (DUR["chute"] if k in KICKS else DUR["golpe"])
 	_act = {"type": type, "side": int(b["side"]), "b": b, "p": 0.0, "dur": d, "hit": false}
+	_act_n += 1
+	_focus = -1
 	match type:
+		"round":
+			var n := int(b.get("n", 1))
+			if n == 1 and intro and not AppSettings.reduce_motion and is_visible_in_tree():
+				# Apresentação: cada um no seu canto, a câmera passa pelos dois, eles vêm ao centro.
+				_act["dur"] = INTRO_S
+				_act["intro"] = true
+				for i in 2:
+					var r: Rig2D = rigs[i]
+					r.px = (-CORNER_X if i == 0 else CORNER_X)
+					r.pose = _relaxed(r)
+				ref.px = 0.0
+				_focus = 0
+				_camera(0.0, true)
+			else:
+				_say("ROUND %d" % n, 1.3)
+		"fim_round":
+			_say("FIM DO ROUND %d" % int(b.get("n", 1)), 1.3)
 		"kd":
 			(rigs[1 - clampi(int(b["side"]), 0, 1)] as Rig2D).ko = true
-			_caption = "KNOCKDOWN!"
-			_caption_t = 1.6
+			_say("KNOCKDOWN!", 1.6, true)
 			_shake = 1.0
 			_slowmo = 0.7
+			_hype = 1.0
 			Sfx.vibrate(40)
 		"fim":
 			_caption_for(b)
+			_hype = 1.0
 			if _method == "KO" and int(b["side"]) >= 0:
-				(rigs[1 - int(b["side"])] as Rig2D).ko = true
+				var out: Rig2D = rigs[1 - int(b["side"])]
+				out.ko = true
+				# O protetor bucal voa no nocaute.
+				var jo := out.joints(0.0, 0.0, 1.0)
+				var hp: Vector2 = jo["head"]
+				_fx.append({"t": 0.0, "kind": "mouth", "x": hp.x, "y": -hp.y, "pw": 1.0, "v": -out.dir, "seed": _rng.randi() % 1000})
 			if _method in ["KO", "TKO"]:
 				_slowmo = 1.0
 				_shake = 1.2
+				_flash = 1.0
 		"fin":
 			if bool(b.get("lock", false)):
-				_caption = "ENCAIXOU!"
-				_caption_t = 1.2
+				_say("ENCAIXOU!", 1.3, true)
+				_hype = maxf(_hype, 0.7)
 		"queda":
 			if bool(b.get("ok", false)) and String(b.get("td", "")) in THROWS:
 				_shake = 0.6
@@ -220,8 +330,7 @@ func _start(b: Dictionary) -> void:
 
 func _caption_for(b: Dictionary) -> void:
 	var m := String(b.get("m", ""))
-	_caption = {"KO": "NOCAUTE!", "TKO": "NOCAUTE TÉCNICO!", "FIN": "FINALIZAÇÃO!"}.get(m, "FIM DE LUTA")
-	_caption_t = 99.0
+	_say({"KO": "NOCAUTE!", "TKO": "NOCAUTE TÉCNICO!", "FIN": "FINALIZAÇÃO!"}.get(m, "FIM DE LUTA"), 99.0, true)
 
 
 # --- Quadro a quadro -----------------------------------------------------------------------
@@ -232,12 +341,26 @@ func _process(delta: float) -> void:
 	if AppSettings.reduce_motion:
 		_shake = 0.0
 		_slowmo = 0.0
+		_hitstop = 0.0
+		_flash = 0.0
+		_punch = 0.0
 	var dt := delta * (0.35 if _slowmo > 0.0 else 1.0)
 	_slowmo -= delta
-	_time += dt
+	_cap_age += delta
+	_rt += delta
+	_fclock += delta * (0.7 + 4.0 * _hype)
+	_flash = maxf(0.0, _flash - delta * 5.0)
+	_punch = maxf(0.0, _punch - delta * 3.5)
+	_hype = maxf(0.0, _hype - delta * 0.2)
 	if not replay.is_empty():
+		_time += dt
 		_play_replay(delta)
 		return
+	# Pausa de impacto: o quadro quase para no contato do golpe forte; os efeitos seguem.
+	if _hitstop > 0.0:
+		_hitstop -= delta
+		dt *= 0.06
+	_time += dt
 	var speed := time_scale * (1.0 + 0.22 * float(_queue.size()))
 	if not _act.is_empty():
 		_act["p"] = float(_act["p"]) + dt * speed / float(_act["dur"])
@@ -250,7 +373,10 @@ func _process(delta: float) -> void:
 			if String(_act["type"]) == "kd" and not _ended:
 				for r: Rig2D in rigs:
 					r.ko = false
+			if bool(_act.get("intro", false)):
+				_say("ROUND 1", 1.2)
 			_act = {}
+			_focus = -1
 			if was_ko and not _replayed and _hist.size() > 30 and not AppSettings.reduce_motion:
 				_replayed = true
 				replay = {"frames": _hist.duplicate(), "t": 0.0, "take": 0}
@@ -259,9 +385,10 @@ func _process(delta: float) -> void:
 		_start(_queue.pop_front())
 	_animate(dt)
 	_animate_ref(dt)
+	_tick_trail(dt)
+	_camera(delta)
 	_record(dt)
 	_shake = maxf(0.0, _shake - delta * 2.5)
-	_zoom = lerpf(_zoom, 1.0, 1.0 - exp(-3.0 * delta))
 	_caption_t -= delta
 	_tick_fx(delta)
 	queue_redraw()
@@ -270,14 +397,51 @@ func _process(delta: float) -> void:
 func _tick_fx(delta: float) -> void:
 	for f: Dictionary in _fx:
 		f["t"] = float(f["t"]) + delta
-	_fx = _fx.filter(func(f: Dictionary) -> bool: return float(f["t"]) < (0.9 if String(f["kind"]) == "blood" else 0.5))
+	_fx = _fx.filter(func(f: Dictionary) -> bool: return float(f["t"]) < float(FX_LIFE.get(String(f["kind"]), 0.5)))
+
+
+## Rastro do golpe: a luva (ou a canela, o joelho, o cotovelo) deixa um risco enquanto viaja.
+func _tick_trail(dt: float) -> void:
+	for pt: Dictionary in _trail:
+		pt["a"] = float(pt["a"]) - dt * 6.5
+	_trail = _trail.filter(func(pt: Dictionary) -> bool: return float(pt["a"]) > 0.0)
+	if _act.is_empty() or AppSettings.reduce_motion:
+		return
+	var type := String(_act["type"])
+	var p := float(_act["p"])
+	if type not in ["golpe", "gnp"] or p < 0.15 or p > 0.5:
+		return
+	var a := clampi(int(_act["side"]), 0, 1)
+	var r: Rig2D = rigs[a]
+	var key := ""
+	var wd := 0.42
+	if type == "gnp" or String(st["pos"]) == "chao":
+		key = String(_act.get("arm", "na")) + "_wr"
+	else:
+		var k := String((_act["b"] as Dictionary).get("k", "jab"))
+		for sk: String in (STRIKE.get(k, STRIKE["jab"]) as Dictionary):
+			if sk.begins_with("L") or sk.begins_with("R"):
+				var side := (r.lead() if sk.begins_with("L") else r.rear())
+				if sk[1] == "l":
+					key = side + ("l_kn" if k.begins_with("joelhada") else "l_an")
+					wd = 0.5
+				else:
+					key = side + ("a_el" if k == "cotovelada" else "a_wr")
+				break
+	if key == "":
+		return
+	var j := r.joints(0.0, 0.0, 1.0)
+	var q: Vector2 = j[key]
+	_trail.append({"x": q.x, "y": -q.y, "a": 1.0, "w": wd, "n": _act_n})
+	if _trail.size() > 16:
+		_trail.pop_front()
 
 
 # --- Replay ------------------------------------------------------------------------------
 
 ## Grava o quadro (poses, posições, brilhos) para o replay; guarda uns 4 segundos.
 func _record(dt: float) -> void:
-	var fr := {"dt": dt, "p": [], "x": [], "d": [], "f": [], "fx": _fx.duplicate(true)}
+	var fr := {"dt": dt, "p": [], "x": [], "d": [], "f": [], "fx": _fx.duplicate(true), "tr": _trail.duplicate(true)}
 	for r: Rig2D in [rigs[0], rigs[1], ref]:
 		fr["p"].append(r.pose.duplicate())
 		fr["x"].append(r.px)
@@ -296,7 +460,7 @@ func _record(dt: float) -> void:
 
 
 ## O replay toca o nocaute duas vezes: o lance inteiro a 0,5× e depois o golpe final a 0,22×, de
-## outro ângulo no 3D. No 2D ganha faixas pretas de cinema em vez de zoom (para não cortar cabeça).
+## outro ângulo no 3D. No 2D ganha faixas pretas de cinema e a câmera fecha na segunda vez.
 func _play_replay(delta: float) -> void:
 	var frames: Array = replay["frames"]
 	var take := int(replay.get("take", 0))
@@ -323,6 +487,7 @@ func _play_replay(delta: float) -> void:
 		if i < 2:
 			r.flash = float(fr["f"][i])
 	_fx = (fr["fx"] as Array).duplicate(true)
+	_trail = (fr.get("tr", []) as Array).duplicate(true)
 	_time += delta * 0.3
 	if idx >= frames.size() - 1:
 		if take == 0:
@@ -331,7 +496,10 @@ func _play_replay(delta: float) -> void:
 		else:
 			replay = {}
 			_fx = []
+			_trail = []
 			_caption_t = 99.0
+			_cap_age = 0.0
+	_camera(delta)
 	queue_redraw()
 
 
@@ -378,8 +546,15 @@ func _animate_ref(dt: float) -> void:
 		p.merge({"na_s": 150.0, "na_e": 20.0, "fa_s": 150.0, "fa_e": 20.0}, true)
 	elif type == "round":
 		tx = mid
-		var chop := smoothstep(0.3, 0.6, pa)
-		p.merge({"na_s": lerpf(165.0, 75.0, chop), "na_e": 5.0, "fa_s": 20.0, "torso": 6.0 + 14.0 * chop}, true)
+		var intro_on := bool(_act.get("intro", false))
+		# Na apresentação ele espera no centro e só dá o sinal quando os dois chegam.
+		var up := smoothstep(0.8, 0.88, pa) if intro_on else 1.0
+		var chop := smoothstep(0.92, 0.98, pa) if intro_on else smoothstep(0.3, 0.6, pa)
+		if intro_on:
+			tx = 0.0
+			p = _relaxed(ref)
+		if up > 0.0:
+			p.merge({"na_s": lerpf(float(p.get("na_s", 12.0)), lerpf(165.0, 75.0, chop), up), "na_e": 5.0, "fa_s": 20.0, "torso": 6.0 + 14.0 * chop}, true)
 	elif type == "balanca":
 		var dfd: Rig2D = rigs[1 - clampi(int(_act.get("side", 0)), 0, 1)]
 		tx = dfd.px + off * 0.45
@@ -418,17 +593,117 @@ func _animate(dt: float) -> void:
 	var ap := 1.0 - exp(-(10.0 if fast else 4.5) * dt)
 	for i in 2:
 		var r: Rig2D = rigs[i]
+		_footwork(i, poses[i], dt)
 		if not is_equal_approx(r.dir, float(dirs[i])):
 			r.dir = float(dirs[i])
 			r.pose = (poses[i] as Dictionary).duplicate()
 		else:
 			r.pose = Rig2D.blend(r.pose, poses[i], a)
+		var was := r.px
 		r.px = clampf(lerpf(r.px, float(pxs[i]), ap), -ARENA + 0.6, ARENA - 0.6)
+		if dt > 0.0005:
+			_vel[i] = lerpf(float(_vel[i]), (r.px - was) / dt, 1.0 - exp(-14.0 * dt))
+			_step[i] = float(_step[i]) + absf(r.px - was) * TAU / 3.0
 		r.flash = maxf(0.0, r.flash - dt * 3.0)
-	var mid := ((rigs[0] as Rig2D).px + (rigs[1] as Rig2D).px) * 0.5
-	var half := size.x / maxf(1.0, _U) * 0.5
+
+
+## Passos: quem está em pé e se deslocando mexe as pernas (uma vai, a outra empurra) em vez de
+## deslizar. A fase anda com a distância percorrida; a amplitude, com a velocidade.
+func _footwork(i: int, pose: Dictionary, _dt: float) -> void:
+	if float(pose.get("sit", 0.0)) > 0.5 or absf(float(pose.get("rot", 0.0))) > 20.0 or float(pose.get("y", 0.0)) > 0.3:
+		return
+	var sp := absf(float(_vel[i]))
+	if sp < 0.3:
+		return
+	var amp := clampf((sp - 0.3) / 3.2, 0.0, 1.0)
+	var ph := float(_step[i])
+	var s1 := sin(ph)
+	var walk := 1.0 if _intro_p() >= 0.0 else 0.55
+	pose["nl_h"] = float(pose.get("nl_h", 0.0)) + 24.0 * walk * amp * s1
+	pose["fl_h"] = float(pose.get("fl_h", 0.0)) - 24.0 * walk * amp * s1
+	pose["nl_k"] = float(pose.get("nl_k", 0.0)) + 26.0 * walk * amp * maxf(0.0, cos(ph))
+	pose["fl_k"] = float(pose.get("fl_k", 0.0)) + 26.0 * walk * amp * maxf(0.0, -cos(ph))
+	pose["y"] = float(pose.get("y", 0.0)) + 0.06 * amp * absf(s1)
+
+
+# --- Câmera -------------------------------------------------------------------------------
+
+## Plano do momento: [zoom máximo, quanto o chão pode descer do quadro (fração da altura)]. Com o
+## chão descendo, os pés saem do quadro e os lutadores crescem (plano americano da transmissão).
+func _shot() -> Array:
+	if not replay.is_empty():
+		return [1.12, 0.06] if replay_take() == 0 else [1.32, 0.17]
+	if _focus >= 0:
+		return [1.24, 0.13]
+	if _ended:
+		return [1.12, 0.1]
+	if _between:
+		return [1.0, 0.0]
+	var type := String(_act.get("type", ""))
+	if type in ["queda", "mat_return", "raspa", "kd", "puxa_guarda", "levanta", "round", "segura_chute"]:
+		return [1.06, 0.03]
+	var pos := String(st.get("pos", "solto"))
+	if pos == "chao":
+		return [1.5, 0.0]
+	if type == "balanca" or pos == "clinch":
+		return [1.3, 0.16]
+	return [[1.05, 0.02], [1.14, 0.07], [1.22, 0.11]][clampi(int(st.get("dist", 1)), 0, 2)]
+
+
+## Enquadra quem está em cena: o centro segue a dupla, o zoom fecha até onde o plano deixa e os
+## dois cabem na largura, e o quadro desce o que for preciso para não cortar a cabeça de ninguém.
+func _camera(delta: float, snap: bool = false) -> void:
+	var w := size.x
+	var h := size.y
+	if w < 10.0 or h < 10.0 or rigs.is_empty() or not is_visible_in_tree():
+		return
+	var u0 := h / 9.6
+	var x0 := INF
+	var x1 := -INF
+	var top := 0.0
+	for i in 2:
+		if _focus >= 0 and i != _focus:
+			continue
+		var r: Rig2D = rigs[i]
+		var j := r.joints(0.0, 0.0, 1.0)
+		for k: String in ["hip", "head", "nl_kn", "fl_kn"]:
+			var q: Vector2 = j[k]
+			x0 = minf(x0, q.x)
+			x1 = maxf(x1, q.x)
+		top = maxf(top, -(j["head"] as Vector2).y + 0.5 * float(j["U"]) + 0.4)
+		if _ended and i == _winner:
+			# Braços para o alto na comemoração.
+			for k: String in ["na_wr", "fa_wr"]:
+				top = maxf(top, -(j[k] as Vector2).y + 0.4)
+	if _caption_t > 0.0 and _caption != "":
+		# Folga em cima para a faixa da legenda não tampar o rosto de ninguém.
+		top += 0.7
+	var shot := _shot()
+	var drop := float(shot[1])
+	var z := minf(float(shot[0]), (w / u0) / maxf(4.0, x1 - x0 + 3.4))
+	z = clampf(minf(z, (0.84 + drop) * 9.6 / maxf(1.0, top)), 1.0, 1.6)
+	if AppSettings.reduce_motion:
+		z = 1.0
+	var cx := (x0 + x1) * 0.5
+	if _focus >= 0:
+		# Apresentação: o lutador fica num terço do quadro e a placa dele no outro lado.
+		cx += (3.0 if _focus == 0 else -3.0)
+	if snap:
+		_vz_t = z
+		_vz = z
+	# Fecha devagar e abre depressa (ninguém pode sair do quadro na queda).
+	var rate := 2.0 if z > _vz_t else 6.0
+	_vz_t = lerpf(_vz_t, z, 1.0 - exp(-rate * delta))
+	_vz = lerpf(_vz, _vz_t, 1.0 - exp(-7.0 * delta))
+	var vy := clampf(top * _vz / 9.6 - 0.84, 0.0, drop + 0.06)
+	_vy = vy if snap else lerpf(_vy, vy, 1.0 - exp(-8.0 * delta))
+	var half := w / u0 * 0.5 / _vz
 	var lim := maxf(0.0, ARENA + 1.0 - half)
-	_cam = lerpf(_cam, clampf(mid, -lim, lim), 1.0 - exp(-3.0 * dt))
+	var pan := 3.0
+	if _focus >= 0 or _intro_p() >= 0.0:
+		pan = 5.5
+	cx = clampf(cx, -lim, lim)
+	_cam = cx if snap else lerpf(_cam, cx, 1.0 - exp(-pan * delta))
 
 
 ## [poses, posições, direções] de cada um neste quadro.
@@ -456,6 +731,9 @@ func _base(s: Dictionary) -> Array:
 	var pos := String(s["pos"])
 	if _ended:
 		return _end_pose(s)
+	var ip := _intro_p()
+	if ip >= 0.0:
+		return _intro_base(ip)
 	if _between:
 		for i in 2:
 			poses[i] = _relaxed(rigs[i])
@@ -481,6 +759,35 @@ func _base(s: Dictionary) -> Array:
 	_cx = lerpf(_cx, target_cx, 0.02)
 	pxs = [_cx - gap * 0.5, _cx + gap * 0.5]
 	return [poses, pxs, dirs]
+
+
+## Apresentação do round 1: cada um solta o corpo no seu canto enquanto a câmera passa por ele;
+## depois os dois vêm ao centro, tocam as luvas e armam a guarda.
+func _intro_base(p: float) -> Array:
+	_focus = 0 if p < 0.33 else (1 if p < 0.66 else -1)
+	var walk := smoothstep(0.68, 0.9, p)
+	var guard := smoothstep(0.78, 0.92, p)
+	var touch := smoothstep(0.85, 0.9, p) * (1.0 - smoothstep(0.93, 0.99, p))
+	var poses := [{}, {}]
+	var pxs := [0.0, 0.0]
+	var loose := 1.0 - smoothstep(0.66, 0.74, p)
+	for i in 2:
+		var r: Rig2D = rigs[i]
+		var sgn := -1.0 if i == 0 else 1.0
+		var ph := _time * 7.5 + float(i) * 1.9
+		var hop := absf(sin(ph)) * loose
+		# No canto: pulinhos na ponta do pé, mãos soltas na altura do peito e uma sombra leve.
+		var warm := _relaxed(r)
+		warm.merge({"y": 0.13 * hop, "crouch": 0.14 * (loose - hop), "torso": 8.0, "head": 2.0 + 6.0 * sin(_time * 2.3 + float(i)) * loose,
+			"na_s": 42.0 + 6.0 * sin(ph), "na_e": 104.0 + 8.0 * sin(ph + 0.8), "fa_s": 28.0 - 6.0 * sin(ph), "fa_e": 112.0 - 8.0 * sin(ph + 0.8)}, true)
+		var sb := _time * 4.6 + float(i) * 2.4
+		_mix(warm, _resolve(r, -sgn, {"La_s": 92.0, "La_e": 6.0, "torso": 12.0}), pow(maxf(0.0, sin(sb)), 6.0) * 0.9 * loose)
+		_mix(warm, _resolve(r, -sgn, {"Ra_s": 90.0, "Ra_e": 8.0, "tw": 40.0, "torso": 18.0}), pow(maxf(0.0, sin(sb - 1.1)), 6.0) * 0.9 * loose)
+		var pose := Rig2D.blend(warm, r.stance(), guard)
+		_mix(pose, _resolve(r, -sgn, {"La_s": 80.0, "La_e": 6.0, "torso": 10.0, "head": 4.0}), touch)
+		poses[i] = pose
+		pxs[i] = sgn * lerpf(CORNER_X, GAP[1] * 0.5 + 0.3 * touch, walk)
+	return [poses, pxs, [1.0, -1.0]]
 
 
 func _relaxed(_r: Rig2D) -> Dictionary:
@@ -661,6 +968,8 @@ func _overlay(s: Dictionary, out: Array) -> void:
 			var e := _ext(p)
 			if k in SPINS and p > 0.12 and p < 0.82:
 				dirs[a] = -float(dirs[a])
+			# Antecipação: recolhe um instante antes de soltar o golpe.
+			_add(pa, {"x": -0.22, "crouch": 0.08, "torso": -5.0}, smoothstep(0.0, 0.1, p) * (1.0 - smoothstep(0.12, 0.26, p)))
 			if CHAMBER.has(k):
 				_mix(pa, _resolve(ra, float(dirs[a]), CHAMBER[k]), smoothstep(0.0, 0.2, p) * (1.0 - e) * (1.0 if p < 0.6 else 0.0))
 			var over: Dictionary = STRIKE.get(k, STRIKE["jab"])
@@ -777,6 +1086,7 @@ func _react(pd: Dictionary, rd: Rig2D, dir: float, b: Dictionary, p: float) -> v
 
 func _gnp(pa: Dictionary, pd: Dictionary, p: float, b: Dictionary, ra: Rig2D, dir: float) -> void:
 	var arm := "na" if int(float(b["t"]) * 13.0 + p) % 2 == 0 else "fa"
+	_act["arm"] = arm
 	var e := _ext(p, 0.12, 0.42, 0.55)
 	var cham := smoothstep(0.0, 0.15, p) * (1.0 - e)
 	_mix(pa, {arm + "_s": 150.0, arm + "_e": 35.0}, cham)
@@ -821,7 +1131,9 @@ func _takedown(pa: Dictionary, pd: Dictionary, p: float, b: Dictionary, pxs: Arr
 		if v3 > 0.6 and not bool(_act.get("slam", false)):
 			_act["slam"] = true
 			_shake = 0.7 if throw else 0.35
-			_fx.append({"t": 0.0, "kind": "dust", "x": float(pxs[d]), "pw": 1.0})
+			_hype = minf(1.0, _hype + (0.6 if throw else 0.3))
+			_punch = 1.0 if throw else 0.5
+			_fx.append({"t": 0.0, "kind": "dust", "x": float(pxs[d]), "y": 0.0, "pw": 1.0})
 
 
 func _submission(pa: Dictionary, pd: Dictionary, p: float, b: Dictionary, s: Dictionary) -> void:
@@ -864,7 +1176,9 @@ func _submission(pa: Dictionary, pd: Dictionary, p: float, b: Dictionary, s: Dic
 		pd["fa_s"] = float(pd.get("fa_s", 0.0)) + 25.0 * sin(p * 10.0) * sq
 
 
-## Contato do golpe: brilho no ponto, o rosto/corpo avermelha, a tela treme nos fortes.
+## Contato do golpe: brilho no ponto, onda de choque, suor que voa, o rosto/corpo avermelha; nos
+## fortes o quadro para um instante, a câmera dá um tranco e a torcida levanta. Bloqueio solta uma
+## faísca curta onde a defesa pegou.
 func _impact() -> void:
 	if bool(_act["hit"]) or float(_act["p"]) < 0.42:
 		return
@@ -873,31 +1187,47 @@ func _impact() -> void:
 	if type not in ["golpe", "gnp"]:
 		return
 	var b: Dictionary = _act["b"]
-	if not bool(b.get("hit", false)):
-		return
 	var d := 1 - clampi(int(_act["side"]), 0, 1)
 	var rd: Rig2D = rigs[d]
-	var dmg := float(b.get("dmg", 0.3))
-	rd.flash = clampf(0.25 + dmg * 0.35, 0.0, 0.7)
-	var j := rd.joints(_origin_x(), _ground, _U)
+	var j := rd.joints(0.0, 0.0, 1.0)
 	var z := String(b.get("z", "head"))
 	var pt: Vector2 = j["head"]
 	if z == "body":
 		pt = (j["neck"] as Vector2).lerp(j["hip"], 0.45)
 	elif z == "leg":
 		pt = (j[rd.lead() + "l_kn"] as Vector2).lerp(j["hip"], 0.3)
-	_fx.append({"t": 0.0, "kind": "hit", "x": (pt.x - _origin_x()) / _U, "y": (_ground - pt.y) / _U, "pw": dmg, "z": z})
+	var fx := pt.x
+	var fy := -pt.y
+	if not bool(b.get("hit", false)):
+		var standing := String(st["pos"]) != "chao"
+		var blocked := z != "head" or int(float(b["t"]) * 7.0 + float(String(b.get("k", "")).length())) % 3 == 1
+		if type == "golpe" and standing and blocked:
+			_fx.append({"t": 0.0, "kind": "block", "x": fx + rd.dir * 0.55, "y": fy - (0.3 if z == "leg" else 0.0), "pw": 0.5})
+		return
+	var dmg := float(b.get("dmg", 0.3))
+	var away := -rd.dir
+	rd.flash = clampf(0.25 + dmg * 0.35, 0.0, 0.7)
+	_fx.append({"t": 0.0, "kind": "hit", "x": fx, "y": fy, "pw": dmg, "z": z, "v": away})
+	if dmg > 0.7:
+		_fx.append({"t": 0.0, "kind": "ring", "x": fx, "y": fy, "pw": dmg})
+	if z == "head" and dmg > 0.45:
+		_fx.append({"t": 0.0, "kind": "sweat", "x": fx, "y": fy, "pw": clampf(0.4 + dmg * 0.5, 0.5, 1.4), "v": away, "seed": _rng.randi() % 1000})
 	if z == "head" and rd.cut > 0.3:
 		(rigs[1 - d] as Rig2D).glove_blood += 0.12
 	if z == "head" and (rd.cut > 0.25 or dmg > 1.1):
-		var away := -rd.dir
-		_fx.append({"t": 0.0, "kind": "blood", "x": (pt.x - _origin_x()) / _U, "y": (_ground - pt.y) / _U, "pw": clampf(rd.cut + dmg * 0.3, 0.3, 1.5), "v": away, "seed": _rng.randi() % 1000})
+		_fx.append({"t": 0.0, "kind": "blood", "x": fx, "y": fy, "pw": clampf(rd.cut + dmg * 0.3, 0.3, 1.5), "v": away, "seed": _rng.randi() % 1000})
 		if stains.size() < 30:
 			stains.append({"x": rd.px + away * _rng.randf_range(0.5, 2.5), "z": _rng.randf(), "w": _rng.randf_range(0.2, 0.55) * (0.6 + rd.cut)})
+	_hype = minf(1.0, _hype + 0.1 + dmg * 0.22)
+	_punch = maxf(_punch, clampf(dmg * 0.7, 0.0, 1.0))
+	if dmg > 0.55 and time_scale < 2.0 and _queue.size() < 4 and not AppSettings.reduce_motion:
+		_hitstop = clampf(0.03 + dmg * 0.05, 0.045, 0.13)
 	if dmg > 0.9:
 		_shake = maxf(_shake, minf(1.0, dmg * 0.5))
 		if z == "head":
 			Sfx.vibrate(25)
+	if z == "head" and dmg > 1.1:
+		_flash = maxf(_flash, minf(1.0, dmg * 0.55))
 
 
 # --- Desenho -------------------------------------------------------------------------------
@@ -906,15 +1236,27 @@ func _origin_x() -> float:
 	return size.x * 0.5 - _cam * _U
 
 
+## Daqui em diante o desenho segue a câmera: zoom em volta do centro da linha do chão, o quadro
+## descendo `_vy` e o tremor. `pos` e `scale` são o deslocamento e a escala de quem desenha.
+func _view(pos: Vector2 = Vector2.ZERO, scale: Vector2 = Vector2.ONE) -> void:
+	draw_set_transform(_vo + pos * _vzd, 0.0, scale * _vzd)
+
+
 func _draw() -> void:
 	var w := size.x
 	var h := size.y
 	if rigs.is_empty() or w < 10.0:
 		return
-	_U = h / 9.6 * _zoom
+	_U = h / 9.6
 	_ground = h * 0.88
-	_sh = Vector2(sin(_time * 70.0), cos(_time * 53.0)) * _shake * _U * 0.18
-	draw_set_transform(_sh, 0.0, Vector2.ONE)
+	_sh = Vector2(sin(_rt * 70.0), cos(_rt * 53.0)) * _shake * _U * 0.18
+	# O tranco do golpe forte fecha um pouco o quadro (e dá folga para o tremor nas bordas).
+	_vzd = _vz * (1.0 + 0.045 * _punch) + 0.03 * minf(1.0, _shake)
+	_vo = Vector2(w * 0.5, _ground) * (1.0 - _vzd) + Vector2(0.0, _vy * h) + _sh
+	# Ginásio escuro, fixo no quadro: o teto some no preto (a câmera desce sem abrir buraco em cima).
+	_quad(PackedVector2Array([Vector2(0, 0), Vector2(w, 0), Vector2(w, h), Vector2(0, h)]),
+		PackedColorArray([Color("#05060A"), Color("#05060A"), Color("#141722"), Color("#141722")]))
+	_view()
 	_draw_arena(w, h)
 	var ox := _origin_x()
 	# Sangue na lona.
@@ -945,32 +1287,114 @@ func _draw() -> void:
 		rg.draw(self, ox, _ground + float(rg.pose.get("zz", 0.0)) * _U * 0.35, _U, 1 if i == layered else 0)
 	if layered >= 0:
 		(rigs[layered] as Rig2D).draw(self, ox, _ground, _U, 2)
+	_draw_trail(ox)
 	_draw_fx(ox)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	_draw_front_fence(w, h)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	# Vinheta: bordas do quadro mais escuras, como na transmissão.
 	var vg := Color(0.01, 0.01, 0.03, 0.38)
 	var v0 := Color(0.01, 0.01, 0.03, 0.0)
 	_quad(PackedVector2Array([Vector2(0, 0), Vector2(w * 0.16, 0), Vector2(w * 0.16, h), Vector2(0, h)]), PackedColorArray([vg, v0, v0, vg]))
 	_quad(PackedVector2Array([Vector2(w, 0), Vector2(w * 0.84, 0), Vector2(w * 0.84, h), Vector2(w, h)]), PackedColorArray([vg, v0, v0, vg]))
+	if _flash > 0.0:
+		# Clarão do golpe que entra limpo na cabeça.
+		draw_rect(Rect2(0, 0, w, h), Color(1.0, 0.98, 0.94, 0.16 * _flash))
 	if not replay.is_empty():
 		var bar := h * 0.07
 		draw_rect(Rect2(0, 0, w, bar), Color(0, 0, 0, 0.92))
 		draw_rect(Rect2(0, h - bar, w, bar), Color(0, 0, 0, 0.92))
 		draw_rect(Rect2(0, 0, w, h), Color(0.15, 0.1, 0.05, 0.12))
 		var font2 := get_theme_default_font()
-		var blink := 0.6 + 0.4 * sin(_time * 12.0)
+		var blink := 0.6 + 0.4 * sin(_rt * 12.0)
 		var ty := bar * 0.5
 		draw_circle(Vector2(14 + _U * 0.2, ty), _U * 0.18, Color(0.9, 0.1, 0.1, blink))
 		var lbl := "REPLAY" if replay_take() == 0 else "REPLAY · CÂMERA LENTA"
 		draw_string(font2, Vector2(14 + _U * 0.55, ty + _U * 0.2), lbl, HORIZONTAL_ALIGNMENT_LEFT, -1, int(_U * 0.55), Color.WHITE)
-	if _caption_t > 0.0 and _caption != "":
-		var font := get_theme_default_font()
-		var fs := int(_U * 1.15)
-		var a := clampf(_caption_t * 2.0, 0.0, 1.0)
-		var y := h * 0.2
-		draw_string_outline(font, Vector2(0, y), _caption, HORIZONTAL_ALIGNMENT_CENTER, w, fs, maxi(2, int(_U * 0.2)), Color(0, 0, 0, 0.8 * a))
-		draw_string(font, Vector2(0, y), _caption, HORIZONTAL_ALIGNMENT_CENTER, w, fs, Color(UIColors.GOLD, a))
+	_draw_plates(w, h)
+	_draw_caption(w, h)
+
+
+## Tamanho de fonte que faz o texto caber em `maxw`.
+static func _fit(font: Font, text: String, fs: int, maxw: float) -> int:
+	var tw := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+	if tw <= maxw or tw <= 0.0:
+		return fs
+	return maxi(8, int(floor(float(fs) * maxw / tw)))
+
+
+## Legenda: faixa escura inclinada com filetes dourados, presa no alto do quadro (a câmera deixa
+## uma folga em cima para ela). O texto entra maior e assenta; a dos lances grandes (`_cap_big`)
+## aparece enorme no meio do quadro por um instante antes de subir para a faixa.
+func _draw_caption(w: float, h: float) -> void:
+	if _caption_t <= 0.0 or _caption == "":
+		return
+	var font := get_theme_default_font()
+	var still := AppSettings.reduce_motion
+	var dock := 1.0 if (still or not _cap_big) else smoothstep(0.55, 0.85, _cap_age)
+	var fs := _fit(font, _caption, int(_U * lerpf(1.3, 0.66, dock)), w * 0.86)
+	var tw := font.get_string_size(_caption, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+	var a := clampf(_caption_t * 3.0, 0.0, 1.0)
+	var grow := 1.0 if still else smoothstep(0.0, 0.14, _cap_age)
+	var pop := 1.0 if still else 1.0 + 0.6 * exp(-_cap_age * 12.0)
+	var c := Vector2(w * 0.5, h * lerpf(0.36, 0.078, dock))
+	var bw := (tw * 0.5 + _U * 0.8) * grow
+	var bh := float(fs) * 0.74
+	var sl := bh * 0.45
+	var gold := Color(UIColors.GOLD, a)
+	draw_colored_polygon(PackedVector2Array([c + Vector2(-bw + sl, -bh), c + Vector2(bw + sl, -bh), c + Vector2(bw - sl, bh), c + Vector2(-bw - sl, bh)]),
+		Color(0.03, 0.03, 0.05, 0.82 * a))
+	var lw := maxf(1.5, _U * 0.07)
+	draw_line(c + Vector2(-bw + sl, -bh), c + Vector2(bw + sl, -bh), gold, lw)
+	draw_line(c + Vector2(-bw - sl, bh), c + Vector2(bw - sl, bh), gold, lw)
+	draw_set_transform(c, 0.0, Vector2(pop, pop))
+	var at := Vector2(-tw * 0.5, float(fs) * 0.36)
+	draw_string_outline(font, at, _caption, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, maxi(2, int(_U * 0.16)), Color(0, 0, 0, 0.8 * a))
+	draw_string(font, at, _caption, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, gold)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+## Placas da apresentação: canto, nome e cartel de cada um, entrando pelo lado enquanto a câmera
+## está nele (a do canto vermelho à direita, para onde ele olha; a do azul à esquerda).
+func _draw_plates(w: float, h: float) -> void:
+	var p := _intro_p()
+	if p < 0.0 or _info.size() < 2:
+		return
+	var font := get_theme_default_font()
+	for i in 2:
+		var a0 := 0.03 if i == 0 else 0.36
+		var a1 := 0.33 if i == 0 else 0.66
+		var k := smoothstep(a0, a0 + 0.05, p) * (1.0 - smoothstep(a1 - 0.04, a1, p))
+		if k <= 0.0:
+			continue
+		var info: Dictionary = _info[i]
+		var col := UIColors.CORNER_RED if i == 0 else UIColors.CORNER_BLUE
+		var pw := minf(w * 0.6, _U * 8.6)
+		var ph := _U * 2.3
+		var sl := _U * 0.5
+		var y := h * 0.58
+		var slide := (1.0 - k) * (pw + sl + 4.0)
+		var tx := 0.0
+		if i == 0:
+			var x := w - pw + slide
+			draw_colored_polygon(PackedVector2Array([Vector2(x + sl, y), Vector2(w + slide + 2.0, y), Vector2(w + slide + 2.0, y + ph), Vector2(x, y + ph)]), Color(0.04, 0.045, 0.06, 0.9))
+			draw_colored_polygon(PackedVector2Array([Vector2(x + sl, y), Vector2(x + sl + _U * 0.2, y), Vector2(x + _U * 0.2, y + ph), Vector2(x, y + ph)]), col)
+			tx = x + sl + _U * 0.5
+		else:
+			var x2 := pw - slide
+			draw_colored_polygon(PackedVector2Array([Vector2(-slide - 2.0, y), Vector2(x2, y), Vector2(x2 - sl, y + ph), Vector2(-slide - 2.0, y + ph)]), Color(0.04, 0.045, 0.06, 0.9))
+			draw_colored_polygon(PackedVector2Array([Vector2(x2 - _U * 0.2, y), Vector2(x2, y), Vector2(x2 - sl, y + ph), Vector2(x2 - sl - _U * 0.2, y + ph)]), col)
+			tx = _U * 0.4 - slide
+		var maxw := pw - sl - _U * 1.2
+		var fs1 := int(_U * 0.4)
+		var tag := "CANTO VERMELHO" if i == 0 else "CANTO AZUL"
+		if String(info["nick"]) != "":
+			tag += "  ·  “%s”" % String(info["nick"])
+		fs1 = _fit(font, tag, fs1, maxw)
+		draw_string(font, Vector2(tx, y + _U * 0.58), tag, HORIZONTAL_ALIGNMENT_LEFT, -1, fs1, col.lightened(0.35))
+		var fs2 := _fit(font, String(info["name"]), int(_U * 0.8), maxw)
+		draw_string(font, Vector2(tx, y + _U * 1.38), String(info["name"]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs2, Color.WHITE)
+		var fs3 := _fit(font, String(info["sub"]), int(_U * 0.4), maxw)
+		draw_string(font, Vector2(tx, y + _U * 1.98), String(info["sub"]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs3, Color(0.8, 0.82, 0.87))
 
 
 ## Tons de camisa e de pele da torcida (escurecidos pela penumbra do ginásio).
@@ -1064,9 +1488,6 @@ func _bake_arena(w: float, h: float) -> void:
 func _draw_arena(w: float, h: float) -> void:
 	_bake_arena(w, h)
 	var rid := get_canvas_item()
-	# Ginásio escuro: o teto some no preto e a luz cai do alto no octógono.
-	_quad(PackedVector2Array([Vector2(0, 0), Vector2(w, 0), Vector2(w, h), Vector2(0, h)]),
-		PackedColorArray([Color("#05060A"), Color("#05060A"), Color("#141722"), Color("#141722")]))
 	var fence_top := _ground - _U * 7.6
 	var fence_bot := _ground - _U * 0.75
 	var cx := w * 0.5 - _cam * _U
@@ -1077,21 +1498,25 @@ func _draw_arena(w: float, h: float) -> void:
 	for l in 3:
 		var lay: Array = _crowd_layers[l]
 		var off := fposmod(-_cam * par * (0.7 + 0.5 * (float(l) + 0.5) / 3.0) * _U, period)
-		var bob := sin(_time * 1.7 + float(l) * 2.1) * _U * 0.02 - _shake * _U * (0.06 + 0.05 * float(l))
+		# A torcida pula com a empolgação: cada fileira no seu tempo.
+		var bob := sin(_rt * 1.7 + float(l) * 2.1) * _U * 0.02 - _shake * _U * (0.06 + 0.05 * float(l)) \
+			- absf(sin(_rt * (5.2 + 0.7 * float(l)) + float(l) * 1.3)) * _U * 0.17 * _hype
 		offs[l] = off
 		if (lay[2] as PackedInt32Array).is_empty():
 			continue
 		for k in 2:
-			draw_set_transform(_sh + Vector2(off - period * float(k), bob), 0.0, Vector2.ONE)
+			_view(Vector2(off - period * float(k), bob))
 			RenderingServer.canvas_item_add_triangle_array(rid, lay[2], lay[0], lay[1])
-	draw_set_transform(_sh, 0.0, Vector2.ONE)
+	_view()
+	# Flashes das câmeras: poucos na luta morna, muitos quando o ginásio levanta.
 	for f: Array in _flashes:
-		if fmod(float(f[2]) * 97.0 + _time * 0.7, 9.0) < 0.06:
+		if fmod(float(f[2]) * 97.0 + _fclock, 9.0) < 0.06 + 0.07 * _hype:
 			var fp0: Vector2 = f[0]
 			var fx := fposmod(fp0.x + float(offs[int(f[3])]) + _U * 2.0, period) - _U * 2.0
 			draw_circle(Vector2(fx, fp0.y), float(f[1]) * 0.75, Color(1, 1, 1, 0.25))
 			draw_circle(Vector2(fx, fp0.y), float(f[1]) * 0.3, Color(1, 1, 1, 0.95))
 	# Névoa do ginásio por cima da torcida e os fachos dos refletores.
+	draw_rect(Rect2(0, -h * 0.5, w, h * 0.5), Color(0.02, 0.03, 0.05, 0.75))
 	_quad(PackedVector2Array([Vector2(0, 0), Vector2(w, 0), Vector2(w, fence_bot), Vector2(0, fence_bot)]),
 		PackedColorArray([Color(0.02, 0.03, 0.05, 0.75), Color(0.02, 0.03, 0.05, 0.75), Color(0.1, 0.12, 0.18, 0.0), Color(0.1, 0.12, 0.18, 0.0)]))
 	var truss_y := h * 0.035
@@ -1111,9 +1536,9 @@ func _draw_arena(w: float, h: float) -> void:
 	draw_rect(Rect2(0, fence_top, w, fence_bot - fence_top), Color(0, 0, 0, 0.25))
 	var fp := 0.8
 	var step := _U * 0.55
-	draw_set_transform(_sh + Vector2(fposmod(-_cam * fp * _U, step), 0), 0.0, Vector2.ONE)
+	_view(Vector2(fposmod(-_cam * fp * _U, step), 0))
 	draw_multiline(_fence_pts, Color(0.62, 0.64, 0.7, 0.16), 1.0)
-	draw_set_transform(_sh, 0.0, Vector2.ONE)
+	_view()
 	# Rodapé acolchoado da grade, com as placas dos patrocinadores.
 	var band_h := _U * 0.62
 	draw_rect(Rect2(0, fence_bot - band_h, w, band_h), Color("#0E1014"))
@@ -1144,9 +1569,10 @@ func _draw_arena(w: float, h: float) -> void:
 	var floor_top := _ground - _U * 0.75
 	_quad(PackedVector2Array([Vector2(0, floor_top), Vector2(w, floor_top), Vector2(w, h), Vector2(0, h)]),
 		PackedColorArray([Color("#9D9A93"), Color("#9D9A93"), Color("#DEDBD3"), Color("#DEDBD3")]))
+	draw_rect(Rect2(0, h, w, _U), Color("#DEDBD3"))
 	draw_rect(Rect2(0, floor_top, w, maxf(1.0, _U * 0.08)), Color(0, 0, 0, 0.3))
-	var ec := Vector2(cx, _ground + _U * 0.15) + _sh
-	draw_set_transform(ec, 0.0, Vector2(1.0, 0.12))
+	var ec := Vector2(cx, _ground + _U * 0.15)
+	_view(ec, Vector2(1.0, 0.12))
 	draw_circle(Vector2.ZERO, _U * 9.5, Color(1.0, 0.98, 0.92, 0.16))
 	draw_circle(Vector2.ZERO, _U * 5.9, Color(_org, 0.5))
 	draw_circle(Vector2.ZERO, _U * 4.6, Color(_org.lerp(Color("#E4E1D9"), 0.72), 0.95))
@@ -1154,16 +1580,16 @@ func _draw_arena(w: float, h: float) -> void:
 	var font := get_theme_default_font()
 	var fs := maxi(8, int(_U * 1.1))
 	var tw := font.get_string_size("NOITE DE LUTA", HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-	draw_set_transform(ec + Vector2(0, _U * 0.2), 0.0, Vector2(1.0, 0.34))
+	_view(ec + Vector2(0, _U * 0.2), Vector2(1.0, 0.34))
 	draw_string(font, Vector2(-tw * 0.5, fs * 0.36), "NOITE DE LUTA", HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(_org.darkened(0.3), 0.6))
-	draw_set_transform(_sh, 0.0, Vector2.ONE)
+	_view()
 	# Pontas da lona na penumbra.
 	for sgn2: float in [-1.0, 1.0]:
 		var e0 := cx + sgn2 * _U * 8.0
 		var e1 := cx + sgn2 * _U * 17.0
-		_quad(PackedVector2Array([Vector2(e0, floor_top), Vector2(e1, floor_top), Vector2(e1, h), Vector2(e0, h)]),
+		_quad(PackedVector2Array([Vector2(e0, floor_top), Vector2(e1, floor_top), Vector2(e1, h + _U), Vector2(e0, h + _U)]),
 			PackedColorArray([Color(0.05, 0.06, 0.1, 0.0), Color(0.05, 0.06, 0.1, 0.42), Color(0.05, 0.06, 0.1, 0.42), Color(0.05, 0.06, 0.1, 0.0)]))
-		draw_rect(Rect2(minf(e1, e1 + sgn2 * w), floor_top, w, h - floor_top), Color(0.05, 0.06, 0.1, 0.42))
+		draw_rect(Rect2(minf(e1, e1 + sgn2 * w), floor_top, w, h + _U - floor_top), Color(0.05, 0.06, 0.1, 0.42))
 	# Cantos azul e vermelho nas pontas da arena.
 	for sgn: float in [-1.0, 1.0]:
 		var ex := w * 0.5 + (sgn * (ARENA + 0.4) - _cam) * _U
@@ -1190,39 +1616,108 @@ func _draw_front_fence(w: float, h: float) -> void:
 			x += step
 
 
+## Rastro do golpe: fita branca que afina e some atrás da luva (ou da canela).
+func _draw_trail(ox: float) -> void:
+	var n := _trail.size()
+	if n < 2:
+		return
+	var pts := PackedVector2Array()
+	for pt: Dictionary in _trail:
+		pts.append(Vector2(ox + float(pt["x"]) * _U, _ground - float(pt["y"]) * _U))
+	var left := PackedVector2Array()
+	var right := PackedVector2Array()
+	for i in n:
+		var same_prev := i > 0 and int((_trail[i - 1] as Dictionary)["n"]) == int((_trail[i] as Dictionary)["n"])
+		var same_next := i < n - 1 and int((_trail[i + 1] as Dictionary)["n"]) == int((_trail[i] as Dictionary)["n"])
+		var dv := (pts[i + 1] if same_next else pts[i]) - (pts[i - 1] if same_prev else pts[i])
+		var nn := Vector2(-dv.y, dv.x).normalized() if dv.length() > 0.01 else Vector2.ZERO
+		var hw := float((_trail[i] as Dictionary)["w"]) * _U * 0.5 * float((_trail[i] as Dictionary)["a"])
+		left.append(pts[i] + nn * hw)
+		right.append(pts[i] - nn * hw)
+	for i in range(1, n):
+		var a: Dictionary = _trail[i - 1]
+		var b: Dictionary = _trail[i]
+		if int(a["n"]) != int(b["n"]):
+			continue
+		var ca := Color(1.0, 0.98, 0.94, 0.3 * float(a["a"]) * float(a["a"]))
+		var cb := Color(1.0, 0.98, 0.94, 0.3 * float(b["a"]) * float(b["a"]))
+		_quad(PackedVector2Array([left[i - 1], left[i], right[i], right[i - 1]]), PackedColorArray([ca, cb, cb, ca]))
+
+
 func _draw_fx(ox: float) -> void:
 	for f: Dictionary in _fx:
 		var t := float(f["t"])
 		var pw := float(f["pw"])
-		if String(f["kind"]) == "blood":
-			var o := Vector2(ox + float(f["x"]) * _U, _ground - float(f["y"]) * _U)
-			var sd := int(f["seed"])
-			for i in 9:
-				var a := -0.9 + float((sd + i * 37) % 100) / 100.0 * 1.2
-				var sp := (2.5 + float((sd * 3 + i * 17) % 100) / 40.0) * _U
-				var v := Vector2(cos(a) * float(f["v"]), sin(a)) * sp
-				var q := o + v * t + Vector2(0, 14.0 * _U) * t * t
-				if q.y > _ground:
+		var p := Vector2(ox + float(f["x"]) * _U, _ground - float(f.get("y", 0.0)) * _U)
+		match String(f["kind"]):
+			"blood":
+				var sd := int(f["seed"])
+				for i in 9:
+					var a := -0.9 + float((sd + i * 37) % 100) / 100.0 * 1.2
+					var sp := (2.5 + float((sd * 3 + i * 17) % 100) / 40.0) * _U
+					var v := Vector2(cos(a) * float(f["v"]), sin(a)) * sp
+					var q := p + v * t + Vector2(0, 14.0 * _U) * t * t
+					if q.y > _ground:
+						continue
+					draw_circle(q, _U * (0.07 + 0.05 * float(i % 3)) * pw, Color(0.6, 0.02, 0.03, clampf(1.0 - t, 0.0, 1.0)))
+			"sweat":
+				# Suor que voa da cabeça: gotas em leque para o lado da força, com um risquinho atrás.
+				var sd2 := int(f["seed"])
+				var al2 := clampf(1.0 - t / 0.7, 0.0, 1.0)
+				for i in 11:
+					var a := -1.3 + float((sd2 + i * 37) % 100) / 100.0 * 1.7
+					var sp := (2.6 + float((sd2 * 3 + i * 17) % 100) / 26.0) * _U * pw
+					var v := Vector2(cos(a) * float(f["v"]), sin(a)) * sp
+					var q := p + v * t + Vector2(0, 11.0 * _U) * t * t
+					if q.y > _ground:
+						continue
+					var vel := v + Vector2(0, 22.0 * _U) * t
+					draw_line(q - vel.normalized() * _U * 0.2, q, Color(0.86, 0.94, 1.0, 0.8 * al2), maxf(1.0, _U * 0.055))
+			"ring":
+				# Onda de choque do golpe forte.
+				var k := clampf(t / 0.42, 0.0, 1.0)
+				var out := 1.0 - (1.0 - k) * (1.0 - k)
+				draw_arc(p, _U * (0.3 + (1.0 + minf(pw, 2.0) * 0.7) * out), 0.0, TAU, 32, Color(1.0, 0.97, 0.9, 0.42 * (1.0 - k)), maxf(1.0, _U * 0.1 * (1.0 - k)))
+			"block":
+				# Defesa: faísca curta e fria onde o golpe parou.
+				var k2 := clampf(t / 0.3, 0.0, 1.0)
+				var c2 := Color(0.8, 0.88, 1.0, 0.75 * (1.0 - k2))
+				for i in 5:
+					var a := TAU * float(i) / 5.0 + float(f["x"]) * 3.0
+					var dv := Vector2(cos(a), sin(a))
+					draw_line(p + dv * _U * (0.15 + 0.35 * k2), p + dv * _U * (0.32 + 0.55 * k2), c2, maxf(1.0, _U * 0.06))
+			"mouth":
+				# Protetor bucal: sai girando da boca e fica caído na lona.
+				var v2 := Vector2(float(f["v"]) * 3.4, -5.2) * _U
+				var q2 := p + v2 * t + Vector2(0, 9.0 * _U) * t * t
+				var spin := t * 16.0
+				if q2.y > _ground - _U * 0.1:
+					q2.y = _ground - _U * 0.1
+					spin = 0.4
+				draw_arc(q2, _U * 0.12, spin, spin + PI, 8, Color(0.96, 0.96, 0.92, clampf((1.3 - t) * 4.0, 0.0, 1.0)), maxf(1.5, _U * 0.07))
+			"dust":
+				for i in 6:
+					var a := PI + PI * float(i) / 5.0
+					var v := Vector2(cos(a), sin(a) * 0.4) * _U * (0.6 + t * 5.0)
+					draw_circle(Vector2(p.x, _ground) + v, _U * (0.35 - t * 0.5), Color(0.85, 0.82, 0.75, 0.6 * (1.0 - t * 2.0)))
+			_:
+				# Faísca do contato: clarão branco que fecha, brilho quente em volta e farpas afiadas
+				# de tamanhos desiguais; as do lado para onde o golpe empurra são mais compridas.
+				var k3 := clampf(t / 0.24, 0.0, 1.0)
+				if k3 >= 1.0:
 					continue
-				draw_circle(q, _U * (0.07 + 0.05 * float(i % 3)) * pw, Color(0.6, 0.02, 0.03, clampf(1.0 - t, 0.0, 1.0)))
-			continue
-		if String(f["kind"]) == "dust":
-			var c := Vector2(ox + float(f["x"]) * _U, _ground)
-			for i in 6:
-				var a := PI + PI * float(i) / 5.0
-				var v := Vector2(cos(a), sin(a) * 0.4) * _U * (0.6 + t * 5.0)
-				draw_circle(c + v, _U * (0.35 - t * 0.5), Color(0.85, 0.82, 0.75, 0.6 * (1.0 - t * 2.0)))
-			continue
-		var p := Vector2(ox + float(f["x"]) * _U, _ground - float(f["y"]) * _U)
-		var al := clampf(1.0 - t * 2.2, 0.0, 1.0)
-		var rad := _U * (0.3 + pw * 0.45) * (0.5 + t * 3.0)
-		var core := Color(1.0, 0.95, 0.75, al)
-		draw_circle(p, rad * 0.45, Color(1, 1, 1, al * 0.7))
-		for i in 8:
-			var a := TAU * float(i) / 8.0 + float(f["x"])
-			var dv := Vector2(cos(a), sin(a))
-			draw_line(p + dv * rad * 0.5, p + dv * rad * (1.0 + 0.4 * float(i % 2)), core, maxf(1.0, _U * 0.08))
-		if String(f.get("z", "")) == "head" and pw > 0.6:
-			for i in 5:
-				var a := -PI * 0.5 + float(i - 2) * 0.35
-				draw_circle(p + Vector2(cos(a) * -signf(float(f["x"]) - _cam), sin(a)) * _U * (0.4 + t * 4.0), _U * 0.08, Color(0.75, 0.88, 1.0, al))
+				var grow := 1.0 - (1.0 - k3) * (1.0 - k3)
+				var r0 := _U * (0.26 + minf(pw, 2.0) * 0.26)
+				var vx := float(f.get("v", 0.0))
+				draw_circle(p, r0 * (1.6 + 0.8 * grow), Color(1.0, 0.82, 0.45, 0.2 * (1.0 - k3)))
+				var sd3 := int(absf(float(f["x"])) * 977.0) % 97
+				for i in 9:
+					var a := TAU * (float(i) + float((sd3 + i * 31) % 10) * 0.06) / 9.0
+					var dv := Vector2(cos(a), sin(a))
+					var push := maxf(0.0, dv.x * vx)
+					var ln := r0 * (1.3 + float((sd3 * 7 + i * 13) % 10) * 0.12 + 1.5 * push) * (0.45 + 0.75 * grow)
+					var hw := r0 * 0.2 * (1.0 - k3)
+					var nv := Vector2(-dv.y, dv.x)
+					var b0 := p + dv * r0 * 0.35 * grow
+					draw_colored_polygon(PackedVector2Array([b0 - nv * hw, b0 + dv * ln, b0 + nv * hw]), Color(1.0, 0.96, 0.8, 0.95 * (1.0 - k3 * k3)))
+				draw_circle(p, r0 * (1.0 - 0.75 * k3), Color(1, 1, 1, 0.95 * (1.0 - k3)))

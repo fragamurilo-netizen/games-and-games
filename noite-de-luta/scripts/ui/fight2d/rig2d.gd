@@ -65,6 +65,9 @@ var bruise := 0.0
 ## Apagado (olhos fechados) e sangue do outro nas luvas.
 var ko := false
 var glove_blood := 0.0
+## Castigo acumulado na luta (0 a 1): coxa da frente (chutes baixos) e costela.
+var leg_dmg := 0.0
+var body_dmg := 0.0
 ## Volume do cabelo e tipo de barba na luta (ver HairShape) e grossura do pescoço.
 var hair_shape: Dictionary = {}
 var beard_kind := 0
@@ -789,6 +792,14 @@ func _leg(j: Dictionary, side: String, off: Vector2, sk: Color, dim: float, Uh: 
 		_pl(PackedVector2Array([_at(1.0, 0.35), _at(1.35, 0.3), _at(1.62, 0.5)]), mc, lw)
 		_pl(PackedVector2Array([_at(1.7, 0.75), _at(1.86, 0.35), _at(2.02, 0.7)]), mc, lw)
 		_pl(PackedVector2Array([_at(2.15, -0.2), _at(2.6, -0.3), _at(3.0, -0.1)]), Color(mc, mc.a * 0.8), lw)
+	if _ol <= 0.0 and not is_ref and leg_dmg > 0.1 and side.begins_with(lead()):
+		# Coxa castigada pelos chutes baixos: vermelhão que cresce e escurece.
+		var along := (kn - hip).normalized() * Uh
+		var across := Vector2(-along.y, along.x)
+		var da := clampf((leg_dmg - 0.1) * 0.8, 0.0, 0.6) * (1.0 if near else 0.75)
+		_ov(_at(1.05, 0.15), along * (0.36 + 0.2 * leg_dmg), across * (0.2 + 0.08 * leg_dmg), 12, Color(0.78, 0.14, 0.12, da * 0.75))
+		if leg_dmg > 0.5:
+			_ov(_at(1.15, 0.25), along * 0.22, across * 0.13, 10, Color(0.42, 0.08, 0.2, (leg_dmg - 0.5) * 0.9 * (1.0 if near else 0.75)))
 	# Pé: calcanhar, peito do pé e dedos.
 	var f := (toe - an).normalized()
 	if f == Vector2.ZERO:
@@ -912,6 +923,13 @@ func _torso(j: Dictionary, sk: Color, tdir: Vector2, tn: Vector2, open: float, U
 		_ln(_at(2.38, minf(0.9, uc)), _at(2.44, uc - 0.5), soft, lw)
 	# Oblíquo / costela.
 	_pl(PackedVector2Array([_at(1.5, clampf(uc - 0.42, -0.85, 0.9)), _at(1.0, clampf(uc - 0.36, -0.85, 0.9)), _at(0.55, clampf(uc - 0.2, -0.8, 0.9))]), soft, lw)
+	if body_dmg > 0.12:
+		# Costela marcada pelos golpes no corpo.
+		var ba := clampf((body_dmg - 0.12) * 0.7, 0.0, 0.5)
+		var bu := clampf(uc - 0.4, -0.75, 0.75)
+		_ov(_at(1.22, bu), tn * Uh * (0.24 + 0.1 * body_dmg), tdir * Uh * (0.34 + 0.12 * body_dmg), 12, Color(0.78, 0.14, 0.12, ba * 0.75))
+		if body_dmg > 0.55:
+			_ov(_at(1.3, bu), tn * Uh * 0.14, tdir * Uh * 0.2, 10, Color(0.42, 0.08, 0.2, (body_dmg - 0.55) * 0.8))
 	if uc > 1.05:
 		# De costas para a câmera: dorsal e escápula.
 		_pl(PackedVector2Array([_at(1.98, -0.2), _at(1.45, -0.58), _at(0.95, -0.7)]), mc, lw)
