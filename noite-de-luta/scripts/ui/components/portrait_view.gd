@@ -122,6 +122,9 @@ var mesh_light: int = -1:
 ## da altura do quadro (medidas tiradas de cutouts de 250 px).
 const FM_ZOOM := 1.42
 const FM_EYE_Y := 0.47
+## Retratos bem pequenos (até 56 px): o rosto ocupa mais do quadro.
+const FM_ZOOM_SMALL := 1.75
+const FM_EYE_Y_SMALL := 0.5
 ## Enquadramento de lutador: um pouco menor que o busto inteiro, olhos a 34% da altura.
 const FIGHT_ZOOM := 1.02
 const FIGHT_EYE_Y := 0.33
@@ -424,6 +427,9 @@ var _M := 0.0
 var _NW := 0.0
 var _BW := 0.0
 var _MW := 0.0
+## Linha da boca e lábio de baixo do último _mouth() (para o reforço dos retratos pequenos).
+var _mouth_line := PackedVector2Array()
+var _mouth_lo := PackedVector2Array()
 var _ND := 0.0
 var _skin := Color.WHITE
 ## Ombro da luz na pele: acima de _lum_knee a luminância se aproxima de _lum_top sem passar.
@@ -551,8 +557,11 @@ func _draw() -> void:
 			elif _fm:
 				# Busto maior que o quadro, com os olhos na altura dos cutouts do FM; o que passa
 				# das bordas é cortado (ombros embaixo, cabelo muito alto em cima).
-				var sv := s * FM_ZOOM
-				_setup(Vector2(c.x, o.y + s * FM_EYE_Y + sv * 0.105), sv)
+				# Quanto menor o quadro, mais perto do rosto (nas listas de 48–72 px o busto inteiro
+				# deixava nariz e boca com poucos pixels).
+				var tight := clampf((96.0 - s) / 40.0, 0.0, 1.0)
+				var sv := s * lerpf(FM_ZOOM, FM_ZOOM_SMALL, tight)
+				_setup(Vector2(c.x, o.y + s * lerpf(FM_EYE_Y, FM_EYE_Y_SMALL, tight) + sv * 0.105), sv)
 			else:
 				_setup(c, s)
 			ready = true
@@ -616,6 +625,7 @@ func _layer_front() -> void:
 	if _ml and _s >= 50.0:
 		# Luz por malha por cima de pele, olhos, boca e barba: tudo no mesmo volume
 		FaceShade.paint(self)
+	_small_cues()
 	# Cabelo da frente
 	if style != FaceGen.H_BALD:
 		_front_hair(rng, hair)
@@ -3414,6 +3424,8 @@ func _mouth() -> void:
 		_r_polyline(roll, Color(_skin.lightened(0.2), 0.28 * lip_line), lw * 0.7, true)
 	var olo := PackedVector2Array(lo)
 	_r_polyline(olo, Color(lip_lo, 0.35), lw * 0.8, true)
+	_mouth_line = line if gap <= 0.5 else bot
+	_mouth_lo = lo
 	var lc := PackedColorArray()
 	for i in line.size():
 		var t := float(i) / 14.0
@@ -3433,6 +3445,35 @@ func _mouth() -> void:
 		for sx: float in [-1.0, 1.0]:
 			var cp := line[0 if sx < 0.0 else 14]
 			_r_arc(cp + Vector2(sx * mw * 0.12, -_fh * 0.01), _fh * 0.035, PI * 0.5 - sx * 1.2, PI * 0.5 + sx * 0.2, 6, Color(_skin.darkened(0.35), 0.22 * (smile - 0.6)), lw * 0.8, true)
+
+
+## Retratos pequenos (listas, cards): a luz suave apaga nariz e boca. Abaixo de ~165 px entram as
+## pistas que o olho usa de longe: sombra embaixo do nariz, narinas e lado do nariz mais escuros,
+## brilho na ponta, linha da boca mais firme e a sombra sob o lábio de baixo.
+func _small_cues() -> void:
+	var k := clampf((165.0 - _s) / 85.0, 0.0, 1.0)
+	if k <= 0.0 or _mouth_line.size() < 15:
+		return
+	var dark := _skin.darkened(0.55)
+	var nw := _NW * _fw
+	# Nariz: sombra projetada logo abaixo da ponta (luz de cima) e o lado na sombra.
+	_soft_spot(_pxn(0.01, _N + 0.03), nw * 0.75, _fh * 0.028, Color(dark, 0.42 * k))
+	_soft_spot(_pxn(_NW * 0.55, _N - 0.07), nw * 0.3, _fh * 0.075, Color(dark, 0.2 * k))
+	for sx: float in [-1.0, 1.0]:
+		_fill(_ellipse(_pxn(sx * _NW * 0.42, _N + 0.006), nw * 0.17, _fh * 0.016, 10), Color(dark.darkened(0.3), 0.45 * k))
+	_soft_spot(_pxn(-0.012, _N - 0.012), nw * 0.3, _fh * 0.02, Color(_skin.lightened(0.35), 0.2 * k))
+	# Boca: linha central firme, mais escura no meio, e sombra sob o lábio de baixo.
+	var lw := maxf(1.0, _s * 0.016)
+	var cols := PackedColorArray()
+	for i in _mouth_line.size():
+		var t := float(i) / float(_mouth_line.size() - 1)
+		cols.append(Color("#2E1414", (0.25 + 0.4 * sin(PI * t)) * k))
+	_r_polyline_colors(_mouth_line, cols, lw, true)
+	var lo_mid := _mouth_lo[_mouth_lo.size() / 2]
+	var mw := _MW * _fw
+	_soft_spot(lo_mid + Vector2(0, _fh * 0.03), mw * 0.55, _fh * 0.025, Color(dark, 0.32 * k))
+	# Lábio de baixo um pouco mais rosado e claro no meio (o volume que dá para ver de longe).
+	_soft_spot(lo_mid + Vector2(0, -_fh * 0.006), mw * 0.45, _fh * 0.012, Color(_skin.lerp(Color("#C07070"), 0.35).lightened(0.05), 0.25 * k))
 
 
 ## Linha que some nas duas pontas (dobras e vincos da pele).
