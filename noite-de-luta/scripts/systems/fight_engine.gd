@@ -68,6 +68,13 @@ var ref_stop := 1.0
 var cards: Array = [[], [], []]
 var round_stats: Array = []
 var events: Array = []
+## Lances para a luta animada (2D/3D): um por ação, com o estado da luta. Só com `narrate`.
+## {r, t, type, side, pos, g (posição no chão), top, cage, dist, ...dados do lance}
+## Tipos: round, estudo, golpe {k, z, hit, dmg, ctr}, balanca, kd, clinch {plum}, solta, queda {td, ok},
+## puxa_guarda, segura_chute {ok}, pega_pescoco {sub}, gnp {hit, dmg}, passa, levanta, mat_return,
+## raspa, repoe, fin {sub, lock}, escapa {sub}, fim {m}, fim_round. Não gasta sorteio: o resultado
+## é o mesmo com ou sem animação.
+var beats: Array = []
 var ko_factor := 1.0
 var mods: Array = [{}, {}]
 var _round_events: Array = []
@@ -153,6 +160,7 @@ func run_round() -> Array:
 	var rs: Array = [_blank_stats(), _blank_stats()]
 	round_stats.append(rs)
 	_log(-1, "info", "Começa o %dº round." % round_no)
+	_beat("round", -1, {"n": round_no})
 	while t < ROUND_S and not finished:
 		var dt: float
 		if pos == "chao":
@@ -177,6 +185,7 @@ func run_round() -> Array:
 	if not finished:
 		t = ROUND_S
 		_score_round()
+		_beat("fim_round", -1, {"n": round_no})
 		_log(-1, "round", "Fim do %dº round." % round_no)
 	return _round_events
 
@@ -291,6 +300,7 @@ func _tick_standing(dt: float) -> void:
 			if int(plans[i]["distancia"]) == 2 and rng.randf() < 0.22 + (_at(i, "clinch") - _at(1 - i, "movimentacao")) / 250.0 + 0.06 * maxf(_tr(i, "cage"), _tr(i, "plum")):
 				pos = "clinch"
 				cage = rng.randf() < 0.55 + 0.3 * _tr(i, "cage")
+				_beat("clinch", i, {"plum": _tr(i, "plum") >= 0.6 and not cage})
 				if _tr(i, "plum") >= 0.6 and not cage:
 					_log(i, "info", "%s prende %s pela nuca no clinch tailandês." % [f[i].short_name(), f[1 - i].short_name()])
 				else:
@@ -303,6 +313,7 @@ func _exchange() -> void:
 	var r: Array[float] = [_rate(0), _rate(1)]
 	var tot: float = r[0] + r[1]
 	if rng.randf() < 0.22 / maxf(0.4, tot):
+		_beat("estudo", -1)
 		if narrate and rng.randf() < 0.18:
 			var i := rng.randi_range(0, 1)
 			_log(i, "info", _say(["{a} finta e circula.", "{a} mede a distância.", "{a} corta o caminho de {b}.", "Estudo dos dois no centro do octógono."], i))
@@ -397,6 +408,7 @@ func _strike(att: int, idx: int, counter: bool, forced: String = "", zone_dist: 
 	acc = clampf(acc, 0.05, 0.9)
 	if rng.randf() >= acc:
 		s[d]["unans"] = 0
+		_beat("golpe", att, {"k": kind, "z": zone, "hit": false, "ctr": counter})
 		if kind in CATCHABLE and _catch_kick(d, att, false):
 			return false
 		if narrate and (rng.randf() < 0.16 or kind in ["chute_alto", "overhand"] or kind in SPINNING):
@@ -416,6 +428,7 @@ func _strike(att: int, idx: int, counter: bool, forced: String = "", zone_dist: 
 		dmg *= 1.0 + float(s[d]["rock"]) * 0.2
 	rs[att]["dmg"] += dmg
 	s[att]["total"]["dmg"] += dmg
+	_beat("golpe", att, {"k": kind, "z": zone, "hit": true, "dmg": dmg, "ctr": counter})
 	match zone:
 		"head":
 			return _head_hit(att, kind, dmg, counter)
@@ -460,6 +473,7 @@ func _head_hit(att: int, kind: String, dmg: float, counter: bool) -> bool:
 			return true
 		s[d]["rock"] = minf(1.0, float(s[d]["rock"]) + 0.25 + shock * 0.15)
 		if shock > 0.95 and rng.randf() < 0.4:
+			_beat("kd", att, {"k": kind})
 			s[d]["kd"] = int(s[d]["kd"]) + 1
 			var rs: Array = round_stats.back()
 			rs[att]["kd"] += 1
@@ -475,6 +489,7 @@ func _head_hit(att: int, kind: String, dmg: float, counter: bool) -> bool:
 					if finished:
 						break
 			return true
+		_beat("balanca", att, {"k": kind})
 		_log(att, "forte", "%s acerta %s e %s sente! %s está balançado." % [f[att].short_name(), _strike_name(kind, true, att), f[d].short_name(), f[d].short_name()])
 	elif narrate and (dmg > 0.85 or rng.randf() < 0.35):
 		_log(att, "golpe" if dmg < 1.0 else "forte", _hit_text(att, kind, "head", dmg, counter))
@@ -527,6 +542,7 @@ func _takedown(i: int, from_clinch: bool, depth: int = 0) -> void:
 			pos = "chao"
 			top = o
 			gpos = "guarda"
+			_beat("puxa_guarda", i)
 			_spend(i, 0.006)
 			_log(i, "chao", _say(Styles.takedown(tech).get("texts", ["{a} puxa {b} para a guarda."]), i))
 			return
@@ -558,6 +574,7 @@ func _takedown(i: int, from_clinch: bool, depth: int = 0) -> void:
 		if land.has("lateral"):
 			land["lateral"] = float(land["lateral"]) * (1.0 + edge)
 		gpos = String(RngUtil.weighted_key(rng, land))
+		_beat("queda", i, {"td": tech, "ok": true})
 		var texts: Array = td.get("texts", ["{a} derruba {b}."])
 		_log(i, "queda", "%s %s" % [_say(texts, i), _say([GPOS_IN[gpos]], i)])
 		# Arremesso e slam machucam.
@@ -574,6 +591,7 @@ func _takedown(i: int, from_clinch: bool, depth: int = 0) -> void:
 				_log(i, "forte", "O impacto balança %s!" % f[o].short_name())
 		return
 	# Errou a queda: quem pega pescoço pune a entrada; quem encadeia tenta de novo.
+	_beat("queda", i, {"td": tech, "ok": false})
 	if not from_clinch and _front_headlock(o):
 		return
 	if depth == 0 and rng.randf() < 0.3 * _tr(i, "chain"):
@@ -616,6 +634,7 @@ func _front_headlock(o: int) -> bool:
 			w[k] = float(subs[k])
 	var sid := "guilhotina" if w.is_empty() else String(RngUtil.weighted_key(rng, w))
 	pos = "chao"
+	_beat("pega_pescoco", o, {"sub": sid})
 	if sid == "guilhotina":
 		top = i
 		gpos = "guarda"
@@ -644,8 +663,10 @@ func _catch_kick(d: int, att: int, landed: bool) -> bool:
 		pos = "chao"
 		top = d
 		gpos = "guarda" if rng.randf() < 0.6 else "meia"
+		_beat("segura_chute", d, {"ok": true})
 		_log(d, "queda", _say(["{a} segura o chute de {b} e derruba com uma rasteira!", "{a} prende a perna de {b} debaixo do braço e varre o pé de apoio."], d))
 	elif narrate:
+		_beat("segura_chute", d, {"ok": false})
 		_log(d, "info", _say(["{a} segura o chute, mas {b} se equilibra num pé só e solta.", "{a} agarra a perna, {b} pula e se livra."], d))
 	return true
 
@@ -666,6 +687,7 @@ func _tick_clinch(dt: float) -> void:
 			if rng.randf() < pb:
 				pos = "solto"
 				dist = 1
+				_beat("solta", i)
 				if narrate and rng.randf() < 0.5:
 					_log(i, "info", "%s desfaz o clinch e volta para o centro." % f[i].short_name())
 				return
@@ -723,6 +745,7 @@ func _tick_ground(dt: float) -> void:
 			3:
 				pos = "solto"
 				dist = 1
+				_beat("levanta", tp)
 				_log(tp, "info", "%s se levanta e deixa %s voltar." % [f[tp].short_name(), f[bt].short_name()])
 				return
 	else:
@@ -757,6 +780,7 @@ func _gnp(tp: int) -> void:
 	_spend(tp, 0.003)
 	if rng.randf() >= acc:
 		s[bt]["unans"] = 0
+		_beat("gnp", tp, {"hit": false})
 		return
 	rs[tp]["sig_land"] += 1
 	s[tp]["total"]["sig_land"] += 1
@@ -764,6 +788,7 @@ func _gnp(tp: int) -> void:
 	var dmg := 0.55 * mult * (0.5 + _at(tp, "potencia") / 100.0 * 0.5 + _at(tp, "forca") / 250.0) * ko_factor * rng.randf_range(0.6, 1.3) * (1.0 + 0.25 * _tr(tp, "gnp"))
 	rs[tp]["dmg"] += dmg
 	s[tp]["total"]["dmg"] += dmg
+	_beat("gnp", tp, {"hit": true, "dmg": dmg})
 	s[bt]["unans"] = int(s[bt]["unans"]) + 1
 	if rng.randf() < 0.75:
 		rs[tp]["head"] += 1
@@ -811,6 +836,7 @@ func _advance(tp: int) -> void:
 	if nxt == gpos:
 		return
 	gpos = nxt
+	_beat("passa", tp)
 	var rs: Array = round_stats.back()
 	rs[tp]["adv"] += 1
 	s[tp]["total"]["adv"] += 1
@@ -833,16 +859,19 @@ func _get_up(bt: int) -> void:
 			s[tp]["total"]["td_att"] += 1
 			s[tp]["total"]["td"] += 1
 			gpos = "costas" if rng.randf() < 0.25 * _tr(tp, "back") + 0.1 else "meia"
+			_beat("mat_return", tp)
 			_spend(bt, 0.01)
 			_log(tp, "queda", _say(["{b} levanta, mas {a} cola nas costas e devolve ao chão.", "{b} quase sai, {a} prende a cintura e derruba de novo.", "Mat return de {a}: {b} volta para o chão."], tp))
 			return
 		if rng.randf() < 0.4:
 			pos = "clinch"
 			cage = true
+			_beat("levanta", bt)
 			_log(bt, "info", "%s levanta pela grade, ainda preso no clinch." % f[bt].short_name())
 		else:
 			pos = "solto"
 			dist = 1
+			_beat("levanta", bt)
 			_log(bt, "info", "%s consegue se levantar." % f[bt].short_name())
 	elif narrate and rng.randf() < 0.2:
 		_log(bt, "info", "%s tenta levantar, mas %s segura." % [f[bt].short_name(), f[tp].short_name()])
@@ -855,6 +884,7 @@ func _sweep(bt: int) -> void:
 	if rng.randf() < clampf(p, 0.03, 0.6):
 		top = bt
 		gpos = "meia" if rng.randf() < 0.5 else "guarda"
+		_beat("raspa", bt)
 		var rs: Array = round_stats.back()
 		rs[bt]["rev"] += 1
 		s[bt]["total"]["rev"] += 1
@@ -866,6 +896,7 @@ func _recover(bt: int) -> void:
 	var p := 0.18 + (_at(bt, "por_baixo") - _at(tp, "por_cima")) / 140.0
 	if gpos in ["lateral", "montada", "costas"] and rng.randf() < p:
 		gpos = "meia" if gpos != "costas" else "lateral"
+		_beat("repoe", bt)
 		if narrate and rng.randf() < 0.5:
 			_log(bt, "info", "%s repõe a guarda." % f[bt].short_name())
 	else:
@@ -924,6 +955,7 @@ func _sub_attempt(i: int, sid: String, announced: bool = false) -> void:
 	var p_lock := clampf(0.17 + (off - dfn) / 130.0 + bonus + (1.0 - float(s[o]["st"])) * 0.15 + float(s[o]["rock"]) * 0.25, 0.03, 0.75)
 	_spend(i, 0.018)
 	if rng.randf() >= p_lock:
+		_beat("fin", i, {"sub": sid, "lock": false})
 		if narrate and not announced:
 			_log(o, "info", "%s ameaça um%s %s, mas %s se defende." % [f[i].short_name(), art, name, f[o].short_name()])
 		elif narrate:
@@ -931,6 +963,7 @@ func _sub_attempt(i: int, sid: String, announced: bool = false) -> void:
 		if i != top and rng.randf() < 0.25:
 			_advance(top)
 		return
+	_beat("fin", i, {"sub": sid, "lock": true})
 	if not announced:
 		_log(i, "fin", "%s encaixa um%s %s!" % [f[i].short_name(), art, name])
 	var p_tap := clampf(0.32 + (off - dfn) / 120.0 + (1.0 - float(s[o]["st"])) * 0.2 + float(s[o]["rock"]) * 0.25 - _at(o, "coracao") / 900.0, 0.06, 0.85)
@@ -939,6 +972,7 @@ func _sub_attempt(i: int, sid: String, announced: bool = false) -> void:
 		_log(i, "fim", "%s bate! Vitória de %s por finalização." % [f[o].short_name(), f[i].short_name()])
 	else:
 		_spend(o, 0.05)
+		_beat("escapa", o, {"sub": sid})
 		_log(o, "info", "%s aguenta firme e escapa d%s %s." % [f[o].short_name(), "a" if art == "a" else "o", name])
 		if i != top and rng.randf() < 0.3:
 			top = i
@@ -950,6 +984,7 @@ func _sub_attempt(i: int, sid: String, announced: bool = false) -> void:
 func _finish(winner: int, method: String, detail: String) -> void:
 	finished = true
 	result = {"winner": winner, "method": method, "detail": detail, "round": round_no, "time": minf(ROUND_S, t)}
+	_beat("fim", winner, {"m": method})
 
 
 func _score_round() -> void:
@@ -1014,6 +1049,14 @@ func finalize() -> Dictionary:
 
 
 # --- Narração -----------------------------------------------------------------------------
+
+func _beat(type: String, side: int, data: Dictionary = {}) -> void:
+	if not narrate:
+		return
+	var b := {"r": round_no, "t": t, "type": type, "side": side, "pos": pos, "g": gpos, "top": top, "cage": cage, "dist": dist}
+	b.merge(data)
+	beats.append(b)
+
 
 func _log(side: int, kind: String, text: String) -> void:
 	var ev := {"r": round_no, "t": t, "side": side, "kind": kind, "text": text,
