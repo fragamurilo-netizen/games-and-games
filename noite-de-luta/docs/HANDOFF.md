@@ -1,5 +1,24 @@
 # Noite de Luta — nota de passagem (23/11/2026)
 
+## Rodada 5 de 23/11/2026: segunda rodada da luta animada (APK 0.1.6)
+
+- **3D**: giro de ombros e quadril (`tw` na tabela `STRIKE`; o soco esticado e a perna que sobe
+  fecham no centro), antebraço, dorsais, abdômen em gomos (some com barriga), faixa lateral no
+  calção, luva com dedos dobrados, rosto com maçãs, queixo, lábios, branco dos olhos; pele com
+  rim light. Grid de luz com refletores, fachos no ar, dois spots e o nome do evento na lona
+  (`Label3D`, passado pela tela da luta).
+- **Direção de TV** (`FightView3D._direct`): planos aberto, lateral, fechado e de cima (no chão),
+  corte a cada 4,5–7,5 s, fechado no knockdown e no fim; enquadra a caixa das juntas dos dois
+  (cabeça e pés dentro). Lados da grade entre a câmera e a luta somem (`_fence`).
+- **2D**: contorno escuro em cada boneco (passada `_ol` em `Rig2D`, primitivas `_cap/_circ/_poly/
+  _cpoly/_line`), cem quilos e costas redesenhados; nas costas a perna e o braço de cá de quem
+  pega por trás ficam por cima (`layer` 2).
+- **Árbitro**: abre o round com o braço, chega perto de quem balança; no 3D tem gola, distintivo
+  e luvas de látex. **Sangue**: nariz sangra com dano alto na cabeça, luva de quem bate em
+  alguém cortado escurece (`glove_blood`), olhos fecham no knockdown/nocaute (`ko`).
+- **Replay** em dois takes (inteiro a 0,5× e o golpe final a 0,22×, outro ângulo no 3D); no 2D
+  faixas de cinema em vez de zoom.
+
 ## Rodada 4 de 23/11/2026: refinamento da luta animada (APK 0.1.5)
 
 - **Bonecos 3D** (`FightView3D._build_fighter/_pose_fighter`): membros em cilindros que afinam
@@ -199,7 +218,7 @@ Cinturões com linhagem.
 ## APK de teste
 
 - APKs novos (0.1.2+) ficam nos arquivos do projeto (`noite-de-luta/`), assinados com a chave de
-  teste guardada em `chave-teste/` lá; o atual é o 0.1.5.
+  teste guardada em `chave-teste/` lá; o atual é o 0.1.6.
 - `releases/NoiteDeLuta-0.1.1.apk` (release, arm64, Android 7+; instala por cima da 0.1.0). Assinado com uma chave de teste
   local: um APK novo assinado com outra chave pede desinstalar o antigo antes.
 - Para gerar de novo: modelos de exportação do Godot 4.7.2 (só `android_*.apk` e `version.txt` em

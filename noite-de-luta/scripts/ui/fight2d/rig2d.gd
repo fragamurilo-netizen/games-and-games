@@ -9,9 +9,10 @@ extends RefCounted
 ## frente), head (ângulo extra da cabeça), na_s/na_e (ombro e cotovelo do braço near), fa_s/fa_e
 ## (braço far), nl_h/nl_k (quadril e joelho da perna near), fl_h/fl_k (perna far), sit (> 0.5:
 ## sentado/deitado, o quadril apoia e os pés podem afundar um pouco). Só no 3D: lz/az abrem pernas
-## e braços para os lados (0 = normal) e zz tira o corpo todo do plano (para não embolar no chão).
+## e braços para os lados (0 = normal), zz tira o corpo todo do plano (para não embolar no chão) e
+## tw gira ombros e quadril (graus; + leva o lado de trás para a frente, como na direita e no chute).
 
-const KEYS := ["x", "y", "crouch", "sit", "rot", "torso", "head", "na_s", "na_e", "fa_s", "fa_e", "nl_h", "nl_k", "fl_h", "fl_k", "lz", "az", "zz"]
+const KEYS := ["x", "y", "crouch", "sit", "rot", "torso", "head", "na_s", "na_e", "fa_s", "fa_e", "nl_h", "nl_k", "fl_h", "fl_k", "lz", "az", "zz", "tw"]
 ## Comprimentos em U (U = tamanho da cabeça).
 const L_TORSO := 2.55
 const L_NECK := 0.35
@@ -57,6 +58,10 @@ var shirt := Color("#16171B")
 ## Corte (sangue no rosto, 0–1.5) e inchaço (dano na cabeça, 0–1).
 var cut := 0.0
 var bruise := 0.0
+## Apagado (olhos fechados) e sangue do outro nas luvas.
+var ko := false
+var glove_blood := 0.0
+
 
 
 static func from_fighter(w: GameWorld, f: Fighter, facing: float) -> Rig2D:
@@ -259,10 +264,21 @@ func draw(ci: CanvasItem, origin_x: float, ground_y: float, U: float, layer: int
 		ci.draw_set_transform(Vector2(j["hip"].x, ground_y), 0.0, Vector2(1.0, 0.22))
 		ci.draw_circle(Vector2.ZERO, Uh * 1.6, Color(0, 0, 0, 0.28))
 		ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	# Contorno escuro primeiro (separa os dois corpos quando se embolam), depois o desenho.
+	_ol = maxf(1.0, Uh * 0.055)
+	_pass(ci, j, layer, sk, far, far_l, near, near_l)
+	_ol = 0.0
+	_pass(ci, j, layer, sk, far, far_l, near, near_l)
+
+
+func _pass(ci: CanvasItem, j: Dictionary, layer: int, sk: Color, far: Color, far_l: Color, near: Color, near_l: Color) -> void:
+	var Uh: float = j["U"]
 	var aw := Uh * 0.3 * arm_k
 	var lw := Uh * 0.43 * leg_k
 	if layer == 2:
-		_arm(ci, j, "na", aw, sk, sk.lightened(0.12), Uh, false)
+		_leg(ci, j, "nl", lw, near, near_l, Uh, false)
+		_shorts_leg(ci, j, "nl", lw, shorts)
+		_arm(ci, j, "na", aw, near, near_l, Uh, false)
 		return
 	# Membros do lado de lá
 	_leg(ci, j, "fl", lw, far, far_l, Uh, true)
@@ -281,8 +297,8 @@ func draw(ci: CanvasItem, origin_x: float, ground_y: float, U: float, layer: int
 	var tors := PackedVector2Array([neck + tn * cw * 0.5, chest + tn * cw, waist + tn * ww * (1.0 + 0.35 * belly), hip + tn * ww * 0.95,
 		hip - tn * ww * 0.95, waist - tn * ww * 0.95, chest - tn * cw * 0.9, neck - tn * cw * 0.55])
 	if outfit == "ref":
-		ci.draw_polygon(tors, PackedColorArray([shirt.lightened(0.1), shirt.lightened(0.1), shirt, shirt, shirt.darkened(0.2), shirt.darkened(0.2), shirt, shirt.lightened(0.1)]))
-		ci.draw_line(neck + tn * cw * 0.3, neck - tn * cw * 0.3, sk, maxf(1.0, Uh * 0.12), true)
+		_poly(ci, tors, PackedColorArray([shirt.lightened(0.1), shirt.lightened(0.1), shirt, shirt, shirt.darkened(0.2), shirt.darkened(0.2), shirt, shirt.lightened(0.1)]))
+		_line(ci, neck + tn * cw * 0.3, neck - tn * cw * 0.3, sk, maxf(1.0, Uh * 0.12), true)
 		_shorts_leg(ci, j, "fl", lw, shorts.darkened(0.25))
 		_head(ci, j, Uh, sk)
 		_leg(ci, j, "nl", lw, near, near_l, Uh, false)
@@ -290,24 +306,24 @@ func draw(ci: CanvasItem, origin_x: float, ground_y: float, U: float, layer: int
 		if layer == 0:
 			_arm(ci, j, "na", aw, near, near_l, Uh, false)
 		return
-	ci.draw_polygon(tors, PackedColorArray([near_l, near_l, near, near, far_l, far_l, near, near_l]))
+	_poly(ci, tors, PackedColorArray([near_l, near_l, near, near, far_l, far_l, near, near_l]))
 	if cut > 0.8:
-		ci.draw_line(neck + tn * cw * 0.6, chest + tn * cw * 0.7 - tdir * Uh * 0.6, Color(0.55, 0.03, 0.03, clampf(cut - 0.7, 0.0, 0.7)), maxf(1.0, Uh * 0.1), true)
+		_line(ci, neck + tn * cw * 0.6, chest + tn * cw * 0.7 - tdir * Uh * 0.6, Color(0.55, 0.03, 0.03, clampf(cut - 0.7, 0.0, 0.7)), maxf(1.0, Uh * 0.1), true)
 	# Peitoral, abdômen e costela
-	ci.draw_line(chest + tn * cw * 0.95, chest + tn * cw * 0.15 - tdir * Uh * 0.15, Color(sk.darkened(0.35), 0.45), maxf(1.0, Uh * 0.05), true)
-	ci.draw_line(chest - tdir * Uh * 0.35 + tn * cw * 0.7, waist + tn * ww * 0.75, Color(sk.darkened(0.3), 0.25), maxf(1.0, Uh * 0.04), true)
+	_line(ci, chest + tn * cw * 0.95, chest + tn * cw * 0.15 - tdir * Uh * 0.15, Color(sk.darkened(0.35), 0.45), maxf(1.0, Uh * 0.05), true)
+	_line(ci, chest - tdir * Uh * 0.35 + tn * cw * 0.7, waist + tn * ww * 0.75, Color(sk.darkened(0.3), 0.25), maxf(1.0, Uh * 0.04), true)
 	if fem:
 		var top := PackedVector2Array([chest + tn * cw * 1.02 + tdir * Uh * 0.3, chest + tn * cw * 1.02 - tdir * Uh * 0.35,
 			chest - tn * cw * 0.92 - tdir * Uh * 0.35, chest - tn * cw * 0.92 + tdir * Uh * 0.3])
-		ci.draw_colored_polygon(top, shorts.darkened(0.15))
-	if tattoo > 0:
+		_cpoly(ci, top, shorts.darkened(0.15))
+	if tattoo > 0 and _ol <= 0.0:
 		ci.draw_arc(chest + tn * cw * 0.35, Uh * 0.22, 0.0, TAU, 10, Color(0.1, 0.12, 0.17, 0.45), maxf(1.0, Uh * 0.05), true)
 	# Calção: cós e as duas pernas do calção por cima das coxas.
 	_shorts_leg(ci, j, "fl", lw, shorts.darkened(0.25))
 	var t_hip := hip + tdir * Uh * 0.35
 	var band := PackedVector2Array([t_hip + tn * ww * 1.05, t_hip - tn * ww * 1.0, hip - tn * ww * 1.05 - tdir * Uh * 0.15, hip + tn * ww * 1.1 - tdir * Uh * 0.15])
-	ci.draw_colored_polygon(band, shorts)
-	ci.draw_line(t_hip + tn * ww * 1.05, t_hip - tn * ww * 1.0, trim, maxf(1.5, Uh * 0.16), true)
+	_cpoly(ci, band, shorts)
+	_line(ci, t_hip + tn * ww * 1.05, t_hip - tn * ww * 1.0, trim, maxf(1.5, Uh * 0.16), true)
 	# Cabeça
 	_head(ci, j, Uh, sk)
 	# Membros do lado de cá
@@ -321,20 +337,21 @@ func _arm(ci: CanvasItem, j: Dictionary, side: String, aw: float, col: Color, li
 	var sh: Vector2 = j["sh"]
 	var el: Vector2 = j[side + "_el"]
 	var wr: Vector2 = j[side + "_wr"]
-	_capsule(ci, sh, el, aw * 1.15, aw * 0.9, col, light)
-	_capsule(ci, el, wr, aw * 0.9, aw * 0.75, col, light)
+	_cap(ci, sh, el, aw * 1.15, aw * 0.9, col, light)
+	_cap(ci, el, wr, aw * 0.9, aw * 0.75, col, light)
 	if tattoo >= 3 and not far_side:
-		ci.draw_line(sh.lerp(el, 0.2), sh.lerp(el, 0.9), Color(0.1, 0.12, 0.17, 0.4), aw * 1.2, true)
+		_line(ci, sh.lerp(el, 0.2), sh.lerp(el, 0.9), Color(0.1, 0.12, 0.17, 0.4), aw * 1.2, true)
 	if outfit == "ref":
-		_capsule(ci, sh, sh.lerp(el, 0.55), aw * 1.3, aw * 1.15, shirt.darkened(0.25) if far_side else shirt, shirt.lightened(0.1))
-		ci.draw_circle(wr + (wr - el).normalized() * Uh * 0.1, Uh * 0.2, col)
+		_cap(ci, sh, sh.lerp(el, 0.55), aw * 1.3, aw * 1.15, shirt.darkened(0.25) if far_side else shirt, shirt.lightened(0.1))
+		_circ(ci, wr + (wr - el).normalized() * Uh * 0.1, Uh * 0.2, col)
 		return
-	var g := glove.darkened(0.3) if far_side else glove
+	var gc := glove.lerp(Color(0.42, 0.03, 0.03), clampf(glove_blood, 0.0, 0.8) * 0.6)
+	var g := gc.darkened(0.3) if far_side else gc
 	var fd := (wr - el).normalized()
 	var fn := Vector2(-fd.y, fd.x)
-	ci.draw_circle(wr + fd * Uh * 0.16, Uh * 0.36, g)
-	ci.draw_circle(wr + fd * Uh * 0.16 - fn * Uh * 0.08 + Vector2(0, -Uh * 0.06), Uh * 0.16, g.lightened(0.12))
-	ci.draw_line(wr - fd * Uh * 0.08 + fn * Uh * 0.3, wr - fd * Uh * 0.08 - fn * Uh * 0.3, corner.darkened(0.3) if far_side else corner, maxf(1.5, Uh * 0.16), true)
+	_circ(ci, wr + fd * Uh * 0.16, Uh * 0.36, g)
+	_circ(ci, wr + fd * Uh * 0.16 - fn * Uh * 0.08 + Vector2(0, -Uh * 0.06), Uh * 0.16, g.lightened(0.12))
+	_line(ci, wr - fd * Uh * 0.08 + fn * Uh * 0.3, wr - fd * Uh * 0.08 - fn * Uh * 0.3, corner.darkened(0.3) if far_side else corner, maxf(1.5, Uh * 0.16), true)
 
 
 func _shorts_leg(ci: CanvasItem, j: Dictionary, side: String, lw: float, col: Color) -> void:
@@ -343,14 +360,14 @@ func _shorts_leg(ci: CanvasItem, j: Dictionary, side: String, lw: float, col: Co
 	var end := hip.lerp(kn, 0.5)
 	if outfit == "ref":
 		var an: Vector2 = j[side + "_an"]
-		_capsule(ci, hip, kn, lw * 1.05, lw * 0.85, col, col.lightened(0.08))
-		_capsule(ci, kn, an.lerp(kn, 0.1), lw * 0.85, lw * 0.6, col, col.lightened(0.08))
+		_cap(ci, hip, kn, lw * 1.05, lw * 0.85, col, col.lightened(0.08))
+		_cap(ci, kn, an.lerp(kn, 0.1), lw * 0.85, lw * 0.6, col, col.lightened(0.08))
 		return
 	var d := (end - hip).normalized()
 	var n := Vector2(-d.y, d.x)
 	var a := hip - d * lw * 0.6
-	ci.draw_colored_polygon(PackedVector2Array([a + n * lw * 1.25, end + n * lw * 1.2, end - n * lw * 1.2, a - n * lw * 1.25]), col)
-	ci.draw_line(end + n * lw * 1.2, end - n * lw * 1.2, Color(trim, 0.9), maxf(1.0, lw * 0.22), true)
+	_cpoly(ci, PackedVector2Array([a + n * lw * 1.25, end + n * lw * 1.2, end - n * lw * 1.2, a - n * lw * 1.25]), col)
+	_line(ci, end + n * lw * 1.2, end - n * lw * 1.2, Color(trim, 0.9), maxf(1.0, lw * 0.22), true)
 
 
 func _leg(ci: CanvasItem, j: Dictionary, side: String, lw: float, col: Color, light: Color, Uh: float, _far_side: bool) -> void:
@@ -358,23 +375,23 @@ func _leg(ci: CanvasItem, j: Dictionary, side: String, lw: float, col: Color, li
 	var kn: Vector2 = j[side + "_kn"]
 	var an: Vector2 = j[side + "_an"]
 	var toe: Vector2 = j[side + "_toe"]
-	_capsule(ci, hip, kn, lw, lw * 0.72, col, light)
-	_capsule(ci, kn, an, lw * 0.72, lw * 0.42, col, light)
-	_capsule(ci, an, toe, lw * 0.4, lw * 0.3, col, light)
+	_cap(ci, hip, kn, lw, lw * 0.72, col, light)
+	_cap(ci, kn, an, lw * 0.72, lw * 0.42, col, light)
+	_cap(ci, an, toe, lw * 0.4, lw * 0.3, col, light)
 
 
 func _head(ci: CanvasItem, j: Dictionary, Uh: float, sk: Color) -> void:
 	var c: Vector2 = j["head"]
 	var neck: Vector2 = j["neck"]
 	var r := R_HEAD * Uh
-	_capsule(ci, neck - (c - neck).normalized() * Uh * 0.1, c, Uh * 0.24 * chest_k, Uh * 0.24, sk.darkened(0.1), sk)
+	_cap(ci, neck - (c - neck).normalized() * Uh * 0.1, c, Uh * 0.24 * chest_k, Uh * 0.24, sk.darkened(0.1), sk)
 	var up := (c - neck).normalized()
 	var fw := Vector2(-up.y, up.x) * dir
 	if fw.dot(Vector2(dir, 0)) < 0.0:
 		fw = -fw
 	# Crânio (oval) e queixo para a frente
-	ci.draw_circle(c, r, sk)
-	ci.draw_circle(c + fw * r * 0.35 - up * r * 0.35, r * 0.62, sk)
+	_circ(ci, c, r, sk)
+	_circ(ci, c + fw * r * 0.35 - up * r * 0.35, r * 0.62, sk)
 	# Cabelo
 	if not bald:
 		var cap := PackedVector2Array()
@@ -383,21 +400,72 @@ func _head(ci: CanvasItem, j: Dictionary, Uh: float, sk: Color) -> void:
 			var v := up.rotated((a - PI * 0.5) * dir)
 			cap.append(c + v * r * 1.04)
 		cap.append(c - fw * r * 0.9 - up * r * 0.1)
-		ci.draw_colored_polygon(cap, hair)
+		_cpoly(ci, cap, hair)
 	# Barba
 	if has_beard:
 		var bd := PackedVector2Array([c + fw * r * 0.95 - up * r * 0.15, c + fw * r * 0.75 - up * r * 0.95, c - up * r * 0.85, c - fw * r * 0.3 - up * r * 0.3])
-		ci.draw_colored_polygon(bd, Color(beard, 0.9))
+		_cpoly(ci, bd, Color(beard, 0.9))
 	# Olho, nariz e orelha
-	ci.draw_circle(c + fw * r * 0.62 + up * r * 0.12, maxf(1.0, r * 0.1), Color(0.08, 0.06, 0.05))
-	ci.draw_line(c + fw * r * 0.9 + up * r * 0.05, c + fw * r * 1.12 - up * r * 0.15, sk.darkened(0.25), maxf(1.0, r * 0.18), true)
-	ci.draw_circle(c - fw * r * 0.1, r * 0.2, sk.darkened(0.15))
+	if ko:
+		_line(ci, c + fw * r * 0.5 + up * r * 0.1, c + fw * r * 0.75 + up * r * 0.1, Color(0.08, 0.06, 0.05), maxf(1.0, r * 0.08))
+	else:
+		_circ(ci, c + fw * r * 0.62 + up * r * 0.12, maxf(1.0, r * 0.1), Color(0.08, 0.06, 0.05))
+	_line(ci, c + fw * r * 0.9 + up * r * 0.05, c + fw * r * 1.12 - up * r * 0.15, sk.darkened(0.25), maxf(1.0, r * 0.18), true)
+	_circ(ci, c - fw * r * 0.1, r * 0.2, sk.darkened(0.15))
 	if bruise > 0.25:
-		ci.draw_circle(c + fw * r * 0.6 + up * r * 0.1, r * (0.22 + 0.12 * bruise), Color(0.38, 0.12, 0.2, clampf((bruise - 0.25) * 0.7, 0.0, 0.5)))
+		_circ(ci, c + fw * r * 0.6 + up * r * 0.1, r * (0.22 + 0.12 * bruise), Color(0.38, 0.12, 0.2, clampf((bruise - 0.25) * 0.7, 0.0, 0.5)))
+	if bruise > 0.6:
+		_line(ci, c + fw * r * 0.98 - up * r * 0.2, c + fw * r * 0.9 - up * r * (0.45 + 0.3 * bruise), Color(0.6, 0.03, 0.03, 0.85), maxf(1.0, r * 0.14))
 	if cut > 0.2:
 		var bl := Color(0.62, 0.04, 0.04, clampf(0.35 + cut * 0.45, 0.0, 0.95))
 		var top := c + fw * r * 0.55 + up * r * 0.5
-		ci.draw_circle(top, r * 0.12, bl)
-		ci.draw_line(top, c + fw * r * 0.72 - up * r * (0.2 + 0.5 * minf(cut, 1.0)), bl, maxf(1.0, r * (0.12 + 0.1 * cut)), true)
+		_circ(ci, top, r * 0.12, bl)
+		_line(ci, top, c + fw * r * 0.72 - up * r * (0.2 + 0.5 * minf(cut, 1.0)), bl, maxf(1.0, r * (0.12 + 0.1 * cut)), true)
 		if cut > 0.7:
-			ci.draw_line(top - fw * r * 0.2, c + fw * r * 0.35 - up * r * 0.9, Color(bl, bl.a * 0.8), maxf(1.0, r * 0.1), true)
+			_line(ci, top - fw * r * 0.2, c + fw * r * 0.35 - up * r * 0.9, Color(bl, bl.a * 0.8), maxf(1.0, r * 0.1), true)
+
+
+# --- Primitivas com contorno ---------------------------------------------------------------
+
+const OL_COL := Color(0.05, 0.04, 0.06, 0.92)
+## Largura do contorno na passada de contorno (0 na passada normal).
+var _ol := 0.0
+
+
+func _cap(ci: CanvasItem, a: Vector2, b: Vector2, w0: float, w1: float, col: Color, light: Color) -> void:
+	if _ol > 0.0:
+		_capsule(ci, a, b, w0 + _ol, w1 + _ol, OL_COL, OL_COL)
+	else:
+		_capsule(ci, a, b, w0, w1, col, light)
+
+
+func _circ(ci: CanvasItem, c: Vector2, r: float, col: Color) -> void:
+	if _ol > 0.0:
+		if r >= _ol * 2.5 and col.a > 0.8:
+			ci.draw_circle(c, r + _ol, OL_COL)
+	else:
+		ci.draw_circle(c, r, col)
+
+
+func _poly(ci: CanvasItem, pts: PackedVector2Array, cols: PackedColorArray) -> void:
+	if _ol > 0.0:
+		var closed := pts.duplicate()
+		closed.append(pts[0])
+		ci.draw_polyline(closed, OL_COL, _ol * 2.0, true)
+	else:
+		ci.draw_polygon(pts, cols)
+
+
+func _cpoly(ci: CanvasItem, pts: PackedVector2Array, col: Color) -> void:
+	if _ol > 0.0:
+		if col.a > 0.8:
+			var closed := pts.duplicate()
+			closed.append(pts[0])
+			ci.draw_polyline(closed, OL_COL, _ol * 2.0, true)
+	else:
+		ci.draw_colored_polygon(pts, col)
+
+
+func _line(ci: CanvasItem, a: Vector2, b: Vector2, col: Color, w: float, _aa: bool = true) -> void:
+	if _ol <= 0.0:
+		ci.draw_line(a, b, col, w, true)

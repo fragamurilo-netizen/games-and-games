@@ -24,11 +24,16 @@ var _drops: Array = []
 var _stains: Array = []
 var _rep: Label
 var _was_replay := false
+var _canvas_label: Label3D
+## Lados da grade ([peças], centro no chão): os que ficam entre a câmera e a luta somem.
+var _fence: Array = []
+var _logo := ""
 
 
-func setup(brain_: FightStage2D, org_color: Color = Color("#C8102E")) -> void:
+func setup(brain_: FightStage2D, org_color: Color = Color("#C8102E"), logo: String = "") -> void:
 	brain = brain_
 	_org = org_color
+	_logo = logo
 	custom_minimum_size = Vector2(0, 300)
 	clip_contents = true
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -157,7 +162,7 @@ func _build_world() -> void:
 	fl.bottom_radius = R_OCT
 	fl.height = 0.4
 	fl.radial_segments = 8
-	_add(fl, _mat(Color("#8F8B83"), 0.95), Vector3(0, -0.2, 0), deg_to_rad(22.5))
+	_add(fl, _mat(Color("#7F7B74"), 0.95), Vector3(0, -0.2, 0), deg_to_rad(22.5))
 	var apron := CylinderMesh.new()
 	apron.top_radius = R_OCT + 3.0
 	apron.bottom_radius = R_OCT + 3.0
@@ -173,7 +178,7 @@ func _build_world() -> void:
 	logo.top_radius = 5.0
 	logo.bottom_radius = 5.0
 	logo.height = 0.02
-	var lm := _mat(Color(_org, 1.0).lerp(Color("#8F8B83"), 0.82))
+	var lm := _mat(Color(_org, 1.0).lerp(Color("#7F7B74"), 0.85))
 	_add(logo, lm, Vector3(0, 0.005, 0))
 	# Grade: painéis de alambrado, postes pretos e acolchoado em cima.
 	var link := _chain_texture()
@@ -195,7 +200,8 @@ func _build_world() -> void:
 		p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var pad := BoxMesh.new()
 		pad.size = Vector3(side, 0.45, 0.5)
-		_add(pad, _mat(Color("#121317")), Vector3(sin(a) * apothem, FENCE_H + 0.2, cos(a) * apothem), a)
+		var pm := _add(pad, _mat(Color("#121317")), Vector3(sin(a) * apothem, FENCE_H + 0.2, cos(a) * apothem), a)
+		_fence.append([[p, pm], Vector3(sin(a) * apothem, 0, cos(a) * apothem)])
 		var va := deg_to_rad(45.0 * float(k) + 22.5)
 		var post := CylinderMesh.new()
 		post.top_radius = 0.28
@@ -206,7 +212,8 @@ func _build_world() -> void:
 			pc = UIColors.CORNER_RED
 		elif k == 2:
 			pc = UIColors.CORNER_BLUE
-		_add(post, _mat(pc), Vector3(sin(va) * R_OCT, (FENCE_H + 0.6) * 0.5, cos(va) * R_OCT))
+		var pst := _add(post, _mat(pc), Vector3(sin(va) * R_OCT, (FENCE_H + 0.6) * 0.5, cos(va) * R_OCT))
+		_fence.append([[pst], Vector3(sin(va) * R_OCT, 0, cos(va) * R_OCT)])
 	# Torcida: arquibancada em volta, blocos escuros com camisas variadas.
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
@@ -240,6 +247,69 @@ func _build_world() -> void:
 	mmi.material_override = cm
 	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_vp.add_child(mmi)
+	# Nome do evento pintado na lona.
+	if _logo != "":
+		_canvas_label = Label3D.new()
+		_canvas_label.text = _logo.to_upper()
+		_canvas_label.font_size = 160
+		_canvas_label.pixel_size = 0.012
+		_canvas_label.outline_size = 0
+		_canvas_label.modulate = Color(1, 1, 1, 0.55)
+		_canvas_label.rotation_degrees = Vector3(-90, 0, 0)
+		_canvas_label.position = Vector3(0, 0.03, 0)
+		_canvas_label.shaded = true
+		_canvas_label.double_sided = false
+		_vp.add_child(_canvas_label)
+	# Grid de luz em cima: treliça, refletores acesos, fachos no ar e dois spots no octógono.
+	var truss := _mat(Color("#1B1C20"), 0.6)
+	for k in 4:
+		var bx := BoxMesh.new()
+		bx.size = Vector3(26.0, 0.6, 0.6)
+		var tb := _add(bx, truss, Vector3(0, 17.0, 0), deg_to_rad(90.0 * float(k)))
+		tb.position = Vector3(sin(deg_to_rad(90.0 * float(k))) * 13.0, 17.0, cos(deg_to_rad(90.0 * float(k))) * 13.0)
+		tb.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var lamp := StandardMaterial3D.new()
+	lamp.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	lamp.albedo_color = Color(1.0, 0.97, 0.88)
+	var beam := StandardMaterial3D.new()
+	beam.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	beam.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	beam.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	beam.cull_mode = BaseMaterial3D.CULL_DISABLED
+	beam.albedo_color = Color(1.0, 0.95, 0.85, 0.035)
+	var cone := CylinderMesh.new()
+	cone.top_radius = 0.35
+	cone.bottom_radius = 4.0
+	cone.height = 16.5
+	cone.radial_segments = 16
+	cone.cap_top = false
+	cone.cap_bottom = false
+	for k in 8:
+		var a := TAU * float(k) / 8.0 + 0.4
+		var lp := Vector3(sin(a) * 12.5, 16.6, cos(a) * 12.5)
+		var lb := BoxMesh.new()
+		lb.size = Vector3(0.7, 0.35, 0.7)
+		_add(lb, lamp, lp).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		if k % 2 == 0:
+			var tgt := Vector3(sin(a) * 4.0, 0, cos(a) * 4.0)
+			var cmi := MeshInstance3D.new()
+			cmi.mesh = cone
+			cmi.material_override = beam
+			cmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			var d := (lp - tgt).normalized()
+			var x := d.cross(Vector3.FORWARD).normalized()
+			var z := x.cross(d).normalized()
+			cmi.transform = Transform3D(Basis(x, d, z), (lp + tgt) * 0.5)
+			_vp.add_child(cmi)
+	for k in 2:
+		var sp := SpotLight3D.new()
+		sp.position = Vector3(-9.0 + 18.0 * float(k), 16.0, 6.0)
+		sp.spot_range = 30.0
+		sp.spot_angle = 32.0
+		sp.light_energy = 1.1
+		sp.light_color = Color(1.0, 0.96, 0.9)
+		_vp.add_child(sp)
+		sp.look_at_from_position(sp.position, Vector3(0, 0, 0))
 	_cam = Camera3D.new()
 	_cam.fov = 38.0
 	_cam.current = true
@@ -306,7 +376,11 @@ func _build_fighter(r: Rig2D) -> Dictionary:
 	var blood := _mat(Color(0.55, 0.02, 0.03), 0.25)
 	var bruise := _mat(Color(0.38, 0.12, 0.2), 0.6)
 	bruise.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	skin.rim_enabled = true
+	skin.rim = 0.3
+	skin.rim_tint = 0.5
 	f["skin"] = skin
+	f["glove_m"] = glove
 	f["bruise_m"] = bruise
 	var top_m: StandardMaterial3D = shirt if is_ref else skin
 	var leg_m: StandardMaterial3D = shorts if is_ref else skin
@@ -318,11 +392,13 @@ func _build_fighter(r: Rig2D) -> Dictionary:
 		f[sd + "_bi"] = _part(sph, top_m)
 		f[sd + "_el"] = _part(sph, skin)
 		f[sd + "_f"] = _part(_taper(0.7), skin)
+		f[sd + "_fm"] = _part(sph, skin)
 		if is_ref:
-			f[sd + "_g"] = _part(sph, skin)
+			f[sd + "_g"] = _part(sph, _mat(Color("#8DB6DA"), 0.35))
 		else:
 			f[sd + "_g"] = _part(sph, glove)
 			f[sd + "_th"] = _part(sph, glove)
+			f[sd + "_fing"] = _part(sph, skin)
 			f[sd + "_band"] = _part(_taper(1.0), band)
 	for sd: String in ["nl", "fl"]:
 		f[sd + "_t"] = _part(_taper(0.7), leg_m)
@@ -335,6 +411,7 @@ func _build_fighter(r: Rig2D) -> Dictionary:
 		if not is_ref:
 			f[sd + "_sh"] = _part(_taper(0.9), shorts)
 			f[sd + "_hem"] = _part(_taper(1.0), trim)
+			f[sd + "_stripe"] = _part(_taper(1.0), trim)
 	f["pelvis"] = _part(sph, shorts)
 	f["band"] = _part(_taper(1.0), shirt if is_ref else trim)
 	f["abs"] = _part(sph, top_m)
@@ -342,6 +419,20 @@ func _build_fighter(r: Rig2D) -> Dictionary:
 	f["pec_n"] = _part(sph, top_m)
 	f["pec_f"] = _part(sph, top_m)
 	f["trap"] = _part(sph, top_m)
+	f["lat_n"] = _part(sph, top_m)
+	f["lat_f"] = _part(sph, top_m)
+	for k in 6:
+		f["ab%d" % k] = _part(sph, top_m)
+	if is_ref:
+		f["collar"] = _part(_taper(1.0), shirt)
+		f["badge"] = _part(box, _mat(Color("#E8E6E0"), 0.6))
+	f["cheek_n"] = _part(sph, skin)
+	f["cheek_f"] = _part(sph, skin)
+	f["chin"] = _part(sph, skin)
+	f["lips"] = _part(sph, _mat(r.skin.darkened(0.3).lerp(Color(0.55, 0.25, 0.25), 0.3), 0.5))
+	f["white_n"] = _part(sph, _mat(Color(0.92, 0.9, 0.86), 0.3))
+	f["white_f"] = _part(sph, _mat(Color(0.92, 0.9, 0.86), 0.3))
+	f["nosebleed"] = _part(_taper(0.5), blood)
 	f["neck"] = _part(_taper(0.92), skin)
 	f["head"] = _part(sph, skin)
 	f["jaw"] = _part(sph, skin)
@@ -432,11 +523,17 @@ func _pose_fighter(f: Dictionary, zoff: float = 0.0) -> void:
 	var up: Vector3 = tf[1]
 	var side: Vector3 = Vector3.BACK
 	# Braços
+	var tw := deg_to_rad(float(r.pose.get("tw", 0.0)))
+	var rear := r.rear()
 	for sd: String in ["na", "fa"]:
-		var z := (sw if sd == "na" else -sw) * az
-		var s := sh + Vector3(0, 0, z)
-		var el := _v(j[sd + "_el"], zz + z * 1.08)
-		var wr := _v(j[sd + "_wr"], zz + z * 0.85)
+		# Giro: o ombro de trás vai para a frente e o da frente recua; o soco esticado fecha no centro.
+		var sg := 1.0 if sd.begins_with(rear) else -1.0
+		var fo := fw * sin(tw) * sw * sg
+		var z := (sw if sd == "na" else -sw) * az * cos(tw)
+		var s := sh + fo + Vector3(0, 0, z)
+		var reach := clampf(((j[sd + "_wr"] as Vector2).distance_to(j["sh"]) / ((Rig2D.L_UARM + Rig2D.L_FARM) * Uh) - 0.6) / 0.35, 0.0, 1.0)
+		var el := _v(j[sd + "_el"], zz + z * 1.08) + fo
+		var wr := _v(j[sd + "_wr"], zz + z * 0.85 * (1.0 - 0.85 * reach)) + fo
 		_ell(f[sd + "_delt"], s + up * Uh * 0.02, fw, up, side, Vector3(aw * 1.55, aw * 1.35, aw * 1.45) * (1.0 + 0.15 * mus))
 		_seg(f[sd + "_u"], s, el, aw)
 		var ud := (el - s).normalized()
@@ -446,19 +543,26 @@ func _pose_fighter(f: Dictionary, zoff: float = 0.0) -> void:
 		_seg(f[sd + "_f"], el, wr, aw * 0.92)
 		var gd := (wr - el).normalized()
 		var gf := _frame(gd, r.dir)
+		_ell(f[sd + "_fm"], el.lerp(wr, 0.3) + (gf[0] as Vector3) * aw * 0.1, gf[0], gd, side, Vector3(aw * (0.95 + 0.2 * mus), el.distance_to(wr) * 0.55, aw * 0.9))
 		if is_ref:
 			_ell(f[sd + "_g"], wr + gd * Uh * 0.12, gf[0], gd, side, Vector3(aw * 0.7, aw * 0.95, aw * 0.6))
 		else:
-			_ell(f[sd + "_g"], wr + gd * Uh * 0.2, gf[0], gd, side, Vector3(Uh * 0.6, Uh * 0.74, Uh * 0.62))
+			# Luva de MMA: almofada nos nós dos dedos, dedos dobrados por baixo, polegar e punho.
+			_ell(f[sd + "_g"], wr + gd * Uh * 0.22 + (gf[0] as Vector3) * Uh * 0.06, gf[0], gd, side, Vector3(Uh * 0.56, Uh * 0.66, Uh * 0.6))
+			_ell(f[sd + "_fing"], wr + gd * Uh * 0.3 - (gf[0] as Vector3) * Uh * 0.16, gf[0], gd, side, Vector3(Uh * 0.3, Uh * 0.36, Uh * 0.5))
 			_ell(f[sd + "_th"], wr + gd * Uh * 0.1 + (gf[0] as Vector3) * Uh * 0.24, gf[0], gd, side, Vector3(Uh * 0.24, Uh * 0.36, Uh * 0.24))
 			_seg(f[sd + "_band"], wr - gd * Uh * 0.12, wr + gd * Uh * 0.02, Uh * 0.55)
 	# Pernas
 	for sd: String in ["nl", "fl"]:
-		var z := hw if sd == "nl" else -hw
-		var h := hip + Vector3(0, 0, z)
-		var kn := _v(j[sd + "_kn"], zz + z * 1.05)
-		var an := _v(j[sd + "_an"], zz + z)
-		var toe := _v(j[sd + "_toe"], zz + z)
+		var sg := 1.0 if sd.begins_with(rear) else -1.0
+		var fo := fw * sin(tw * 0.6) * hw * sg
+		var z := (hw if sd == "nl" else -hw) * cos(tw * 0.6)
+		var h := hip + fo + Vector3(0, 0, z)
+		# Perna que sobe (chute, joelhada) fecha para o centro.
+		var rise := clampf(((j[sd + "_an"] as Vector2).y * -1.0 - (-(j["hip"] as Vector2).y - 3.2 * Uh)) / (2.6 * Uh), 0.0, 1.0)
+		var kn := _v(j[sd + "_kn"], zz + z * 1.05 * (1.0 - 0.5 * rise)) + fo
+		var an := _v(j[sd + "_an"], zz + z * (1.0 - 0.8 * rise)) + fo
+		var toe := _v(j[sd + "_toe"], zz + z * (1.0 - 0.8 * rise)) + fo
 		_seg(f[sd + "_t"], h, kn, lw)
 		var td := (kn - h).normalized()
 		var tfr := _frame(td, r.dir)
@@ -476,6 +580,8 @@ func _pose_fighter(f: Dictionary, zoff: float = 0.0) -> void:
 			var send := h.lerp(kn, 0.52)
 			_seg(f[sd + "_sh"], h - td * Uh * 0.15, send, lw * 1.28)
 			_seg(f[sd + "_hem"], send - td * Uh * 0.06, send + td * Uh * 0.03, lw * 1.2)
+			var outv := Vector3(0, 0, signf(z) if absf(z) > 0.01 else 1.0) * lw * 0.6
+			_seg(f[sd + "_stripe"], h + outv - td * Uh * 0.1, send + outv, lw * 0.22)
 	# Tronco
 	var tl := hip.distance_to(neck)
 	var depth := 0.9 * Uh * r.chest_k
@@ -488,6 +594,19 @@ func _pose_fighter(f: Dictionary, zoff: float = 0.0) -> void:
 	for pk: String in ["pec_n", "pec_f"]:
 		var zs := 1.0 if pk == "pec_n" else -1.0
 		_ell(f[pk], chest_c + up * Uh * 0.12 + fw * depth * 0.3 + side * zs * sw * 0.48, fw, up, side, Vector3(depth * 0.55, Uh * 0.62, sw * 0.95) * (1.0 + 0.2 * mus))
+	for li: int in 2:
+		var zs := 1.0 if li == 0 else -1.0
+		_ell(f["lat_n" if li == 0 else "lat_f"], chest_c - up * Uh * 0.45 + side * zs * sw * 0.95 - fw * depth * 0.1, fw, up, side, Vector3(depth * 0.62, Uh * 1.15, sw * 0.42) * (1.0 + 0.15 * mus))
+	for k in 6:
+		var abm: MeshInstance3D = f["ab%d" % k]
+		abm.visible = belly < 0.25 and not is_ref
+		if abm.visible:
+			var row := float(k / 2)
+			var zs2 := 1.0 if k % 2 == 0 else -1.0
+			_ell(abm, hip + up * Uh * (0.8 + 0.4 * row) + fw * depth * 0.4 + side * zs2 * sw * 0.26, fw, up, side, Vector3(depth * 0.22, Uh * 0.36, sw * 0.3))
+	if is_ref:
+		_seg(f["collar"], neck - up * Uh * 0.15, neck + up * Uh * 0.12, Uh * 0.68)
+		_ell(f["badge"], chest_c + up * Uh * 0.25 + fw * depth * 0.5 + side * sw * 0.5, fw, up, side, Vector3(0.05, Uh * 0.28, Uh * 0.36))
 	_ell(f["trap"], neck - up * Uh * 0.2 - fw * depth * 0.12, fw, up, side, Vector3(depth * 0.7, Uh * 0.55, sw * 1.6) * (1.0 + 0.2 * mus))
 	if f.has("top"):
 		_ell(f["top"], chest_c + up * Uh * 0.05 + fw * depth * 0.06, fw, up, side, Vector3(depth * 1.12, Uh * 0.85, sw * 2.25))
@@ -505,8 +624,22 @@ func _pose_fighter(f: Dictionary, zoff: float = 0.0) -> void:
 	for ek: String in ["n", "f"]:
 		var zs := 1.0 if ek == "n" else -1.0
 		var ep := head + hf * hr * 0.44 + hu * hr * 0.08 + side * zs * hr * 0.17
-		_ell(f["eye_" + ek], ep, hf, hu, side, Vector3(hr * 0.08, hr * 0.09, hr * 0.12))
+		_ell(f["eye_" + ek], ep + hf * hr * 0.02, hf, hu, side, Vector3(hr * 0.06, hr * (0.02 if r.ko else 0.08), hr * 0.08))
 		_ell(f["brow_" + ek], ep + hu * hr * 0.11 + hf * hr * 0.03, hf, hu, side, Vector3(hr * 0.06, hr * 0.05, hr * 0.2))
+	for ck: String in ["n", "f"]:
+		var zs := 1.0 if ck == "n" else -1.0
+		_ell(f["cheek_" + ck], head + hf * hr * 0.3 - hu * hr * 0.1 + side * zs * hr * 0.24, hf, hu, side, Vector3(hr * 0.3, hr * 0.26, hr * 0.26))
+		var wm: MeshInstance3D = f["white_" + ck]
+		var ep2 := head + hf * hr * 0.41 + hu * hr * 0.08 + side * zs * hr * 0.17
+		_ell(wm, ep2, hf, hu, side, Vector3(hr * 0.06, hr * (0.02 if r.ko else 0.1), hr * 0.17))
+	_ell(f["chin"], head - hu * hr * 0.5 + hf * hr * 0.3, hf, hu, side, Vector3(hr * 0.3, hr * 0.26, hr * 0.34))
+	_ell(f["lips"], head - hu * hr * 0.27 + hf * hr * 0.44, hf, hu, side, Vector3(hr * 0.1, hr * 0.08, hr * 0.26))
+	var nb: MeshInstance3D = f["nosebleed"]
+	nb.visible = r.bruise > 0.6 and not is_ref
+	if nb.visible:
+		_seg(nb, head + hf * hr * 0.5 - hu * hr * 0.15, head + hf * hr * 0.48 - hu * hr * (0.35 + 0.3 * r.bruise), hr * 0.1)
+	if f.has("glove_m"):
+		(f["glove_m"] as StandardMaterial3D).albedo_color = r.glove.lerp(Color(0.42, 0.03, 0.03), clampf(r.glove_blood, 0.0, 0.8) * 0.6)
 	_ell(f["nose"], head + hf * hr * 0.5 - hu * hr * 0.05, hf, hu, side, Vector3(hr * 0.2, hr * 0.26, hr * 0.15))
 	_ell(f["hair"], head + hu * hr * 0.13 - hf * hr * 0.09, hf, hu, side, Vector3(hr * 1.0, hr * 1.0, hr * 0.96))
 	_ell(f["beard"], head - hu * hr * 0.3 + hf * hr * 0.17, hf, hu, side, Vector3(hr * 0.72, hr * 0.6, hr * 0.8))
@@ -528,6 +661,102 @@ func _pose_fighter(f: Dictionary, zoff: float = 0.0) -> void:
 		_ell(bm, head + hf * hr * 0.4 + hu * hr * 0.05 + side * hr * 0.17, hf, hu, side, Vector3(hr * 0.12, hr * 0.22, hr * 0.26) * (1.0 + 0.4 * r.bruise))
 
 
+# --- Direção de TV ---------------------------------------------------------------------------
+
+## Planos: aberto (geral alto), lateral (na altura da cintura, por fora da grade), fechado (perto
+## e de lado) e de cima (no chão mostra bem quem está por cima). Corta de plano a cada poucos
+## segundos, corta para o fechado no knockdown e no fim, e enquadra a dupla inteira sozinho
+## (cabeça e pés sempre dentro).
+const SHOTS := {
+	"aberto": {"yaw": 0.2, "pitch": 17.0, "pad": 1.45},
+	"lateral": {"yaw": -0.05, "pitch": 5.0, "pad": 1.3},
+	"fechado": {"yaw": 0.55, "pitch": 9.0, "pad": 1.0},
+	"cima": {"yaw": 0.1, "pitch": 64.0, "pad": 1.3},
+	"replay1": {"yaw": -0.7, "pitch": 4.0, "pad": 1.25},
+	"replay2": {"yaw": 1.0, "pitch": 10.0, "pad": 1.05},
+}
+var _shot := "aberto"
+var _shot_left := 6.0
+var _shot_n := 0
+var _last_kd := false
+
+
+func _pick_shot() -> String:
+	var ground := String(brain.st.get("pos", "solto")) == "chao"
+	_shot_n += 1
+	var seq: Array = ["cima", "fechado", "aberto", "cima", "lateral"] if ground else ["aberto", "lateral", "fechado", "aberto", "fechado", "lateral"]
+	return String(seq[_shot_n % seq.size()])
+
+
+func _bbox() -> AABB:
+	var box := AABB()
+	var first := true
+	for f: Dictionary in _figs:
+		var r: Rig2D = f["rig"]
+		var j := r.joints(0.0, 0.0, 1.0)
+		for k: String in ["hip", "head", "neck", "na_wr", "fa_wr", "nl_an", "fl_an", "nl_kn", "fl_kn"]:
+			var p := _v(j[k], float(r.pose.get("zz", 0.0)))
+			if first:
+				box = AABB(p, Vector3.ZERO)
+				first = false
+			else:
+				box = box.expand(p)
+	return box.grow(0.35)
+
+
+func _direct(delta: float) -> void:
+	var cut := false
+	var rep := brain.in_replay()
+	var want := _shot
+	if rep:
+		want = "replay1" if brain.replay_take() == 0 else "replay2"
+	elif brain._ended:
+		want = "fechado"
+	else:
+		var kd: bool = String(brain._act.get("type", "")) == "kd"
+		if kd and not _last_kd:
+			want = "fechado"
+			_shot_left = 3.0
+		_last_kd = kd
+		_shot_left -= delta
+		var ground := String(brain.st.get("pos", "solto")) == "chao"
+		if _shot_left <= 0.0 or (_shot == "cima" and not ground) or _shot.begins_with("replay"):
+			want = _pick_shot()
+			_shot_left = 4.5 + float(_shot_n % 3) * 1.5
+	if want != _shot:
+		_shot = want
+		cut = true
+	var sp: Dictionary = SHOTS[_shot]
+	var box := _bbox()
+	var c := box.get_center()
+	var yaw := float(sp["yaw"])
+	if _shot == "aberto":
+		yaw += 0.2 * sin(_t * 0.08)
+	elif _shot == "replay2":
+		yaw += _t * 0.08
+	var pitch := deg_to_rad(float(sp["pitch"]))
+	var pad := float(sp["pad"])
+	var aspect := maxf(0.5, float(_vp.size.x) / maxf(1.0, float(_vp.size.y)))
+	var tv := tan(deg_to_rad(_cam.fov * 0.5))
+	var dirv := Vector3(sin(yaw) * cos(pitch), sin(pitch), cos(yaw) * cos(pitch))
+	# Tamanho da dupla visto deste ângulo.
+	var right := Vector3(cos(yaw), 0, -sin(yaw))
+	var upv := dirv.cross(right).normalized() * -1.0
+	var hw := 0.0
+	var hh := 0.0
+	for i in 8:
+		var corner := box.get_endpoint(i) - c
+		hw = maxf(hw, absf(corner.dot(right)))
+		hh = maxf(hh, absf(corner.dot(upv)))
+	var dist := maxf(hh * pad / tv, hw * pad / (tv * aspect)) + box.size.length() * 0.05
+	dist = clampf(dist, 5.5, 30.0)
+	var tgt := c + dirv * dist
+	tgt.y = maxf(tgt.y, 0.8)
+	var k := 1.0 if cut else 1.0 - exp(-3.0 * delta)
+	_cam_pos = _cam_pos.lerp(tgt, k)
+	_cam_look = _cam_look.lerp(c, k)
+
+
 # --- Quadro --------------------------------------------------------------------------------
 
 func _process(delta: float) -> void:
@@ -538,40 +767,19 @@ func _process(delta: float) -> void:
 		_pose_fighter(f)
 	if _ref_fig.size() > 0:
 		_pose_fighter(_ref_fig, -3.4)
-	# Câmera de TV: alta, acompanhando a dupla e girando devagar; chega mais perto no chão e nos
-	# momentos grandes. No replay, câmera baixa girando em volta do nocaute.
-	var mid := ((brain.rigs[0] as Rig2D).px + (brain.rigs[1] as Rig2D).px) * 0.5
-	var ground := String(brain.st.get("pos", "solto")) == "chao"
-	var big := brain._caption_t > 0.0 and brain._caption_t < 10.0
-	var dist := 14.0
-	var look_y := 3.6
-	var lift := 3.2
-	var ang := 0.28 * sin(_t * 0.09) + 0.12
-	if ground:
-		dist = 13.0
-		look_y = 1.4
-		lift = 4.6
-	if big:
-		dist -= 2.5
-	if brain._ended:
-		dist = 13.0
-		look_y = 3.0
-		lift = 3.0
-	var rep := brain.in_replay()
-	if rep:
-		dist = 11.0
-		look_y = 2.8
-		lift = 0.9
-		ang = 0.75 + _t * 0.12
-	var tgt := Vector3(mid + sin(ang) * dist, look_y + lift, cos(ang) * dist)
-	var k := 1.0 - exp(-(5.0 if rep else 2.0) * delta)
-	if rep != _was_replay:
-		k = 1.0
-		_was_replay = rep
-	_cam_pos = _cam_pos.lerp(tgt, k)
-	_cam_look = _cam_look.lerp(Vector3(mid, look_y, 0), k)
+	_direct(delta)
 	var shake := Vector3(sin(_t * 70.0), cos(_t * 53.0), 0) * brain._shake * 0.25
 	_cam.look_at_from_position(_cam_pos + shake, _cam_look + shake * 0.5)
+	var cflat := Vector3(_cam_pos.x, 0, _cam_pos.z)
+	var lflat := Vector3(_cam_look.x, 0, _cam_look.z)
+	var outside := cflat.length() > R_OCT * 0.8
+	for fs: Array in _fence:
+		var ctr: Vector3 = fs[1]
+		var hide := outside and (ctr - lflat).normalized().dot((cflat - lflat).normalized()) > 0.55 and _cam_pos.y < FENCE_H + 6.0
+		for m: MeshInstance3D in fs[0]:
+			m.visible = not hide
+	if _canvas_label != null:
+		_canvas_label.modulate.a = 0.55
 	# Brilho dos golpes, gotas de sangue e manchas na lona.
 	var fxl: Array = brain._fx
 	var hits: Array = fxl.filter(func(e: Dictionary) -> bool: return String(e["kind"]) == "hit")
@@ -613,4 +821,5 @@ func _process(delta: float) -> void:
 			sm.position = Vector3(float(stn["x"]), 0.012 + float(i) * 0.0004, lerpf(1.6, -2.4, float(stn["z"])))
 			sm.scale = Vector3(w, 1.0, w * 0.8)
 	_cap.text = brain._caption if brain._caption_t > 0.0 else ""
-	_rep.visible = rep
+	_rep.visible = brain.in_replay()
+	_rep.text = "● REPLAY" if brain.replay_take() <= 0 else "● REPLAY · CÂMERA LENTA"

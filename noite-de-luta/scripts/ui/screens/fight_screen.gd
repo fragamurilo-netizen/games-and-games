@@ -156,7 +156,9 @@ func _mount_view() -> void:
 		_stage.get_parent().remove_child(_stage)
 	if AppSettings.fight_view == "3d":
 		_view3d = FightView3D.new()
-		_view3d.setup(_stage)
+		var ev := world().event(_b.event_id)
+		var logo := ev.name.rstrip("0123456789 ") if ev != null else ""
+		_view3d.setup(_stage, UIColors.CORNER_RED, logo)
 		_stage_holder.add_child(_view3d)
 	else:
 		_stage.visible = true

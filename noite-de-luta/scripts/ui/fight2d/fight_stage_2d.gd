@@ -14,7 +14,7 @@ const GAP := [5.4, 4.3, 3.3] ## distância entre as cinturas por distância do m
 ## Duração base de cada lance, em segundos de tela.
 const DUR := {"golpe": 0.42, "chute": 0.58, "giro": 0.75, "kd": 1.7, "balanca": 0.9, "clinch": 0.55, "solta": 0.5, "estudo": 0.7,
 	"queda": 1.15, "puxa_guarda": 0.9, "segura_chute": 1.0, "pega_pescoco": 0.9, "gnp": 0.34, "passa": 0.75, "levanta": 0.9,
-	"mat_return": 1.0, "raspa": 1.0, "repoe": 0.7, "fin": 1.5, "escapa": 0.7, "fim": 2.2, "round": 0.2, "fim_round": 0.6}
+	"mat_return": 1.0, "raspa": 1.0, "repoe": 0.7, "fin": 1.5, "escapa": 0.7, "fim": 2.2, "round": 1.1, "fim_round": 0.6}
 ## Em que ponto do lance o corpo já vai para a posição nova (quedas, raspagens).
 const SWITCH := {"queda": 0.5, "puxa_guarda": 0.35, "segura_chute": 0.6, "raspa": 0.5, "levanta": 0.35, "mat_return": 0.55, "passa": 0.3}
 const THROWS := ["suplex", "uchi_mata", "seoi", "harai", "quadril", "corpo", "levantamento", "pegada_cinto"]
@@ -22,24 +22,24 @@ const KICKS := ["chute_baixo", "chute_corpo", "chute_alto", "chute_frontal", "ch
 const SPINS := ["chute_giratorio", "chute_rodado"]
 ## Golpes: pose estendida. Chaves com L/R são o braço/perna da frente/de trás (La_s, Rl_h...).
 const STRIKE := {
-	"jab": {"La_s": 97.0, "La_e": 2.0, "torso": 10.0, "head": 6.0, "x": 0.75},
-	"direto": {"Ra_s": 94.0, "Ra_e": 4.0, "La_s": 70.0, "La_e": 130.0, "torso": 20.0, "x": 0.75, "Rl_h": -32.0, "Rl_k": 10.0},
-	"gancho": {"La_s": 92.0, "La_e": 75.0, "torso": 6.0, "head": 4.0, "x": 0.35, "crouch": 0.3},
-	"uppercut": {"Ra_s": 55.0, "Ra_e": 95.0, "torso": 10.0, "x": 0.5, "crouch": 0.35},
-	"overhand": {"Ra_s": 150.0, "Ra_e": -55.0, "torso": 32.0, "x": 0.9, "crouch": 0.3},
-	"backfist": {"La_s": 102.0, "La_e": 0.0, "torso": -4.0, "x": 0.5},
-	"superman": {"Ra_s": 100.0, "Ra_e": 4.0, "La_s": 30.0, "La_e": 40.0, "torso": 24.0, "x": 1.3, "y": 0.7, "Rl_h": -60.0, "Rl_k": 70.0},
-	"cotovelada": {"La_s": 100.0, "La_e": 150.0, "torso": 14.0, "x": 0.8},
-	"joelhada": {"Rl_h": 100.0, "Rl_k": 125.0, "torso": -6.0, "La_s": 115.0, "La_e": 40.0, "Ra_s": 105.0, "Ra_e": 50.0, "x": 0.5},
-	"joelhada_voadora": {"Rl_h": 105.0, "Rl_k": 130.0, "Ll_h": 15.0, "Ll_k": 90.0, "y": 1.1, "torso": -8.0, "x": 1.1, "La_s": 40.0, "La_e": 40.0},
-	"chute_baixo": {"Rl_h": 58.0, "Rl_k": 8.0, "torso": -18.0, "Ra_s": -20.0, "Ra_e": 20.0, "x": 0.3},
-	"chute_panturrilha": {"Rl_h": 42.0, "Rl_k": 4.0, "torso": -14.0, "Ra_s": -15.0, "Ra_e": 25.0, "x": 0.35},
-	"chute_obliquo": {"Ll_h": 55.0, "Ll_k": 0.0, "torso": -16.0, "x": 0.2},
-	"chute_corpo": {"Rl_h": 88.0, "Rl_k": 6.0, "torso": -28.0, "Ra_s": -25.0, "Ra_e": 10.0, "x": 0.35},
-	"chute_alto": {"Rl_h": 142.0, "Rl_k": 8.0, "torso": -44.0, "Ra_s": -30.0, "Ra_e": 10.0, "x": 0.4},
-	"chute_frontal": {"Ll_h": 92.0, "Ll_k": 0.0, "torso": -18.0, "x": 0.25},
-	"chute_giratorio": {"Rl_h": -96.0, "Rl_k": 0.0, "torso": 34.0, "head": -20.0, "x": -0.4},
-	"chute_rodado": {"Rl_h": -125.0, "Rl_k": 6.0, "torso": 45.0, "head": -25.0, "x": -0.4},
+	"jab": {"tw": 12.0, "La_s": 97.0, "La_e": 2.0, "torso": 10.0, "head": 6.0, "x": 0.75},
+	"direto": {"tw": 48.0, "Ra_s": 94.0, "Ra_e": 4.0, "La_s": 70.0, "La_e": 130.0, "torso": 20.0, "x": 0.75, "Rl_h": -32.0, "Rl_k": 10.0},
+	"gancho": {"tw": -38.0, "La_s": 92.0, "La_e": 75.0, "torso": 6.0, "head": 4.0, "x": 0.35, "crouch": 0.3},
+	"uppercut": {"tw": 28.0, "Ra_s": 55.0, "Ra_e": 95.0, "torso": 10.0, "x": 0.5, "crouch": 0.35},
+	"overhand": {"tw": 55.0, "Ra_s": 150.0, "Ra_e": -55.0, "torso": 32.0, "x": 0.9, "crouch": 0.3},
+	"backfist": {"tw": -25.0, "La_s": 102.0, "La_e": 0.0, "torso": -4.0, "x": 0.5},
+	"superman": {"tw": 45.0, "Ra_s": 100.0, "Ra_e": 4.0, "La_s": 30.0, "La_e": 40.0, "torso": 24.0, "x": 1.3, "y": 0.7, "Rl_h": -60.0, "Rl_k": 70.0},
+	"cotovelada": {"tw": -30.0, "La_s": 100.0, "La_e": 150.0, "torso": 14.0, "x": 0.8},
+	"joelhada": {"tw": 20.0, "Rl_h": 100.0, "Rl_k": 125.0, "torso": -6.0, "La_s": 115.0, "La_e": 40.0, "Ra_s": 105.0, "Ra_e": 50.0, "x": 0.5},
+	"joelhada_voadora": {"tw": 25.0, "Rl_h": 105.0, "Rl_k": 130.0, "Ll_h": 15.0, "Ll_k": 90.0, "y": 1.1, "torso": -8.0, "x": 1.1, "La_s": 40.0, "La_e": 40.0},
+	"chute_baixo": {"tw": 45.0, "Rl_h": 58.0, "Rl_k": 8.0, "torso": -18.0, "Ra_s": -20.0, "Ra_e": 20.0, "x": 0.3},
+	"chute_panturrilha": {"tw": 40.0, "Rl_h": 42.0, "Rl_k": 4.0, "torso": -14.0, "Ra_s": -15.0, "Ra_e": 25.0, "x": 0.35},
+	"chute_obliquo": {"tw": -10.0, "Ll_h": 55.0, "Ll_k": 0.0, "torso": -16.0, "x": 0.2},
+	"chute_corpo": {"tw": 55.0, "Rl_h": 88.0, "Rl_k": 6.0, "torso": -28.0, "Ra_s": -25.0, "Ra_e": 10.0, "x": 0.35},
+	"chute_alto": {"tw": 65.0, "Rl_h": 142.0, "Rl_k": 8.0, "torso": -44.0, "Ra_s": -30.0, "Ra_e": 10.0, "x": 0.4},
+	"chute_frontal": {"tw": 5.0, "Ll_h": 92.0, "Ll_k": 0.0, "torso": -18.0, "x": 0.25},
+	"chute_giratorio": {"tw": 30.0, "Rl_h": -96.0, "Rl_k": 0.0, "torso": 34.0, "head": -20.0, "x": -0.4},
+	"chute_rodado": {"tw": 40.0, "Rl_h": -125.0, "Rl_k": 6.0, "torso": 45.0, "head": -25.0, "x": -0.4},
 }
 ## Preparação (meio do caminho) de alguns golpes, para o movimento não ser uma linha reta.
 const CHAMBER := {
@@ -159,6 +159,8 @@ func _apply_state(b: Dictionary, silent: bool) -> void:
 		_cage_side = -1.0 if side == 1 else 1.0
 	match type:
 		"round":
+			for r: Rig2D in rigs:
+				r.ko = false
 			_between = false
 			_ended = false
 			_replayed = false
@@ -191,6 +193,7 @@ func _start(b: Dictionary) -> void:
 	_act = {"type": type, "side": int(b["side"]), "b": b, "p": 0.0, "dur": d, "hit": false}
 	match type:
 		"kd":
+			(rigs[1 - clampi(int(b["side"]), 0, 1)] as Rig2D).ko = true
 			_caption = "KNOCKDOWN!"
 			_caption_t = 1.6
 			_shake = 1.0
@@ -198,6 +201,8 @@ func _start(b: Dictionary) -> void:
 			Sfx.vibrate(40)
 		"fim":
 			_caption_for(b)
+			if _method == "KO" and int(b["side"]) >= 0:
+				(rigs[1 - int(b["side"])] as Rig2D).ko = true
 			if _method in ["KO", "TKO"]:
 				_slowmo = 1.0
 				_shake = 1.2
@@ -239,10 +244,13 @@ func _process(delta: float) -> void:
 			and String((_queue[0] as Dictionary)["type"]) == String(_act["type"]) and int((_queue[0] as Dictionary)["side"]) == int(_act["side"])
 		if float(_act["p"]) >= 1.0 or chain:
 			var was_ko := String(_act["type"]) == "fim" and _method in ["KO", "TKO"]
+			if String(_act["type"]) == "kd" and not _ended:
+				for r: Rig2D in rigs:
+					r.ko = false
 			_act = {}
 			if was_ko and not _replayed and _hist.size() > 30 and not AppSettings.reduce_motion:
 				_replayed = true
-				replay = {"frames": _hist.duplicate(), "t": 0.0}
+				replay = {"frames": _hist.duplicate(), "t": 0.0, "take": 0}
 				_caption_t = 0.0
 	if _act.is_empty() and _queue.size() > 0:
 		_start(_queue.pop_front())
@@ -284,15 +292,22 @@ func _record(dt: float) -> void:
 		_hist = _hist.slice(cut_at)
 
 
-## O replay toca os quadros gravados devagar, com zoom, e depois volta para o fim de luta.
+## O replay toca o nocaute duas vezes: o lance inteiro a 0,5× e depois o golpe final a 0,22×, de
+## outro ângulo no 3D. No 2D ganha faixas pretas de cinema em vez de zoom (para não cortar cabeça).
 func _play_replay(delta: float) -> void:
 	var frames: Array = replay["frames"]
-	replay["t"] = float(replay["t"]) + delta * 0.4
+	var take := int(replay.get("take", 0))
+	replay["t"] = float(replay["t"]) + delta * (0.5 if take == 0 else 0.22)
+	var total := 0.0
+	for fr0: Dictionary in frames:
+		total += float(fr0["dt"])
+	var start := 0.0 if take == 0 else maxf(0.0, total - 3.0)
+	var want := start + float(replay["t"])
 	var acc := 0.0
 	var idx := frames.size() - 1
 	for i in frames.size():
 		acc += float((frames[i] as Dictionary)["dt"])
-		if acc >= float(replay["t"]):
+		if acc >= want:
 			idx = i
 			break
 	var fr: Dictionary = frames[idx]
@@ -305,13 +320,20 @@ func _play_replay(delta: float) -> void:
 		if i < 2:
 			r.flash = float(fr["f"][i])
 	_fx = (fr["fx"] as Array).duplicate(true)
-	_zoom = lerpf(_zoom, 1.12, 1.0 - exp(-3.0 * delta))
-	_time += delta * 0.4
+	_time += delta * 0.3
 	if idx >= frames.size() - 1:
-		replay = {}
-		_fx = []
-		_caption_t = 99.0
+		if take == 0:
+			replay["take"] = 1
+			replay["t"] = 0.0
+		else:
+			replay = {}
+			_fx = []
+			_caption_t = 99.0
 	queue_redraw()
+
+
+func replay_take() -> int:
+	return int(replay.get("take", -1))
 
 
 func in_replay() -> bool:
@@ -351,6 +373,14 @@ func _animate_ref(dt: float) -> void:
 	elif _ended:
 		tx = mid
 		p.merge({"na_s": 150.0, "na_e": 20.0, "fa_s": 150.0, "fa_e": 20.0}, true)
+	elif type == "round":
+		tx = mid
+		var chop := smoothstep(0.3, 0.6, pa)
+		p.merge({"na_s": lerpf(165.0, 75.0, chop), "na_e": 5.0, "fa_s": 20.0, "torso": 6.0 + 14.0 * chop}, true)
+	elif type == "balanca":
+		var dfd: Rig2D = rigs[1 - clampi(int(_act.get("side", 0)), 0, 1)]
+		tx = dfd.px + off * 0.45
+		p.merge({"torso": 22.0, "head": 12.0, "na_s": 70.0, "na_e": 30.0}, true)
 	elif type == "solta":
 		tx = mid
 		p.merge({"na_s": 92.0, "na_e": 6.0, "fa_s": 86.0, "fa_e": 10.0}, true)
@@ -477,9 +507,9 @@ func _ground_base(s: Dictionary) -> Array:
 			B["lz"] = 0.6
 			T.merge({"lz": 0.5, "zz": 0.35}, true)
 		"lateral":
-			B.merge({"sit": 1.0, "rot": 90.0, "head": 20.0, "na_s": 75.0, "na_e": 70.0, "fa_s": 40.0, "fa_e": 80.0, "nl_h": 40.0, "nl_k": 80.0, "fl_h": 25.0, "fl_k": 70.0}, true)
-			T.merge({"torso": 78.0, "head": 10.0, "na_s": 30.0, "na_e": 40.0, "fa_s": 60.0, "fa_e": 30.0, "nl_h": -15.0, "nl_k": 75.0, "fl_h": -40.0, "fl_k": 55.0}, true)
-			t_off = 0.4
+			B.merge({"sit": 1.0, "rot": 90.0, "head": 20.0, "na_s": 95.0, "na_e": 60.0, "fa_s": 40.0, "fa_e": 80.0, "nl_h": 50.0, "nl_k": 95.0, "fl_h": 30.0, "fl_k": 75.0}, true)
+			T.merge({"torso": 70.0, "head": 18.0, "na_s": 20.0, "na_e": 30.0, "fa_s": 55.0, "fa_e": 25.0, "nl_h": 10.0, "nl_k": 100.0, "fl_h": -30.0, "fl_k": 70.0}, true)
+			t_off = 0.7
 			T.merge({"lz": 0.5, "zz": 0.95}, true)
 		"montada":
 			B.merge({"sit": 1.0, "rot": 90.0, "head": 25.0, "na_s": 90.0, "na_e": 30.0, "fa_s": 75.0, "fa_e": 45.0, "nl_h": 45.0, "nl_k": 90.0, "fl_h": 35.0, "fl_k": 85.0}, true)
@@ -487,9 +517,9 @@ func _ground_base(s: Dictionary) -> Array:
 			t_off = -0.5
 			T["lz"] = 2.0
 		"costas":
-			B.merge({"sit": 1.0, "rot": 0.0, "torso": -12.0, "head": 10.0, "na_s": 70.0, "na_e": 60.0, "fa_s": 60.0, "fa_e": 70.0, "nl_h": 86.0, "nl_k": 8.0, "fl_h": 82.0, "fl_k": 12.0}, true)
-			T.merge({"sit": 1.0, "torso": 6.0, "head": 12.0, "na_s": 88.0, "na_e": 55.0, "fa_s": 70.0, "fa_e": 70.0, "nl_h": 86.0, "nl_k": 6.0, "fl_h": 82.0, "fl_k": 10.0}, true)
-			t_off = -1.15
+			B.merge({"sit": 1.0, "rot": 0.0, "torso": -6.0, "head": 14.0, "na_s": 75.0, "na_e": 80.0, "fa_s": 65.0, "fa_e": 85.0, "nl_h": 84.0, "nl_k": 25.0, "fl_h": 78.0, "fl_k": 15.0}, true)
+			T.merge({"sit": 1.0, "rot": -18.0, "torso": 0.0, "head": 20.0, "na_s": 100.0, "na_e": 75.0, "fa_s": 85.0, "fa_e": 70.0, "nl_h": 70.0, "nl_k": 45.0, "fl_h": 95.0, "fl_k": 20.0}, true)
+			t_off = -1.55
 			dirs[tp] = dB
 			T.merge({"lz": 1.5, "az": 0.25}, true)
 		_:
@@ -854,6 +884,8 @@ func _impact() -> void:
 	elif z == "leg":
 		pt = (j[rd.lead() + "l_kn"] as Vector2).lerp(j["hip"], 0.3)
 	_fx.append({"t": 0.0, "kind": "hit", "x": (pt.x - _origin_x()) / _U, "y": (_ground - pt.y) / _U, "pw": dmg, "z": z})
+	if z == "head" and rd.cut > 0.3:
+		(rigs[1 - d] as Rig2D).glove_blood += 0.12
 	if z == "head" and (rd.cut > 0.25 or dmg > 1.1):
 		var away := -rd.dir
 		_fx.append({"t": 0.0, "kind": "blood", "x": (pt.x - _origin_x()) / _U, "y": (_ground - pt.y) / _U, "pw": clampf(rd.cut + dmg * 0.3, 0.3, 1.5), "v": away, "seed": _rng.randi() % 1000})
@@ -916,11 +948,16 @@ func _draw() -> void:
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	_draw_front_fence(w, h)
 	if not replay.is_empty():
+		var bar := h * 0.07
+		draw_rect(Rect2(0, 0, w, bar), Color(0, 0, 0, 0.92))
+		draw_rect(Rect2(0, h - bar, w, bar), Color(0, 0, 0, 0.92))
+		draw_rect(Rect2(0, 0, w, h), Color(0.15, 0.1, 0.05, 0.12))
 		var font2 := get_theme_default_font()
 		var blink := 0.6 + 0.4 * sin(_time * 12.0)
-		draw_rect(Rect2(10, 10, _U * 3.6, _U * 0.95), Color(0, 0, 0, 0.6))
-		draw_circle(Vector2(10 + _U * 0.45, 10 + _U * 0.48), _U * 0.2, Color(0.9, 0.1, 0.1, blink))
-		draw_string(font2, Vector2(10 + _U * 0.8, 10 + _U * 0.72), "REPLAY", HORIZONTAL_ALIGNMENT_LEFT, -1, int(_U * 0.6), Color.WHITE)
+		var ty := bar * 0.5
+		draw_circle(Vector2(14 + _U * 0.2, ty), _U * 0.18, Color(0.9, 0.1, 0.1, blink))
+		var lbl := "REPLAY" if replay_take() == 0 else "REPLAY · CÂMERA LENTA"
+		draw_string(font2, Vector2(14 + _U * 0.55, ty + _U * 0.2), lbl, HORIZONTAL_ALIGNMENT_LEFT, -1, int(_U * 0.55), Color.WHITE)
 	if _caption_t > 0.0 and _caption != "":
 		var font := get_theme_default_font()
 		var fs := int(_U * 1.15)

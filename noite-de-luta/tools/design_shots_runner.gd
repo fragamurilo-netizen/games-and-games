@@ -105,7 +105,9 @@ func _run() -> void:
 	while String(fs.get("_state")) != "done" and Time.get_ticks_msec() - t0 < 60000:
 		if String(fs.get("_state")) == "corner":
 			var foot: VBoxContainer = fs.footer()
-			(foot.get_child(0) as Button).pressed.emit()
+			var btns := foot.find_children("*", "Button", true, false).filter(func(b: Node) -> bool: return not b.is_queued_for_deletion() and not b.get_parent().is_queued_for_deletion())
+			if not btns.is_empty():
+				(btns[0] as Button).pressed.emit()
 		fs.set("_clock", 99999.0)
 		fs.set("_skip", true)
 		await get_tree().process_frame

@@ -86,7 +86,7 @@ func _initialize() -> void:
 		var holder: Control = st
 		if three:
 			var v := FightView3D.new()
-			v.setup(st)
+			v.setup(st, Color("#C8102E"), "Noite de Luta")
 			holder = v
 		holder.position = Vector2(4 + (i % cols) * (PW + 4), 4 + (i / cols) * (PH + 4))
 		holder.size = Vector2(PW, PH)
