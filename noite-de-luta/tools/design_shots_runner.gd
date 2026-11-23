@@ -91,6 +91,11 @@ func _run() -> void:
 	for i in 150:
 		await get_tree().process_frame
 	await _shot("13b_luta")
+	AppSettings.fight_view = "2d"
+	fs.call("_toggle_view")
+	for i in 90:
+		await get_tree().process_frame
+	await _shot("13c_luta_3d")
 	var t0 := Time.get_ticks_msec()
 	while String(fs.get("_state")) == "round" and Time.get_ticks_msec() - t0 < 30000:
 		fs.set("_clock", 99999.0)
@@ -105,4 +110,6 @@ func _run() -> void:
 		fs.set("_skip", true)
 		await get_tree().process_frame
 	await _shot("15_resultado")
+	AppSettings.fight_view = "2d"
+	AppSettings.save_settings()
 	get_tree().quit()

@@ -1,5 +1,30 @@
 # Noite de Luta — nota de passagem (23/11/2026)
 
+## Rodada 3 de 23/11/2026: luta animada 2D e 3D (APK 0.1.4)
+
+- **Lances estruturados** (`FightEngine.beats`, só com `narrate`): cada ação vira um dicionário
+  `{r, t, type, side, pos, g, top, cage, dist, ...}` — golpe (técnica, zona, acertou, dano,
+  contra-ataque), balança, knockdown, clinch/solta, queda (técnica, deu certo), puxar guarda,
+  segurar chute, pegar o pescoço, ground and pound, passagem, levantar, raspagem, repor guarda,
+  finalização (encaixou ou não), escapar, fim e fim de round. Não usa RNG (soak igual).
+  `tools/beat_dump.gd -- --seed=3` imprime os lances de uma luta.
+- **2D** (`scripts/ui/fight2d/`): `Rig2D` é o boneco de lado (cinemática direta; pose = ângulos;
+  físico, rosto, cores da equipe, guarda por escola: boxe, thai, caratê, wrestler, MMA; canhoto
+  troca a frente). `FightStage2D` é o "cérebro" e o palco: fila de lances, pose de base por
+  posição (em pé por distância, clinch/plum, grade, guarda, meia, cem quilos, montada, costas,
+  intervalo, fim) + o movimento de cada lance (tabela `STRIKE`/`CHAMBER`, reações de quem apanha,
+  quedas de entrada e arremesso, sprawl, gnp, finalizações com tapinha), brilho do impacto,
+  tremida, câmera lenta no nocaute, legenda. A fila acelera quando acumula e `skip()` resume.
+- **3D** (`FightView3D`): o mesmo cérebro escondido dentro; a vista monta bonecos de cápsulas e
+  esferas a partir das juntas 2D (profundidade nos ombros/quadril), octógono com alambrado
+  (textura gerada), postes dos corners, lona, torcida (MultiMesh), luz com sombra e câmera de TV
+  que acompanha e chega perto no chão. Renderizador de compatibilidade (mesmo do celular).
+- **Tela da luta**: a vista fica entre o placar e a narração; botão no rodapé alterna 2D → 3D →
+  Texto (`AppSettings.fight_view`, salvo no aparelho). O fim do round espera a animação acabar.
+- Folha de poses: `tools/stage_sheet.gd -- --out=... [--3d] [--a=boxe --b=muay_thai]`.
+- Ideias seguintes: árbitro, cortes/sangue no rosto, mais variação de passagens e raspagens,
+  replay do nocaute, câmera 3D com cortes (close/aberta) e bonecos 3D com malha de verdade.
+
 ## Rodada 2 de 23/11/2026: rostos, corpos e personalidade
 
 - **Rostos pequenos legíveis** (`PortraitView`): no recorte FM abaixo de 96 px o enquadramento chega
@@ -154,6 +179,8 @@ Cinturões com linhagem.
 
 ## APK de teste
 
+- APKs novos (0.1.2+) ficam nos arquivos do projeto (`noite-de-luta/`), assinados com a chave de
+  teste guardada em `chave-teste/` lá; o atual é o 0.1.4.
 - `releases/NoiteDeLuta-0.1.1.apk` (release, arm64, Android 7+; instala por cima da 0.1.0). Assinado com uma chave de teste
   local: um APK novo assinado com outra chave pede desinstalar o antigo antes.
 - Para gerar de novo: modelos de exportação do Godot 4.7.2 (só `android_*.apk` e `version.txt` em
@@ -180,4 +207,5 @@ godot --headless --path . --script res://tools/fight_soak.gd -- --n=300 --seed=7
 godot --headless --path . --script res://tools/style_lab.gd -- --a=wrestling --b=muay_thai --log=1   # ou --world
 xvfb-run -a -s "-screen 0 1600x1600x24" godot --path . --resolution 1400x1300 --script res://tools/face_sheet.gd -- --out=/tmp/rostos.png --nations=RUS,KAZ,GEO
 xvfb-run -a -s "-screen 0 1400x1400x24" godot --path . --resolution 390x844 --script res://tools/design_shots.gd -- --out=/tmp/telas [--role=presidente]
+xvfb-run -a -s "-screen 0 1700x2200x24" godot --path . --resolution 1600x2140 --script res://tools/stage_sheet.gd -- --out=/tmp/palco.png [--3d]
 ```

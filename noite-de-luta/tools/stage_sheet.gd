@@ -19,6 +19,7 @@ func _initialize() -> void:
 	var base_a := "boxe"
 	var base_b := "muay_thai"
 	var div := "M77"
+	var three := false
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--out="):
 			out = a.substr(6)
@@ -26,6 +27,8 @@ func _initialize() -> void:
 			base_a = a.substr(4)
 		elif a.begins_with("--b="):
 			base_b = a.substr(4)
+		elif a == "--3d":
+			three = true
 		elif a.begins_with("--div="):
 			div = a.substr(6)
 	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
@@ -76,21 +79,29 @@ func _initialize() -> void:
 		var c: Array = cases[i]
 		var st := FightStage2D.new()
 		st.setup(w, fa, fb)
-		st.position = Vector2(4 + (i % cols) * (PW + 4), 4 + (i / cols) * (PH + 4))
-		st.size = Vector2(PW, PH)
-		root.add_child(st)
+		var holder: Control = st
+		if three:
+			var v := FightView3D.new()
+			v.setup(st)
+			holder = v
+		holder.position = Vector2(4 + (i % cols) * (PW + 4), 4 + (i / cols) * (PH + 4))
+		holder.size = Vector2(PW, PH)
+		root.add_child(holder)
 		var l := Label.new()
 		l.text = String(c[0])
-		l.position = st.position + Vector2(6, 4)
+		l.position = holder.position + Vector2(6, 4)
 		l.add_theme_font_size_override(&"font_size", 13)
 		root.add_child(l)
-		stages.append(st)
+		stages.append(holder)
 	await process_frame
-	for st: FightStage2D in stages:
-		st.set_process(false)
+	for h: Control in stages:
+		h.set_process(false)
+		if h is FightView3D:
+			(h as FightView3D).brain.set_process(false)
 	for i in cases.size():
 		var c: Array = cases[i]
-		var st: FightStage2D = stages[i]
+		var h: Control = stages[i]
+		var st: FightStage2D = (h as FightView3D).brain if h is FightView3D else h
 		st._process(0.0)
 		st._process(1.0 / 60.0)
 		for k in 60:
@@ -100,6 +111,9 @@ func _initialize() -> void:
 		var n := int(float(c[2]) * 60.0)
 		for k in n:
 			st._process(1.0 / 60.0)
+		if h is FightView3D:
+			for k in 200:
+				h._process(1.0 / 60.0)
 	await process_frame
 	await process_frame
 	root.get_texture().get_image().save_png(out)

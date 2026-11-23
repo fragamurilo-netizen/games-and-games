@@ -25,7 +25,8 @@ var _pos_lbl: Label
 var _spectator := false
 ## Luta animada (lances do motor encenados) e onde ela está na lista de lances.
 var _stage: FightStage2D
-var _stage_holder: Control
+var _stage_holder: MarginContainer
+var _view3d: FightView3D
 var _bi := 0
 var _skip := false
 
@@ -135,11 +136,32 @@ func _build_board(w: GameWorld) -> void:
 func _build_stage(w: GameWorld) -> void:
 	_stage = FightStage2D.new()
 	_stage.setup(w, w.fighter(_b.a), w.fighter(_b.b))
-	_stage_holder = UIKit.margin(_stage, UITokens.GUTTER_DENSE, UITokens.S2, UITokens.GUTTER_DENSE, 0)
+	_stage_holder = MarginContainer.new()
+	for k: String in ["margin_left", "margin_right"]:
+		_stage_holder.add_theme_constant_override(k, UITokens.GUTTER_DENSE)
+	_stage_holder.add_theme_constant_override(&"margin_top", UITokens.S2)
 	var body := get_node("Body")
 	body.add_child(_stage_holder)
 	body.move_child(_stage_holder, 1)
-	_stage_holder.visible = AppSettings.fight_view == "2d"
+	_mount_view()
+
+
+## Põe a luta na vista escolhida (2D, 3D ou escondida no modo texto, onde ela segue tocando).
+func _mount_view() -> void:
+	if _view3d != null:
+		_view3d.release()
+		_view3d.queue_free()
+		_view3d = null
+	if _stage.get_parent() != null:
+		_stage.get_parent().remove_child(_stage)
+	if AppSettings.fight_view == "3d":
+		_view3d = FightView3D.new()
+		_view3d.setup(_stage)
+		_stage_holder.add_child(_view3d)
+	else:
+		_stage.visible = true
+		_stage_holder.add_child(_stage)
+	_stage_holder.visible = AppSettings.fight_view != "texto"
 
 
 func _feed_stage() -> void:
@@ -158,8 +180,8 @@ func _toggle_view() -> void:
 	var i := AppSettings.FIGHT_VIEWS.find(AppSettings.fight_view)
 	AppSettings.fight_view = AppSettings.FIGHT_VIEWS[(i + 1) % AppSettings.FIGHT_VIEWS.size()]
 	AppSettings.save_settings()
-	if _stage_holder != null:
-		_stage_holder.visible = AppSettings.fight_view == "2d"
+	if _stage != null:
+		_mount_view()
 	_controls()
 
 
@@ -216,7 +238,8 @@ func _controls() -> void:
 		_clock = 99999.0
 		_skip = true))
 	if _stage != null:
-		row.add_child(UIKit.button("Texto" if AppSettings.fight_view == "2d" else "2D", "GhostButton", _toggle_view))
+		var vi := AppSettings.FIGHT_VIEWS.find(AppSettings.fight_view)
+		row.add_child(UIKit.button(AppSettings.FIGHT_VIEW_NAMES[maxi(0, vi)], "GhostButton", _toggle_view))
 	foot.add_child(row)
 
 

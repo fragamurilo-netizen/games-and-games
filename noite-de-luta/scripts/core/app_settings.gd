@@ -11,9 +11,9 @@ static var sound: bool = true
 static var vibration: bool = true
 static var sfx_volume: int = 90
 static var fight_speed: int = 1
-## Como a luta ao vivo aparece: "2d" (animada) ou "texto" (só a narração).
-const FIGHT_VIEWS: Array[String] = ["2d", "texto"]
-const FIGHT_VIEW_NAMES: Array[String] = ["Animada 2D", "Só texto"]
+## Como a luta ao vivo aparece: "2d" ou "3d" (animada) ou "texto" (só a narração).
+const FIGHT_VIEWS: Array[String] = ["2d", "3d", "texto"]
+const FIGHT_VIEW_NAMES: Array[String] = ["2D", "3D", "Texto"]
 static var fight_view: String = "2d"
 ## Transições mais curtas.
 static var reduce_motion: bool = false

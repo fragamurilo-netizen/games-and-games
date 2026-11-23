@@ -89,6 +89,12 @@ func setup(w: GameWorld, fa: Fighter, fb: Fighter, org_color: Color = Color("#C8
 		if w.team(([fa, fb][i] as Fighter).team_id) == null:
 			r.shorts = r.corner.darkened(0.35)
 			r.trim = Color("#F1F0EC")
+	# Equipes com a mesma cor: o corner azul usa calção azul para dar para distinguir.
+	var c0: Color = (rigs[0] as Rig2D).shorts
+	var c1: Color = (rigs[1] as Rig2D).shorts
+	if Vector3(c0.r - c1.r, c0.g - c1.g, c0.b - c1.b).length() < 0.3:
+		(rigs[1] as Rig2D).shorts = UIColors.CORNER_BLUE.darkened(0.35)
+		(rigs[1] as Rig2D).trim = Color("#F1F0EC")
 	(rigs[0] as Rig2D).px = -GAP[1] * 0.5
 	(rigs[1] as Rig2D).px = GAP[1] * 0.5
 	_org = org_color
@@ -240,7 +246,7 @@ func _animate(dt: float) -> void:
 			r.pose = (poses[i] as Dictionary).duplicate()
 		else:
 			r.pose = Rig2D.blend(r.pose, poses[i], a)
-		r.px = lerpf(r.px, float(pxs[i]), ap)
+		r.px = clampf(lerpf(r.px, float(pxs[i]), ap), -ARENA + 0.6, ARENA - 0.6)
 		r.flash = maxf(0.0, r.flash - dt * 3.0)
 	var mid := ((rigs[0] as Rig2D).px + (rigs[1] as Rig2D).px) * 0.5
 	var half := size.x / maxf(1.0, _U) * 0.5
@@ -276,6 +282,7 @@ func _base(s: Dictionary) -> Array:
 	if _between:
 		for i in 2:
 			poses[i] = _relaxed(rigs[i])
+		_cx = lerpf(_cx, 0.0, 0.03)
 		return [poses, [_cx - 5.5, _cx + 5.5], dirs]
 	if pos == "chao":
 		return _ground_base(s)
