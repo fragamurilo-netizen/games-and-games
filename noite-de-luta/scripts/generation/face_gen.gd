@@ -1589,7 +1589,25 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	# Categoria de peso em `wt` (0 a 1). `bw` já é o tipo de sobrancelha escolhido no editor.
 	if look.has("wt"):
 		_apply_weight(f, seed_value, clampf(float(look["wt"]), 0.0, 1.0))
+	_apply_physique(f, look)
 	return f
+
+
+## Físico do lutador (FighterGenerator.physique): músculo, gordura, trapézio e tatuagens do tronco.
+static func _apply_physique(f: Dictionary, look: Dictionary) -> void:
+	var fem: bool = bool(f.get("fem", false))
+	if look.has("ms"):
+		f["muscle"] = clampf(float(look["ms"]) * (0.85 if fem else 1.0), 0.0, 1.0)
+	if look.has("bf"):
+		var bf := float(look["bf"])
+		f["body_fat"] = bf
+		f["fat"] = clampf(float(f["fat"]) + maxf(0.0, bf - 0.25) * 0.5, 0.0, 0.8)
+	var tr := float(look.get("tr", 0.0))
+	f["trap"] = tr * (0.5 if fem else 1.0)
+	if tr > 0.0:
+		f["build"] = clampf(float(f.get("build", 0.5)) + 0.12 * tr * (0.5 if fem else 1.0), 0.0, 1.0)
+		f["neck_w"] = float(f["neck_w"]) + 0.07 * tr * (0.4 if fem else 1.0)
+	f["body_tat"] = int(look.get("tt", 0))
 
 
 ## Lutadora: o mesmo sorteio de pele, olhos e etnia, com o rosto de mulher. Mandíbula e queixo

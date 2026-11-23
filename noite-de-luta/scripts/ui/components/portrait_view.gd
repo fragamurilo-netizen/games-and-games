@@ -77,6 +77,13 @@ var cutout: bool = false:
 		cutout = v
 		queue_redraw()
 
+## Só a cabeça (cabelo, rosto, orelhas), sem pescoço nem corpo: para o BodyView, que desenha o
+## corpo inteiro por baixo. Usa o enquadramento clássico e fundo transparente.
+var head_only: bool = false:
+	set(v):
+		head_only = v
+		queue_redraw()
+
 ## Corpo de lutador: tronco nu nos homens e top esportivo nas mulheres (como na pesagem e na
 ## entrada no cage). Desligado, veste a camisa (`kit`); `suit` veste o terno dos dirigentes.
 var fight_body: bool = true:
@@ -538,7 +545,10 @@ func _draw() -> void:
 	_prepare_decals(s)
 	# Três camadas com cache próprio: fundo + cabelo de trás, corpo + roupa, rosto + cabelo.
 	# Trocar o uniforme ou a estampa ficar pronta só redesenha a camada do corpo.
-	var face_key := hash([face_seed, eth, age, look, size, bg_color, cutout, _fm, _ff, stage])
+	if head_only:
+		_fm = false
+		_ff = false
+	var face_key := hash([face_seed, eth, age, look, size, bg_color, cutout, _fm, _ff, stage, head_only])
 	var k_back := hash(["back", face_key])
 	var k_body := hash(["body", face_key, shirt_color, trim_color, suit, kit_collar, kit_pattern, kit, crest, fight_body, gear_color, gear_trim,
 		_crest_tex != null, _sponsor_tex != null])
@@ -571,7 +581,10 @@ func _draw() -> void:
 			0:
 				_layer_back()
 			1:
-				_body()
+				if head_only:
+					_body_setup()
+				else:
+					_body()
 			2:
 				_layer_front()
 		_recording = false
@@ -1657,7 +1670,7 @@ func _body_setup() -> void:
 	_nwt = _fw * float(f.get("neck_w", 0.68)) * (1.0 + 0.1 * float(f["fat"]))
 	# Pescoço de atleta: nunca um "palito" embaixo de um rosto fino, mas também nunca mais largo que
 	# a mandíbula (aí vira uma "coluna")
-	_nwt = minf(maxf(_nwt, _fw * 0.6), _fw * float(f["jaw"]) * 0.95 * 0.92)
+	_nwt = minf(maxf(_nwt, _fw * 0.6), _fw * float(f["jaw"]) * 0.95 * (0.92 + 0.16 * float(f.get("trap", 0.0))))
 	_ynb = _chin_y + s * (0.058 + 0.01 * build)
 	_ynotch = _chin_y + s * (0.1 + 0.01 * build)
 	_sw = s * (0.41 + 0.07 * build)
@@ -1685,7 +1698,9 @@ func _torso_side(t0: float, neck: bool) -> PackedVector2Array:
 			var q := float(i) / 3.0
 			out.append(Vector2(x0 + _nwt * lerpf(0.96, 1.0, q), lerpf(_hc.y + _fh * 0.35, r1.y - s * 0.012, q)))
 	var r2 := Vector2(x0 + _sw * 0.72, _ysp - s * 0.006)
-	out.append_array(_bez(r1, Vector2(x0 + _nwt * 1.1 + s * 0.025, _ynb + s * 0.004), r2, n, t0))
+	# Trapézio alto: a curva do pescoço ao ombro estufa para cima.
+	var trap: float = float(_f.get("trap", 0.0)) if fight_body and not suit else 0.0
+	out.append_array(_bez(r1, Vector2(x0 + _nwt * 1.1 + s * (0.025 + 0.03 * trap), _ynb + s * (0.004 - 0.03 * trap)), r2, n, t0))
 	var sh := _bez(r2, Vector2(x0 + _sw * 0.99, _ysp), Vector2(x0 + _sw * 1.05, _ysp + s * 0.085), n)
 	sh.remove_at(0)
 	out.append_array(sh)
@@ -2521,8 +2536,11 @@ func _fight_body_setup() -> void:
 		_sw = s * (0.35 + 0.05 * build)
 		_ysp = _ynb + s * 0.1
 	else:
-		_sw = s * (0.39 + 0.1 * build + 0.02 * mus)
-		_ysp = _ynb + s * (0.105 - 0.03 * build * mus)
+		# Mosca seco e estreito até o pesado de ombro largo; o trapézio de wrestler sobe o ombro.
+		var trap: float = float(f.get("trap", 0.0))
+		var bf: float = float(f.get("body_fat", 0.15))
+		_sw = s * (0.35 + 0.17 * build + 0.04 * mus + 0.02 * trap + 0.03 * maxf(0.0, bf - 0.25))
+		_ysp = _ynb + s * (0.11 - 0.03 * build * mus - 0.028 * trap)
 	_tside = _torso_side(0.0, true)
 	_tbot = _c.y + s * 0.56
 
@@ -2540,6 +2558,7 @@ func _fight_body() -> void:
 	_aa_edge(_tside, _bare_col)
 	_aa_edge(_mirror(_tside, _hc.x), _bare_col)
 	_neck_tattoo()
+	_body_tattoos()
 	if fem:
 		_sports_bra()
 	elif s >= 70.0:
@@ -2635,6 +2654,66 @@ func _bare_col(p: Vector2) -> Color:
 	# Recorte dos corners nas laterais dos ombros e dos braços
 	col = _rim_add(col, sx, 0.5 * smoothstep(0.84, 1.07, ax / _sw) * (1.0 - smoothstep(_ysp, _ysp + s * 0.35, y) * 0.6))
 	return neck.lerp(col, w_body)
+
+
+## Tatuagens do tronco (`body_tat` 1 a 3): 1 = um ombro, 2 = os dois ombros e uma escrita no peito,
+## 3 = manga fechada num braço e peito. Desenho em traço de tinta, que acompanha a luz.
+func _body_tattoos() -> void:
+	var n := int(_f.get("body_tat", 0))
+	if n <= 0 or _s < 50.0:
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([face_seed, "tatuagem"])
+	var dark := clampf(float(_f["skin_i"]) / 9.0, 0.0, 1.0)
+	var ink := Color(0.1, 0.12, 0.17, lerpf(0.55, 0.35, dark))
+	var lw := maxf(0.7, _s * 0.005)
+	var s := _s
+	var first := -1.0 if rng.randf() < 0.5 else 1.0
+	var sides: Array = [first] if n == 1 else [first, -first]
+	for sx: float in sides:
+		var c := Vector2(_hc.x + sx * _sw * 0.88, _ysp + s * 0.06)
+		var r := _sw * 0.16
+		match rng.randi_range(0, 2):
+			0: # tribal no ombro: lâminas curvas em volta do deltoide
+				for k in 5:
+					var a := -PI * 0.5 + (k - 2) * 0.45
+					var p0 := c + Vector2(cos(a), sin(a)) * r * 0.4
+					var p1 := c + Vector2(cos(a + sx * 0.5), sin(a + sx * 0.5)) * r * 1.25
+					var p2 := c + Vector2(cos(a + sx * 0.15), sin(a + sx * 0.15)) * r * 0.95
+					_fill(PackedVector2Array([p0, p1, p2]), ink)
+			1: # mandala/rosa: círculos e pétalas
+				_r_arc(c, r * 0.9, 0.0, TAU, 20, ink, lw, true)
+				_r_arc(c, r * 0.45, 0.0, TAU, 14, ink, lw, true)
+				for k in 8:
+					var a2 := k * TAU / 8.0
+					_r_line(c + Vector2(cos(a2), sin(a2)) * r * 0.45, c + Vector2(cos(a2 + 0.2), sin(a2 + 0.2)) * r * 0.9, ink, lw, true)
+			_: # estrela/rosa dos ventos
+				for k in 4:
+					var a3 := k * PI * 0.5 + 0.3
+					var tip := c + Vector2(cos(a3), sin(a3)) * r
+					var l2 := c + Vector2(cos(a3 + 0.5), sin(a3 + 0.5)) * r * 0.3
+					var r2 := c + Vector2(cos(a3 - 0.5), sin(a3 - 0.5)) * r * 0.3
+					_fill(PackedVector2Array([c, l2, tip, r2]), ink)
+	if n >= 2:
+		# Escrita no peito, abaixo da clavícula de um lado.
+		var y0 := _ynotch + s * 0.07
+		var sx2 := -first
+		for k in 2:
+			var pts := PackedVector2Array()
+			for i in 16:
+				var t := float(i) / 15.0
+				pts.append(Vector2(_hc.x + sx2 * _sw * lerpf(0.16, 0.62, t), y0 + k * s * 0.03 + s * 0.006 * sin(t * 24.0 + k * 1.7)))
+			_r_polyline(pts, ink, lw * 0.9, true)
+	if n >= 3:
+		# Manga: o braço inteiro do lado do primeiro ombro coberto de sombra de tinta.
+		var ax := _sw * 0.94
+		for k in 9:
+			var y := _ysp + s * (0.08 + k * 0.035)
+			var pts2 := PackedVector2Array()
+			for i in 8:
+				var t := float(i) / 7.0
+				pts2.append(Vector2(_hc.x + first * (ax + _sw * 0.14 * t), y + s * 0.008 * sin(t * 9.0 + k)))
+			_r_polyline(pts2, Color(ink, ink.a * 0.8), lw * 1.6, true)
 
 
 ## Pelos do peito (genética da barba): densos no meio do peito e entre os peitorais.

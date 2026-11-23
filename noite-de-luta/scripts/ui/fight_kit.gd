@@ -192,6 +192,7 @@ static func cards_text(b: Bout) -> String:
 ## Ficha comparativa (tale of the tape): linhas "valor A · rótulo · valor B".
 static func tape(w: GameWorld, fa: Fighter, fb: Fighter) -> VBoxContainer:
 	var v := UIKit.vbox(0)
+	v.add_child(bodies(w, fa, fb, 300))
 	var rows := [
 		["Cartel", fa.record_text() if fa.is_pro() else "Amador", fb.record_text() if fb.is_pro() else "Amador"],
 		["Ranking", w.rank_text(fa), w.rank_text(fb)],
@@ -227,6 +228,61 @@ static func tape(w: GameWorld, fa: Fighter, fb: Fighter) -> VBoxContainer:
 		line.custom_minimum_size.y = 1
 		v.add_child(line)
 	return v
+
+
+## Corpo inteiro do lutador (pesagem): `ref_cm` igual nos dois lados compara a altura de verdade.
+static func body(w: GameWorld, f: Fighter, h: int, ref_cm: int = 0) -> BodyView:
+	var b := BodyView.new()
+	b.set_fighter(w, f)
+	b.ref_cm = ref_cm if ref_cm > 0 else f.height_cm + 4
+	b.custom_minimum_size = Vector2(h * 0.48, h)
+	b.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return b
+
+
+## Os dois corpos lado a lado, na mesma escala (quem é mais alto aparece mais alto).
+static func bodies(w: GameWorld, fa: Fighter, fb: Fighter, h: int) -> HBoxContainer:
+	var row := UIKit.hbox(0)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	var ref := maxi(fa.height_cm, fb.height_cm) + 4
+	for f: Fighter in [fa, fb]:
+		var b := body(w, f, h, ref)
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(b)
+	return row
+
+
+## Como o corpo dele aparece em palavras (pela ficha do físico).
+static func physique_text(f: Fighter) -> String:
+	var lk := f.look
+	var parts: Array = []
+	var ms := float(lk.get("ms", 0.5))
+	var bf := float(lk.get("bf", 0.15))
+	if bf >= 0.32:
+		parts.append("corpo pesado, de barriga")
+	elif bf <= 0.12 and ms >= 0.55:
+		parts.append("seco e definido")
+	elif bf <= 0.12:
+		parts.append("magro")
+	if ms >= 0.8:
+		parts.append("muito musculoso")
+	elif ms >= 0.6:
+		parts.append("musculoso")
+	elif ms < 0.35:
+		parts.append("pouco músculo")
+	if float(lk.get("tr", 0.0)) >= 0.6:
+		parts.append("pescoço e trapézio de quem vive no clinch")
+	var tt := int(lk.get("tt", 0))
+	if tt > 0:
+		parts.append(["", "uma tatuagem no ombro", "tatuagens no peito e nos ombros", "braço fechado de tatuagem"][mini(tt, 3)])
+	if lk.has("er"):
+		parts.append("orelha de couve-flor")
+	if lk.has("ns"):
+		parts.append("nariz quebrado")
+	if parts.is_empty():
+		return "Físico comum para a categoria."
+	var t := ", ".join(parts)
+	return t.substr(0, 1).to_upper() + t.substr(1) + "."
 
 
 ## Faixa dos corners: retratos frente a frente, vermelho à esquerda e azul à direita.

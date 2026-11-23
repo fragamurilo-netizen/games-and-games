@@ -90,6 +90,13 @@ func _header(w: GameWorld, f: Fighter) -> Control:
 func _ficha(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 	var body := UIKit.card("Card", UITokens.S1)
 	body.add_child(UIKit.label("Físico", "Section"))
+	var fig := UIKit.hbox(UITokens.S2)
+	fig.add_child(FightKit.body(w, f, 300))
+	var ft := UIKit.label(FightKit.physique_text(f), "Small", true)
+	ft.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ft.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	fig.add_child(ft)
+	body.add_child(fig)
 	body.add_child(UIKit.kv("Estilo", f.style_label()))
 	body.add_child(UIKit.kv("Arte de base", Styles.describe(f)))
 	body.add_child(UIKit.kv("Altura · envergadura", "%s · %d cm" % [Fmt.height(f.height_cm), f.reach_cm]))

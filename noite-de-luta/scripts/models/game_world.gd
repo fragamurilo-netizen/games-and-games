@@ -247,6 +247,11 @@ static func from_dict(d: Dictionary) -> GameWorld:
 	for fd: Dictionary in d.get("fighters", []):
 		var f := Fighter.from_dict(fd)
 		w.fighters[f.id] = f
+		if not f.look.has("ms"):
+			# Save de antes do físico: sorteia o físico uma vez, fixo pelo id.
+			var pr := RandomNumberGenerator.new()
+			pr.seed = hash([f.id, f.face_seed, "fisico"])
+			FighterGenerator.physique(f, pr)
 	for td: Dictionary in d.get("teams", []):
 		var t := Team.from_dict(td)
 		w.teams[t.id] = t

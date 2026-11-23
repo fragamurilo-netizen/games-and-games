@@ -110,6 +110,7 @@ static func make(w: GameWorld, div: String, level: float, age_: int = 0, amateur
 	f.wear = maxf(0.0, f.fights() * rng.randf_range(0.02, 0.06))
 	_grooming(f, rng, String(origin["c"]))
 	_marks(f, rng)
+	physique(f, rng, String(origin["c"]))
 	return f
 
 
@@ -156,6 +157,37 @@ static func _marks(f: Fighter, rng: RandomNumberGenerator) -> void:
 	var cut := 0.22 if f.base == "muay_thai" else 0.06
 	if rng.randf() < cut * years:
 		f.look["sc"] = 1 if rng.randf() < 0.5 else -1
+
+
+## Físico (chaves de `look`): `ms` músculo aparente, `tr` trapézio e pescoço de quem vive no
+## clinch e na luta agarrada, `bf` gordura (pesados, pouco fôlego, veteranos), `tt` tatuagens no
+## tronco (0 a 3, pela cultura: comuns no Brasil, nos EUA e no México, raras no Daguestão e no Japão).
+static func physique(f: Fighter, rng: RandomNumberGenerator, culture: String = "") -> void:
+	var wt := float(DataDB.division(f.division).get("wt", 0.5))
+	var age := f.age(2027, 1) if f.birth_year > 0 else 28
+	var grap := 0.0
+	if f.base in ["wrestling", "folkstyle", "greco", "freestyle", "sambo", "sambo_combate", "judo", "kurash", "laamb", "catch"]:
+		grap = 1.0
+	elif Styles.family(f.base) == "agarrada":
+		grap = 0.5
+	var ms := 0.45 + (f.a("forca") - 55.0) / 45.0 + grap * 0.12 + rng.randf_range(-0.12, 0.12)
+	var bf := 0.08 + wt * 0.16 + maxf(0.0, 60.0 - f.a("cardio")) / 90.0 + maxf(0.0, age - 32.0) * 0.02 + rng.randf_range(-0.04, 0.08)
+	if wt > 0.85 and rng.randf() < 0.35:
+		bf += rng.randf_range(0.12, 0.3) # o pesado de barriga
+	var tr := grap * rng.randf_range(0.45, 1.0) + (f.a("forca") - 60.0) / 80.0 + (0.15 if f.base == "muay_thai" else 0.0)
+	f.look["ms"] = snappedf(clampf(ms, 0.1, 1.0), 0.01)
+	f.look["bf"] = snappedf(clampf(bf, 0.04, 0.6), 0.01)
+	f.look["tr"] = snappedf(clampf(tr, 0.0, 1.0), 0.01)
+	var tat: Dictionary = {"BRA": 0.55, "USA": 0.5, "MEX": 0.55, "NZL": 0.6, "POL": 0.45, "AUS": 0.5, "GBR": 0.45, "IRL": 0.4,
+		"RUS": 0.3, "DAG": 0.03, "CHE": 0.03, "JPN": 0.12, "KOR": 0.12, "CHN": 0.12, "THA": 0.5, "NGA": 0.25, "KAZ": 0.12, "UZB": 0.08}
+	var p := float(tat.get(f.nation, 0.3)) * (0.6 if f.is_female() else 1.0)
+	for c: String in culture.split("+"):
+		if c in ["dag", "chech", "afg", "persian", "tj", "maghreb"]:
+			p = 0.04 # muçulmanos praticantes quase não tatuam
+		elif c in ["jp", "kr", "cn", "kz", "uz"]:
+			p = minf(p, 0.12)
+	if rng.randf() < p:
+		f.look["tt"] = 1 + int(rng.randf() < 0.45) + int(rng.randf() < 0.25)
 
 
 ## Depois de cada luta, a marca pode chegar: o corte vira cicatriz, o nocaute entorta o nariz, o
