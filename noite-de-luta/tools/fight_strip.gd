@@ -2,8 +2,8 @@ extends SceneTree
 ## Tira de quadros da luta 2D em movimento: um FightStage2D do tamanho que ele tem no celular toca
 ## uma sequência de lances e a ferramenta fotografa um quadro a cada tantos, lado a lado. Serve
 ## para conferir câmera, passos, impacto e apresentação, que não aparecem numa pose parada.
-## xvfb-run -a -s "-screen 0 700x520x24" godot --path . --resolution 600x420 --script res://tools/fight_strip.gd -- --out=/tmp/tira.png --case=troca [--every=5] [--from=0] [--max=48] [--cols=6] [--scale=0.5] [--fem] [--div=M77]
-## Casos: intro, troca, clinch, chao, ko.
+## xvfb-run -a -s "-screen 0 700x520x24" godot --path . --resolution 600x420 --script res://tools/fight_strip.gd -- --out=/tmp/tira.png --case=troca [--every=5] [--from=0] [--max=48] [--at=30,90,150] [--cols=6] [--scale=0.5] [--fem] [--div=M77]
+## Casos: intro, troca, clinch, chao, intervalo, ko.
 
 const SW := 568
 const SH := 384
@@ -53,6 +53,15 @@ func _cases() -> Dictionary:
 			_b("levanta", 1, S),
 			_b("queda", 1, "chao:guarda:1", {"td": "suplex", "ok": true}),
 		],
+		"intervalo": [
+			_b("golpe", 0, S, {"k": "direto", "z": "head", "hit": true, "dmg": 1.5}),
+			_b("queda", 1, "chao:guarda:1", {"td": "duas_pernas", "ok": true}),
+			_b("levanta", 0, S),
+			_b("fim_round", -1, S, {"n": 1}),
+			{"wait": 9.5},
+			_b("round", -1, S, {"n": 2}),
+			_b("golpe", 1, S, {"k": "jab", "z": "head", "hit": true, "dmg": 0.4}),
+		],
 		"ko": [
 			_b("golpe", 0, S, {"k": "jab", "z": "head", "hit": true, "dmg": 0.4}),
 			_b("golpe", 1, S, {"k": "direto", "z": "head", "hit": true, "dmg": 1.1, "cut": [0.5, 0.0], "head": [1.2, 0.3]}),
@@ -74,6 +83,7 @@ func _initialize() -> void:
 	var div := ""
 	var tail := 1.2
 	var from := 0
+	var at: Array = []
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--out="):
 			out = a.substr(6)
@@ -93,6 +103,9 @@ func _initialize() -> void:
 			tail = float(a.substr(7))
 		elif a.begins_with("--from="):
 			from = int(a.substr(7))
+		elif a.begins_with("--at="):
+			for part in a.substr(5).split(","):
+				at.append(int(part))
 		elif a == "--fem":
 			fem = true
 	if div == "":
@@ -125,15 +138,21 @@ func _initialize() -> void:
 	if which != "intro":
 		for k in 50:
 			st._process(1.0 / 60.0)
+	if not at.is_empty():
+		max_n = at.size()
 	while shots.size() < max_n:
-		if st.idle() and not beats.is_empty():
+		if st.idle() and not beats.is_empty() and (beats[0] as Dictionary).has("wait"):
+			beats[0]["wait"] = float(beats[0]["wait"]) - 1.0 / 60.0
+			if float(beats[0]["wait"]) <= 0.0:
+				beats.pop_front()
+		elif st.idle() and not beats.is_empty():
 			st.add_beat(beats.pop_front())
 		elif st.idle():
 			after += 1.0 / 60.0
 			if after > tail:
 				break
 		st._process(1.0 / 60.0)
-		if frame >= from and frame % every == 0:
+		if (frame in at) if not at.is_empty() else (frame >= from and frame % every == 0):
 			await process_frame
 			await process_frame
 			shots.append(root.get_texture().get_image().get_region(Rect2i(0, 0, SW, SH)))

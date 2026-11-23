@@ -58,6 +58,8 @@ var guard := "mma"
 var flash := 0.0
 ## "ref" veste o árbitro (camisa e calça escuras, sem luvas).
 var outfit := ""
+## Mão de quem veste roupa (árbitro: luva de látex azul; técnico: a pele).
+var hand := Color("#8DB6DA")
 var shirt := Color("#16171B")
 ## Corte (sangue no rosto, 0–1.5) e inchaço (dano na cabeça, 0–1).
 var cut := 0.0
@@ -746,7 +748,7 @@ func _arm(j: Dictionary, side: String, off: Vector2, sk: Color, dim: float, Uh: 
 		_pl(PackedVector2Array([_at(1.5, 0.25), _at(1.85, 0.05), _at(2.3, 0.0)]), Color(mc, mc.a * 0.7), lw)
 	if is_ref:
 		# Mão do árbitro com luva de látex azul.
-		_cov(wr + fd * Uh * 0.17, fd * Uh * 0.22, fn * Uh * 0.13, 10, _tone(Color("#8DB6DA"), dim))
+		_cov(wr + fd * Uh * 0.17, fd * Uh * 0.22, fn * Uh * 0.13, 10, _tone(hand, dim))
 		return
 	# Luva de MMA: faixa do córner no punho, almofada nos nós dos dedos, dedos e polegar de fora.
 	var gc := glove.lerp(Color(0.42, 0.03, 0.03), clampf(glove_blood, 0.0, 0.8) * 0.6)

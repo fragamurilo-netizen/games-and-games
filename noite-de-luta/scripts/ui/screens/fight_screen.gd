@@ -136,6 +136,9 @@ func _build_board(w: GameWorld) -> void:
 func _build_stage(w: GameWorld) -> void:
 	_stage = FightStage2D.new()
 	_stage.setup(w, w.fighter(_b.a), w.fighter(_b.b))
+	var ev0 := w.event(_b.event_id)
+	if ev0 != null and ev0.name.rstrip("0123456789 ") != "":
+		_stage.logo = ev0.name.rstrip("0123456789 ").to_upper()
 	_stage_holder = MarginContainer.new()
 	for k: String in ["margin_left", "margin_right"]:
 		_stage_holder.add_theme_constant_override(k, UITokens.GUTTER_DENSE)

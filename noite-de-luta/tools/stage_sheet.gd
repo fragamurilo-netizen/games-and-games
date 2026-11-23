@@ -1,9 +1,9 @@
 extends SceneTree
 ## Folha de poses da luta animada 2D: cada quadro é um FightStage2D parado num momento de um lance.
-## xvfb-run -a -s "-screen 0 1700x2600x24" godot --path . --resolution 1600x2460 --script res://tools/stage_sheet.gd -- --out=/tmp/palco.png [--a=boxe --b=muay_thai] [--div=M77]
+## xvfb-run -a -s "-screen 0 2100x3200x24" godot --path . --resolution 2020x3110 --script res://tools/stage_sheet.gd -- --out=/tmp/palco.png [--a=boxe --b=muay_thai] [--div=M77]
 
-const PW := 390
-const PH := 300
+const PW := 500
+const PH := 384
 
 
 func _b(type: String, side: int, pos: String, data: Dictionary = {}) -> Dictionary:
