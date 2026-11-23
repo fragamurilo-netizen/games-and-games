@@ -23,6 +23,11 @@ var _round_lbl: Label
 var _bars: Array = [] # [ProgressBar fôlego, ProgressBar dano] por lado
 var _pos_lbl: Label
 var _spectator := false
+## Luta animada (lances do motor encenados) e onde ela está na lista de lances.
+var _stage: FightStage2D
+var _stage_holder: Control
+var _bi := 0
+var _skip := false
 
 
 func setup(p: Dictionary) -> void:
@@ -41,6 +46,8 @@ func _ready() -> void:
 	_spectator = bool(params.get("spectator", false))
 	_side = -1 if _spectator else (0 if w.is_user_fighter(w.fighter(_b.a)) else 1)
 	_build_board(w)
+	if _b.status != "feita":
+		_build_stage(w)
 	if _b.status == "feita":
 		_state = "done"
 		_show_result()
@@ -125,9 +132,42 @@ func _build_board(w: GameWorld) -> void:
 	body.move_child(holder, 0)
 
 
+func _build_stage(w: GameWorld) -> void:
+	_stage = FightStage2D.new()
+	_stage.setup(w, w.fighter(_b.a), w.fighter(_b.b))
+	_stage_holder = UIKit.margin(_stage, UITokens.GUTTER_DENSE, UITokens.S2, UITokens.GUTTER_DENSE, 0)
+	var body := get_node("Body")
+	body.add_child(_stage_holder)
+	body.move_child(_stage_holder, 1)
+	_stage_holder.visible = AppSettings.fight_view == "2d"
+
+
+func _feed_stage() -> void:
+	if _stage == null:
+		return
+	_stage.time_scale = [1.0, 1.4, 2.4][clampi(_speed, 0, 2)]
+	while _bi < _e.beats.size() and float((_e.beats[_bi] as Dictionary)["t"]) <= _clock:
+		_stage.add_beat(_e.beats[_bi])
+		_bi += 1
+	if _skip:
+		_skip = false
+		_stage.skip()
+
+
+func _toggle_view() -> void:
+	var i := AppSettings.FIGHT_VIEWS.find(AppSettings.fight_view)
+	AppSettings.fight_view = AppSettings.FIGHT_VIEWS[(i + 1) % AppSettings.FIGHT_VIEWS.size()]
+	AppSettings.save_settings()
+	if _stage_holder != null:
+		_stage_holder.visible = AppSettings.fight_view == "2d"
+	_controls()
+
+
 func _update_board(ev: Dictionary) -> void:
 	var st: Array = ev.get("st", [1.0, 1.0])
 	var hd: Array = ev.get("hd", [0.0, 0.0])
+	if _stage != null:
+		_stage.stamina = [float(st[0]), float(st[1])]
 	for i in 2:
 		(_bars[i][0] as ProgressBar).value = float(st[i]) * 100.0
 		(_bars[i][1] as ProgressBar).value = clampf(float(hd[i]) / 3.0, 0.0, 1.0) * 100.0
@@ -172,7 +212,11 @@ func _controls() -> void:
 		AppSettings.save_settings())
 	seg.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(seg)
-	row.add_child(UIKit.button("Pular", "GhostButton", func(): _clock = 99999.0))
+	row.add_child(UIKit.button("Pular", "GhostButton", func():
+		_clock = 99999.0
+		_skip = true))
+	if _stage != null:
+		row.add_child(UIKit.button("Texto" if AppSettings.fight_view == "2d" else "2D", "GhostButton", _toggle_view))
 	foot.add_child(row)
 
 
@@ -186,11 +230,13 @@ func _process(delta: float) -> void:
 		_add_line(ev)
 		last_t = float(ev["t"])
 		_shown += 1
+	_feed_stage()
 	var shown_clock := minf(_clock, FightEngine.ROUND_S)
 	if _shown > 0 and _shown >= _events.size():
 		shown_clock = float((_events.back() as Dictionary)["t"])
 	_clock_lbl.text = Fmt.clock(FightEngine.ROUND_S - shown_clock)
-	if _shown >= _events.size() and (_clock >= FightEngine.ROUND_S or _e.finished):
+	var stage_busy := _stage != null and _stage_holder.visible and not _stage.idle()
+	if _shown >= _events.size() and (_clock >= FightEngine.ROUND_S or _e.finished) and not stage_busy:
 		set_process(false)
 		_end_round()
 

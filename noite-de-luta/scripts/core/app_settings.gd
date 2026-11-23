@@ -11,6 +11,10 @@ static var sound: bool = true
 static var vibration: bool = true
 static var sfx_volume: int = 90
 static var fight_speed: int = 1
+## Como a luta ao vivo aparece: "2d" (animada) ou "texto" (só a narração).
+const FIGHT_VIEWS: Array[String] = ["2d", "texto"]
+const FIGHT_VIEW_NAMES: Array[String] = ["Animada 2D", "Só texto"]
+static var fight_view: String = "2d"
 ## Transições mais curtas.
 static var reduce_motion: bool = false
 static var _loaded := false
@@ -28,6 +32,9 @@ static func load_settings() -> void:
 	sfx_volume = int(cfg.get_value("audio", "sfx_volume", sfx_volume))
 	fight_speed = clampi(int(cfg.get_value("jogo", "fight_speed", fight_speed)), 0, FIGHT_SPEEDS.size() - 1)
 	reduce_motion = bool(cfg.get_value("jogo", "reduce_motion", reduce_motion))
+	fight_view = String(cfg.get_value("jogo", "fight_view", fight_view))
+	if fight_view not in FIGHT_VIEWS:
+		fight_view = "2d"
 
 
 static func save_settings() -> void:
@@ -37,4 +44,5 @@ static func save_settings() -> void:
 	cfg.set_value("audio", "sfx_volume", sfx_volume)
 	cfg.set_value("jogo", "fight_speed", fight_speed)
 	cfg.set_value("jogo", "reduce_motion", reduce_motion)
+	cfg.set_value("jogo", "fight_view", fight_view)
 	cfg.save(PATH)

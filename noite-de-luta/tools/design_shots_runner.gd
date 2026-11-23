@@ -88,9 +88,13 @@ func _run() -> void:
 	for i in 60:
 		await get_tree().process_frame
 	await _shot("13_luta")
+	for i in 150:
+		await get_tree().process_frame
+	await _shot("13b_luta")
 	var t0 := Time.get_ticks_msec()
 	while String(fs.get("_state")) == "round" and Time.get_ticks_msec() - t0 < 30000:
 		fs.set("_clock", 99999.0)
+		fs.set("_skip", true)
 		await get_tree().process_frame
 	await _shot("14_intervalo_ou_fim")
 	while String(fs.get("_state")) != "done" and Time.get_ticks_msec() - t0 < 60000:
@@ -98,6 +102,7 @@ func _run() -> void:
 			var foot: VBoxContainer = fs.footer()
 			(foot.get_child(0) as Button).pressed.emit()
 		fs.set("_clock", 99999.0)
+		fs.set("_skip", true)
 		await get_tree().process_frame
 	await _shot("15_resultado")
 	get_tree().quit()
