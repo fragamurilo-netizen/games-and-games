@@ -19,6 +19,11 @@ var _t := 0.0
 var _org := Color("#C8102E")
 var _cam_pos := Vector3(0, 6, 18)
 var _cam_look := Vector3(0, 3, 0)
+var _ref_fig: Dictionary = {}
+var _drops: Array = []
+var _stains: Array = []
+var _rep: Label
+var _was_replay := false
 
 
 func setup(brain_: FightStage2D, org_color: Color = Color("#C8102E")) -> void:
@@ -43,6 +48,25 @@ func setup(brain_: FightStage2D, org_color: Color = Color("#C8102E")) -> void:
 	_build_world()
 	for i in 2:
 		_figs.append(_build_fighter(brain.rigs[i]))
+	if brain.ref != null:
+		_ref_fig = _build_fighter(brain.ref)
+	var bm := _mat(Color(0.5, 0.02, 0.03), 0.3)
+	for i in 14:
+		var d := _part(_sphere(), bm)
+		d.visible = false
+		d.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_drops.append(d)
+	var disc := CylinderMesh.new()
+	disc.top_radius = 0.5
+	disc.bottom_radius = 0.5
+	disc.height = 0.01
+	disc.radial_segments = 14
+	var stm := _mat(Color(0.42, 0.03, 0.04), 0.35)
+	for i in 30:
+		var d2 := _part(disc, stm)
+		d2.visible = false
+		d2.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_stains.append(d2)
 	for i in 4:
 		var m := MeshInstance3D.new()
 		var sm := SphereMesh.new()
@@ -66,6 +90,15 @@ func setup(brain_: FightStage2D, org_color: Color = Color("#C8102E")) -> void:
 	_cap.add_theme_color_override(&"font_outline_color", Color(0, 0, 0, 0.85))
 	_cap.add_theme_constant_override(&"outline_size", 6)
 	add_child(_cap)
+	_rep = Label.new()
+	_rep.text = "● REPLAY"
+	_rep.position = Vector2(12, 10)
+	_rep.add_theme_font_size_override(&"font_size", 18)
+	_rep.add_theme_color_override(&"font_color", Color.WHITE)
+	_rep.add_theme_color_override(&"font_outline_color", Color(0.75, 0.05, 0.05))
+	_rep.add_theme_constant_override(&"outline_size", 5)
+	_rep.visible = false
+	add_child(_rep)
 
 
 ## Devolve o cérebro para quem vai mostrar a luta de outro jeito.
@@ -108,7 +141,7 @@ func _build_world() -> void:
 	_vp.add_child(we)
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-62, 25, 0)
-	sun.light_energy = 0.95
+	sun.light_energy = 0.85
 	sun.light_color = Color(1.0, 0.97, 0.9)
 	sun.shadow_enabled = true
 	sun.directional_shadow_max_distance = 60.0
@@ -124,7 +157,7 @@ func _build_world() -> void:
 	fl.bottom_radius = R_OCT
 	fl.height = 0.4
 	fl.radial_segments = 8
-	_add(fl, _mat(Color("#A39F96"), 0.95), Vector3(0, -0.2, 0), deg_to_rad(22.5))
+	_add(fl, _mat(Color("#8F8B83"), 0.95), Vector3(0, -0.2, 0), deg_to_rad(22.5))
 	var apron := CylinderMesh.new()
 	apron.top_radius = R_OCT + 3.0
 	apron.bottom_radius = R_OCT + 3.0
@@ -140,7 +173,7 @@ func _build_world() -> void:
 	logo.top_radius = 5.0
 	logo.bottom_radius = 5.0
 	logo.height = 0.02
-	var lm := _mat(Color(_org, 1.0).lerp(Color("#A39F96"), 0.78))
+	var lm := _mat(Color(_org, 1.0).lerp(Color("#8F8B83"), 0.82))
 	_add(logo, lm, Vector3(0, 0.005, 0))
 	# Grade: painéis de alambrado, postes pretos e acolchoado em cima.
 	var link := _chain_texture()
@@ -226,47 +259,108 @@ static func _chain_texture() -> ImageTexture:
 	return ImageTexture.create_from_image(img)
 
 
-# --- Lutadores -----------------------------------------------------------------------------
+# --- Lutadores ---------------------------------------------------------------------------
 
+## Malhas compartilhadas: cilindros afinando (membros), esfera (músculos, juntas, cabeça), caixa.
+var _meshes := {}
+
+
+func _taper(k: float) -> CylinderMesh:
+	var key := "c%.2f" % k
+	if not _meshes.has(key):
+		var c := CylinderMesh.new()
+		c.bottom_radius = 0.5
+		c.top_radius = 0.5 * k
+		c.height = 1.0
+		c.radial_segments = 14
+		c.rings = 1
+		_meshes[key] = c
+	return _meshes[key]
+
+
+func _sphere() -> SphereMesh:
+	if not _meshes.has("s"):
+		var m := SphereMesh.new()
+		m.radius = 0.5
+		m.height = 1.0
+		m.radial_segments = 18
+		m.rings = 10
+		_meshes["s"] = m
+	return _meshes["s"]
+
+
+## Monta o boneco: membros que afinam, deltoide, bíceps, quadríceps e panturrilha, peito em dois
+## peitorais, trapézio, abdômen, calção com cós, luvas com polegar e punho do corner, rosto com
+## mandíbula, orelhas, olhos, sobrancelhas, nariz, cabelo, barba, corte e inchaço.
 func _build_fighter(r: Rig2D) -> Dictionary:
 	var f := {"rig": r}
-	var skin := _mat(r.skin, 0.6)
+	var is_ref := r.outfit == "ref"
+	var skin := _mat(r.skin, 0.55)
 	var shorts := _mat(r.shorts, 0.85)
+	var shirt := _mat(r.shirt, 0.8)
 	var trim := _mat(r.trim, 0.7)
-	var glove := _mat(r.glove, 0.45)
-	var hair := _mat(r.hair, 0.9)
+	var glove := _mat(r.glove, 0.4)
+	var band := _mat(r.corner, 0.6)
+	var hair := _mat(r.hair, 0.95)
+	var dark := _mat(Color(0.06, 0.05, 0.05), 0.3)
+	var blood := _mat(Color(0.55, 0.02, 0.03), 0.25)
+	var bruise := _mat(Color(0.38, 0.12, 0.2), 0.6)
+	bruise.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	f["skin"] = skin
-	var cap := CapsuleMesh.new()
-	cap.radius = 0.5
-	cap.height = 1.0
-	cap.radial_segments = 12
-	cap.rings = 4
-	var sph := SphereMesh.new()
-	sph.radius = 0.5
-	sph.height = 1.0
-	sph.radial_segments = 16
-	sph.rings = 8
+	f["bruise_m"] = bruise
+	var top_m: StandardMaterial3D = shirt if is_ref else skin
+	var leg_m: StandardMaterial3D = shorts if is_ref else skin
+	var sph := _sphere()
 	var box := BoxMesh.new()
-	for k: String in ["na_u", "na_f", "fa_u", "fa_f", "nl_t", "nl_s", "fl_t", "fl_s"]:
-		f[k] = _part(cap, skin)
-	for k: String in ["na_g", "fa_g"]:
-		f[k] = _part(sph, glove)
-	for k: String in ["nl_ft", "fl_ft"]:
-		f[k] = _part(box, skin)
-	for k: String in ["nl_sh", "fl_sh"]:
-		f[k] = _part(cap, shorts)
-	f["torso"] = _part(cap, skin)
-	f["chest"] = _part(sph, skin)
-	f["hips"] = _part(sph, shorts)
-	f["band"] = _part(CylinderMesh.new(), trim)
-	f["neck"] = _part(cap, skin)
+	for sd: String in ["na", "fa"]:
+		f[sd + "_delt"] = _part(sph, top_m)
+		f[sd + "_u"] = _part(_taper(0.78), top_m)
+		f[sd + "_bi"] = _part(sph, top_m)
+		f[sd + "_el"] = _part(sph, skin)
+		f[sd + "_f"] = _part(_taper(0.7), skin)
+		if is_ref:
+			f[sd + "_g"] = _part(sph, skin)
+		else:
+			f[sd + "_g"] = _part(sph, glove)
+			f[sd + "_th"] = _part(sph, glove)
+			f[sd + "_band"] = _part(_taper(1.0), band)
+	for sd: String in ["nl", "fl"]:
+		f[sd + "_t"] = _part(_taper(0.7), leg_m)
+		f[sd + "_q"] = _part(sph, leg_m)
+		f[sd + "_kn"] = _part(sph, leg_m)
+		f[sd + "_s"] = _part(_taper(0.58), leg_m)
+		f[sd + "_calf"] = _part(sph, leg_m)
+		f[sd + "_an"] = _part(sph, skin)
+		f[sd + "_ft"] = _part(sph, dark if is_ref else skin)
+		if not is_ref:
+			f[sd + "_sh"] = _part(_taper(0.9), shorts)
+			f[sd + "_hem"] = _part(_taper(1.0), trim)
+	f["pelvis"] = _part(sph, shorts)
+	f["band"] = _part(_taper(1.0), shirt if is_ref else trim)
+	f["abs"] = _part(sph, top_m)
+	f["ribs"] = _part(sph, top_m)
+	f["pec_n"] = _part(sph, top_m)
+	f["pec_f"] = _part(sph, top_m)
+	f["trap"] = _part(sph, top_m)
+	f["neck"] = _part(_taper(0.92), skin)
 	f["head"] = _part(sph, skin)
+	f["jaw"] = _part(sph, skin)
+	f["ear_n"] = _part(sph, skin)
+	f["ear_f"] = _part(sph, skin)
+	f["eye_n"] = _part(sph, dark)
+	f["eye_f"] = _part(sph, dark)
+	f["brow_n"] = _part(box, hair)
+	f["brow_f"] = _part(box, hair)
+	f["nose"] = _part(sph, skin)
 	f["hair"] = _part(sph, hair)
 	(f["hair"] as MeshInstance3D).visible = not r.bald
-	f["beard"] = _part(sph, _mat(r.beard, 0.9))
+	f["beard"] = _part(sph, _mat(r.beard, 0.95))
 	(f["beard"] as MeshInstance3D).visible = r.has_beard
-	f["nose"] = _part(box, skin)
-	if r.fem:
+	f["cut"] = _part(sph, blood)
+	f["drip"] = _part(_taper(0.4), blood)
+	f["chest_blood"] = _part(_taper(0.5), blood)
+	f["bruise"] = _part(sph, bruise)
+	if r.fem and not is_ref:
 		f["top"] = _part(sph, _mat(r.shorts.darkened(0.15)))
 	return f
 
@@ -283,8 +377,8 @@ static func _v(p: Vector2, z: float) -> Vector3:
 	return Vector3(p.x, -p.y, z)
 
 
-## Coloca um membro (cápsula de altura 1) entre dois pontos, com grossura `w`.
-static func _seg(mi: MeshInstance3D, a: Vector3, b: Vector3, w: float) -> void:
+## Peça de altura 1 entre dois pontos (o topo da malha fica em `b`), com grossura `w`.
+static func _seg(mi: MeshInstance3D, a: Vector3, b: Vector3, w: float, extra: float = 0.0) -> void:
 	var d := b - a
 	var l := d.length()
 	if l < 0.001:
@@ -295,76 +389,143 @@ static func _seg(mi: MeshInstance3D, a: Vector3, b: Vector3, w: float) -> void:
 		x = y.cross(Vector3.RIGHT)
 	x = x.normalized()
 	var z := x.cross(y).normalized()
-	mi.transform = Transform3D(Basis(x * w, y * (l + w * 0.8), z * w), (a + b) * 0.5)
+	mi.transform = Transform3D(Basis(x * w, y * (l + extra), z * w), (a + b) * 0.5)
 
 
-static func _blob(mi: MeshInstance3D, c: Vector3, s: Vector3, up: Vector3 = Vector3.UP) -> void:
-	var y := up.normalized()
-	var x := y.cross(Vector3.BACK)
-	if x.length() < 0.01:
-		x = Vector3.RIGHT
-	x = x.normalized()
-	var z := x.cross(y).normalized()
-	mi.transform = Transform3D(Basis(x * s.x, y * s.y, z * s.z), c)
+## Elipsoide em `c` com eixos (frente, cima, lado) e tamanhos.
+static func _ell(mi: MeshInstance3D, c: Vector3, fw: Vector3, up: Vector3, _sd: Vector3, size: Vector3) -> void:
+	# Base sempre destra (o lado sai de frente × cima), senão a malha vira do avesso.
+	var sd := fw.cross(up).normalized()
+	mi.transform = Transform3D(Basis(fw * size.x, up * size.y, sd * size.z), c)
 
 
-func _pose_fighter(f: Dictionary) -> void:
+static func _frame(up: Vector3, dir: float) -> Array:
+	var u := up.normalized()
+	var fw := u.cross(Vector3.BACK) * dir
+	if fw.length() < 0.01:
+		fw = Vector3.RIGHT * dir
+	fw = fw.normalized()
+	var sd := fw.cross(u).normalized()
+	return [fw, u, sd]
+
+
+func _pose_fighter(f: Dictionary, zoff: float = 0.0) -> void:
 	var r: Rig2D = f["rig"]
 	var j := r.joints(0.0, 0.0, 1.0)
 	var Uh: float = j["U"]
+	var is_ref := r.outfit == "ref"
 	var skin: StandardMaterial3D = f["skin"]
 	skin.albedo_color = r.skin.lerp(Color(0.8, 0.22, 0.18), r.flash * 0.35)
-	var sw := 0.62 * r.chest_k * Uh
-	var hw := 0.36 * Uh
-	var aw := 0.62 * r.arm_k * Uh
-	var lw := 0.85 * r.leg_k * Uh
-	var hip := _v(j["hip"], 0.0)
-	var neck := _v(j["neck"], 0.0)
-	var sh := _v(j["sh"], 0.0)
-	var up := (neck - hip).normalized()
-	for side: String in ["na", "fa"]:
-		var z := sw if side == "na" else -sw
+	var zz := zoff + float(r.pose.get("zz", 0.0))
+	var lz := 1.0 + float(r.pose.get("lz", 0.0))
+	var az := 1.0 + float(r.pose.get("az", 0.0))
+	var mus := clampf((r.arm_k - 0.85) / 0.5, 0.0, 1.0)
+	var sw := 0.66 * r.chest_k * Uh
+	var hw := 0.36 * Uh * lz
+	var aw := 0.5 * r.arm_k * Uh
+	var lw := 0.72 * r.leg_k * Uh
+	var hip := _v(j["hip"], zz)
+	var neck := _v(j["neck"], zz)
+	var sh := _v(j["sh"], zz)
+	var tf := _frame(neck - hip, r.dir)
+	var fw: Vector3 = tf[0]
+	var up: Vector3 = tf[1]
+	var side: Vector3 = Vector3.BACK
+	# Braços
+	for sd: String in ["na", "fa"]:
+		var z := (sw if sd == "na" else -sw) * az
 		var s := sh + Vector3(0, 0, z)
-		var el := _v(j[side + "_el"], z * 1.05)
-		var wr := _v(j[side + "_wr"], z * 0.8)
-		_seg(f[side + "_u"], s, el, aw)
-		_seg(f[side + "_f"], el, wr, aw * 0.82)
+		var el := _v(j[sd + "_el"], zz + z * 1.08)
+		var wr := _v(j[sd + "_wr"], zz + z * 0.85)
+		_ell(f[sd + "_delt"], s + up * Uh * 0.02, fw, up, side, Vector3(aw * 1.55, aw * 1.35, aw * 1.45) * (1.0 + 0.15 * mus))
+		_seg(f[sd + "_u"], s, el, aw)
+		var ud := (el - s).normalized()
+		var uf := _frame(ud, r.dir)
+		_ell(f[sd + "_bi"], s.lerp(el, 0.45) + (uf[0] as Vector3) * aw * 0.18, uf[0], ud, side, Vector3(aw * (1.0 + 0.25 * mus), s.distance_to(el) * 0.7, aw * 0.95))
+		_ell(f[sd + "_el"], el, fw, up, side, Vector3.ONE * aw * 0.82)
+		_seg(f[sd + "_f"], el, wr, aw * 0.92)
 		var gd := (wr - el).normalized()
-		_blob(f[side + "_g"], wr + gd * Uh * 0.18, Vector3.ONE * Uh * 0.72, gd)
-	for side: String in ["nl", "fl"]:
-		var z := hw if side == "nl" else -hw
+		var gf := _frame(gd, r.dir)
+		if is_ref:
+			_ell(f[sd + "_g"], wr + gd * Uh * 0.12, gf[0], gd, side, Vector3(aw * 0.7, aw * 0.95, aw * 0.6))
+		else:
+			_ell(f[sd + "_g"], wr + gd * Uh * 0.2, gf[0], gd, side, Vector3(Uh * 0.6, Uh * 0.74, Uh * 0.62))
+			_ell(f[sd + "_th"], wr + gd * Uh * 0.1 + (gf[0] as Vector3) * Uh * 0.24, gf[0], gd, side, Vector3(Uh * 0.24, Uh * 0.36, Uh * 0.24))
+			_seg(f[sd + "_band"], wr - gd * Uh * 0.12, wr + gd * Uh * 0.02, Uh * 0.55)
+	# Pernas
+	for sd: String in ["nl", "fl"]:
+		var z := hw if sd == "nl" else -hw
 		var h := hip + Vector3(0, 0, z)
-		var kn := _v(j[side + "_kn"], z)
-		var an := _v(j[side + "_an"], z)
-		var toe := _v(j[side + "_toe"], z)
-		_seg(f[side + "_t"], h, kn, lw)
-		_seg(f[side + "_s"], kn, an, lw * 0.62)
-		_seg(f[side + "_ft"], an, toe, lw * 0.42)
-		_seg(f[side + "_sh"], h - up * Uh * 0.1, h.lerp(kn, 0.5), lw * 1.18)
-	# Tronco: cintura até o peito, e o peito mais largo.
-	var depth := 0.95 * Uh * r.chest_k * (1.0 + 0.3 * r.belly)
-	var chest_c := neck - up * Uh * 0.75
-	var tx := up.cross(Vector3.BACK).normalized()
-	var tz := tx.cross(up).normalized()
+		var kn := _v(j[sd + "_kn"], zz + z * 1.05)
+		var an := _v(j[sd + "_an"], zz + z)
+		var toe := _v(j[sd + "_toe"], zz + z)
+		_seg(f[sd + "_t"], h, kn, lw)
+		var td := (kn - h).normalized()
+		var tfr := _frame(td, r.dir)
+		_ell(f[sd + "_q"], h.lerp(kn, 0.5) + (tfr[0] as Vector3) * lw * 0.15, tfr[0], td, side, Vector3(lw * 1.0, h.distance_to(kn) * 0.8, lw * 0.95))
+		_ell(f[sd + "_kn"], kn, fw, up, side, Vector3.ONE * lw * 0.72)
+		_seg(f[sd + "_s"], kn, an, lw * 0.66)
+		var sdv := (an - kn).normalized()
+		var sfr := _frame(sdv, r.dir)
+		_ell(f[sd + "_calf"], kn.lerp(an, 0.32) - (sfr[0] as Vector3) * lw * 0.12, sfr[0], sdv, side, Vector3(lw * 0.72, kn.distance_to(an) * 0.55, lw * 0.66))
+		_ell(f[sd + "_an"], an, fw, up, side, Vector3.ONE * lw * 0.42)
+		var fd := (toe - an).normalized()
+		var ffr := _frame(fd, r.dir)
+		_ell(f[sd + "_ft"], an.lerp(toe, 0.55), ffr[0], fd, side, Vector3(lw * 0.36, an.distance_to(toe) * 1.25, lw * 0.5))
+		if f.has(sd + "_sh"):
+			var send := h.lerp(kn, 0.52)
+			_seg(f[sd + "_sh"], h - td * Uh * 0.15, send, lw * 1.28)
+			_seg(f[sd + "_hem"], send - td * Uh * 0.06, send + td * Uh * 0.03, lw * 1.2)
+	# Tronco
 	var tl := hip.distance_to(neck)
-	(f["torso"] as MeshInstance3D).transform = Transform3D(Basis(tx * depth, up * (tl + 0.2), tz * (sw * 1.6)), hip.lerp(neck, 0.47))
-	(f["chest"] as MeshInstance3D).transform = Transform3D(Basis(tx * depth * 1.05, up * Uh * 1.35, tz * sw * 2.25), chest_c + up * Uh * 0.1)
-	(f["hips"] as MeshInstance3D).transform = Transform3D(Basis(tx * depth * 1.0, up * Uh * 0.95, tz * hw * 3.0), hip + up * Uh * 0.15)
-	(f["band"] as MeshInstance3D).transform = Transform3D(Basis(tx * depth * 1.02, up * Uh * 0.1, tz * hw * 3.05), hip + up * Uh * 0.55)
+	var depth := 0.9 * Uh * r.chest_k
+	var belly := r.belly
+	var chest_c := neck - up * Uh * 0.78
+	_ell(f["pelvis"], hip + up * Uh * 0.1, fw, up, side, Vector3(depth * 1.05, Uh * 1.0, hw * 2.0 + Uh * 0.75))
+	(f["band"] as MeshInstance3D).transform = Transform3D(Basis(fw * depth * 1.08, up * Uh * 0.2, fw.cross(up) * (hw * 2.0 + Uh * 0.82)), hip + up * Uh * 0.52)
+	_ell(f["abs"], hip.lerp(neck, 0.38) + fw * Uh * 0.05 * belly, fw, up, side, Vector3(depth * (0.95 + 0.4 * belly), tl * 0.62, sw * 1.7 * (1.0 + 0.15 * belly)))
+	_ell(f["ribs"], chest_c, fw, up, side, Vector3(depth * 1.05, Uh * 1.55, sw * 2.15))
+	for pk: String in ["pec_n", "pec_f"]:
+		var zs := 1.0 if pk == "pec_n" else -1.0
+		_ell(f[pk], chest_c + up * Uh * 0.12 + fw * depth * 0.3 + side * zs * sw * 0.48, fw, up, side, Vector3(depth * 0.55, Uh * 0.62, sw * 0.95) * (1.0 + 0.2 * mus))
+	_ell(f["trap"], neck - up * Uh * 0.2 - fw * depth * 0.12, fw, up, side, Vector3(depth * 0.7, Uh * 0.55, sw * 1.6) * (1.0 + 0.2 * mus))
 	if f.has("top"):
-		(f["top"] as MeshInstance3D).transform = Transform3D(Basis(tx * depth * 1.08, up * Uh * 0.8, tz * sw * 2.3), chest_c + up * Uh * 0.05)
-	# Pescoço e cabeça (nariz para onde ele olha).
-	var head := _v(j["head"], 0.0)
-	_seg(f["neck"], neck - up * Uh * 0.1, head, Uh * 0.48 * r.chest_k)
-	var hu := (head - neck).normalized()
-	var fw := Vector3(-hu.y, hu.x, 0) * r.dir
-	if fw.x * r.dir < 0.0:
-		fw = -fw
-	var hr := Uh * 1.0
-	_blob(f["head"], head, Vector3(hr * 1.0, hr * 1.12, hr * 0.92), hu)
-	_blob(f["hair"], head + hu * Uh * 0.12 - fw * Uh * 0.06, Vector3(hr * 1.04, hr * 1.02, hr * 0.97), hu)
-	_blob(f["beard"], head - hu * Uh * 0.22 + fw * Uh * 0.12, Vector3(hr * 0.85, hr * 0.7, hr * 0.85), hu)
-	_seg(f["nose"], head + fw * Uh * 0.42 + hu * Uh * 0.02, head + fw * Uh * 0.56 - hu * Uh * 0.08, Uh * 0.14)
+		_ell(f["top"], chest_c + up * Uh * 0.05 + fw * depth * 0.06, fw, up, side, Vector3(depth * 1.12, Uh * 0.85, sw * 2.25))
+	# Cabeça
+	var head := _v(j["head"], zz)
+	_seg(f["neck"], neck - up * Uh * 0.2, head - up * 0.0, Uh * 0.5 * r.chest_k)
+	var hfr := _frame(head - neck, r.dir)
+	var hf: Vector3 = hfr[0]
+	var hu: Vector3 = hfr[1]
+	var hr := Uh
+	_ell(f["head"], head, hf, hu, side, Vector3(hr * 1.0, hr * 1.12, hr * 0.9))
+	_ell(f["jaw"], head - hu * hr * 0.25 + hf * hr * 0.12, hf, hu, side, Vector3(hr * 0.78, hr * 0.68, hr * 0.78))
+	_ell(f["ear_n"], head + side * hr * 0.45 - hf * hr * 0.05, hf, hu, side, Vector3(hr * 0.18, hr * 0.28, hr * 0.12))
+	_ell(f["ear_f"], head - side * hr * 0.45 - hf * hr * 0.05, hf, hu, side, Vector3(hr * 0.18, hr * 0.28, hr * 0.12))
+	for ek: String in ["n", "f"]:
+		var zs := 1.0 if ek == "n" else -1.0
+		var ep := head + hf * hr * 0.44 + hu * hr * 0.08 + side * zs * hr * 0.17
+		_ell(f["eye_" + ek], ep, hf, hu, side, Vector3(hr * 0.08, hr * 0.09, hr * 0.12))
+		_ell(f["brow_" + ek], ep + hu * hr * 0.11 + hf * hr * 0.03, hf, hu, side, Vector3(hr * 0.06, hr * 0.05, hr * 0.2))
+	_ell(f["nose"], head + hf * hr * 0.5 - hu * hr * 0.05, hf, hu, side, Vector3(hr * 0.2, hr * 0.26, hr * 0.15))
+	_ell(f["hair"], head + hu * hr * 0.13 - hf * hr * 0.09, hf, hu, side, Vector3(hr * 1.0, hr * 1.0, hr * 0.96))
+	_ell(f["beard"], head - hu * hr * 0.3 + hf * hr * 0.17, hf, hu, side, Vector3(hr * 0.72, hr * 0.6, hr * 0.8))
+	# Corte, sangue escorrendo e olho inchado.
+	var cut := r.cut
+	var cm: MeshInstance3D = f["cut"]
+	cm.visible = cut > 0.2
+	(f["drip"] as MeshInstance3D).visible = cut > 0.35
+	(f["chest_blood"] as MeshInstance3D).visible = cut > 0.8
+	if cut > 0.2:
+		var cp := head + hf * hr * 0.42 + hu * hr * 0.3 + side * hr * 0.12
+		_ell(cm, cp, hf, hu, side, Vector3(hr * 0.12, hr * 0.12, hr * (0.12 + 0.15 * cut)))
+		_seg(f["drip"], cp, head + hf * hr * 0.48 - hu * hr * (0.2 + 0.4 * minf(cut, 1.0)) + side * hr * 0.15, hr * 0.09 * (1.0 + cut))
+		_seg(f["chest_blood"], neck + fw * depth * 0.45, chest_c + fw * depth * 0.5 - up * Uh * 0.5, Uh * 0.15)
+	var bm: MeshInstance3D = f["bruise"]
+	bm.visible = r.bruise > 0.25
+	if bm.visible:
+		(f["bruise_m"] as StandardMaterial3D).albedo_color = Color(0.38, 0.12, 0.2, clampf((r.bruise - 0.25) * 0.8, 0.0, 0.6))
+		_ell(bm, head + hf * hr * 0.4 + hu * hr * 0.05 + side * hr * 0.17, hf, hu, side, Vector3(hr * 0.12, hr * 0.22, hr * 0.26) * (1.0 + 0.4 * r.bruise))
 
 
 # --- Quadro --------------------------------------------------------------------------------
@@ -375,14 +536,17 @@ func _process(delta: float) -> void:
 	_t += delta
 	for f: Dictionary in _figs:
 		_pose_fighter(f)
-	# Câmera de TV: por fora da grade, alta, acompanhando a dupla e girando devagar; chega mais
-	# perto no chão e nos momentos grandes.
+	if _ref_fig.size() > 0:
+		_pose_fighter(_ref_fig, -3.4)
+	# Câmera de TV: alta, acompanhando a dupla e girando devagar; chega mais perto no chão e nos
+	# momentos grandes. No replay, câmera baixa girando em volta do nocaute.
 	var mid := ((brain.rigs[0] as Rig2D).px + (brain.rigs[1] as Rig2D).px) * 0.5
 	var ground := String(brain.st.get("pos", "solto")) == "chao"
 	var big := brain._caption_t > 0.0 and brain._caption_t < 10.0
 	var dist := 14.0
 	var look_y := 3.6
 	var lift := 3.2
+	var ang := 0.28 * sin(_t * 0.09) + 0.12
 	if ground:
 		dist = 13.0
 		look_y = 1.4
@@ -393,19 +557,28 @@ func _process(delta: float) -> void:
 		dist = 13.0
 		look_y = 3.0
 		lift = 3.0
-	var ang := 0.28 * sin(_t * 0.09) + 0.12
+	var rep := brain.in_replay()
+	if rep:
+		dist = 11.0
+		look_y = 2.8
+		lift = 0.9
+		ang = 0.75 + _t * 0.12
 	var tgt := Vector3(mid + sin(ang) * dist, look_y + lift, cos(ang) * dist)
-	var k := 1.0 - exp(-2.0 * delta)
+	var k := 1.0 - exp(-(5.0 if rep else 2.0) * delta)
+	if rep != _was_replay:
+		k = 1.0
+		_was_replay = rep
 	_cam_pos = _cam_pos.lerp(tgt, k)
 	_cam_look = _cam_look.lerp(Vector3(mid, look_y, 0), k)
 	var shake := Vector3(sin(_t * 70.0), cos(_t * 53.0), 0) * brain._shake * 0.25
 	_cam.look_at_from_position(_cam_pos + shake, _cam_look + shake * 0.5)
-	# Brilho dos golpes que entram.
+	# Brilho dos golpes, gotas de sangue e manchas na lona.
 	var fxl: Array = brain._fx
+	var hits: Array = fxl.filter(func(e: Dictionary) -> bool: return String(e["kind"]) == "hit")
 	for i in _fx.size():
 		var m: MeshInstance3D = _fx[i]
-		if i < fxl.size() and String((fxl[i] as Dictionary)["kind"]) == "hit":
-			var e: Dictionary = fxl[i]
+		if i < hits.size():
+			var e: Dictionary = hits[i]
 			var t := float(e["t"])
 			m.visible = true
 			m.position = Vector3(float(e["x"]), float(e["y"]), 0.6)
@@ -413,4 +586,31 @@ func _process(delta: float) -> void:
 			(m.material_override as StandardMaterial3D).albedo_color = Color(1, 0.95, 0.7, clampf(0.8 - t * 1.8, 0.0, 0.8))
 		else:
 			m.visible = false
+	var drops: Array = []
+	for e: Dictionary in fxl:
+		if String(e["kind"]) != "blood":
+			continue
+		var t := float(e["t"])
+		var sd := int(e["seed"])
+		for i in 9:
+			var a := -0.9 + float((sd + i * 37) % 100) / 100.0 * 1.2
+			var sp := 2.5 + float((sd * 3 + i * 17) % 100) / 40.0
+			var p := Vector3(float(e["x"]) + cos(a) * float(e["v"]) * sp * t, float(e["y"]) - sin(a) * sp * t - 14.0 * t * t, 0.3 + float(i % 3 - 1) * 0.5 * t)
+			if p.y > 0.0:
+				drops.append([p, (0.07 + 0.05 * float(i % 3)) * float(e["pw"]) * 0.9])
+	for i in _drops.size():
+		var dm: MeshInstance3D = _drops[i]
+		dm.visible = i < drops.size()
+		if dm.visible:
+			dm.position = drops[i][0]
+			dm.scale = Vector3.ONE * float(drops[i][1])
+	for i in _stains.size():
+		var sm: MeshInstance3D = _stains[i]
+		sm.visible = i < brain.stains.size()
+		if sm.visible:
+			var stn: Dictionary = brain.stains[i]
+			var w := float(stn["w"]) * 2.0
+			sm.position = Vector3(float(stn["x"]), 0.012 + float(i) * 0.0004, lerpf(1.6, -2.4, float(stn["z"])))
+			sm.scale = Vector3(w, 1.0, w * 0.8)
 	_cap.text = brain._caption if brain._caption_t > 0.0 else ""
+	_rep.visible = rep

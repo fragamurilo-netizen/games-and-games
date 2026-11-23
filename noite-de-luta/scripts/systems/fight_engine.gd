@@ -1053,7 +1053,8 @@ func finalize() -> Dictionary:
 func _beat(type: String, side: int, data: Dictionary = {}) -> void:
 	if not narrate:
 		return
-	var b := {"r": round_no, "t": t, "type": type, "side": side, "pos": pos, "g": gpos, "top": top, "cage": cage, "dist": dist}
+	var b := {"r": round_no, "t": t, "type": type, "side": side, "pos": pos, "g": gpos, "top": top, "cage": cage, "dist": dist,
+		"cut": [float(s[0]["cut"]), float(s[1]["cut"])], "head": [float(s[0]["head"]), float(s[1]["head"])]}
 	b.merge(data)
 	beats.append(b)
 

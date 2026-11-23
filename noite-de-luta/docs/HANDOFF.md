@@ -1,5 +1,24 @@
 # Noite de Luta — nota de passagem (23/11/2026)
 
+## Rodada 4 de 23/11/2026: refinamento da luta animada (APK 0.1.5)
+
+- **Bonecos 3D** (`FightView3D._build_fighter/_pose_fighter`): membros em cilindros que afinam
+  (malhas compartilhadas por afinamento), deltoide, bíceps, quadríceps, panturrilha, joelho e
+  cotovelo, peitorais, trapézio, abdômen (barriga), calção com barra e cós, luvas com polegar e
+  punho na cor do corner, pés; rosto com mandíbula, orelhas, olhos, sobrancelhas, nariz, cabelo e
+  barba. Músculo pelo físico (`arm_k`). Bases sempre destras (`_ell`), senão a malha vira do avesso.
+- **Chão sem embolar**: chaves de pose só do 3D, `lz`/`az` (abrem pernas/braços para os lados) e
+  `zz` (tira o corpo do plano); usadas em guarda, meia, cem quilos, montada e costas. No 2D, `zz`
+  desce o boneco um pouco na tela (fica na frente).
+- **Árbitro** (`FightStage2D.ref`, `Rig2D.referee`): camisa e calça escuras; acompanha pelo lado
+  com mais espaço, agacha no chão, separa o clinch, aponta no knockdown, entra para parar a luta e
+  levanta a mão do vencedor (também na decisão). No 3D fica atrás (z −3.4).
+- **Sangue**: os lances trazem `cut` e `head` dos dois; o rosto ganha corte escorrendo e olho
+  inchado (2D e 3D), golpe forte na cabeça de quem está cortado respinga gotas e deixa mancha na
+  lona (`stains`, até 30).
+- **Replay do nocaute**: o cérebro grava ~4 s de quadros (`_record`); depois do fim por KO/TKO
+  toca de novo a 0,4× com zoom (2D) ou câmera baixa girando (3D) e selo REPLAY. `skip()` cancela.
+
 ## Rodada 3 de 23/11/2026: luta animada 2D e 3D (APK 0.1.4)
 
 - **Lances estruturados** (`FightEngine.beats`, só com `narrate`): cada ação vira um dicionário
@@ -180,7 +199,7 @@ Cinturões com linhagem.
 ## APK de teste
 
 - APKs novos (0.1.2+) ficam nos arquivos do projeto (`noite-de-luta/`), assinados com a chave de
-  teste guardada em `chave-teste/` lá; o atual é o 0.1.4.
+  teste guardada em `chave-teste/` lá; o atual é o 0.1.5.
 - `releases/NoiteDeLuta-0.1.1.apk` (release, arm64, Android 7+; instala por cima da 0.1.0). Assinado com uma chave de teste
   local: um APK novo assinado com outra chave pede desinstalar o antigo antes.
 - Para gerar de novo: modelos de exportação do Godot 4.7.2 (só `android_*.apk` e `version.txt` em

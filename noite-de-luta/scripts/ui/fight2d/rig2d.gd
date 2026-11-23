@@ -8,9 +8,10 @@ extends RefCounted
 ## corpo inteiro em volta da cintura, para quedas e chão), torso (inclinação, 0 = em pé, + para a
 ## frente), head (ângulo extra da cabeça), na_s/na_e (ombro e cotovelo do braço near), fa_s/fa_e
 ## (braço far), nl_h/nl_k (quadril e joelho da perna near), fl_h/fl_k (perna far), sit (> 0.5:
-## sentado/deitado, o quadril apoia e os pés podem afundar um pouco).
+## sentado/deitado, o quadril apoia e os pés podem afundar um pouco). Só no 3D: lz/az abrem pernas
+## e braços para os lados (0 = normal) e zz tira o corpo todo do plano (para não embolar no chão).
 
-const KEYS := ["x", "y", "crouch", "sit", "rot", "torso", "head", "na_s", "na_e", "fa_s", "fa_e", "nl_h", "nl_k", "fl_h", "fl_k"]
+const KEYS := ["x", "y", "crouch", "sit", "rot", "torso", "head", "na_s", "na_e", "fa_s", "fa_e", "nl_h", "nl_k", "fl_h", "fl_k", "lz", "az", "zz"]
 ## Comprimentos em U (U = tamanho da cabeça).
 const L_TORSO := 2.55
 const L_NECK := 0.35
@@ -50,6 +51,12 @@ var px := 0.0
 var guard := "mma"
 ## Pisca vermelho quando apanha.
 var flash := 0.0
+## "ref" veste o árbitro (camisa e calça escuras, sem luvas).
+var outfit := ""
+var shirt := Color("#16171B")
+## Corte (sangue no rosto, 0–1.5) e inchaço (dano na cabeça, 0–1).
+var cut := 0.0
+var bruise := 0.0
 
 
 static func from_fighter(w: GameWorld, f: Fighter, facing: float) -> Rig2D:
@@ -86,6 +93,30 @@ static func from_fighter(w: GameWorld, f: Fighter, facing: float) -> Rig2D:
 	elif fam == "agarrada":
 		r.guard = "wrestler"
 	r.pose = r.stance()
+	return r
+
+
+## Árbitro: camisa escura, calça cinza, sem luvas; cabeça de alguém comum.
+static func referee(rng: RandomNumberGenerator) -> Rig2D:
+	var r := Rig2D.new()
+	var eth: int = [FaceGen.E_EUR, FaceGen.E_LAT, FaceGen.E_NOR, FaceGen.E_MED, FaceGen.E_AFR][rng.randi() % 5]
+	r.face = FaceGen.features(rng.randi(), eth, rng.randi_range(36, 58), {})
+	r.skin = r.face["skin"]
+	r.hair = r.face.get("hair", Color("#2A1D16"))
+	r.beard = r.face.get("beard_col", r.hair)
+	r.has_beard = int(r.face.get("beard", 0)) >= 2
+	r.bald = int(r.face.get("style", 0)) == FaceGen.H_BALD
+	r.outfit = "ref"
+	r.shorts = Color("#3B3E46")
+	r.shirt = Color("#15161A")
+	r.arm_k = 0.95
+	r.leg_k = 0.85
+	r.chest_k = 0.95
+	r.belly = 0.15
+	r.height_k = 1.0
+	r.dir = 1.0
+	r.pose = {"x": 0.0, "y": 0.0, "crouch": 0.1, "sit": 0.0, "rot": 0.0, "torso": 6.0, "head": 0.0, "na_s": 40.0, "na_e": 60.0, "fa_s": 30.0, "fa_e": 70.0,
+		"nl_h": 8.0, "nl_k": 4.0, "fl_h": -8.0, "fl_k": 6.0}
 	return r
 
 
@@ -249,7 +280,19 @@ func draw(ci: CanvasItem, origin_x: float, ground_y: float, U: float, layer: int
 	var waist := hip + tdir * Uh * 0.55
 	var tors := PackedVector2Array([neck + tn * cw * 0.5, chest + tn * cw, waist + tn * ww * (1.0 + 0.35 * belly), hip + tn * ww * 0.95,
 		hip - tn * ww * 0.95, waist - tn * ww * 0.95, chest - tn * cw * 0.9, neck - tn * cw * 0.55])
+	if outfit == "ref":
+		ci.draw_polygon(tors, PackedColorArray([shirt.lightened(0.1), shirt.lightened(0.1), shirt, shirt, shirt.darkened(0.2), shirt.darkened(0.2), shirt, shirt.lightened(0.1)]))
+		ci.draw_line(neck + tn * cw * 0.3, neck - tn * cw * 0.3, sk, maxf(1.0, Uh * 0.12), true)
+		_shorts_leg(ci, j, "fl", lw, shorts.darkened(0.25))
+		_head(ci, j, Uh, sk)
+		_leg(ci, j, "nl", lw, near, near_l, Uh, false)
+		_shorts_leg(ci, j, "nl", lw, shorts)
+		if layer == 0:
+			_arm(ci, j, "na", aw, near, near_l, Uh, false)
+		return
 	ci.draw_polygon(tors, PackedColorArray([near_l, near_l, near, near, far_l, far_l, near, near_l]))
+	if cut > 0.8:
+		ci.draw_line(neck + tn * cw * 0.6, chest + tn * cw * 0.7 - tdir * Uh * 0.6, Color(0.55, 0.03, 0.03, clampf(cut - 0.7, 0.0, 0.7)), maxf(1.0, Uh * 0.1), true)
 	# Peitoral, abdômen e costela
 	ci.draw_line(chest + tn * cw * 0.95, chest + tn * cw * 0.15 - tdir * Uh * 0.15, Color(sk.darkened(0.35), 0.45), maxf(1.0, Uh * 0.05), true)
 	ci.draw_line(chest - tdir * Uh * 0.35 + tn * cw * 0.7, waist + tn * ww * 0.75, Color(sk.darkened(0.3), 0.25), maxf(1.0, Uh * 0.04), true)
@@ -282,6 +325,10 @@ func _arm(ci: CanvasItem, j: Dictionary, side: String, aw: float, col: Color, li
 	_capsule(ci, el, wr, aw * 0.9, aw * 0.75, col, light)
 	if tattoo >= 3 and not far_side:
 		ci.draw_line(sh.lerp(el, 0.2), sh.lerp(el, 0.9), Color(0.1, 0.12, 0.17, 0.4), aw * 1.2, true)
+	if outfit == "ref":
+		_capsule(ci, sh, sh.lerp(el, 0.55), aw * 1.3, aw * 1.15, shirt.darkened(0.25) if far_side else shirt, shirt.lightened(0.1))
+		ci.draw_circle(wr + (wr - el).normalized() * Uh * 0.1, Uh * 0.2, col)
+		return
 	var g := glove.darkened(0.3) if far_side else glove
 	var fd := (wr - el).normalized()
 	var fn := Vector2(-fd.y, fd.x)
@@ -294,6 +341,11 @@ func _shorts_leg(ci: CanvasItem, j: Dictionary, side: String, lw: float, col: Co
 	var hip: Vector2 = j["hip"]
 	var kn: Vector2 = j[side + "_kn"]
 	var end := hip.lerp(kn, 0.5)
+	if outfit == "ref":
+		var an: Vector2 = j[side + "_an"]
+		_capsule(ci, hip, kn, lw * 1.05, lw * 0.85, col, col.lightened(0.08))
+		_capsule(ci, kn, an.lerp(kn, 0.1), lw * 0.85, lw * 0.6, col, col.lightened(0.08))
+		return
 	var d := (end - hip).normalized()
 	var n := Vector2(-d.y, d.x)
 	var a := hip - d * lw * 0.6
@@ -340,3 +392,12 @@ func _head(ci: CanvasItem, j: Dictionary, Uh: float, sk: Color) -> void:
 	ci.draw_circle(c + fw * r * 0.62 + up * r * 0.12, maxf(1.0, r * 0.1), Color(0.08, 0.06, 0.05))
 	ci.draw_line(c + fw * r * 0.9 + up * r * 0.05, c + fw * r * 1.12 - up * r * 0.15, sk.darkened(0.25), maxf(1.0, r * 0.18), true)
 	ci.draw_circle(c - fw * r * 0.1, r * 0.2, sk.darkened(0.15))
+	if bruise > 0.25:
+		ci.draw_circle(c + fw * r * 0.6 + up * r * 0.1, r * (0.22 + 0.12 * bruise), Color(0.38, 0.12, 0.2, clampf((bruise - 0.25) * 0.7, 0.0, 0.5)))
+	if cut > 0.2:
+		var bl := Color(0.62, 0.04, 0.04, clampf(0.35 + cut * 0.45, 0.0, 0.95))
+		var top := c + fw * r * 0.55 + up * r * 0.5
+		ci.draw_circle(top, r * 0.12, bl)
+		ci.draw_line(top, c + fw * r * 0.72 - up * r * (0.2 + 0.5 * minf(cut, 1.0)), bl, maxf(1.0, r * (0.12 + 0.1 * cut)), true)
+		if cut > 0.7:
+			ci.draw_line(top - fw * r * 0.2, c + fw * r * 0.35 - up * r * 0.9, Color(bl, bl.a * 0.8), maxf(1.0, r * 0.1), true)

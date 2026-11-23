@@ -1,6 +1,6 @@
 extends SceneTree
 ## Folha de poses da luta animada 2D: cada quadro é um FightStage2D parado num momento de um lance.
-## xvfb-run -a -s "-screen 0 1700x2200x24" godot --path . --resolution 1600x2140 --script res://tools/stage_sheet.gd -- --out=/tmp/palco.png [--a=boxe --b=muay_thai] [--div=M77]
+## xvfb-run -a -s "-screen 0 1700x2600x24" godot --path . --resolution 1600x2460 --script res://tools/stage_sheet.gd -- --out=/tmp/palco.png [--a=boxe --b=muay_thai] [--div=M77]
 
 const PW := 390
 const PH := 300
@@ -68,6 +68,10 @@ func _initialize() -> void:
 		["chave de braço", [_b("passa", 1, "chao:montada:1"), _b("fin", 1, "chao:montada:1", {"sub": "chave_braco", "lock": false})], 1.6],
 		["fim: nocaute", [_b("fim", 1, S, {"m": "KO"})], 2.5],
 		["intervalo", [_b("fim_round", -1, S, {"n": 1})], 2.0],
+		["corte e sangue", [_b("golpe", 0, S, {"k": "cotovelada", "z": "head", "hit": true, "dmg": 1.4, "cut": [0.0, 1.1], "head": [0.3, 2.2]})], 0.5],
+		["árbitro separa", [_b("clinch", 0, "clinch"), _b("solta", 0, S)], 0.8],
+		["replay do nocaute", [_b("golpe", 0, S, {"k": "gancho", "z": "head", "hit": true, "dmg": 2.0}), _b("fim", 0, S, {"m": "KO"})], 4.4],
+		["mão levantada (decisão)", [_b("fim", 1, S, {"m": "DEC"})], 3.0],
 	]
 	var cols := 4
 	var bg := ColorRect.new()

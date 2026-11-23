@@ -79,6 +79,15 @@ var _ground := 100.0
 var _org := Color("#C8102E")
 var _crowd: Array = []
 var _rng := RandomNumberGenerator.new()
+## Árbitro: terceiro boneco, atrás da dupla.
+var ref: Rig2D
+## Manchas de sangue na lona: {x, z (0 perto da câmera, 1 longe), w}.
+var stains: Array = []
+## Replay do nocaute: últimos quadros gravados e o replay em andamento.
+var _hist: Array = []
+var replay: Dictionary = {}
+var _replayed := false
+var _zoom := 1.0
 
 
 func setup(w: GameWorld, fa: Fighter, fb: Fighter, org_color: Color = Color("#C8102E")) -> void:
@@ -102,6 +111,7 @@ func setup(w: GameWorld, fa: Fighter, fb: Fighter, org_color: Color = Color("#C8
 	clip_contents = true
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_rng.seed = hash(fa.id * 7919 + fb.id)
+	ref = Rig2D.referee(_rng)
 	for i in 150:
 		_crowd.append(Vector3(_rng.randf_range(-40.0, 40.0), _rng.randf(), _rng.randf()))
 
@@ -123,12 +133,14 @@ func skip() -> void:
 		if String(b["type"]) in ["fim", "kd"]:
 			last_big = b
 	_act = {}
+	replay = {}
+	_replayed = true
 	if not last_big.is_empty():
 		_start(last_big)
 
 
 func idle() -> bool:
-	return _act.is_empty() and _queue.is_empty()
+	return _act.is_empty() and _queue.is_empty() and replay.is_empty()
 
 
 # --- Fila e estado -------------------------------------------------------------------------
@@ -138,6 +150,10 @@ func _apply_state(b: Dictionary, silent: bool) -> void:
 	st = {"pos": String(b["pos"]), "g": String(b["g"]), "top": int(b["top"]), "cage": bool(b["cage"]), "dist": int(b["dist"])}
 	var type := String(b["type"])
 	var side := int(b["side"])
+	if b.has("cut"):
+		for i in 2:
+			(rigs[i] as Rig2D).cut = float((b["cut"] as Array)[i])
+			(rigs[i] as Rig2D).bruise = clampf(float((b["head"] as Array)[i]) / 2.5, 0.0, 1.0)
 	if bool(st["cage"]) and not was_cage and side >= 0:
 		# Quem leva para a grade empurra o outro: a grade fica atrás de quem é empurrado.
 		_cage_side = -1.0 if side == 1 else 1.0
@@ -145,6 +161,7 @@ func _apply_state(b: Dictionary, silent: bool) -> void:
 		"round":
 			_between = false
 			_ended = false
+			_replayed = false
 			_cx = 0.0
 			_plum = -1
 			for i in 2:
@@ -210,6 +227,9 @@ func _process(delta: float) -> void:
 	var dt := delta * (0.35 if _slowmo > 0.0 else 1.0)
 	_slowmo -= delta
 	_time += dt
+	if not replay.is_empty():
+		_play_replay(delta)
+		return
 	var speed := time_scale * (1.0 + 0.22 * float(_queue.size()))
 	if not _act.is_empty():
 		_act["p"] = float(_act["p"]) + dt * speed / float(_act["dur"])
@@ -218,16 +238,140 @@ func _process(delta: float) -> void:
 		var chain := String(_act["type"]) in ["golpe", "gnp"] and float(_act["p"]) >= 0.68 and _queue.size() > 0 \
 			and String((_queue[0] as Dictionary)["type"]) == String(_act["type"]) and int((_queue[0] as Dictionary)["side"]) == int(_act["side"])
 		if float(_act["p"]) >= 1.0 or chain:
+			var was_ko := String(_act["type"]) == "fim" and _method in ["KO", "TKO"]
 			_act = {}
+			if was_ko and not _replayed and _hist.size() > 30 and not AppSettings.reduce_motion:
+				_replayed = true
+				replay = {"frames": _hist.duplicate(), "t": 0.0}
+				_caption_t = 0.0
 	if _act.is_empty() and _queue.size() > 0:
 		_start(_queue.pop_front())
 	_animate(dt)
+	_animate_ref(dt)
+	_record(dt)
 	_shake = maxf(0.0, _shake - delta * 2.5)
+	_zoom = lerpf(_zoom, 1.0, 1.0 - exp(-3.0 * delta))
 	_caption_t -= delta
+	_tick_fx(delta)
+	queue_redraw()
+
+
+func _tick_fx(delta: float) -> void:
 	for f: Dictionary in _fx:
 		f["t"] = float(f["t"]) + delta
-	_fx = _fx.filter(func(f: Dictionary) -> bool: return float(f["t"]) < 0.5)
+	_fx = _fx.filter(func(f: Dictionary) -> bool: return float(f["t"]) < (0.9 if String(f["kind"]) == "blood" else 0.5))
+
+
+# --- Replay ------------------------------------------------------------------------------
+
+## Grava o quadro (poses, posições, brilhos) para o replay; guarda uns 4 segundos.
+func _record(dt: float) -> void:
+	var fr := {"dt": dt, "p": [], "x": [], "d": [], "f": [], "fx": _fx.duplicate(true)}
+	for r: Rig2D in [rigs[0], rigs[1], ref]:
+		fr["p"].append(r.pose.duplicate())
+		fr["x"].append(r.px)
+		fr["d"].append(r.dir)
+		fr["f"].append(r.flash)
+	_hist.append(fr)
+	var total := 0.0
+	var cut_at := 0
+	for i in range(_hist.size() - 1, -1, -1):
+		total += float((_hist[i] as Dictionary)["dt"])
+		if total > 4.2:
+			cut_at = i
+			break
+	if cut_at > 0:
+		_hist = _hist.slice(cut_at)
+
+
+## O replay toca os quadros gravados devagar, com zoom, e depois volta para o fim de luta.
+func _play_replay(delta: float) -> void:
+	var frames: Array = replay["frames"]
+	replay["t"] = float(replay["t"]) + delta * 0.4
+	var acc := 0.0
+	var idx := frames.size() - 1
+	for i in frames.size():
+		acc += float((frames[i] as Dictionary)["dt"])
+		if acc >= float(replay["t"]):
+			idx = i
+			break
+	var fr: Dictionary = frames[idx]
+	var all := [rigs[0], rigs[1], ref]
+	for i in 3:
+		var r: Rig2D = all[i]
+		r.pose = (fr["p"][i] as Dictionary).duplicate()
+		r.px = float(fr["x"][i])
+		r.dir = float(fr["d"][i])
+		if i < 2:
+			r.flash = float(fr["f"][i])
+	_fx = (fr["fx"] as Array).duplicate(true)
+	_zoom = lerpf(_zoom, 1.12, 1.0 - exp(-3.0 * delta))
+	_time += delta * 0.4
+	if idx >= frames.size() - 1:
+		replay = {}
+		_fx = []
+		_caption_t = 99.0
 	queue_redraw()
+
+
+func in_replay() -> bool:
+	return not replay.is_empty()
+
+
+# --- Árbitro -------------------------------------------------------------------------------
+
+## Acompanha a dupla pelo lado com mais espaço; separa o clinch, aponta no knockdown, entra para
+## parar a luta e levanta a mão do vencedor.
+func _animate_ref(dt: float) -> void:
+	var r0: Rig2D = rigs[0]
+	var r1: Rig2D = rigs[1]
+	var mid := (r0.px + r1.px) * 0.5
+	var off := 3.4 if mid < 0.0 else -3.4
+	var pos := String(st.get("pos", "solto"))
+	var p := _relaxed(ref)
+	p.merge({"na_s": 45.0, "na_e": 70.0, "fa_s": 35.0, "fa_e": 80.0, "crouch": 0.12, "torso": 8.0}, true)
+	var tx := mid + off
+	var type := String(_act.get("type", ""))
+	var pa := float(_act.get("p", 0.0))
+	if _between:
+		tx = 0.0
+		p = _relaxed(ref)
+	elif _ended and _winner >= 0:
+		var wr: Rig2D = rigs[_winner]
+		var lr: Rig2D = rigs[1 - _winner]
+		if type == "fim" and pa < 0.7 and _method in ["KO", "TKO", "FIN"]:
+			# Entra correndo e abraça/protege quem perdeu.
+			tx = lr.px + (wr.px - lr.px) * 0.25
+			p.merge({"crouch": 0.5, "torso": 45.0, "na_s": 110.0 + 35.0 * sin(_time * 14.0), "na_e": 20.0, "fa_s": 95.0 - 35.0 * sin(_time * 14.0), "fa_e": 25.0}, true)
+		else:
+			# Mão do vencedor para o alto.
+			tx = wr.px - signf(wr.px - lr.px + 0.001) * 1.3
+			p = _relaxed(ref)
+			p.merge({"na_s": 160.0, "na_e": 10.0, "torso": -4.0}, true)
+	elif _ended:
+		tx = mid
+		p.merge({"na_s": 150.0, "na_e": 20.0, "fa_s": 150.0, "fa_e": 20.0}, true)
+	elif type == "solta":
+		tx = mid
+		p.merge({"na_s": 92.0, "na_e": 6.0, "fa_s": 86.0, "fa_e": 10.0}, true)
+	elif type == "kd":
+		tx = mid + off * 0.6
+		p.merge({"torso": 28.0, "na_s": 75.0, "na_e": 0.0}, true)
+	elif pos == "chao":
+		tx = mid + off * 0.75
+		p.merge({"crouch": 0.7, "torso": 40.0, "na_s": 25.0, "na_e": 20.0, "fa_s": 20.0, "fa_e": 25.0}, true)
+	elif pos == "clinch":
+		tx = mid + off * 0.6
+	tx = clampf(tx, -ARENA + 1.0, ARENA - 1.0)
+	var dirt := signf(mid - ref.px)
+	if _ended and _winner >= 0 and not (type == "fim" and pa < 0.7):
+		dirt = signf((rigs[_winner] as Rig2D).px - ref.px)
+	if dirt != 0.0 and not is_equal_approx(dirt, ref.dir):
+		ref.dir = dirt
+		ref.pose = Rig2D.swap_sides(ref.pose)
+	p["crouch"] = float(p.get("crouch", 0.0)) + 0.03 * sin(_time * 3.0)
+	ref.pose = Rig2D.blend(ref.pose, p, 1.0 - exp(-8.0 * dt))
+	ref.px = lerpf(ref.px, tx, 1.0 - exp(-(4.0 if _ended else 2.2) * dt))
 
 
 func _animate(dt: float) -> void:
@@ -330,22 +474,28 @@ func _ground_base(s: Dictionary) -> Array:
 			B.merge({"sit": 1.0, "rot": 88.0, "head": 25.0, "na_s": 55.0, "na_e": 60.0, "fa_s": 70.0, "fa_e": 50.0, "nl_h": 35.0, "nl_k": 85.0, "fl_h": 12.0, "fl_k": 40.0}, true)
 			T.merge({"torso": 58.0, "head": 15.0, "na_s": 100.0, "na_e": 40.0, "fa_s": 80.0, "fa_e": 50.0, "nl_h": 25.0, "nl_k": 110.0, "fl_h": -15.0, "fl_k": 85.0}, true)
 			t_off = 1.3
+			B["lz"] = 0.6
+			T.merge({"lz": 0.5, "zz": 0.35}, true)
 		"lateral":
 			B.merge({"sit": 1.0, "rot": 90.0, "head": 20.0, "na_s": 75.0, "na_e": 70.0, "fa_s": 40.0, "fa_e": 80.0, "nl_h": 40.0, "nl_k": 80.0, "fl_h": 25.0, "fl_k": 70.0}, true)
 			T.merge({"torso": 78.0, "head": 10.0, "na_s": 30.0, "na_e": 40.0, "fa_s": 60.0, "fa_e": 30.0, "nl_h": -15.0, "nl_k": 75.0, "fl_h": -40.0, "fl_k": 55.0}, true)
 			t_off = 0.4
+			T.merge({"lz": 0.5, "zz": 0.95}, true)
 		"montada":
 			B.merge({"sit": 1.0, "rot": 90.0, "head": 25.0, "na_s": 90.0, "na_e": 30.0, "fa_s": 75.0, "fa_e": 45.0, "nl_h": 45.0, "nl_k": 90.0, "fl_h": 35.0, "fl_k": 85.0}, true)
 			T.merge({"sit": 1.0, "y": 0.1, "torso": 8.0, "head": 5.0, "na_s": 65.0, "na_e": 30.0, "fa_s": 50.0, "fa_e": 40.0, "nl_h": 70.0, "nl_k": 155.0, "fl_h": 62.0, "fl_k": 150.0}, true)
 			t_off = -0.5
+			T["lz"] = 2.0
 		"costas":
 			B.merge({"sit": 1.0, "rot": 0.0, "torso": -12.0, "head": 10.0, "na_s": 70.0, "na_e": 60.0, "fa_s": 60.0, "fa_e": 70.0, "nl_h": 86.0, "nl_k": 8.0, "fl_h": 82.0, "fl_k": 12.0}, true)
 			T.merge({"sit": 1.0, "torso": 6.0, "head": 12.0, "na_s": 88.0, "na_e": 55.0, "fa_s": 70.0, "fa_e": 70.0, "nl_h": 86.0, "nl_k": 6.0, "fl_h": 82.0, "fl_k": 10.0}, true)
 			t_off = -1.15
 			dirs[tp] = dB
+			T.merge({"lz": 1.5, "az": 0.25}, true)
 		_:
 			B.merge({"sit": 1.0, "rot": 90.0, "head": 25.0, "na_s": 60.0, "na_e": 30.0, "fa_s": 70.0, "fa_e": 40.0, "nl_h": 45.0, "nl_k": 78.0, "fl_h": 40.0, "fl_k": 70.0}, true)
-			T.merge({"torso": 30.0, "head": 0.0, "na_s": 58.0, "na_e": 20.0, "fa_s": 50.0, "fa_e": 28.0, "nl_h": -2.0, "nl_k": 95.0, "fl_h": -12.0, "fl_k": 80.0}, true)
+			T.merge({"torso": 30.0, "head": 0.0, "na_s": 58.0, "na_e": 20.0, "fa_s": 50.0, "fa_e": 28.0, "nl_h": -2.0, "nl_k": 95.0, "fl_h": -12.0, "fl_k": 80.0, "lz": 0.7}, true)
+			B["lz"] = 1.4
 	dirs[bt] = dB
 	var target_cx := 0.0
 	if bool(s["cage"]):
@@ -704,6 +854,11 @@ func _impact() -> void:
 	elif z == "leg":
 		pt = (j[rd.lead() + "l_kn"] as Vector2).lerp(j["hip"], 0.3)
 	_fx.append({"t": 0.0, "kind": "hit", "x": (pt.x - _origin_x()) / _U, "y": (_ground - pt.y) / _U, "pw": dmg, "z": z})
+	if z == "head" and (rd.cut > 0.25 or dmg > 1.1):
+		var away := -rd.dir
+		_fx.append({"t": 0.0, "kind": "blood", "x": (pt.x - _origin_x()) / _U, "y": (_ground - pt.y) / _U, "pw": clampf(rd.cut + dmg * 0.3, 0.3, 1.5), "v": away, "seed": _rng.randi() % 1000})
+		if stains.size() < 30:
+			stains.append({"x": rd.px + away * _rng.randf_range(0.5, 2.5), "z": _rng.randf(), "w": _rng.randf_range(0.2, 0.55) * (0.6 + rd.cut)})
 	if dmg > 0.9:
 		_shake = maxf(_shake, minf(1.0, dmg * 0.5))
 		if z == "head":
@@ -721,12 +876,24 @@ func _draw() -> void:
 	var h := size.y
 	if rigs.is_empty() or w < 10.0:
 		return
-	_U = h / 9.6
+	_U = h / 9.6 * _zoom
 	_ground = h * 0.88
 	var sh := Vector2(sin(_time * 70.0), cos(_time * 53.0)) * _shake * _U * 0.18
 	draw_set_transform(sh, 0.0, Vector2.ONE)
 	_draw_arena(w, h)
 	var ox := _origin_x()
+	# Sangue na lona.
+	for stn: Dictionary in stains:
+		var sp := Vector2(ox + float(stn["x"]) * _U, _ground - _U * 0.55 + float(stn["z"]) * _U * 0.5)
+		var sw := float(stn["w"]) * _U
+		draw_set_transform(sp, 0.0, Vector2(1.0, 0.3))
+		draw_circle(Vector2.ZERO, sw, Color(0.45, 0.03, 0.04, 0.55))
+		draw_circle(Vector2(sw * 0.8, sw * 0.3), sw * 0.35, Color(0.45, 0.03, 0.04, 0.45))
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	# Árbitro: um pouco mais atrás (menor e mais alto na tela).
+	if ref != null:
+		var ur := _U * 0.88
+		ref.draw(self, ox + ref.px * (_U - ur), _ground - _U * 0.5, ur)
 	var order := [0, 1]
 	var layered := -1
 	if String(st["pos"]) == "chao" and not _ended:
@@ -739,13 +906,21 @@ func _draw() -> void:
 		order = [1 - _winner, _winner]
 	elif not _act.is_empty() and int(_act["side"]) >= 0:
 		order = [1 - int(_act["side"]), int(_act["side"])]
+	# Quem sai do plano (zz) desce um pouco na tela: fica "na frente" do outro no chão.
 	for i: int in order:
-		(rigs[i] as Rig2D).draw(self, ox, _ground, _U, 1 if i == layered else 0)
+		var rg: Rig2D = rigs[i]
+		rg.draw(self, ox, _ground + float(rg.pose.get("zz", 0.0)) * _U * 0.35, _U, 1 if i == layered else 0)
 	if layered >= 0:
 		(rigs[layered] as Rig2D).draw(self, ox, _ground, _U, 2)
 	_draw_fx(ox)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	_draw_front_fence(w, h)
+	if not replay.is_empty():
+		var font2 := get_theme_default_font()
+		var blink := 0.6 + 0.4 * sin(_time * 12.0)
+		draw_rect(Rect2(10, 10, _U * 3.6, _U * 0.95), Color(0, 0, 0, 0.6))
+		draw_circle(Vector2(10 + _U * 0.45, 10 + _U * 0.48), _U * 0.2, Color(0.9, 0.1, 0.1, blink))
+		draw_string(font2, Vector2(10 + _U * 0.8, 10 + _U * 0.72), "REPLAY", HORIZONTAL_ALIGNMENT_LEFT, -1, int(_U * 0.6), Color.WHITE)
 	if _caption_t > 0.0 and _caption != "":
 		var font := get_theme_default_font()
 		var fs := int(_U * 1.15)
@@ -834,6 +1009,18 @@ func _draw_fx(ox: float) -> void:
 	for f: Dictionary in _fx:
 		var t := float(f["t"])
 		var pw := float(f["pw"])
+		if String(f["kind"]) == "blood":
+			var o := Vector2(ox + float(f["x"]) * _U, _ground - float(f["y"]) * _U)
+			var sd := int(f["seed"])
+			for i in 9:
+				var a := -0.9 + float((sd + i * 37) % 100) / 100.0 * 1.2
+				var sp := (2.5 + float((sd * 3 + i * 17) % 100) / 40.0) * _U
+				var v := Vector2(cos(a) * float(f["v"]), sin(a)) * sp
+				var q := o + v * t + Vector2(0, 14.0 * _U) * t * t
+				if q.y > _ground:
+					continue
+				draw_circle(q, _U * (0.07 + 0.05 * float(i % 3)) * pw, Color(0.6, 0.02, 0.03, clampf(1.0 - t, 0.0, 1.0)))
+			continue
 		if String(f["kind"]) == "dust":
 			var c := Vector2(ox + float(f["x"]) * _U, _ground)
 			for i in 6:
