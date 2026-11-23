@@ -67,7 +67,7 @@ static func _train(w: GameWorld, f: Fighter, team: Team, age: int) -> void:
 		if k in ["queixo", "coracao"]:
 			continue # não se treina queixo
 		var coach := team.staff_quality(String(COACH_OF[g])) if team != null else 20.0
-		var amount := base * float(focus[g]) * (0.6 + coach / 100.0) * w.rng.randf_range(0.4, 1.6)
+		var amount := base * float(focus[g]) * (0.6 + coach / 100.0) * w.rng.randf_range(0.4, 1.6) * Persona.train_k(f)
 		var p := float(f.progress.get(k, 0.0)) + amount
 		if p >= 1.0 and f.a(k) < 99.0:
 			f.attrs[k] = f.a(k) + 1.0

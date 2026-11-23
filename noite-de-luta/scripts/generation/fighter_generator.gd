@@ -111,6 +111,7 @@ static func make(w: GameWorld, div: String, level: float, age_: int = 0, amateur
 	_grooming(f, rng, String(origin["c"]))
 	_marks(f, rng)
 	physique(f, rng, String(origin["c"]))
+	Persona.make(f, rng, String(origin["c"]))
 	return f
 
 

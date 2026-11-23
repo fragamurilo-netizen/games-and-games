@@ -1,5 +1,29 @@
 # Noite de Luta — nota de passagem (23/11/2026)
 
+## Rodada 2 de 23/11/2026: rostos, corpos e personalidade
+
+- **Rostos pequenos legíveis** (`PortraitView`): no recorte FM abaixo de 96 px o enquadramento chega
+  mais perto (`FM_ZOOM_SMALL`), e abaixo de ~165 px `_small_cues()` reforça sombra sob o nariz,
+  narinas, linha da boca e sombra sob o lábio.
+- **Físico** (`FighterGenerator.physique`, chaves de `look`): `ms` músculo (força + luta agarrada),
+  `bf` gordura (categoria, fôlego, idade; alguns pesados de barriga), `tr` trapézio/pescoço de
+  wrestler, `tt` tatuagens 0–3 pela cultura (raras no Cáucaso e no Leste Asiático).
+  `FaceGen._apply_physique` leva isso ao retrato (ombros mais largos por categoria, trapézio alto,
+  pescoço grosso, tatuagens no tronco em `_body_tattoos`). Saves antigos ganham físico ao carregar.
+- **Corpo inteiro** (`scripts/ui/components/body_view.gd`, `BodyView`): de frente, como na pesagem,
+  com shorts nas cores da equipe e luvas; altura real em escala (`ref_cm`). A cabeça é um
+  `PortraitView` com `head_only`. Aparece no perfil (card Físico, com o texto de
+  `FightKit.physique_text`) e no alto da ficha de comparação (`FightKit.tape` → `bodies`).
+  Folha de teste: `tools/body_sheet.gd -- --out=... [--fem] [--nations=BRA,RUS] [--h=700]`.
+- **Personalidade** (`scripts/systems/persona.gd`, `Fighter.traits`): dois traços entre falastrão,
+  humilde, disciplinado, preguiçoso, encrenqueiro, frio, nervoso, mercenário, guerreiro e showman.
+  Pesam na balança, no treino, na fama, em aceitar luta (Org e substituto), na noite grande
+  (mods do motor), na coletiva pós-luta (aposentar) e numa **coletiva pré-luta** nova: com um
+  esquentado na luta principal pode sair provocação ou briga (`FightEvent.hype` soma no apelo).
+  A expressão da foto segue o primeiro traço (`look.ex`). Card "Personalidade" no perfil.
+- Ideias seguintes: corpo em guarda/de lado, mulheres no corpo inteiro com mais variação,
+  rivalidades entre lutadores (falastrão × falastrão), humor do lutador com a equipe/organização.
+
 ## Rodada de 23/11/2026: vida de presidente (semana da luta e coletiva)
 
 Ramo de trabalho: `claude/project-thread-cbowjz` (sai de `claude/inspiring-wright-xx78jb`).
@@ -26,7 +50,7 @@ Ramo de trabalho: `claude/project-thread-cbowjz` (sai de `claude/inspiring-wrigh
   em fase ruim se aposentar (aceita ou se ofende) e exaltar a casa cheia. Tudo vira notícia.
 - Verificado: `check_scripts` (85, 0 erros), `world_sim` de 52 semanas nos dois papéis com save,
   capturas `design_shots --role=presidente` (novas: `p09a`, `p09b_decidir_*`, `p17b_coletiva`).
-- **APK 0.1.2** em `releases/` (código 3). Assinado com uma **chave de teste nova** (a da 0.1.1 não
+- **APK** em `releases/` (0.1.2 código 3; depois 0.1.3 código 4 na rodada 2, mesma chave). Assinado com uma **chave de teste nova** (a da 0.1.1 não
   estava no repositório): no celular, desinstalar a 0.1.1 antes de instalar. Sem acesso ao
   `dl.google.com`, o `apksigner` veio do `uber-apk-signer` (GitHub) dentro de um SDK mínimo
   (`build-tools/34.0.0/apksigner` + um `platform-tools/adb` vazio só para passar na checagem).

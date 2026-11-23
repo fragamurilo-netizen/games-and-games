@@ -62,7 +62,7 @@ static func weigh_in(w: GameWorld, b: Bout) -> Dictionary:
 		res["cut"].append(cut)
 		# Cerca de 3% erram o peso (no MMA real, perto de uma luta por card); corte grande, nutricionista
 		# fraco e pouca cabeça pesam.
-		var miss_p := clampf(0.03 + (cut - 0.08) * 0.6 - (nutri - 50.0) / 2000.0 - (f.a("qi") - 50.0) / 3000.0, 0.005, 0.4)
+		var miss_p := clampf((0.03 + (cut - 0.08) * 0.6 - (nutri - 50.0) / 2000.0 - (f.a("qi") - 50.0) / 3000.0) * Persona.weight_k(f), 0.002, 0.4)
 		var kg := limit - r.randf_range(0.0, 0.4)
 		if r.randf() < miss_p:
 			kg = limit + r.randf_range(0.3, 2.4)
@@ -79,6 +79,10 @@ static func weigh_in(w: GameWorld, b: Bout) -> Dictionary:
 		if cond > 0.0:
 			m["cardio"] = float(m.get("cardio", 0.0)) - cond * 22.0
 			m["queixo"] = float(m.get("queixo", 0.0)) - cond * 10.0
+		# Personalidade na noite grande (frio cresce, nervoso trava, guerreiro aguenta).
+		var pm := Persona.fight_mods(f, b.title or b.main_event)
+		for k: String in pm:
+			m[k] = float(m.get(k, 0.0)) + float(pm[k])
 		res["mods"][i] = m
 	b.weigh = res
 	return res
@@ -144,7 +148,7 @@ static func resolve(w: GameWorld, b: Bout, res: Dictionary, e: FightEngine) -> v
 		# Fama: ganhar (e ganhar bonito) dá nome; perder tira um pouco.
 		var tier := ev.tier if ev != null else 0
 		if won:
-			f.popularity = minf(100.0, f.popularity + 1.5 + tier * 1.5 + (2.0 if method != "DEC" else 0.0) + (8.0 if b.title else 0.0))
+			f.popularity = minf(100.0, f.popularity + (1.5 + tier * 1.5 + (2.0 if method != "DEC" else 0.0) + (8.0 if b.title else 0.0)) * Persona.fame_k(f, method != "DEC"))
 		elif res_code == "D":
 			f.popularity = maxf(1.0, f.popularity - 1.0)
 		var st: Dictionary = e.s[i] if e != null else {}

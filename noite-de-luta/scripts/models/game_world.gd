@@ -252,6 +252,10 @@ static func from_dict(d: Dictionary) -> GameWorld:
 			var pr := RandomNumberGenerator.new()
 			pr.seed = hash([f.id, f.face_seed, "fisico"])
 			FighterGenerator.physique(f, pr)
+		if f.traits.is_empty():
+			var tr := RandomNumberGenerator.new()
+			tr.seed = hash([f.id, f.face_seed, "jeito"])
+			Persona.make(f, tr)
 	for td: Dictionary in d.get("teams", []):
 		var t := Team.from_dict(td)
 		w.teams[t.id] = t

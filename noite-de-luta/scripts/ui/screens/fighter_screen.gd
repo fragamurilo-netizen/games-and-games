@@ -125,11 +125,23 @@ func _ficha(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 	else:
 		pot.add_child(UIKit.label("Contrate um olheiro", "Small"))
 	body.add_child(pot)
-	var cards: Array = [UIKit.card_panel(body), _style_card(f)]
+	var cards: Array = [UIKit.card_panel(body), _persona_card(f), _style_card(f)]
 	cards.append_array(FightKit.attr_blocks(f))
 	for x: Control in cards:
 		c.add_child(x)
 	columnize(c, 2, 2)
+
+
+## Personalidade: os dois traços e o que cada um faz no jogo.
+func _persona_card(f: Fighter) -> Control:
+	var card := UIKit.card("Card", UITokens.S1)
+	card.add_child(UIKit.label("Personalidade", "Section"))
+	for t: String in f.traits:
+		card.add_child(UIKit.label(Persona.name_of(t), "H3"))
+		card.add_child(UIKit.label(Persona.desc_of(t), "Small", true))
+	if f.traits.is_empty():
+		card.add_child(UIKit.label("Ainda não deu para conhecer.", "Muted"))
+	return UIKit.card_panel(card)
 
 
 ## Estilo de luta: de onde ele vem, as marcas da escola e as armas que mais usa.

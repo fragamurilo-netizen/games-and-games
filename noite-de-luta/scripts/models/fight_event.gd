@@ -19,11 +19,13 @@ var ppv: bool = false
 var closed: bool = false
 ## Fechamento da noite (presidente): público, receitas, custos, bônus. Vazio antes.
 var report: Dictionary = {}
+## Interesse extra criado na semana (briga na coletiva, provocação): soma no apelo da noite.
+var hype: float = 0.0
 
 
 func to_dict() -> Dictionary:
 	return {"id": id, "week": week, "tier": tier, "name": name, "city": city, "nation": nation, "bouts": bouts, "slots": slots, "done": done,
-		"ppv": ppv, "closed": closed, "report": report}
+		"ppv": ppv, "closed": closed, "report": report, "hype": hype}
 
 
 static func from_dict(d: Dictionary) -> FightEvent:
@@ -38,6 +40,7 @@ static func from_dict(d: Dictionary) -> FightEvent:
 	e.slots = int(d.get("slots", 6))
 	e.done = bool(d.get("done", false))
 	e.ppv = bool(d.get("ppv", false))
+	e.hype = float(d.get("hype", 0.0))
 	e.closed = bool(d.get("closed", false))
 	e.report = d.get("report", {})
 	return e

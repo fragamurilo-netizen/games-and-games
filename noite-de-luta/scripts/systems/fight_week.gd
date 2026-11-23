@@ -63,6 +63,35 @@ static func roll(w: GameWorld) -> void:
 					break
 			if gap == 0 and not has_incident(w, b.id):
 				_weigh(w, ev, b)
+			if gap == 1 and b.main_event and b.status == "marcada":
+				_presser_brawl(w, ev, b)
+
+
+## Coletiva da semana da luta principal: com um falastrão ou encrenqueiro na mesa, pode sair
+## provocação ou empurra-empurra. Vende a noite (hype) e dá fama; às vezes a comissão multa.
+static func _presser_brawl(w: GameWorld, ev: FightEvent, b: Bout) -> void:
+	if bool(ev.report.get("brawl_rolled", false)):
+		return
+	ev.report["brawl_rolled"] = true
+	var fa := w.fighter(b.a)
+	var fb := w.fighter(b.b)
+	var hot := int(Persona.hothead(fa)) + int(Persona.hothead(fb))
+	if hot == 0 or w.rng.randf() >= 0.3 + 0.25 * (hot - 1):
+		return
+	var loud := fa if Persona.hothead(fa) else fb
+	var other := fb if loud == fa else fa
+	var brawl := Persona.has(loud, "encrenqueiro") or hot == 2
+	ev.hype += 8.0 if brawl else 4.0
+	loud.popularity = minf(100.0, loud.popularity + 3.0)
+	other.popularity = minf(100.0, other.popularity + 1.5)
+	var txt := ""
+	if brawl:
+		txt = "Confusão na coletiva da %s: %s parte para cima de %s e os seguranças separam. A luta vira assunto e os ingressos voam." % [ev.name, loud.display_name(), other.display_name()]
+		if w.rng.randf() < 0.4:
+			txt += " A comissão multa %s." % loud.short_name()
+	else:
+		txt = "%s provoca %s na coletiva da %s e promete nocaute. A noite ganha interesse." % [loud.display_name(), other.display_name(), ev.name]
+	w.add_news("organizacao" if w.is_president() else "resultado", txt, [loud.id, other.id], brawl)
 
 
 ## Lesão de um lutador com luta marcada numa noite da organização: vira decisão do presidente.
@@ -174,9 +203,9 @@ static func sub_chances(w: GameWorld, i: Dictionary, sub: Fighter) -> Array:
 	var ns := 60 if rs < 0 else rs
 	var nk := 60 if rk < 0 else rk
 	# O substituto: oportunidade de subir no ranking é ótima, aviso de dias é o que pesa.
-	var ps := 0.72 + (0.12 if ns > nk else -0.1) - (0.2 if notice == 0 else (0.08 if notice == 1 else 0.0))
+	var ps := 0.72 + (0.12 if ns > nk else -0.1) - (0.2 if notice == 0 else (0.08 if notice == 1 else 0.0)) + Persona.accept_mod(sub, nk - ns, 1.3, true)
 	# Quem ficou: não quer arriscar a posição contra alguém muito abaixo.
-	var pk := 0.92 - maxf(0.0, ns - nk - 6) * 0.035
+	var pk := 0.92 - maxf(0.0, ns - nk - 6) * 0.035 + Persona.accept_mod(keep, ns - nk, 1.0, true)
 	var why := "%s não aceita: diz que não ganha nada enfrentando alguém tão abaixo no ranking." % keep.short_name()
 	if ps < pk:
 		why = "%s recusa: não dá para cortar o peso e se preparar com tão pouco tempo." % sub.short_name()
@@ -503,7 +532,8 @@ static func presser_pick(w: GameWorld, ev: FightEvent, o: Dictionary) -> String:
 				out = "Saia justa: a luta é anunciada, mas as equipes desmentem no dia seguinte. %s" % String(r["text"])
 		"aposenta":
 			var f3 := w.fighter(int(o["fighter"]))
-			if w.rng.randf() < 0.45:
+			var pa := 0.8 if Persona.has(f3, "humilde") else (0.15 if Persona.hothead(f3) or Persona.has(f3, "guerreiro") else 0.45)
+			if w.rng.randf() < pa:
 				Development.retire(w, f3)
 				out = "%s concorda: anuncia a aposentadoria no dia seguinte e é aplaudid%s." % [f3.short_name(), _o(f3)]
 			else:

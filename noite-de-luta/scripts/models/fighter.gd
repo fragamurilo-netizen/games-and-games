@@ -104,6 +104,8 @@ var bout_id: int = -1
 var challenge_lock: int = -999
 ## Treino acumulado ainda não convertido em ponto de atributo.
 var progress: Dictionary = {}
+## Personalidade: dois traços (ver Persona).
+var traits: Array = []
 
 
 func display_name() -> String:
@@ -215,7 +217,7 @@ func to_dict() -> Dictionary:
 		"pot": potential, "peak": peak_age, "team": team_id, "contract": contract, "rec": record, "am": amateur,
 		"hist": history, "rating": rating, "streak": streak, "last_fw": last_fight_week, "cond": condition,
 		"inj": injury, "susp": suspension, "pop": popularity, "wear": wear, "ret": retired, "titles": titles_won,
-		"defs": title_defenses, "train": training, "bout": bout_id, "ch_lock": challenge_lock, "prog": progress,
+		"defs": title_defenses, "train": training, "bout": bout_id, "ch_lock": challenge_lock, "prog": progress, "traits": traits,
 	}
 
 
@@ -264,4 +266,5 @@ static func from_dict(d: Dictionary) -> Fighter:
 	f.bout_id = int(d.get("bout", -1))
 	f.challenge_lock = int(d.get("ch_lock", -999))
 	f.progress = d.get("prog", {})
+	f.traits = d.get("traits", [])
 	return f

@@ -229,6 +229,7 @@ static func acceptance(w: GameWorld, ev: FightEvent, f: Fighter, opp: Fighter, t
 		if why == "":
 			why = "%s é estrela; para enfrentar alguém desconhecido, quer uma bolsa maior." % f.short_name()
 	p += [0.0, 0.08, 0.14, 0.2][maxi(0, PURSE_STEPS.find(mult))]
+	p += Persona.accept_mod(f, gap, mult, notice < 3)
 	if why == "":
 		why = "A equipe de %s pediu mais dinheiro e um adversário melhor." % f.short_name()
 	return [clampf(p, 0.03, 0.97), why]
@@ -400,6 +401,8 @@ static func draw(w: GameWorld, ev: FightEvent) -> float:
 			belts += 1
 	if ev.ppv:
 		d += 4.0
+	# Confusão na coletiva da semana (FightWeek) vende a noite.
+	d += ev.hype
 	d *= minf(1.0, 0.55 + lst.size() / float(maxi(1, ev.slots)) * 0.45)
 	return clampf(d, 0.0, 100.0)
 
