@@ -114,4 +114,22 @@ func _run() -> void:
 	await _shot("15_resultado")
 	AppSettings.fight_view = "2d"
 	AppSettings.save_settings()
+	# Um ano depois: o mundo andou (prêmios do ano, Hall da Fama, recordes, visual mais velho).
+	guard = 0
+	while w.awards.is_empty() and guard < 70:
+		guard += 1
+		for o: Dictionary in w.offers.duplicate():
+			if w.offers.has(o):
+				Matchmaker.accept_offer(w, o)
+		Career.advance_week(w, true)
+		if guard % 8 == 0:
+			await get_tree().process_frame
+	UIManager.goto("hub")
+	await _shot("16_inicio_um_ano_depois")
+	UIManager.push("legacy")
+	await _shot("17_legado_premios")
+	UIManager.replace("legacy", {"tab": "hall"})
+	await _shot("17b_legado_hall")
+	UIManager.replace("legacy", {"tab": "recordes"})
+	await _shot("17c_legado_recordes")
 	get_tree().quit()

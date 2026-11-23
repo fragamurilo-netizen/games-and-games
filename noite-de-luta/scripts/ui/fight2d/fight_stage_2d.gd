@@ -88,6 +88,8 @@ var _hist: Array = []
 var replay: Dictionary = {}
 var _replayed := false
 var _zoom := 1.0
+## Tremor da câmera no golpe forte (deslocamento do quadro).
+var _sh := Vector2.ZERO
 
 
 func setup(w: GameWorld, fa: Fighter, fb: Fighter, org_color: Color = Color("#C8102E")) -> void:
@@ -112,8 +114,9 @@ func setup(w: GameWorld, fa: Fighter, fb: Fighter, org_color: Color = Color("#C8
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_rng.seed = hash(fa.id * 7919 + fb.id)
 	ref = Rig2D.referee(_rng)
-	for i in 150:
+	for i in 170:
 		_crowd.append(Vector3(_rng.randf_range(-40.0, 40.0), _rng.randf(), _rng.randf()))
+	_crowd.sort_custom(func(a: Vector3, b: Vector3) -> bool: return a.y < b.y)
 
 
 ## Um lance do motor, na ordem. A fila acumulada demais (velocidade alta, "Pular") é resumida:
@@ -910,18 +913,16 @@ func _draw() -> void:
 		return
 	_U = h / 9.6 * _zoom
 	_ground = h * 0.88
-	var sh := Vector2(sin(_time * 70.0), cos(_time * 53.0)) * _shake * _U * 0.18
-	draw_set_transform(sh, 0.0, Vector2.ONE)
+	_sh = Vector2(sin(_time * 70.0), cos(_time * 53.0)) * _shake * _U * 0.18
+	draw_set_transform(_sh, 0.0, Vector2.ONE)
 	_draw_arena(w, h)
 	var ox := _origin_x()
 	# Sangue na lona.
 	for stn: Dictionary in stains:
 		var sp := Vector2(ox + float(stn["x"]) * _U, _ground - _U * 0.55 + float(stn["z"]) * _U * 0.5)
 		var sw := float(stn["w"]) * _U
-		draw_set_transform(sp, 0.0, Vector2(1.0, 0.3))
-		draw_circle(Vector2.ZERO, sw, Color(0.45, 0.03, 0.04, 0.55))
-		draw_circle(Vector2(sw * 0.8, sw * 0.3), sw * 0.35, Color(0.45, 0.03, 0.04, 0.45))
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		draw_colored_polygon(Rig2D._oval(sp, Vector2(sw, 0), Vector2(0, sw * 0.3), 12), Color(0.45, 0.03, 0.04, 0.55))
+		draw_colored_polygon(Rig2D._oval(sp + Vector2(sw * 0.8, sw * 0.09), Vector2(sw * 0.35, 0), Vector2(0, sw * 0.1), 8), Color(0.45, 0.03, 0.04, 0.45))
 	# Árbitro: um pouco mais atrás (menor e mais alto na tela).
 	if ref != null:
 		var ur := _U * 0.88
@@ -947,6 +948,11 @@ func _draw() -> void:
 	_draw_fx(ox)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	_draw_front_fence(w, h)
+	# Vinheta: bordas do quadro mais escuras, como na transmissão.
+	var vg := Color(0.01, 0.01, 0.03, 0.38)
+	var v0 := Color(0.01, 0.01, 0.03, 0.0)
+	_quad(PackedVector2Array([Vector2(0, 0), Vector2(w * 0.16, 0), Vector2(w * 0.16, h), Vector2(0, h)]), PackedColorArray([vg, v0, v0, vg]))
+	_quad(PackedVector2Array([Vector2(w, 0), Vector2(w * 0.84, 0), Vector2(w * 0.84, h), Vector2(w, h)]), PackedColorArray([vg, v0, v0, vg]))
 	if not replay.is_empty():
 		var bar := h * 0.07
 		draw_rect(Rect2(0, 0, w, bar), Color(0, 0, 0, 0.92))
@@ -967,55 +973,197 @@ func _draw() -> void:
 		draw_string(font, Vector2(0, y), _caption, HORIZONTAL_ALIGNMENT_CENTER, w, fs, Color(UIColors.GOLD, a))
 
 
-func _draw_arena(w: float, h: float) -> void:
-	# Fundo escuro do ginásio, com a luz caindo no octógono.
-	draw_rect(Rect2(0, 0, w, h), Color("#0C0E13"))
-	var glow := PackedVector2Array([Vector2(w * 0.5 - _U * 3.0, 0), Vector2(w * 0.5 + _U * 3.0, 0), Vector2(w + _U * 4.0, _ground), Vector2(-_U * 4.0, _ground)])
-	draw_colored_polygon(glow, Color(1.0, 0.95, 0.85, 0.05))
-	# Torcida (parallax lento), com flashes de celular.
-	var par := 0.35
+## Tons de camisa e de pele da torcida (escurecidos pela penumbra do ginásio).
+const CROWD_SHIRTS := [Color("#3A3F4C"), Color("#2B2E38"), Color("#5A2A30"), Color("#27384F"), Color("#6B6E78"), Color("#3E4A3A"), Color("#8A8780"), Color("#4A3A52")]
+const CROWD_SKIN := [Color("#C99E7C"), Color("#8E6243"), Color("#E0B896"), Color("#5E3D28"), Color("#B5825C")]
+
+
+## Quadrilátero com cor por vértice, sem triangulação.
+const QUAD_IDX := [0, 1, 2, 0, 2, 3]
+var _bake_key := Vector2.ZERO
+## Torcida pronta em três camadas de profundidade: [pontos, cores, índices] cada.
+var _crowd_layers: Array = []
+var _flashes: Array = []
+var _fence_pts := PackedVector2Array()
+
+
+func _quad(pts: PackedVector2Array, cols: PackedColorArray) -> void:
+	RenderingServer.canvas_item_add_triangle_array(get_canvas_item(), PackedInt32Array(QUAD_IDX), pts, cols)
+
+
+## Monta de uma vez a torcida e o alambrado (não mudam de um quadro para o outro; só deslizam
+## com a câmera), para o desenho de cada quadro ficar leve no celular.
+func _bake_arena(w: float, h: float) -> void:
+	if _bake_key == Vector2(w, h) and not _crowd_layers.is_empty():
+		return
+	_bake_key = Vector2(w, h)
+	var period := w + _U * 4.0
+	_crowd_layers = []
+	_flashes = []
+	for l in 3:
+		_crowd_layers.append([PackedVector2Array(), PackedColorArray(), PackedInt32Array()])
+	var ring: Array = []
+	for i in 8:
+		ring.append(Vector2.RIGHT.rotated(TAU * float(i) / 8.0))
 	for c: Vector3 in _crowd:
-		var x := w * 0.5 + (c.x - _cam * par) * _U
-		x = fposmod(x, w + _U * 4.0) - _U * 2.0
-		var y := h * 0.12 + c.y * h * 0.38
-		var r := _U * (0.22 + c.y * 0.2)
-		var col := Color(0.16, 0.17, 0.21).lerp(Color(0.24, 0.24, 0.28), c.z)
-		draw_circle(Vector2(x, y), r, col)
-		draw_rect(Rect2(x - r * 1.1, y + r * 0.7, r * 2.2, r * 1.4), col.darkened(0.2))
-		if fmod(c.z * 97.0 + _time * 0.7, 9.0) < 0.06:
-			draw_circle(Vector2(x, y - r), r * 0.5, Color(1, 1, 1, 0.9))
-	# Grade do fundo: tela de alambrado com postes e o acolchoado de cima.
+		var dpt := c.y
+		var lay: Array = _crowd_layers[mini(2, int(dpt * 3.0))]
+		var pts: PackedVector2Array = lay[0]
+		var cols: PackedColorArray = lay[1]
+		var idx: PackedInt32Array = lay[2]
+		var x := fposmod(w * 0.5 + c.x * _U, period) - _U * 2.0
+		var r := _U * (0.2 + dpt * 0.22)
+		var y := h * 0.1 + dpt * h * 0.4
+		var lum := lerpf(0.34, 0.8, dpt)
+		var shirt: Color = CROWD_SHIRTS[int(c.z * 7.99)]
+		var skin: Color = CROWD_SKIN[int(fposmod(c.z * 31.0, 1.0) * 4.99)]
+		shirt = Color(shirt.r * lum, shirt.g * lum, shirt.b * lum * 1.08)
+		skin = Color(skin.r * lum * 0.62, skin.g * lum * 0.6, skin.b * lum * 0.66)
+		# Ombros e tronco.
+		var b0 := pts.size()
+		for q: Vector2 in [Vector2(-0.75, 0.8), Vector2(0.75, 0.8), Vector2(1.35, 1.5), Vector2(1.35, 2.6), Vector2(-1.35, 2.6), Vector2(-1.35, 1.5)]:
+			pts.append(Vector2(x, y) + q * r)
+			cols.append(shirt)
+		for t in 4:
+			idx.append_array([b0, b0 + t + 1, b0 + t + 2])
+		if fposmod(c.z * 7.0, 1.0) < 0.14:
+			# Braço para o alto.
+			b0 = pts.size()
+			for q: Vector2 in [Vector2(0.9, 1.4), Vector2(1.3, 1.4), Vector2(1.7, -2.1), Vector2(1.3, -2.1)]:
+				pts.append(Vector2(x, y) + q * r)
+				cols.append(skin)
+			idx.append_array([b0, b0 + 1, b0 + 2, b0, b0 + 2, b0 + 3])
+		# Cabeça e cabelo.
+		for part in 2:
+			b0 = pts.size()
+			var hc := Vector2(x, y) if part == 0 else Vector2(x, y - r * 0.28)
+			var hr := r if part == 0 else r * 0.86
+			var hcol := skin if part == 0 else skin.darkened(0.45)
+			for v: Vector2 in ring:
+				pts.append(hc + v * hr)
+				cols.append(hcol)
+			for t in 6:
+				idx.append_array([b0, b0 + t + 1, b0 + t + 2])
+		lay[0] = pts
+		lay[1] = cols
+		lay[2] = idx
+		if fposmod(c.z * 5.0, 1.0) < 0.2:
+			_flashes.append([Vector2(x + r * 0.9, y - r * 0.6), r, c.z, mini(2, int(dpt * 3.0))])
+	# Alambrado do fundo: losangos numa largura que cobre a tela toda.
 	var fence_top := _ground - _U * 7.6
 	var fence_bot := _ground - _U * 0.75
+	var step := _U * 0.55
+	var hh := fence_bot - fence_top
+	_fence_pts = PackedVector2Array()
+	var x0 := -step * 2.0
+	while x0 < w + hh + step:
+		_fence_pts.append_array(PackedVector2Array([Vector2(x0, fence_top), Vector2(x0 - hh * 0.6, fence_bot), Vector2(x0 - hh * 0.6, fence_top), Vector2(x0, fence_bot)]))
+		x0 += step
+
+
+func _draw_arena(w: float, h: float) -> void:
+	_bake_arena(w, h)
+	var rid := get_canvas_item()
+	# Ginásio escuro: o teto some no preto e a luz cai do alto no octógono.
+	_quad(PackedVector2Array([Vector2(0, 0), Vector2(w, 0), Vector2(w, h), Vector2(0, h)]),
+		PackedColorArray([Color("#05060A"), Color("#05060A"), Color("#141722"), Color("#141722")]))
+	var fence_top := _ground - _U * 7.6
+	var fence_bot := _ground - _U * 0.75
+	var cx := w * 0.5 - _cam * _U
+	# Torcida em profundidade: quem está longe é menor e mais apagado; pula no golpe forte.
+	var par := 0.35
+	var period := w + _U * 4.0
+	var offs := [0.0, 0.0, 0.0]
+	for l in 3:
+		var lay: Array = _crowd_layers[l]
+		var off := fposmod(-_cam * par * (0.7 + 0.5 * (float(l) + 0.5) / 3.0) * _U, period)
+		var bob := sin(_time * 1.7 + float(l) * 2.1) * _U * 0.02 - _shake * _U * (0.06 + 0.05 * float(l))
+		offs[l] = off
+		if (lay[2] as PackedInt32Array).is_empty():
+			continue
+		for k in 2:
+			draw_set_transform(_sh + Vector2(off - period * float(k), bob), 0.0, Vector2.ONE)
+			RenderingServer.canvas_item_add_triangle_array(rid, lay[2], lay[0], lay[1])
+	draw_set_transform(_sh, 0.0, Vector2.ONE)
+	for f: Array in _flashes:
+		if fmod(float(f[2]) * 97.0 + _time * 0.7, 9.0) < 0.06:
+			var fp0: Vector2 = f[0]
+			var fx := fposmod(fp0.x + float(offs[int(f[3])]) + _U * 2.0, period) - _U * 2.0
+			draw_circle(Vector2(fx, fp0.y), float(f[1]) * 0.75, Color(1, 1, 1, 0.25))
+			draw_circle(Vector2(fx, fp0.y), float(f[1]) * 0.3, Color(1, 1, 1, 0.95))
+	# Névoa do ginásio por cima da torcida e os fachos dos refletores.
+	_quad(PackedVector2Array([Vector2(0, 0), Vector2(w, 0), Vector2(w, fence_bot), Vector2(0, fence_bot)]),
+		PackedColorArray([Color(0.02, 0.03, 0.05, 0.75), Color(0.02, 0.03, 0.05, 0.75), Color(0.1, 0.12, 0.18, 0.0), Color(0.1, 0.12, 0.18, 0.0)]))
+	var truss_y := h * 0.035
+	var beam_c := PackedColorArray([Color(1.0, 0.96, 0.86, 0.075), Color(1.0, 0.96, 0.86, 0.075), Color(1.0, 0.96, 0.86, 0.0), Color(1.0, 0.96, 0.86, 0.0)])
+	for i in 5:
+		var lx := w * 0.5 + (float(i) - 2.0) * _U * 4.6 - _cam * _U * 0.12
+		var spread := _U * (3.4 + 0.6 * absf(float(i) - 2.0))
+		var tx := cx + (float(i) - 2.0) * _U * 2.2
+		_quad(PackedVector2Array([Vector2(lx - _U * 0.2, truss_y), Vector2(lx + _U * 0.2, truss_y), Vector2(tx + spread, _ground), Vector2(tx - spread, _ground)]), beam_c)
+	draw_rect(Rect2(0, truss_y - _U * 0.22, w, _U * 0.2), Color("#0B0C10"))
+	for i in 5:
+		var lx2 := w * 0.5 + (float(i) - 2.0) * _U * 4.6 - _cam * _U * 0.12
+		draw_rect(Rect2(lx2 - _U * 0.32, truss_y - _U * 0.1, _U * 0.64, _U * 0.3), Color("#16181E"))
+		draw_circle(Vector2(lx2, truss_y + _U * 0.2), _U * 0.55, Color(1.0, 0.95, 0.82, 0.1))
+		draw_circle(Vector2(lx2, truss_y + _U * 0.2), _U * 0.2, Color(1.0, 0.97, 0.9, 0.9))
+	# Grade do fundo: tela de alambrado com postes e o acolchoado de cima.
 	draw_rect(Rect2(0, fence_top, w, fence_bot - fence_top), Color(0, 0, 0, 0.25))
 	var fp := 0.8
 	var step := _U * 0.55
-	var off := fposmod(-_cam * fp * _U, step)
-	var x0 := -step * 2.0 + off
-	var mesh := Color(0.62, 0.64, 0.7, 0.16)
-	var hh := fence_bot - fence_top
-	while x0 < w + hh:
-		draw_line(Vector2(x0, fence_top), Vector2(x0 - hh * 0.6, fence_bot), mesh, 1.0)
-		draw_line(Vector2(x0 - hh * 0.6, fence_top), Vector2(x0, fence_bot), mesh, 1.0)
-		x0 += step
+	draw_set_transform(_sh + Vector2(fposmod(-_cam * fp * _U, step), 0), 0.0, Vector2.ONE)
+	draw_multiline(_fence_pts, Color(0.62, 0.64, 0.7, 0.16), 1.0)
+	draw_set_transform(_sh, 0.0, Vector2.ONE)
+	# Rodapé acolchoado da grade, com as placas dos patrocinadores.
+	var band_h := _U * 0.62
+	draw_rect(Rect2(0, fence_bot - band_h, w, band_h), Color("#0E1014"))
+	draw_rect(Rect2(0, fence_bot - band_h, w, _U * 0.07), Color(_org, 0.75))
+	var ad_step := _U * 4.2
+	var ax := fposmod(w * 0.5 - _cam * fp * _U, ad_step) - ad_step
+	var ad_i := int(floor((_cam * fp * _U - w * 0.5) / ad_step))
+	while ax < w + ad_step:
+		ad_i += 1
+		var light := posmod(ad_i, 2) == 0
+		var ar := Rect2(ax + _U * 0.5, fence_bot - band_h + _U * 0.16, _U * 2.6, band_h - _U * 0.26)
+		draw_rect(ar, Color(_org.darkened(0.25), 0.9) if light else Color(0.86, 0.85, 0.82, 0.85))
+		draw_rect(Rect2(ar.position + Vector2(_U * 0.25, ar.size.y * 0.3), Vector2(_U * 1.3, ar.size.y * 0.4)), Color(1, 1, 1, 0.8) if light else Color(_org.darkened(0.4), 0.85))
+		draw_rect(Rect2(ar.position + Vector2(_U * 1.75, ar.size.y * 0.3), Vector2(_U * 0.55, ar.size.y * 0.4)), Color(1, 1, 1, 0.45) if light else Color(0.1, 0.1, 0.12, 0.6))
+		ax += ad_step
 	var post_step := _U * 7.0
 	var poff := fposmod(w * 0.5 - _cam * fp * _U, post_step)
 	var px := poff - post_step
 	while px < w + post_step:
-		draw_rect(Rect2(px - _U * 0.18, fence_top - _U * 0.3, _U * 0.36, fence_bot - fence_top + _U * 0.3), Color("#15171C"))
-		draw_rect(Rect2(px - _U * 0.18, fence_top - _U * 0.3, _U * 0.36, _U * 0.9), _org.darkened(0.35))
+		draw_rect(Rect2(px - _U * 0.2, fence_top - _U * 0.3, _U * 0.4, fence_bot - fence_top + _U * 0.3), Color("#15171C"))
+		draw_rect(Rect2(px - _U * 0.2, fence_top - _U * 0.3, _U * 0.12, fence_bot - fence_top + _U * 0.3), Color(1, 1, 1, 0.05))
+		draw_rect(Rect2(px - _U * 0.2, fence_top - _U * 0.3, _U * 0.4, _U * 0.9), _org.darkened(0.35))
 		px += post_step
 	draw_rect(Rect2(0, fence_top - _U * 0.35, w, _U * 0.4), Color("#1D1F25"))
 	draw_rect(Rect2(0, fence_top - _U * 0.35, w, _U * 0.08), _org.darkened(0.2))
-	# Lona: clara, com a marca no centro e o anel colorido.
+	draw_rect(Rect2(0, fence_top - _U * 0.05, w, _U * 0.1), Color(0, 0, 0, 0.35))
+	# Lona: clara no meio (onde a luz bate) e mais escura nas pontas; marca da liga no centro.
 	var floor_top := _ground - _U * 0.75
-	draw_polygon(PackedVector2Array([Vector2(0, floor_top), Vector2(w, floor_top), Vector2(w, h), Vector2(0, h)]),
-		PackedColorArray([Color("#B9B5AC"), Color("#B9B5AC"), Color("#E4E1D9"), Color("#E4E1D9")]))
-	var cx := w * 0.5 - _cam * _U
-	draw_set_transform(Vector2(cx, _ground + _U * 0.15), 0.0, Vector2(1.0, 0.12))
-	draw_circle(Vector2.ZERO, _U * 5.5, Color(_org, 0.22))
-	draw_arc(Vector2.ZERO, _U * 5.5, 0.0, TAU, 48, Color(_org, 0.5), _U * 0.9)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	_quad(PackedVector2Array([Vector2(0, floor_top), Vector2(w, floor_top), Vector2(w, h), Vector2(0, h)]),
+		PackedColorArray([Color("#9D9A93"), Color("#9D9A93"), Color("#DEDBD3"), Color("#DEDBD3")]))
+	draw_rect(Rect2(0, floor_top, w, maxf(1.0, _U * 0.08)), Color(0, 0, 0, 0.3))
+	var ec := Vector2(cx, _ground + _U * 0.15) + _sh
+	draw_set_transform(ec, 0.0, Vector2(1.0, 0.12))
+	draw_circle(Vector2.ZERO, _U * 9.5, Color(1.0, 0.98, 0.92, 0.16))
+	draw_circle(Vector2.ZERO, _U * 5.9, Color(_org, 0.5))
+	draw_circle(Vector2.ZERO, _U * 4.6, Color(_org.lerp(Color("#E4E1D9"), 0.72), 0.95))
+	draw_arc(Vector2.ZERO, _U * 4.6, 0.0, TAU, 40, Color(1, 1, 1, 0.55), maxf(1.0, _U * 0.2))
+	var font := get_theme_default_font()
+	var fs := maxi(8, int(_U * 1.1))
+	var tw := font.get_string_size("NOITE DE LUTA", HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+	draw_set_transform(ec + Vector2(0, _U * 0.2), 0.0, Vector2(1.0, 0.34))
+	draw_string(font, Vector2(-tw * 0.5, fs * 0.36), "NOITE DE LUTA", HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(_org.darkened(0.3), 0.6))
+	draw_set_transform(_sh, 0.0, Vector2.ONE)
+	# Pontas da lona na penumbra.
+	for sgn2: float in [-1.0, 1.0]:
+		var e0 := cx + sgn2 * _U * 8.0
+		var e1 := cx + sgn2 * _U * 17.0
+		_quad(PackedVector2Array([Vector2(e0, floor_top), Vector2(e1, floor_top), Vector2(e1, h), Vector2(e0, h)]),
+			PackedColorArray([Color(0.05, 0.06, 0.1, 0.0), Color(0.05, 0.06, 0.1, 0.42), Color(0.05, 0.06, 0.1, 0.42), Color(0.05, 0.06, 0.1, 0.0)]))
+		draw_rect(Rect2(minf(e1, e1 + sgn2 * w), floor_top, w, h - floor_top), Color(0.05, 0.06, 0.1, 0.42))
 	# Cantos azul e vermelho nas pontas da arena.
 	for sgn: float in [-1.0, 1.0]:
 		var ex := w * 0.5 + (sgn * (ARENA + 0.4) - _cam) * _U

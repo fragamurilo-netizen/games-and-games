@@ -159,6 +159,7 @@ static func resolve(w: GameWorld, b: Bout, res: Dictionary, e: FightEngine) -> v
 	_pay(w, b, winner_id)
 	_reputation(w, b, winner_id, ra, rb)
 	_news(w, b, winner_id, method, champ_before, ra, rb)
+	Legacy.on_bout(w, b, e)
 	if not w.played_this_week.has(b.id):
 		w.played_this_week.append(b.id)
 
@@ -280,6 +281,10 @@ static func advance_week(w: GameWorld, auto: bool = false) -> void:
 	_contracts(w)
 	w.week += 1
 	w.played_this_week = []
+	# Virada do ano: prêmios, Hall da Fama e o visual de todo mundo.
+	var y_now := w.year()
+	if int(GameWorld.date_of(w.week - 1)["year"]) < y_now:
+		Legacy.year_end(w, y_now - 1)
 	if w.week % 4 == 0:
 		Development.month(w)
 		StaffMarket.refresh(w)
@@ -346,7 +351,7 @@ static func _trim(w: GameWorld) -> void:
 			var keep := w.is_president() and e.tier == 2 and e.week >= w.week - 104
 			for bid: int in e.bouts:
 				var b := w.bout(bid)
-				if b != null and (w.is_user_fighter(w.fighter(b.a)) or w.is_user_fighter(w.fighter(b.b)) or b.title):
+				if b != null and (w.is_user_fighter(w.fighter(b.a)) or w.is_user_fighter(w.fighter(b.b)) or (b.title and e.week >= w.week - 260)):
 					keep = true
 			if not keep:
 				for bid: int in e.bouts:

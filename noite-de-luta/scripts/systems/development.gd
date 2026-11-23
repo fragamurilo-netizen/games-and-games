@@ -126,36 +126,159 @@ static func after_fight(w: GameWorld, f: Fighter, head: float, body: float, legs
 			w.add_news("equipe", "%s saiu da luta com %s: %d semanas de recuperação." % [f.display_name(), String(inj[0]).to_lower(), int(f.injury["weeks"])], [f.id])
 
 
-## Mensal: aposentadorias e a nova safra de amadores.
+## Mensal: aposentadorias, troca de categoria e a nova safra de amadores.
 static func month(w: GameWorld) -> void:
 	var y := w.year()
 	var m := w.month()
+	var active := {}
 	for f: Fighter in w.fighters.values():
-		if f.retired or f.bout_id >= 0:
+		if f.retired:
+			continue
+		if f.bout_id >= 0:
+			active[f.division] = int(active.get(f.division, 0)) + 1
 			continue
 		var age := f.age(y, m)
-		if age < 33:
-			continue
-		var p := (age - 33) * 0.018 + (0.04 if f.streak <= -3 else 0.0) + (0.03 if f.level() < 55 else 0.0)
+		var idle := w.week - f.last_fight_week
+		var p := 0.0
+		if age >= 33:
+			p = (age - 33) * 0.018 + (0.04 if f.streak <= -3 else 0.0) + (0.03 if f.level() < 55 else 0.0)
 		if age >= 42:
 			p = 0.6
-		if w.rng.randf() < p:
+		# Quem parou de lutar e não tem academia acaba largando.
+		if f.is_pro() and idle > 78 and f.team_id < 0 and age >= 26:
+			p = maxf(p, 0.12)
+		elif not f.is_pro() and f.team_id < 0 and age >= 27:
+			p = maxf(p, 0.05)
+		if p > 0.0 and w.rng.randf() < p:
 			retire(w, f)
-	var divs := DataDB.divisions()
-	for _i in 9:
-		var d: Dictionary = divs[w.rng.randi_range(0, divs.size() - 1)]
-		var f := FighterGenerator.make(w, String(d["id"]), w.rng.randf_range(36.0, 56.0), 0, true)
-		w.fighters[f.id] = f
-		# Metade vai direto para uma academia rival; a outra metade fica no mercado.
-		if w.rng.randf() < 0.5:
-			var teams: Array = w.teams.values().filter(func(t: Team) -> bool: return not t.is_user)
-			var t: Team = teams[w.rng.randi_range(0, teams.size() - 1)]
-			f.team_id = t.id
-			f.contract = {"cut": 0.2, "fights": 4}
+			continue
+		_maybe_change_division(w, f, age)
+		active[f.division] = int(active.get(f.division, 0)) + 1
+	# Safra nova: cada categoria repõe o que perdeu (o mundo não incha nem esvazia).
+	for d: Dictionary in DataDB.divisions():
+		var div := String(d["id"])
+		var target := int(d.get("count", 60)) + maxi(4, int(int(d.get("count", 60)) * 0.14))
+		var gap := float(target - int(active.get(div, 0)))
+		var n := clampi(int(round(gap * 0.2 + w.rng.randf_range(-0.3, 1.0))), 0, 5)
+		for _i in n:
+			var f := FighterGenerator.make(w, div, w.rng.randf_range(36.0, 56.0), 0, true)
+			w.fighters[f.id] = f
+			# Metade vai direto para uma academia rival; a outra metade fica no mercado.
+			if w.rng.randf() < 0.5:
+				var teams: Array = w.teams.values().filter(func(t: Team) -> bool: return not t.is_user)
+				var t: Team = teams[w.rng.randi_range(0, teams.size() - 1)]
+				f.team_id = t.id
+				f.contract = {"cut": 0.2, "fights": 4}
+
+
+## Troca de categoria: quem perde corte de peso desce, quem cresceu sobe. Campeão não troca.
+static func _maybe_change_division(w: GameWorld, f: Fighter, age: int) -> void:
+	if int(w.champions.get(f.division, -1)) == f.id or not f.is_pro() or f.injury.size() > 0:
+		return
+	# O corpo cresce até perto dos 30 e pesa mais depois.
+	if w.month() == 1 and w.week % 4 == 0:
+		f.natural_kg = snappedf(f.natural_kg * (1.0 + (0.006 if age < 30 else 0.003)), 0.1)
+	var divs := DataDB.divisions().filter(func(d: Dictionary) -> bool: return String(d.get("sex", "m")) == f.sex)
+	var idx := -1
+	for i in divs.size():
+		if String(divs[i]["id"]) == f.division:
+			idx = i
+	if idx < 0:
+		return
+	var limit := float(divs[idx].get("limit_kg", 70.0))
+	var recent: Array = f.history.slice(maxi(0, f.history.size() - 3))
+	var losses := recent.filter(func(h: Dictionary) -> bool: return String(h["res"]) == "D").size()
+	var to := -1
+	var why := ""
+	if idx < divs.size() - 1 and f.natural_kg > limit * 1.2 and w.rng.randf() < 0.12:
+		to = idx + 1
+		why = "não consegue mais bater o peso"
+	elif idx > 0 and losses >= 2 and f.natural_kg < float(divs[idx - 1].get("limit_kg", 0.0)) * 1.17 and age < 33 and w.rng.randf() < 0.1:
+		to = idx - 1
+		why = "depois de %d derrotas, tenta a sorte numa categoria abaixo" % losses
+	elif idx < divs.size() - 1 and losses >= 2 and age >= 30 and w.rng.randf() < 0.05:
+		to = idx + 1
+		why = "cansado de cortar peso depois de %d derrotas" % losses
+	elif idx < divs.size() - 1 and f.title_defenses >= 3 and f.streak >= 4 and w.rng.randf() < 0.04:
+		to = idx + 1
+		why = "busca um segundo cinturão numa categoria acima"
+	if to < 0:
+		return
+	var nd: Dictionary = divs[to]
+	var old := f.division
+	f.division = String(nd["id"])
+	f.look["wt"] = float(nd.get("wt", 0.5))
+	f.rating -= 60.0 # recomeça um pouco abaixo no ranking novo
+	if f.level() >= 66 or w.is_user_fighter(f) or w.is_followed(f):
+		w.add_news("categoria", "%s sai dos %s para os %s: %s." % [f.display_name(), Matchmaker.division_name(old, true), Matchmaker.division_name(f.division, true), why], [f.id], w.is_user_fighter(f))
+
+
+## Uma vez por ano: o visual muda (penteado, barba, careca assumida) e o corpo acompanha a idade
+## (o veterano engorda um pouco, o aposentado bem mais, e perde músculo).
+static func yearly_look(w: GameWorld) -> void:
+	var y := w.year()
+	var m := w.month()
+	var rng := w.rng
+	for f: Fighter in w.fighters.values():
+		var age := f.age(y, m)
+		var bf := float(f.look.get("bf", 0.15))
+		var ms := float(f.look.get("ms", 0.5))
+		if f.retired:
+			bf += rng.randf_range(0.02, 0.07)
+			ms -= rng.randf_range(0.02, 0.06)
+		elif age >= 31:
+			bf += rng.randf_range(0.0, 0.025)
+			if age >= 35:
+				ms -= rng.randf_range(0.0, 0.03)
+		f.look["bf"] = snappedf(clampf(bf, 0.04, 0.7), 0.01)
+		f.look["ms"] = snappedf(clampf(ms, 0.1, 1.0), 0.01)
+		if f.is_female():
+			continue # o penteado delas já muda por fase no gerador de rostos
+		var note := ""
+		# Careca assumida: quem está perdendo cabelo raspa de vez.
+		if f.look.has("hs") and int(f.look["hs"]) not in [FaceGen.H_BALD, FaceGen.H_BUZZ] and age >= 29:
+			var free := f.look.duplicate()
+			free.erase("hs")
+			var ff := FaceGen.features(f.face_seed, f.eth, age, free)
+			if float(ff.get("crown", 0.0)) > 0.3 or int(ff.get("style", 0)) == FaceGen.H_BALD:
+				if rng.randf() < 0.5:
+					f.look["hs"] = FaceGen.H_BALD if rng.randf() < 0.55 else FaceGen.H_BUZZ
+					note = "raspou a cabeça"
+		if note == "" and rng.randf() < (0.1 if f.retired else 0.18):
+			var t := FighterGenerator.grooming_table(rng, String(f.look.get("cu", _culture_guess(f))))
+			var hw: Dictionary = t.get("hair", {})
+			if not hw.is_empty() and rng.randf() < float(t.get("hair_p", 0.4)):
+				var hs := int(RngUtil.weighted_key(rng, hw))
+				if hs != int(f.look.get("hs", -1)):
+					f.look["hs"] = hs
+					note = "mudou o cabelo"
+			elif f.look.has("hs"):
+				f.look.erase("hs")
+				note = "deixou o cabelo crescer"
+		if rng.randf() < (0.08 if f.retired else 0.14):
+			var t2 := FighterGenerator.grooming_table(rng, String(f.look.get("cu", _culture_guess(f))))
+			var bw: Dictionary = t2.get("beard", {})
+			if not bw.is_empty() and rng.randf() < float(t2.get("beard_p", 0.3)) + 0.2:
+				var bd := int(RngUtil.weighted_key(rng, bw))
+				if bd != int(f.look.get("bd", -1)):
+					f.look["bd"] = bd
+					note = "mudou a barba" if note == "" else note + " e a barba"
+			elif f.look.has("bd"):
+				f.look.erase("bd")
+				note = "mudou a barba" if note == "" else note + " e a barba"
+		if note != "" and not f.retired and (w.is_user_fighter(f) or w.is_followed(f)):
+			w.add_news("visual", "Visual novo: %s %s." % [f.display_name(), note], [f.id])
+
+
+static func _culture_guess(f: Fighter) -> String:
+	return {"DAG": "dag", "CHE": "chech", "THA": "th", "JPN": "jp", "KOR": "kr", "CHN": "cn", "KAZ": "kz", "UZB": "uz",
+		"KGZ": "kg", "TJK": "tj", "AZE": "az", "ARM": "am", "GEO": "ge", "IRN": "persian", "AFG": "afg", "RUS": "ru",
+		"UKR": "ua", "PHI": "ph", "MAR": "maghreb", "ALG": "maghreb"}.get(f.nation, "*")
 
 
 static func retire(w: GameWorld, f: Fighter) -> void:
 	f.retired = true
+	f.retired_week = w.week
 	var was_champ := int(w.champions.get(f.division, -1)) == f.id
 	if was_champ:
 		w.champions[f.division] = -1

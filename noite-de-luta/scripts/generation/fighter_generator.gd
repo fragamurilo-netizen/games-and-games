@@ -89,6 +89,18 @@ static func make(w: GameWorld, div: String, level: float, age_: int = 0, amateur
 	if age < 29:
 		gap = maxf(0.0, (29.0 - age) * rng.randf_range(0.6, 2.4))
 	f.potential = clampf(level + gap + rng.randf_range(0.0, 3.0), level, 96.0)
+	if amateur:
+		# Talento: entre os amadores, alguns nasceram para a elite (sorteio à parte, para o mundo
+		# gerado não mudar). Sem isso a elite envelhece e ninguém chega no lugar.
+		var trng := RandomNumberGenerator.new()
+		trng.seed = hash([f.id, level, "talento"])
+		var roll := trng.randf()
+		if roll < 0.04:
+			f.potential = clampf(f.potential + trng.randf_range(20.0, 32.0), level, 96.0)
+		elif roll < 0.16:
+			f.potential = clampf(f.potential + trng.randf_range(9.0, 20.0), level, 96.0)
+		elif roll < 0.45:
+			f.potential = clampf(f.potential + trng.randf_range(2.0, 9.0), level, 96.0)
 	# Rosto
 	f.face_seed = rng.randi()
 	f.look = {"wt": float(d.get("wt", 0.5))}
@@ -108,6 +120,7 @@ static func make(w: GameWorld, div: String, level: float, age_: int = 0, amateur
 	if f.is_pro():
 		f.last_fight_week = w.week - rng.randi_range(2, 22)
 	f.wear = maxf(0.0, f.fights() * rng.randf_range(0.02, 0.06))
+	f.look["cu"] = String(origin["c"])
 	_grooming(f, rng, String(origin["c"]))
 	_marks(f, rng)
 	physique(f, rng, String(origin["c"]))
@@ -121,13 +134,8 @@ static func make(w: GameWorld, div: String, level: float, age_: int = 0, amateur
 static func _grooming(f: Fighter, rng: RandomNumberGenerator, culture: String) -> void:
 	if f.is_female():
 		return
-	var g: Dictionary = DataDB.mma().get("grooming", {})
-	var parts := culture.split("+")
-	var key := parts[0]
-	if parts.size() > 1 and g.has(parts[1]) and rng.randf() < 0.6:
-		key = parts[1]
-	var t: Dictionary = g.get(key, g.get("*", {}))
-	var dflt: Dictionary = g.get("*", {})
+	var t := grooming_table(rng, culture)
+	var dflt: Dictionary = DataDB.mma().get("grooming", {}).get("*", {})
 	if rng.randf() < float(t.get("hair_p", dflt.get("hair_p", 0.0))):
 		var hw: Dictionary = t.get("hair", dflt.get("hair", {}))
 		if not hw.is_empty():
@@ -136,6 +144,16 @@ static func _grooming(f: Fighter, rng: RandomNumberGenerator, culture: String) -
 		var bw: Dictionary = t.get("beard", {})
 		if not bw.is_empty():
 			f.look["bd"] = int(RngUtil.weighted_key(rng, bw))
+
+
+## Tabela de cabelo e barba da cultura (data/world/mma.json › grooming).
+static func grooming_table(rng: RandomNumberGenerator, culture: String) -> Dictionary:
+	var g: Dictionary = DataDB.mma().get("grooming", {})
+	var parts := culture.split("+")
+	var key := parts[0]
+	if parts.size() > 1 and g.has(parts[1]) and rng.randf() < 0.6:
+		key = parts[1]
+	return g.get(key, g.get("*", {}))
 
 
 ## Marcas de quem luta: orelha de couve-flor em quem cresceu no tatame de luta agarrada, nariz

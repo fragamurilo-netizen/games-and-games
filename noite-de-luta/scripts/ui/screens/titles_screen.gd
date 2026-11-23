@@ -15,10 +15,11 @@ func refresh() -> void:
 	screen_subtitle = w.league_name()
 	UIManager.refresh_chrome()
 	var c := reset()
+	c.add_child(UIKit.menu_group([UIKit.menu_row("trophy", "Legado da liga", "Prêmios do ano, Hall da Fama e recordes", func(): UIManager.push("legacy"))]))
 	for d: Dictionary in DataDB.divisions():
 		var div := String(d["id"])
 		c.add_child(_division(w, div))
-	columnize(c, 0, 2)
+	columnize(c, 1, 2)
 
 
 func _division(w: GameWorld, div: String) -> Control:

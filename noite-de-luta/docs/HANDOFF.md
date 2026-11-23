@@ -1,5 +1,48 @@
 # Noite de Luta — nota de passagem (23/11/2026)
 
+## Rodada 6 de 23/11/2026: mundo vivo e realismo do 2D e do 3D (APK 0.2.0)
+
+Primeira etapa do roteiro da 1.0 (documento "Noite de Luta: roteiro para a versão 1.0", nos
+artefatos do projeto) mais a rodada de realismo que o dono pediu ("melhorar o 2D, 3D e o
+realismo do jogo todo").
+
+- **Mundo vivo** (`scripts/systems/legacy.gd`): `on_bout` guarda os candidatos a luta, nocaute e
+  finalização do ano; `year_end` (primeira semana do ano) entrega os prêmios, faz a cerimônia do
+  Hall da Fama (`legacy_score`, até 4 por ano), envelhece o visual de todo mundo
+  (`Development.yearly_look`: cabelo, barba, entradas, grisalho, gordura depois de aposentar) e
+  tira do save os aposentados sem história (`_prune`). Tela `legacy` (Prêmios, Hall da Fama,
+  Recordes), aberta pelo Início nos dois papéis; honrarias no perfil do lutador (`honors`).
+- **Corpo 3D** (`scripts/ui/fight2d/body3d.gd`): malha anatômica com pele (`ARM_TAB`, `LEG_TAB`,
+  `TORSO_TAB`, `torso_row`, `arm_scale`, `leg_scale`), no lugar das formas simples. `skin_tone`
+  segura a pele clara para não estourar na luz.
+- **Lutador 2D redesenhado** (`Rig2D`): cada parte é uma tira com o mesmo perfil anatômico do 3D
+  (frente = bíceps/quadríceps), leque na junta, volume por textura de sombreado (`_shading`),
+  contorno em uma passada e desenho na outra (`_parts` guarda as tiras entre as duas). Giro de
+  ombros e quadril, músculos que aparecem conforme o giro, tatuagens em traço, pé que dobra na
+  bola. `joints()` usa tornozelo e joelho para o chão e puxa o pé perto da lona com IK.
+- **Malha única** (seção "Malha única" do `Rig2D`): tudo que o lutador desenha (`_emit`, `_ov`,
+  `_dot`, `_ln`, `_pl`, `_push_flat`...) entra em uma fita só de linhas de dois vértices, emendada
+  por linhas sem área, e `_flush` manda uma chamada por lutador. Peças chapadas apontam para a
+  faixa branca da textura (`UV_FLAT`). **Toda peça tem que ter número par de vértices.** A arena
+  2D é pré-montada (`FightStage2D._bake_arena`: torcida em três camadas, grade, flashes). O quadro
+  do palco 2D caiu de 7,96 ms para 2,1 ms nesta máquina.
+- **Cabelo e barba na luta** (`scripts/ui/fight2d/hair_shape.gd`): lê o nome do penteado e da
+  barba (`FaceGen.HAIR_STYLES`, `FaceGen.BEARDS`) e devolve um volume (alto, lados, nuca, franja,
+  topete, coque/rabo/puffs, tranças, moicano, cacheado; barba por fazer, bigode, cavanhaque,
+  curta, média, longa). Usado no 2D (`Rig2D._prep_head`) e no 3D (`FightView3D._pose_fighter`).
+  Penteado novo entra sozinho pelo nome.
+- **Arenas**: 2D com torcida de gente, treliça de luz, placas e lona pintada; 3D com arquibancada,
+  torcida em `MultiMesh` (corpo e cabeça), três telões com o nome do evento, pintura da lona,
+  base da grade na cor da organização, luz de contorno e tonemap mais contido.
+- **Ferramentas novas**: `rig2d_sheet` (bonecos 2D soltos), `looks_sheet` (12 duplas variadas em
+  guarda, 2D ou `--3d`), `body3d_sheet` (corpos 3D de frente, lado e costas), `aging_sheet` (o
+  mesmo lutador aos 23, 31 e 39). `design_shots` agora avança um ano e captura a tela de Legado.
+- **Verificado**: `check_scripts` 101 scripts, 0 erros; `fight_soak --n=100` igual ao de antes
+  (KO 10,8% TKO 10,6% FIN 23,6% DEC 53,6%); `world_sim --weeks=156` nos dois papéis sem erro;
+  `design_shots` completo; folhas 2D e 3D conferidas. **Não testado em celular de verdade.**
+- **Próximo**: etapas 0.3 em diante do roteiro. No 2D ainda dá para pré-montar a arena em um nó
+  filho (hoje a geometria é reenviada a cada quadro) se o celular pedir.
+
 ## Rodada 5 de 23/11/2026: segunda rodada da luta animada (APK 0.1.6)
 
 - **3D**: giro de ombros e quadril (`tw` na tabela `STRIKE`; o soco esticado e a perna que sobe
@@ -218,7 +261,7 @@ Cinturões com linhagem.
 ## APK de teste
 
 - APKs novos (0.1.2+) ficam nos arquivos do projeto (`noite-de-luta/`), assinados com a chave de
-  teste guardada em `chave-teste/` lá; o atual é o 0.1.6.
+  teste guardada em `chave-teste/` lá; o atual é o 0.2.0.
 - `releases/NoiteDeLuta-0.1.1.apk` (release, arm64, Android 7+; instala por cima da 0.1.0). Assinado com uma chave de teste
   local: um APK novo assinado com outra chave pede desinstalar o antigo antes.
 - Para gerar de novo: modelos de exportação do Godot 4.7.2 (só `android_*.apk` e `version.txt` em
@@ -245,5 +288,7 @@ godot --headless --path . --script res://tools/fight_soak.gd -- --n=300 --seed=7
 godot --headless --path . --script res://tools/style_lab.gd -- --a=wrestling --b=muay_thai --log=1   # ou --world
 xvfb-run -a -s "-screen 0 1600x1600x24" godot --path . --resolution 1400x1300 --script res://tools/face_sheet.gd -- --out=/tmp/rostos.png --nations=RUS,KAZ,GEO
 xvfb-run -a -s "-screen 0 1400x1400x24" godot --path . --resolution 390x844 --script res://tools/design_shots.gd -- --out=/tmp/telas [--role=presidente]
-xvfb-run -a -s "-screen 0 1700x2200x24" godot --path . --resolution 1600x2140 --script res://tools/stage_sheet.gd -- --out=/tmp/palco.png [--3d]
+xvfb-run -a -s "-screen 0 1700x2600x24" godot --path . --resolution 1600x2460 --script res://tools/stage_sheet.gd -- --out=/tmp/palco.png [--3d]
+xvfb-run -a -s "-screen 0 1700x1300x24" godot --path . --resolution 1600x1230 --script res://tools/looks_sheet.gd -- --out=/tmp/visuais.png [--3d] [--seed=9]
+xvfb-run -a -s "-screen 0 1700x1000x24" godot --path . --resolution 1600x900 --script res://tools/rig2d_sheet.gd -- --out=/tmp/bonecos.png
 ```

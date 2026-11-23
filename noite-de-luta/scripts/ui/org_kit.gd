@@ -160,3 +160,43 @@ static func followed_section(w: GameWorld, c: VBoxContainer) -> void:
 		else:
 			line = "Sem luta marcada · " + f.record_text()
 		c.add_child(FightKit.fighter_row(w, f, func(): UIManager.push("fighter", {"id": id}), line, col))
+
+
+## Nas primeiras semanas do ano: os prêmios do ano que passou, com o vencedor principal.
+static func awards_banner(w: GameWorld, c: VBoxContainer) -> void:
+	if w.awards.is_empty():
+		return
+	var a: Dictionary = w.awards.back()
+	var y := int(a["year"])
+	if y != w.year() - 1 or w.week - _first_week_of(y + 1) > 5:
+		return
+	var card := UIKit.card("CardHighlight", UITokens.S2)
+	var head := UIKit.hbox(8)
+	head.add_child(UIKit.icon_rect("trophy", 26, UIColors.GOLD))
+	var t := UIKit.colored("Prêmios de %d" % y, UIColors.GOLD, "Section")
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(t)
+	card.add_child(head)
+	var shown := 0
+	for it: Dictionary in a["items"]:
+		if it.has("a") or shown >= 2:
+			continue
+		var f := w.fighter(int(it.get("id", -1)))
+		if f == null:
+			continue
+		var fid := f.id
+		card.add_child(FightKit.fighter_row(w, f, func(): UIManager.push("fighter", {"id": fid}), String(it["title"]), UIColors.GOLD))
+		shown += 1
+	var hof: Array = w.hall.filter(func(h: Dictionary) -> bool: return int(h["year"]) == y)
+	if not hof.is_empty():
+		card.add_child(UIKit.label("Hall da Fama: " + ", ".join(hof.map(func(h: Dictionary) -> String: return String(h["name"]))), "Small", true))
+	var go := UIKit.button("Ver todos os prêmios", "GhostButton", func(): UIManager.push("legacy"))
+	card.add_child(go)
+	c.add_child(UIKit.card_panel(card))
+
+
+static func _first_week_of(year: int) -> int:
+	var wk := 0
+	while int(GameWorld.date_of(wk)["year"]) < year:
+		wk += 52 if int(GameWorld.date_of(wk + 52)["year"]) < year else 1
+	return wk

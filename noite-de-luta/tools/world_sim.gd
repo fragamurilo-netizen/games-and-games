@@ -42,6 +42,8 @@ func _initialize() -> void:
 				if b.week == w.week - 1:
 					methods[String(b.result["method"])] = int(methods.get(String(b.result["method"]), 0)) + 1
 		fights += after - before
+		if (i + 1) % 52 == 0:
+			_year_line(w, Time.get_ticks_msec() - t0)
 	var ms := Time.get_ticks_msec() - t0
 	print("%d semanas, %d lutas (%.1f por semana), %d ms" % [weeks, fights, fights / float(weeks), ms])
 	print("métodos: ", methods)
@@ -59,6 +61,11 @@ func _initialize() -> void:
 		print("  * ", f.display_name(), " ", f.record_text(), " nível ", f.level(), " ", w.rank_text(f), " cond ", int(f.condition))
 	var js := JSON.stringify(w.to_dict())
 	print("save: %d KB" % (js.length() / 1024))
+	for a: Dictionary in w.awards:
+		for it: Dictionary in a["items"]:
+			print("  %d %-20s %s · %s" % [int(a["year"]), String(it["title"]), String(it.get("name", "")), String(it.get("text", ""))])
+	for h: Dictionary in w.hall:
+		print("  HoF %d: %s (%s)" % [int(h["year"]), String(h["name"]), String(h["text"])])
 	var w2 := GameWorld.from_dict(JSON.parse_string(js))
 	print("recarregado: %d lutadores, semana %d" % [w2.fighters.size(), w2.week])
 	for n: Dictionary in w.news.slice(maxi(0, w.news.size() - 12)):
@@ -145,3 +152,21 @@ func _president(weeks: int) -> void:
 	print("save %d KB; recarregado como %s, semana %d" % [js.length() / 1024, w2.role, w2.week])
 	for n: Dictionary in w.news.slice(maxi(0, w.news.size() - 8)):
 		print("  [", n["kind"], "] ", n["text"])
+
+
+func _year_line(w: GameWorld, ms: int) -> void:
+	var active := 0
+	var retired := 0
+	var top := 0.0
+	var tops := 0
+	for f: Fighter in w.fighters.values():
+		if f.retired:
+			retired += 1
+		else:
+			active += 1
+	for div: String in w.rankings:
+		for id: int in (w.rankings[div] as Array).slice(0, 5):
+			top += w.fighter(id).level()
+			tops += 1
+	var js := JSON.stringify(w.to_dict())
+	print("ano %d: ativos %d, aposentados guardados %d, top5 nível médio %.1f, HoF %d, save %d KB, %d ms" % [w.year() - 1, active, retired, top / maxf(1, tops), w.hall.size(), js.length() / 1024, ms])

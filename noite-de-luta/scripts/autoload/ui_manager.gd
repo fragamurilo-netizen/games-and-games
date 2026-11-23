@@ -20,6 +20,7 @@ const SCREENS := {
 	# Os dois papéis (acompanhar o mundo como fã)
 	"titles": "res://scripts/ui/screens/titles_screen.gd",
 	"results": "res://scripts/ui/screens/results_screen.gd",
+	"legacy": "res://scripts/ui/screens/legacy_screen.gd",
 	# Presidente da organização
 	"org_hub": "res://scripts/ui/screens/org_hub_screen.gd",
 	"events": "res://scripts/ui/screens/org_events_screen.gd",

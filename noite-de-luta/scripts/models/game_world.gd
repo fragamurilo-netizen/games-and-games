@@ -53,6 +53,12 @@ var delegate_cards: bool = true
 var bout_block: Dictionary = {}
 ## Presidente: imprevistos da semana da luta (lesão, peso) que esperam decisão. Ver FightWeek.
 var incidents: Array = []
+## Candidatos aos prêmios do ano em curso (luta, nocaute e finalização). Ver Legacy.
+var season: Dictionary = {}
+## Prêmios de cada ano: [{year, items: [{key, title, id?, name, text, a?, b?}]}]
+var awards: Array = []
+## Hall da Fama: [{id, name, year, div, nation, text, score}]
+var hall: Array = []
 
 
 func new_id() -> int:
@@ -234,7 +240,8 @@ func to_dict() -> Dictionary:
 		"champions": champions, "rankings": rankings, "user_team": user_team_id, "staff_market": staff_market,
 		"played": played_this_week, "ev_count": event_counters, "cal": calendar_weeks, "ch_block": challenge_block,
 		"sign_block": sign_block, "role": role, "followed": followed, "titles": title_history,
-		"delegate": delegate_cards, "bout_block": bout_block, "incidents": incidents}
+		"delegate": delegate_cards, "bout_block": bout_block, "incidents": incidents,
+		"season": season, "awards": awards, "hall": hall}
 
 
 static func from_dict(d: Dictionary) -> GameWorld:
@@ -285,6 +292,9 @@ static func from_dict(d: Dictionary) -> GameWorld:
 	w.delegate_cards = bool(d.get("delegate", true))
 	w.bout_block = d.get("bout_block", {})
 	w.incidents = d.get("incidents", [])
+	w.season = d.get("season", {})
+	w.awards = d.get("awards", [])
+	w.hall = d.get("hall", [])
 	for i: Dictionary in w.incidents:
 		i["refused"] = (i.get("refused", []) as Array).map(func(v): return int(v))
 	return w

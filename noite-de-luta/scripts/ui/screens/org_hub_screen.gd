@@ -28,6 +28,7 @@ func refresh() -> void:
 		for ev: FightEvent in ups.slice(0, 2):
 			var id := ev.id
 			c.add_child(OrgKit.event_card(w, ev, func(): UIManager.push("org_event", {"id": id})))
+	OrgKit.awards_banner(w, c)
 	OrgKit.followed_section(w, c)
 	c.add_child(UIKit.section_header("Notícias", "Resultados", func(): UIManager.push("results")))
 	var shown := 0

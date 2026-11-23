@@ -94,6 +94,8 @@ var popularity: float = 10.0
 ## Dano acumulado na carreira (cabeça): o queixo cai com ele.
 var wear: float = 0.0
 var retired: bool = false
+## Semana em que se aposentou (Hall da Fama e limpeza do save).
+var retired_week: int = -1
 var titles_won: int = 0
 var title_defenses: int = 0
 ## Treino: foco e intensidade (0 leve, 1 normal, 2 pesado).
@@ -216,7 +218,7 @@ func to_dict() -> Dictionary:
 		"r": reach_cm, "sp": southpaw, "nat_kg": natural_kg, "div": division, "base": base, "base2": base2, "attrs": attrs,
 		"pot": potential, "peak": peak_age, "team": team_id, "contract": contract, "rec": record, "am": amateur,
 		"hist": history, "rating": rating, "streak": streak, "last_fw": last_fight_week, "cond": condition,
-		"inj": injury, "susp": suspension, "pop": popularity, "wear": wear, "ret": retired, "titles": titles_won,
+		"inj": injury, "susp": suspension, "pop": popularity, "wear": wear, "ret": retired, "rw": retired_week, "titles": titles_won,
 		"defs": title_defenses, "train": training, "bout": bout_id, "ch_lock": challenge_lock, "prog": progress, "traits": traits,
 	}
 
@@ -260,6 +262,7 @@ static func from_dict(d: Dictionary) -> Fighter:
 	f.popularity = float(d.get("pop", 10.0))
 	f.wear = float(d.get("wear", 0.0))
 	f.retired = bool(d.get("ret", false))
+	f.retired_week = int(d.get("rw", -1))
 	f.titles_won = int(d.get("titles", 0))
 	f.title_defenses = int(d.get("defs", 0))
 	f.training = d.get("train", {"focus": "equilibrado", "intensity": 1})

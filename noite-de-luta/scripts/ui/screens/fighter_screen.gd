@@ -181,6 +181,9 @@ func _carreira(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 	sum.add_child(UIKit.kv("Cartel amador", "%d-%d" % [int(f.amateur.get("w", 0)), int(f.amateur.get("l", 0))]))
 	if f.titles_won > 0:
 		sum.add_child(UIKit.kv("Cinturões", "%d (%d defesas)" % [f.titles_won, f.title_defenses], UIColors.GOLD))
+	for hn: String in Legacy.honors(w, f):
+		var hl := UIKit.colored(hn, UIColors.GOLD, "Small", true)
+		sum.add_child(UIKit.tap_row(hl, func(): UIManager.push("legacy", {"tab": "hall" if hn.begins_with("Hall") else "premios"})))
 	c.add_child(UIKit.card_panel(sum))
 	c.add_child(UIKit.section_header("Lutas no jogo"))
 	if f.history.is_empty():
@@ -207,7 +210,7 @@ func _carreira(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 		v.add_child(sub)
 		h.add_child(v)
 		var oid := int(hst["opp"])
-		c.add_child(UIKit.tap_row(h, func(): UIManager.push("fighter", {"id": oid})))
+		c.add_child(UIKit.tap_row(h, func(): if w.fighter(oid) != null: UIManager.push("fighter", {"id": oid})))
 
 
 func _treino(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:

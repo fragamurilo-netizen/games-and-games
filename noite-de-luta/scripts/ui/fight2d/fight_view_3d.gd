@@ -138,15 +138,26 @@ func _build_world() -> void:
 	env.background_mode = Environment.BG_COLOR
 	env.background_color = Color("#07080B")
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.55, 0.57, 0.65)
-	env.ambient_light_energy = 0.4
+	env.ambient_light_color = Color(0.5, 0.54, 0.66)
+	env.ambient_light_energy = 0.3
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	env.tonemap_white = 1.8
+	env.adjustment_enabled = true
+	env.adjustment_contrast = 1.07
+	env.adjustment_saturation = 1.1
 	var we := WorldEnvironment.new()
 	we.environment = env
 	_vp.add_child(we)
+	# Luz de recorte: vem de trás e do alto, fria, e solta os lutadores do fundo escuro.
+	var rim := DirectionalLight3D.new()
+	rim.rotation_degrees = Vector3(-32, 200, 0)
+	rim.light_energy = 0.34
+	rim.light_color = Color(0.72, 0.82, 1.0)
+	rim.shadow_enabled = false
+	_vp.add_child(rim)
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-62, 25, 0)
-	sun.light_energy = 0.85
+	sun.light_energy = 0.5
 	sun.light_color = Color(1.0, 0.97, 0.9)
 	sun.shadow_enabled = true
 	sun.directional_shadow_max_distance = 60.0
@@ -154,7 +165,7 @@ func _build_world() -> void:
 	var fill := OmniLight3D.new()
 	fill.position = Vector3(0, 14, 10)
 	fill.omni_range = 40.0
-	fill.light_energy = 0.6
+	fill.light_energy = 0.2
 	_vp.add_child(fill)
 	# Lona: octógono claro com o anel e a marca no centro.
 	var fl := CylinderMesh.new()
@@ -162,24 +173,24 @@ func _build_world() -> void:
 	fl.bottom_radius = R_OCT
 	fl.height = 0.4
 	fl.radial_segments = 8
-	_add(fl, _mat(Color("#7F7B74"), 0.95), Vector3(0, -0.2, 0), deg_to_rad(22.5))
+	_add(fl, _mat(Color("#62666E"), 0.92), Vector3(0, -0.2, 0), deg_to_rad(22.5))
 	var apron := CylinderMesh.new()
 	apron.top_radius = R_OCT + 3.0
 	apron.bottom_radius = R_OCT + 3.0
 	apron.height = 0.4
 	apron.radial_segments = 8
 	_add(apron, _mat(Color("#16181D")), Vector3(0, -0.45, 0), deg_to_rad(22.5))
-	var ring := TorusMesh.new()
-	ring.inner_radius = 5.0
-	ring.outer_radius = 5.9
-	var rm := _mat(_org.darkened(0.1))
-	_add(ring, rm, Vector3(0, -0.1, 0)).scale = Vector3(1, 0.08, 1)
-	var logo := CylinderMesh.new()
-	logo.top_radius = 5.0
-	logo.bottom_radius = 5.0
-	logo.height = 0.02
-	var lm := _mat(Color(_org, 1.0).lerp(Color("#7F7B74"), 0.85))
-	_add(logo, lm, Vector3(0, 0.005, 0))
+	# Pintura da lona em camadas finas: faixa na cor da liga junto à grade, a lona por dentro, o
+	# anel e o disco do centro com a marca.
+	var canvas := Color("#62666E")
+	for lay: Array in [[R_OCT - 0.12, 8, _org.darkened(0.5), 0.01], [R_OCT - 1.7, 8, canvas, 0.02], [6.2, 48, _org.darkened(0.42), 0.03], [5.3, 48, Color(_org, 1.0).darkened(0.3).lerp(canvas, 0.72), 0.04]]:
+		var lc := CylinderMesh.new()
+		lc.top_radius = float(lay[0])
+		lc.bottom_radius = float(lay[0])
+		lc.height = 0.01
+		lc.radial_segments = int(lay[1])
+		var lmi := _add(lc, _mat(lay[2], 0.92), Vector3(0, float(lay[3]) - 0.005, 0), deg_to_rad(22.5) if int(lay[1]) == 8 else 0.0)
+		lmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# Grade: painéis de alambrado, postes pretos e acolchoado em cima.
 	var link := _chain_texture()
 	var apothem := R_OCT * cos(deg_to_rad(22.5))
@@ -201,7 +212,14 @@ func _build_world() -> void:
 		var pad := BoxMesh.new()
 		pad.size = Vector3(side, 0.45, 0.5)
 		var pm := _add(pad, _mat(Color("#121317")), Vector3(sin(a) * apothem, FENCE_H + 0.2, cos(a) * apothem), a)
-		_fence.append([[p, pm], Vector3(sin(a) * apothem, 0, cos(a) * apothem)])
+		# Rodapé acolchoado com a faixa da liga.
+		var base := BoxMesh.new()
+		base.size = Vector3(side, 0.55, 0.4)
+		var bm0 := _add(base, _mat(Color("#101116")), Vector3(sin(a) * (apothem + 0.05), 0.27, cos(a) * (apothem + 0.05)), a)
+		var stripe := BoxMesh.new()
+		stripe.size = Vector3(side, 0.09, 0.42)
+		var sm0 := _add(stripe, _mat(_org.darkened(0.1)), Vector3(sin(a) * (apothem + 0.05), 0.5, cos(a) * (apothem + 0.05)), a)
+		_fence.append([[p, pm, bm0, sm0], Vector3(sin(a) * apothem, 0, cos(a) * apothem)])
 		var va := deg_to_rad(45.0 * float(k) + 22.5)
 		var post := CylinderMesh.new()
 		post.top_radius = 0.28
@@ -214,16 +232,19 @@ func _build_world() -> void:
 			pc = UIColors.CORNER_BLUE
 		var pst := _add(post, _mat(pc), Vector3(sin(va) * R_OCT, (FENCE_H + 0.6) * 0.5, cos(va) * R_OCT))
 		_fence.append([[pst], Vector3(sin(va) * R_OCT, 0, cos(va) * R_OCT)])
-	# Torcida: arquibancada em volta, blocos escuros com camisas variadas.
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_colors = true
-	var person := BoxMesh.new()
-	person.size = Vector3(0.9, 1.5, 0.7)
-	mm.mesh = person
+	# Arquibancada: um anel inclinado em volta do octógono, com a torcida sentada (corpo e cabeça).
+	var bowl := CylinderMesh.new()
+	bowl.top_radius = R_OCT + 18.0
+	bowl.bottom_radius = R_OCT + 5.2
+	bowl.height = 6.6
+	bowl.radial_segments = 32
+	bowl.cap_top = false
+	bowl.cap_bottom = false
+	var bowl_m := _mat(Color("#0C0D11"), 1.0)
+	bowl_m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_add(bowl, bowl_m, Vector3(0, 2.7, 0)).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 42
-	var n := 0
 	var spots: Array = []
 	for row in 7:
 		var r := R_OCT + 6.0 + float(row) * 1.6
@@ -231,22 +252,73 @@ func _build_world() -> void:
 		for i in cnt:
 			var a := TAU * float(i) / float(cnt) + rng.randf() * 0.02
 			spots.append([Vector3(sin(a) * r, 0.2 + float(row) * 0.9 + rng.randf() * 0.25, cos(a) * r), a])
-			n += 1
-	mm.instance_count = n
-	for i in n:
-		var s: Array = spots[i]
-		var tr := Transform3D(Basis(Vector3.UP, float(s[1])), s[0])
-		mm.set_instance_transform(i, tr)
-		var c := Color.from_hsv(rng.randf(), rng.randf_range(0.05, 0.3), rng.randf_range(0.07, 0.2))
-		mm.set_instance_color(i, c)
-	var mmi := MultiMeshInstance3D.new()
-	mmi.multimesh = mm
-	var cm := StandardMaterial3D.new()
-	cm.vertex_color_use_as_albedo = true
-	cm.roughness = 1.0
-	mmi.material_override = cm
-	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_vp.add_child(mmi)
+	var n := spots.size()
+	var person := BoxMesh.new()
+	person.size = Vector3(0.95, 1.25, 0.6)
+	var head_m := SphereMesh.new()
+	head_m.radius = 0.3
+	head_m.height = 0.64
+	head_m.radial_segments = 8
+	head_m.rings = 4
+	var skins := [Color("#C99E7C"), Color("#8E6243"), Color("#E0B896"), Color("#5E3D28"), Color("#B5825C")]
+	var shirts := [Color("#3A3F4C"), Color("#2B2E38"), Color("#6A2A32"), Color("#27384F"), Color("#8A8D96"), Color("#3E4A3A"), Color("#B5B2AA"), Color("#4A3A52")]
+	for part in 2:
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.use_colors = true
+		mm.mesh = person if part == 0 else head_m
+		mm.instance_count = n
+		for i in n:
+			var s: Array = spots[i]
+			var pos: Vector3 = s[0]
+			if part == 1:
+				pos += Vector3(0, 0.95, 0)
+			mm.set_instance_transform(i, Transform3D(Basis(Vector3.UP, float(s[1])), pos))
+			var lum := rng.randf_range(0.3, 0.62)
+			var c: Color = (shirts[rng.randi() % shirts.size()] if part == 0 else skins[rng.randi() % skins.size()])
+			mm.set_instance_color(i, Color(c.r * lum, c.g * lum, c.b * lum))
+		var mmi := MultiMeshInstance3D.new()
+		mmi.multimesh = mm
+		var cm := StandardMaterial3D.new()
+		cm.vertex_color_use_as_albedo = true
+		cm.roughness = 1.0
+		mmi.material_override = cm
+		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_vp.add_child(mmi)
+	# Telões em cima da arquibancada, com o nome do evento e as cores dos dois corners.
+	var screen_m := StandardMaterial3D.new()
+	screen_m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	screen_m.albedo_color = Color(0.05, 0.07, 0.12).lerp(_org, 0.12)
+	for sa: float in [PI, PI - 1.05, PI + 1.05]:
+		var sr := R_OCT + 18.5
+		var sq := QuadMesh.new()
+		sq.size = Vector2(11.0, 4.6)
+		var sp0 := Vector3(sin(sa) * sr, 10.2, cos(sa) * sr)
+		var smi := _add(sq, screen_m, sp0, sa + PI)
+		smi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var frame := BoxMesh.new()
+		frame.size = Vector3(11.5, 5.1, 0.3)
+		_add(frame, _mat(Color("#0A0B0E")), sp0 * 1.01, sa + PI).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var inward := -Vector3(sin(sa), 0, cos(sa))
+		for cs in 2:
+			var bar := QuadMesh.new()
+			bar.size = Vector2(5.2, 0.35)
+			var bmat := StandardMaterial3D.new()
+			bmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			bmat.albedo_color = (UIColors.CORNER_RED if cs == 0 else UIColors.CORNER_BLUE)
+			var right := Vector3.UP.cross(inward).normalized()
+			_add(bar, bmat, sp0 + inward * 0.05 + Vector3(0, -1.75, 0) + right * (-2.7 if cs == 0 else 2.7), sa + PI).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var sl := Label3D.new()
+		sl.text = (_logo if _logo != "" else "Noite de Luta").to_upper()
+		sl.font_size = 110
+		sl.pixel_size = 0.016
+		sl.outline_size = 0
+		sl.modulate = Color(0.96, 0.95, 0.92)
+		sl.width = 620.0
+		sl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		sl.position = sp0 + inward * 0.08 + Vector3(0, 0.35, 0)
+		sl.rotation.y = sa + PI
+		_vp.add_child(sl)
 	# Nome do evento pintado na lona.
 	if _logo != "":
 		_canvas_label = Label3D.new()
@@ -256,7 +328,7 @@ func _build_world() -> void:
 		_canvas_label.outline_size = 0
 		_canvas_label.modulate = Color(1, 1, 1, 0.55)
 		_canvas_label.rotation_degrees = Vector3(-90, 0, 0)
-		_canvas_label.position = Vector3(0, 0.03, 0)
+		_canvas_label.position = Vector3(0, 0.062, 0)
 		_canvas_label.shaded = true
 		_canvas_label.double_sided = false
 		_vp.add_child(_canvas_label)
@@ -276,7 +348,7 @@ func _build_world() -> void:
 	beam.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	beam.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 	beam.cull_mode = BaseMaterial3D.CULL_DISABLED
-	beam.albedo_color = Color(1.0, 0.95, 0.85, 0.035)
+	beam.albedo_color = Color(1.0, 0.95, 0.85, 0.016)
 	var cone := CylinderMesh.new()
 	cone.top_radius = 0.35
 	cone.bottom_radius = 4.0
@@ -306,12 +378,14 @@ func _build_world() -> void:
 		sp.position = Vector3(-9.0 + 18.0 * float(k), 16.0, 6.0)
 		sp.spot_range = 30.0
 		sp.spot_angle = 32.0
-		sp.light_energy = 1.1
+		sp.light_energy = 0.42
 		sp.light_color = Color(1.0, 0.96, 0.9)
 		_vp.add_child(sp)
 		sp.look_at_from_position(sp.position, Vector3(0, 0, 0))
 	_cam = Camera3D.new()
 	_cam.fov = 38.0
+	_cam.near = 0.3
+	_cam.far = 400.0
 	_cam.current = true
 	_vp.add_child(_cam)
 
@@ -359,16 +433,14 @@ func _sphere() -> SphereMesh:
 	return _meshes["s"]
 
 
-## Monta o boneco: membros que afinam, deltoide, bíceps, quadríceps e panturrilha, peito em dois
-## peitorais, trapézio, abdômen, calção com cós, luvas com polegar e punho do corner, rosto com
-## mandíbula, orelhas, olhos, sobrancelhas, nariz, cabelo, barba, corte e inchaço.
+## Monta o boneco: o corpo é uma malha contínua com esqueleto (Body3D: tronco, braços, pernas,
+## pés, calção e cabeça); por cima vão as peças soltas: luvas com polegar e punho do corner,
+## orelhas, olhos, sobrancelhas, nariz, boca, cabelo, barba, corte e inchaço.
 func _build_fighter(r: Rig2D) -> Dictionary:
 	var f := {"rig": r}
 	var is_ref := r.outfit == "ref"
-	var skin := _mat(r.skin, 0.55)
-	var shorts := _mat(r.shorts, 0.85)
-	var shirt := _mat(r.shirt, 0.8)
-	var trim := _mat(r.trim, 0.7)
+	f["body"] = Body3D.build(r, _vp)
+	var skin := _mat(Body3D.skin_tone(r.skin), 0.55)
 	var glove := _mat(r.glove, 0.4)
 	var band := _mat(r.corner, 0.6)
 	var hair := _mat(r.hair, 0.95)
@@ -382,60 +454,20 @@ func _build_fighter(r: Rig2D) -> Dictionary:
 	f["skin"] = skin
 	f["glove_m"] = glove
 	f["bruise_m"] = bruise
-	var top_m: StandardMaterial3D = shirt if is_ref else skin
-	var leg_m: StandardMaterial3D = shorts if is_ref else skin
 	var sph := _sphere()
 	var box := BoxMesh.new()
-	for sd: String in ["na", "fa"]:
-		f[sd + "_delt"] = _part(sph, top_m)
-		f[sd + "_u"] = _part(_taper(0.78), top_m)
-		f[sd + "_bi"] = _part(sph, top_m)
-		f[sd + "_el"] = _part(sph, skin)
-		f[sd + "_f"] = _part(_taper(0.7), skin)
-		f[sd + "_fm"] = _part(sph, skin)
-		if is_ref:
-			f[sd + "_g"] = _part(sph, _mat(Color("#8DB6DA"), 0.35))
-		else:
+	if not is_ref:
+		for sd: String in ["na", "fa"]:
 			f[sd + "_g"] = _part(sph, glove)
 			f[sd + "_th"] = _part(sph, glove)
 			f[sd + "_fing"] = _part(sph, skin)
 			f[sd + "_band"] = _part(_taper(1.0), band)
-	for sd: String in ["nl", "fl"]:
-		f[sd + "_t"] = _part(_taper(0.7), leg_m)
-		f[sd + "_q"] = _part(sph, leg_m)
-		f[sd + "_kn"] = _part(sph, leg_m)
-		f[sd + "_s"] = _part(_taper(0.58), leg_m)
-		f[sd + "_calf"] = _part(sph, leg_m)
-		f[sd + "_an"] = _part(sph, skin)
-		f[sd + "_ft"] = _part(sph, dark if is_ref else skin)
-		if not is_ref:
-			f[sd + "_sh"] = _part(_taper(0.9), shorts)
-			f[sd + "_hem"] = _part(_taper(1.0), trim)
-			f[sd + "_stripe"] = _part(_taper(1.0), trim)
-	f["pelvis"] = _part(sph, shorts)
-	f["band"] = _part(_taper(1.0), shirt if is_ref else trim)
-	f["abs"] = _part(sph, top_m)
-	f["ribs"] = _part(sph, top_m)
-	f["pec_n"] = _part(sph, top_m)
-	f["pec_f"] = _part(sph, top_m)
-	f["trap"] = _part(sph, top_m)
-	f["lat_n"] = _part(sph, top_m)
-	f["lat_f"] = _part(sph, top_m)
-	for k in 6:
-		f["ab%d" % k] = _part(sph, top_m)
-	if is_ref:
-		f["collar"] = _part(_taper(1.0), shirt)
+	else:
 		f["badge"] = _part(box, _mat(Color("#E8E6E0"), 0.6))
-	f["cheek_n"] = _part(sph, skin)
-	f["cheek_f"] = _part(sph, skin)
-	f["chin"] = _part(sph, skin)
-	f["lips"] = _part(sph, _mat(r.skin.darkened(0.3).lerp(Color(0.55, 0.25, 0.25), 0.3), 0.5))
+	f["lips"] = _part(sph, _mat(Body3D.skin_tone(r.skin).darkened(0.3).lerp(Color(0.55, 0.25, 0.25), 0.3), 0.5))
 	f["white_n"] = _part(sph, _mat(Color(0.92, 0.9, 0.86), 0.3))
 	f["white_f"] = _part(sph, _mat(Color(0.92, 0.9, 0.86), 0.3))
 	f["nosebleed"] = _part(_taper(0.5), blood)
-	f["neck"] = _part(_taper(0.92), skin)
-	f["head"] = _part(sph, skin)
-	f["jaw"] = _part(sph, skin)
 	f["ear_n"] = _part(sph, skin)
 	f["ear_f"] = _part(sph, skin)
 	f["eye_n"] = _part(sph, dark)
@@ -443,16 +475,32 @@ func _build_fighter(r: Rig2D) -> Dictionary:
 	f["brow_n"] = _part(box, hair)
 	f["brow_f"] = _part(box, hair)
 	f["nose"] = _part(sph, skin)
+	# Cabelo pelo volume do penteado (HairShape): calota, parte que cai na nuca, coque/rabo.
+	var hs: Dictionary = r.hair_shape
+	var bun := int(hs.get("bun", 0))
 	f["hair"] = _part(sph, hair)
 	(f["hair"] as MeshInstance3D).visible = not r.bald
-	f["beard"] = _part(sph, _mat(r.beard, 0.95))
-	(f["beard"] as MeshInstance3D).visible = r.has_beard
+	f["hair_back"] = _part(sph, _mat(r.hair.darkened(0.12), 0.95))
+	(f["hair_back"] as MeshInstance3D).visible = not r.bald and (float(hs.get("back", 0.0)) >= 0.2 or bun == HairShape.BUN_TAIL)
+	f["bun"] = _part(sph, hair)
+	(f["bun"] as MeshInstance3D).visible = not r.bald and bun in [HairShape.BUN_TOP, HairShape.BUN_LOW, HairShape.BUN_PUFFS]
+	f["bun2"] = _part(sph, hair)
+	(f["bun2"] as MeshInstance3D).visible = not r.bald and bun == HairShape.BUN_PUFFS
+	# Barba pelo tipo: sombra por fazer, bigode, cavanhaque, curta, média e longa.
+	var bmat := _mat(r.beard, 0.95)
+	f["beard"] = _part(sph, bmat)
+	(f["beard"] as MeshInstance3D).visible = r.beard_kind >= HairShape.BD_GOATEE
+	f["stache"] = _part(sph, bmat)
+	(f["stache"] as MeshInstance3D).visible = r.beard_kind >= HairShape.BD_MUSTACHE
+	var stub := _mat(Color(r.beard, 0.32), 0.95)
+	stub.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	f["stubble"] = _part(sph, stub)
+	(f["stubble"] as MeshInstance3D).visible = r.beard_kind == HairShape.BD_STUBBLE
 	f["cut"] = _part(sph, blood)
 	f["drip"] = _part(_taper(0.4), blood)
 	f["chest_blood"] = _part(_taper(0.5), blood)
 	f["bruise"] = _part(sph, bruise)
-	if r.fem and not is_ref:
-		f["top"] = _part(sph, _mat(r.shorts.darkened(0.15)))
+	f["phase"] = randf() * TAU
 	return f
 
 
@@ -502,19 +550,19 @@ static func _frame(up: Vector3, dir: float) -> Array:
 
 func _pose_fighter(f: Dictionary, zoff: float = 0.0) -> void:
 	var r: Rig2D = f["rig"]
+	var body: Body3D = f["body"]
 	var j := r.joints(0.0, 0.0, 1.0)
 	var Uh: float = j["U"]
 	var is_ref := r.outfit == "ref"
+	var tint := Color.WHITE.lerp(Color(1.0, 0.5, 0.45), r.flash * 0.45)
+	body.mat.albedo_color = tint
 	var skin: StandardMaterial3D = f["skin"]
-	skin.albedo_color = r.skin.lerp(Color(0.8, 0.22, 0.18), r.flash * 0.35)
+	skin.albedo_color = Body3D.skin_tone(r.skin) * tint
 	var zz := zoff + float(r.pose.get("zz", 0.0))
 	var lz := 1.0 + float(r.pose.get("lz", 0.0))
 	var az := 1.0 + float(r.pose.get("az", 0.0))
-	var mus := clampf((r.arm_k - 0.85) / 0.5, 0.0, 1.0)
-	var sw := 0.66 * r.chest_k * Uh
-	var hw := 0.36 * Uh * lz
-	var aw := 0.5 * r.arm_k * Uh
-	var lw := 0.72 * r.leg_k * Uh
+	var sw := body.sw
+	var hw := body.hw * lz
 	var hip := _v(j["hip"], zz)
 	var neck := _v(j["neck"], zz)
 	var sh := _v(j["sh"], zz)
@@ -522,127 +570,125 @@ func _pose_fighter(f: Dictionary, zoff: float = 0.0) -> void:
 	var fw: Vector3 = tf[0]
 	var up: Vector3 = tf[1]
 	var side: Vector3 = Vector3.BACK
-	# Braços
+	# Tronco: o peito gira mais que o quadril (direto, gancho, chute), a cintura torce no meio.
 	var tw := deg_to_rad(float(r.pose.get("tw", 0.0)))
 	var rear := r.rear()
-	for sd: String in ["na", "fa"]:
-		# Giro: o ombro de trás vai para a frente e o da frente recua; o soco esticado fecha no centro.
+	var base := Basis(fw, up, fw.cross(up).normalized())
+	var phi := r.dir * (1.0 if rear == "n" else -1.0) * tw
+	var bc := Basis(up, phi) * base
+	var bp := Basis(up, phi * 0.6) * base
+	var breath := 1.0 + 0.014 * sin(_t * 2.6 + float(f["phase"]))
+	body.pose_block(Body3D.B_PELVIS, hip, bp)
+	body.pose_block(Body3D.B_CHEST, neck, bc, Vector3(breath, 1.0, breath))
+	var arm_len := (Rig2D.L_UARM + Rig2D.L_FARM) * Uh
+	for s in 2:
+		var zl := 1.0 if s == 0 else -1.0
+		var near := r.dir * zl > 0.0
+		var sd := "na" if near else "fa"
+		# Braço: o ombro acompanha o giro do peito; o soco esticado fecha no centro.
 		var sg := 1.0 if sd.begins_with(rear) else -1.0
 		var fo := fw * sin(tw) * sw * sg
-		var z := (sw if sd == "na" else -sw) * az * cos(tw)
-		var s := sh + fo + Vector3(0, 0, z)
-		var reach := clampf(((j[sd + "_wr"] as Vector2).distance_to(j["sh"]) / ((Rig2D.L_UARM + Rig2D.L_FARM) * Uh) - 0.6) / 0.35, 0.0, 1.0)
+		var z := (sw if near else -sw) * az * cos(tw)
+		var s0 := sh + bc * Vector3(0, 0, zl * sw)
+		var reach := clampf(((j[sd + "_wr"] as Vector2).distance_to(j["sh"]) / arm_len - 0.6) / 0.35, 0.0, 1.0)
 		var el := _v(j[sd + "_el"], zz + z * 1.08) + fo
 		var wr := _v(j[sd + "_wr"], zz + z * 0.85 * (1.0 - 0.85 * reach)) + fo
-		_ell(f[sd + "_delt"], s + up * Uh * 0.02, fw, up, side, Vector3(aw * 1.55, aw * 1.35, aw * 1.45) * (1.0 + 0.15 * mus))
-		_seg(f[sd + "_u"], s, el, aw)
-		var ud := (el - s).normalized()
-		var uf := _frame(ud, r.dir)
-		_ell(f[sd + "_bi"], s.lerp(el, 0.45) + (uf[0] as Vector3) * aw * 0.18, uf[0], ud, side, Vector3(aw * (1.0 + 0.25 * mus), s.distance_to(el) * 0.7, aw * 0.95))
-		_ell(f[sd + "_el"], el, fw, up, side, Vector3.ONE * aw * 0.82)
-		_seg(f[sd + "_f"], el, wr, aw * 0.92)
-		var gd := (wr - el).normalized()
-		var gf := _frame(gd, r.dir)
-		_ell(f[sd + "_fm"], el.lerp(wr, 0.3) + (gf[0] as Vector3) * aw * 0.1, gf[0], gd, side, Vector3(aw * (0.95 + 0.2 * mus), el.distance_to(wr) * 0.55, aw * 0.9))
-		if is_ref:
-			_ell(f[sd + "_g"], wr + gd * Uh * 0.12, gf[0], gd, side, Vector3(aw * 0.7, aw * 0.95, aw * 0.6))
-		else:
+		var bend := (s0 + wr) * 0.5 - el
+		var hint := bend * 4.0 + fw * 0.2 + up * 0.1
+		var flex := clampf(1.0 - s0.distance_to(wr) / arm_len, 0.0, 1.0)
+		body.pose_limb(Body3D.side_bone(s, Body3D.P_UARM), s0, el, hint, 1.0 + 0.07 * flex)
+		body.pose_limb(Body3D.side_bone(s, Body3D.P_FARM), el, wr, hint)
+		if not is_ref:
 			# Luva de MMA: almofada nos nós dos dedos, dedos dobrados por baixo, polegar e punho.
-			_ell(f[sd + "_g"], wr + gd * Uh * 0.22 + (gf[0] as Vector3) * Uh * 0.06, gf[0], gd, side, Vector3(Uh * 0.56, Uh * 0.66, Uh * 0.6))
-			_ell(f[sd + "_fing"], wr + gd * Uh * 0.3 - (gf[0] as Vector3) * Uh * 0.16, gf[0], gd, side, Vector3(Uh * 0.3, Uh * 0.36, Uh * 0.5))
-			_ell(f[sd + "_th"], wr + gd * Uh * 0.1 + (gf[0] as Vector3) * Uh * 0.24, gf[0], gd, side, Vector3(Uh * 0.24, Uh * 0.36, Uh * 0.24))
-			_seg(f[sd + "_band"], wr - gd * Uh * 0.12, wr + gd * Uh * 0.02, Uh * 0.55)
-	# Pernas
-	for sd: String in ["nl", "fl"]:
-		var sg := 1.0 if sd.begins_with(rear) else -1.0
-		var fo := fw * sin(tw * 0.6) * hw * sg
-		var z := (hw if sd == "nl" else -hw) * cos(tw * 0.6)
-		var h := hip + fo + Vector3(0, 0, z)
-		# Perna que sobe (chute, joelhada) fecha para o centro.
-		var rise := clampf(((j[sd + "_an"] as Vector2).y * -1.0 - (-(j["hip"] as Vector2).y - 3.2 * Uh)) / (2.6 * Uh), 0.0, 1.0)
-		var kn := _v(j[sd + "_kn"], zz + z * 1.05 * (1.0 - 0.5 * rise)) + fo
-		var an := _v(j[sd + "_an"], zz + z * (1.0 - 0.8 * rise)) + fo
-		var toe := _v(j[sd + "_toe"], zz + z * (1.0 - 0.8 * rise)) + fo
-		_seg(f[sd + "_t"], h, kn, lw)
-		var td := (kn - h).normalized()
-		var tfr := _frame(td, r.dir)
-		_ell(f[sd + "_q"], h.lerp(kn, 0.5) + (tfr[0] as Vector3) * lw * 0.15, tfr[0], td, side, Vector3(lw * 1.0, h.distance_to(kn) * 0.8, lw * 0.95))
-		_ell(f[sd + "_kn"], kn, fw, up, side, Vector3.ONE * lw * 0.72)
-		_seg(f[sd + "_s"], kn, an, lw * 0.66)
-		var sdv := (an - kn).normalized()
-		var sfr := _frame(sdv, r.dir)
-		_ell(f[sd + "_calf"], kn.lerp(an, 0.32) - (sfr[0] as Vector3) * lw * 0.12, sfr[0], sdv, side, Vector3(lw * 0.72, kn.distance_to(an) * 0.55, lw * 0.66))
-		_ell(f[sd + "_an"], an, fw, up, side, Vector3.ONE * lw * 0.42)
-		var fd := (toe - an).normalized()
-		var ffr := _frame(fd, r.dir)
-		_ell(f[sd + "_ft"], an.lerp(toe, 0.55), ffr[0], fd, side, Vector3(lw * 0.36, an.distance_to(toe) * 1.25, lw * 0.5))
-		if f.has(sd + "_sh"):
-			var send := h.lerp(kn, 0.52)
-			_seg(f[sd + "_sh"], h - td * Uh * 0.15, send, lw * 1.28)
-			_seg(f[sd + "_hem"], send - td * Uh * 0.06, send + td * Uh * 0.03, lw * 1.2)
-			var outv := Vector3(0, 0, signf(z) if absf(z) > 0.01 else 1.0) * lw * 0.6
-			_seg(f[sd + "_stripe"], h + outv - td * Uh * 0.1, send + outv, lw * 0.22)
-	# Tronco
-	var tl := hip.distance_to(neck)
-	var depth := 0.9 * Uh * r.chest_k
-	var belly := r.belly
-	var chest_c := neck - up * Uh * 0.78
-	_ell(f["pelvis"], hip + up * Uh * 0.1, fw, up, side, Vector3(depth * 1.05, Uh * 1.0, hw * 2.0 + Uh * 0.75))
-	(f["band"] as MeshInstance3D).transform = Transform3D(Basis(fw * depth * 1.08, up * Uh * 0.2, fw.cross(up) * (hw * 2.0 + Uh * 0.82)), hip + up * Uh * 0.52)
-	_ell(f["abs"], hip.lerp(neck, 0.38) + fw * Uh * 0.05 * belly, fw, up, side, Vector3(depth * (0.95 + 0.4 * belly), tl * 0.62, sw * 1.7 * (1.0 + 0.15 * belly)))
-	_ell(f["ribs"], chest_c, fw, up, side, Vector3(depth * 1.05, Uh * 1.55, sw * 2.15))
-	for pk: String in ["pec_n", "pec_f"]:
-		var zs := 1.0 if pk == "pec_n" else -1.0
-		_ell(f[pk], chest_c + up * Uh * 0.12 + fw * depth * 0.3 + side * zs * sw * 0.48, fw, up, side, Vector3(depth * 0.55, Uh * 0.62, sw * 0.95) * (1.0 + 0.2 * mus))
-	for li: int in 2:
-		var zs := 1.0 if li == 0 else -1.0
-		_ell(f["lat_n" if li == 0 else "lat_f"], chest_c - up * Uh * 0.45 + side * zs * sw * 0.95 - fw * depth * 0.1, fw, up, side, Vector3(depth * 0.62, Uh * 1.15, sw * 0.42) * (1.0 + 0.15 * mus))
-	for k in 6:
-		var abm: MeshInstance3D = f["ab%d" % k]
-		abm.visible = belly < 0.25 and not is_ref
-		if abm.visible:
-			var row := float(k / 2)
-			var zs2 := 1.0 if k % 2 == 0 else -1.0
-			_ell(abm, hip + up * Uh * (0.8 + 0.4 * row) + fw * depth * 0.4 + side * zs2 * sw * 0.26, fw, up, side, Vector3(depth * 0.22, Uh * 0.36, sw * 0.3))
+			var gd := (wr - el).normalized()
+			var gf := _frame(gd, r.dir)
+			_ell(f[sd + "_g"], wr + gd * Uh * 0.2 + (gf[0] as Vector3) * Uh * 0.05, gf[0], gd, side, Vector3(Uh * 0.48, Uh * 0.56, Uh * 0.52))
+			_ell(f[sd + "_fing"], wr + gd * Uh * 0.27 - (gf[0] as Vector3) * Uh * 0.14, gf[0], gd, side, Vector3(Uh * 0.26, Uh * 0.32, Uh * 0.44))
+			_ell(f[sd + "_th"], wr + gd * Uh * 0.1 + (gf[0] as Vector3) * Uh * 0.2, gf[0], gd, side, Vector3(Uh * 0.2, Uh * 0.32, Uh * 0.2))
+			_seg(f[sd + "_band"], wr - gd * Uh * 0.14, wr + gd * Uh * 0.02, Uh * 0.36)
+		# Perna: o quadril gira menos; a perna que sobe (chute, joelhada) fecha para o centro.
+		var ld := "nl" if near else "fl"
+		var lsg := 1.0 if ld.begins_with(rear) else -1.0
+		var lfo := fw * sin(tw * 0.6) * hw * lsg
+		var lzv := (hw if near else -hw) * cos(tw * 0.6)
+		var h0 := hip + bp * Vector3(0, 0, zl * body.hw * minf(lz, 1.25))
+		var rise := clampf(((j[ld + "_an"] as Vector2).y * -1.0 - (-(j["hip"] as Vector2).y - 3.2 * Uh)) / (2.6 * Uh), 0.0, 1.0)
+		var kn := _v(j[ld + "_kn"], zz + lzv * 1.05 * (1.0 - 0.5 * rise)) + lfo
+		var an := _v(j[ld + "_an"], zz + lzv * (1.0 - 0.8 * rise)) + lfo
+		var toe := _v(j[ld + "_toe"], zz + lzv * (1.0 - 0.8 * rise) + signf(lzv) * 0.12 * Uh * (1.0 - rise)) + lfo
+		var lhint := (kn - (h0 + an) * 0.5) * 4.0 + fw * 0.2
+		body.pose_limb(Body3D.side_bone(s, Body3D.P_THIGH), h0, kn, lhint)
+		body.pose_limb(Body3D.side_bone(s, Body3D.P_SHIN), kn, an, lhint)
+		body.pose_limb(Body3D.side_bone(s, Body3D.P_FOOT), an, toe, kn - an)
+	var depth := 0.92 * Uh * (0.88 + 0.12 * r.chest_k)
+	var chest_c := neck - up * Uh * 0.6
 	if is_ref:
-		_seg(f["collar"], neck - up * Uh * 0.15, neck + up * Uh * 0.12, Uh * 0.68)
-		_ell(f["badge"], chest_c + up * Uh * 0.25 + fw * depth * 0.5 + side * sw * 0.5, fw, up, side, Vector3(0.05, Uh * 0.28, Uh * 0.36))
-	_ell(f["trap"], neck - up * Uh * 0.2 - fw * depth * 0.12, fw, up, side, Vector3(depth * 0.7, Uh * 0.55, sw * 1.6) * (1.0 + 0.2 * mus))
-	if f.has("top"):
-		_ell(f["top"], chest_c + up * Uh * 0.05 + fw * depth * 0.06, fw, up, side, Vector3(depth * 1.12, Uh * 0.85, sw * 2.25))
+		_ell(f["badge"], chest_c + up * Uh * 0.1 + fw * depth * 0.5 + side * sw * 0.5, fw, up, side, Vector3(0.05, Uh * 0.28, Uh * 0.36))
 	# Cabeça
 	var head := _v(j["head"], zz)
-	_seg(f["neck"], neck - up * Uh * 0.2, head - up * 0.0, Uh * 0.5 * r.chest_k)
 	var hfr := _frame(head - neck, r.dir)
 	var hf: Vector3 = hfr[0]
 	var hu: Vector3 = hfr[1]
 	var hr := Uh
-	_ell(f["head"], head, hf, hu, side, Vector3(hr * 1.0, hr * 1.12, hr * 0.9))
-	_ell(f["jaw"], head - hu * hr * 0.25 + hf * hr * 0.12, hf, hu, side, Vector3(hr * 0.78, hr * 0.68, hr * 0.78))
-	_ell(f["ear_n"], head + side * hr * 0.45 - hf * hr * 0.05, hf, hu, side, Vector3(hr * 0.18, hr * 0.28, hr * 0.12))
-	_ell(f["ear_f"], head - side * hr * 0.45 - hf * hr * 0.05, hf, hu, side, Vector3(hr * 0.18, hr * 0.28, hr * 0.12))
+	body.pose_block(Body3D.B_HEAD, head, Basis(hf, hu, hf.cross(hu).normalized()))
+	_ell(f["ear_n"], head + side * hr * 0.44 - hf * hr * 0.05 - hu * hr * 0.04, hf, hu, side, Vector3(hr * 0.16, hr * 0.26, hr * 0.1))
+	_ell(f["ear_f"], head - side * hr * 0.44 - hf * hr * 0.05 - hu * hr * 0.04, hf, hu, side, Vector3(hr * 0.16, hr * 0.26, hr * 0.1))
 	for ek: String in ["n", "f"]:
 		var zs := 1.0 if ek == "n" else -1.0
-		var ep := head + hf * hr * 0.44 + hu * hr * 0.08 + side * zs * hr * 0.17
-		_ell(f["eye_" + ek], ep + hf * hr * 0.02, hf, hu, side, Vector3(hr * 0.06, hr * (0.02 if r.ko else 0.08), hr * 0.08))
-		_ell(f["brow_" + ek], ep + hu * hr * 0.11 + hf * hr * 0.03, hf, hu, side, Vector3(hr * 0.06, hr * 0.05, hr * 0.2))
-	for ck: String in ["n", "f"]:
-		var zs := 1.0 if ck == "n" else -1.0
-		_ell(f["cheek_" + ck], head + hf * hr * 0.3 - hu * hr * 0.1 + side * zs * hr * 0.24, hf, hu, side, Vector3(hr * 0.3, hr * 0.26, hr * 0.26))
-		var wm: MeshInstance3D = f["white_" + ck]
-		var ep2 := head + hf * hr * 0.41 + hu * hr * 0.08 + side * zs * hr * 0.17
-		_ell(wm, ep2, hf, hu, side, Vector3(hr * 0.06, hr * (0.02 if r.ko else 0.1), hr * 0.17))
-	_ell(f["chin"], head - hu * hr * 0.5 + hf * hr * 0.3, hf, hu, side, Vector3(hr * 0.3, hr * 0.26, hr * 0.34))
-	_ell(f["lips"], head - hu * hr * 0.27 + hf * hr * 0.44, hf, hu, side, Vector3(hr * 0.1, hr * 0.08, hr * 0.26))
+		var ep := head + hf * hr * 0.4 + hu * hr * 0.08 + side * zs * hr * 0.17
+		_ell(f["eye_" + ek], ep + hf * hr * 0.02, hf, hu, side, Vector3(hr * 0.06, hr * (0.02 if r.ko else 0.07), hr * 0.07))
+		_ell(f["brow_" + ek], ep + hu * hr * 0.1 + hf * hr * 0.035, hf, hu, side, Vector3(hr * 0.06, hr * 0.045, hr * 0.2))
+		var wm: MeshInstance3D = f["white_" + ek]
+		_ell(wm, ep - hf * hr * 0.005, hf, hu, side, Vector3(hr * 0.06, hr * (0.02 if r.ko else 0.085), hr * 0.15))
+	_ell(f["lips"], head - hu * hr * 0.3 + hf * hr * 0.41, hf, hu, side, Vector3(hr * 0.09, hr * 0.07, hr * 0.24))
 	var nb: MeshInstance3D = f["nosebleed"]
 	nb.visible = r.bruise > 0.6 and not is_ref
 	if nb.visible:
-		_seg(nb, head + hf * hr * 0.5 - hu * hr * 0.15, head + hf * hr * 0.48 - hu * hr * (0.35 + 0.3 * r.bruise), hr * 0.1)
+		_seg(nb, head + hf * hr * 0.48 - hu * hr * 0.17, head + hf * hr * 0.45 - hu * hr * (0.35 + 0.3 * r.bruise), hr * 0.1)
 	if f.has("glove_m"):
 		(f["glove_m"] as StandardMaterial3D).albedo_color = r.glove.lerp(Color(0.42, 0.03, 0.03), clampf(r.glove_blood, 0.0, 0.8) * 0.6)
-	_ell(f["nose"], head + hf * hr * 0.5 - hu * hr * 0.05, hf, hu, side, Vector3(hr * 0.2, hr * 0.26, hr * 0.15))
-	_ell(f["hair"], head + hu * hr * 0.13 - hf * hr * 0.09, hf, hu, side, Vector3(hr * 1.0, hr * 1.0, hr * 0.96))
-	_ell(f["beard"], head - hu * hr * 0.3 + hf * hr * 0.17, hf, hu, side, Vector3(hr * 0.72, hr * 0.6, hr * 0.8))
+	_ell(f["nose"], head + hf * hr * 0.47 - hu * hr * 0.07, hf, hu, side, Vector3(hr * 0.2, hr * 0.26, hr * 0.14))
+	# Cabelo: a calota cresce no alto e nos lados conforme o penteado; laterais raspadas deixam
+	# só o alto, o moicano vira uma crista e o cabelo comprido cai na nuca com a gravidade.
+	var hs: Dictionary = r.hair_shape
+	if not r.bald and not hs.is_empty():
+		var top := float(hs["top"])
+		var sdk := float(hs["side"])
+		var back := float(hs["back"])
+		if bool(hs["ridge"]):
+			_ell(f["hair"], head + hu * hr * (0.14 + top * 0.5) - hf * hr * 0.08, hf, hu, side, Vector3(hr * 1.0, hr * (0.95 + top * 1.3), hr * 0.22))
+		else:
+			_ell(f["hair"], head + hu * hr * (0.1 + (top - 0.03) * 0.55) - hf * hr * (0.06 + (sdk - 0.026) * 0.7), hf, hu, side,
+				Vector3(hr * (0.97 + (sdk - 0.026) * 1.35), hr * (0.95 + (top - 0.03) * 0.9), hr * (0.91 + (sdk - 0.026) * 1.35)))
+		var gu := (hu * 0.45 + Vector3.UP * 0.55).normalized()
+		var gf := (hf - gu * hf.dot(gu)).normalized()
+		var bun := int(hs["bun"])
+		if bun == HairShape.BUN_TAIL:
+			_ell(f["hair_back"], head - hf * hr * 0.6 - gu * hr * 0.22 + hu * hr * 0.15, gf, gu, side, Vector3(hr * 0.24, hr * 0.85, hr * 0.24))
+		elif back >= 0.2:
+			_ell(f["hair_back"], head - hf * hr * (0.3 + sdk * 0.5) - gu * hr * (0.22 + back * 0.32), gf, gu, side, Vector3(hr * (0.6 + sdk), hr * (0.7 + back * 0.78), hr * (0.84 + sdk * 1.2)))
+		var puff := bool(hs["curly"])
+		if bun == HairShape.BUN_TOP:
+			_ell(f["bun"], head + hu * hr * (0.6 if not puff else 0.66) - hf * hr * 0.2, hf, hu, side, Vector3.ONE * hr * (0.34 if not puff else 0.62))
+		elif bun == HairShape.BUN_LOW:
+			_ell(f["bun"], head - hf * hr * 0.52 - hu * hr * 0.14, hf, hu, side, Vector3.ONE * hr * 0.33)
+		elif bun == HairShape.BUN_PUFFS:
+			var sv := hf.cross(hu).normalized()
+			_ell(f["bun"], head + hu * hr * 0.5 + sv * hr * 0.34 - hf * hr * 0.05, hf, hu, side, Vector3.ONE * hr * 0.46)
+			_ell(f["bun2"], head + hu * hr * 0.5 - sv * hr * 0.34 - hf * hr * 0.05, hf, hu, side, Vector3.ONE * hr * 0.46)
+	match r.beard_kind:
+		HairShape.BD_GOATEE:
+			_ell(f["beard"], head - hu * hr * 0.44 + hf * hr * 0.3, hf, hu, side, Vector3(hr * 0.34, hr * 0.36, hr * 0.38))
+		HairShape.BD_SHORT:
+			_ell(f["beard"], head - hu * hr * 0.31 + hf * hr * 0.13, hf, hu, side, Vector3(hr * 0.72, hr * 0.5, hr * 0.76))
+		HairShape.BD_MEDIUM:
+			_ell(f["beard"], head - hu * hr * 0.35 + hf * hr * 0.13, hf, hu, side, Vector3(hr * 0.75, hr * 0.62, hr * 0.79))
+		HairShape.BD_LONG:
+			_ell(f["beard"], head - hu * hr * 0.5 + hf * hr * 0.16, hf, hu, side, Vector3(hr * 0.72, hr * 0.98, hr * 0.74))
+		HairShape.BD_STUBBLE:
+			_ell(f["stubble"], head - hu * hr * 0.3 + hf * hr * 0.12, hf, hu, side, Vector3(hr * 0.73, hr * 0.5, hr * 0.775))
+	if r.beard_kind >= HairShape.BD_MUSTACHE:
+		_ell(f["stache"], head - hu * hr * 0.215 + hf * hr * 0.425, hf, hu, side, Vector3(hr * 0.1, hr * 0.075, hr * 0.3))
 	# Corte, sangue escorrendo e olho inchado.
 	var cut := r.cut
 	var cm: MeshInstance3D = f["cut"]
@@ -650,15 +696,15 @@ func _pose_fighter(f: Dictionary, zoff: float = 0.0) -> void:
 	(f["drip"] as MeshInstance3D).visible = cut > 0.35
 	(f["chest_blood"] as MeshInstance3D).visible = cut > 0.8
 	if cut > 0.2:
-		var cp := head + hf * hr * 0.42 + hu * hr * 0.3 + side * hr * 0.12
+		var cp := head + hf * hr * 0.4 + hu * hr * 0.28 + side * hr * 0.12
 		_ell(cm, cp, hf, hu, side, Vector3(hr * 0.12, hr * 0.12, hr * (0.12 + 0.15 * cut)))
-		_seg(f["drip"], cp, head + hf * hr * 0.48 - hu * hr * (0.2 + 0.4 * minf(cut, 1.0)) + side * hr * 0.15, hr * 0.09 * (1.0 + cut))
-		_seg(f["chest_blood"], neck + fw * depth * 0.45, chest_c + fw * depth * 0.5 - up * Uh * 0.5, Uh * 0.15)
+		_seg(f["drip"], cp, head + hf * hr * 0.45 - hu * hr * (0.2 + 0.4 * minf(cut, 1.0)) + side * hr * 0.15, hr * 0.09 * (1.0 + cut))
+		_seg(f["chest_blood"], neck + fw * depth * 0.32 - up * Uh * 0.2, chest_c + fw * depth * 0.55 - up * Uh * 0.5, Uh * 0.15)
 	var bm: MeshInstance3D = f["bruise"]
 	bm.visible = r.bruise > 0.25
 	if bm.visible:
 		(f["bruise_m"] as StandardMaterial3D).albedo_color = Color(0.38, 0.12, 0.2, clampf((r.bruise - 0.25) * 0.8, 0.0, 0.6))
-		_ell(bm, head + hf * hr * 0.4 + hu * hr * 0.05 + side * hr * 0.17, hf, hu, side, Vector3(hr * 0.12, hr * 0.22, hr * 0.26) * (1.0 + 0.4 * r.bruise))
+		_ell(bm, head + hf * hr * 0.38 + hu * hr * 0.05 + side * hr * 0.17, hf, hu, side, Vector3(hr * 0.12, hr * 0.22, hr * 0.26) * (1.0 + 0.4 * r.bruise))
 
 
 # --- Direção de TV ---------------------------------------------------------------------------
@@ -818,7 +864,7 @@ func _process(delta: float) -> void:
 		if sm.visible:
 			var stn: Dictionary = brain.stains[i]
 			var w := float(stn["w"]) * 2.0
-			sm.position = Vector3(float(stn["x"]), 0.012 + float(i) * 0.0004, lerpf(1.6, -2.4, float(stn["z"])))
+			sm.position = Vector3(float(stn["x"]), 0.047 + float(i) * 0.0006, lerpf(1.6, -2.4, float(stn["z"])))
 			sm.scale = Vector3(w, 1.0, w * 0.8)
 	_cap.text = brain._caption if brain._caption_t > 0.0 else ""
 	_rep.visible = brain.in_replay()
