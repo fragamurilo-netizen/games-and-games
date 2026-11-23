@@ -77,6 +77,9 @@ func _president(weeks: int) -> void:
 	var offers := 0
 	var accepted := 0
 	var titles := 0
+	var inc_kinds := {}
+	var outcomes := {}
+	var presser := {}
 	for i in weeks:
 		var evs := Org.upcoming_events(w).filter(func(e: FightEvent) -> bool: return e.week - w.week >= 3)
 		if not evs.is_empty():
@@ -102,7 +105,32 @@ func _president(weeks: int) -> void:
 						titles += 1
 						belts += 1
 						break
+		# Imprevistos da semana: metade decide como um jogador (substituto, peso combinado com
+		# extra), a outra metade fica para o padrão.
+		for inc: Dictionary in FightWeek.pending(w):
+			inc_kinds[String(inc["kind"])] = int(inc_kinds.get(String(inc["kind"]), 0)) + 1
+			if w.rng.randf() < 0.5:
+				continue
+			if String(inc["kind"]) == "lesao":
+				var done := false
+				for s: Fighter in FightWeek.substitutes(w, inc, 3):
+					if bool(FightWeek.offer_sub(w, inc, s)["ok"]):
+						done = true
+						break
+				if not done:
+					FightWeek.cancel_injury(w, inc, true)
+			else:
+				if not bool(FightWeek.catchweight(w, inc, true)["ok"]):
+					FightWeek.cancel_weight(w, inc)
 		Career.advance_week(w, true)
+		for ev2: FightEvent in Org.past_events(w).slice(0, 1):
+			if ev2.week == w.week - 1 and not FightWeek.presser_done(ev2):
+				for o: Dictionary in FightWeek.presser_options(w, ev2).slice(0, 2):
+					presser[String(o["key"])] = int(presser.get(String(o["key"]), 0)) + 1
+					FightWeek.presser_pick(w, ev2, o)
+	for inc2: Dictionary in w.incidents:
+		outcomes[String(inc2.get("outcome", "aberto"))] = int(outcomes.get(String(inc2.get("outcome", "aberto")), 0)) + 1
+	print("imprevistos: ", inc_kinds, " desfechos (últimas 12 semanas): ", outcomes, " coletiva: ", presser)
 	var t := w.user_team()
 	print("%d semanas em %d ms; ofertas de cinturão %d, aceitas %d" % [weeks, Time.get_ticks_msec() - t0, offers, accepted])
 	print("organização: caixa %s, reputação %.1f" % [Fmt.money(t.balance), t.reputation])

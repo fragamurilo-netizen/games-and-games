@@ -18,8 +18,10 @@ static func bout_row(w: GameWorld, b: Bout, cb: Callable = Callable(), with_resu
 	cl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	cap.add_child(cl)
+	if not (b.weigh.get("missed", []) as Array).is_empty():
+		cap.add_child(UIKit.colored("Peso combinado", UIColors.MUTED, "Caps"))
 	if b.title:
-		cap.add_child(UIKit.colored("Cinturão", UIColors.GOLD, "Caps"))
+		cap.add_child(UIKit.colored("Cinturão" if b.title_for < 0 else "Cinturão vago", UIColors.GOLD, "Caps"))
 	v.add_child(cap)
 	var h := UIKit.hbox(UITokens.S1)
 	var wid := int(b.result.get("winner_id", -1)) if b.status == "feita" else -2

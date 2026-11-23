@@ -32,6 +32,10 @@ func refresh() -> void:
 			GameManager.save_now()
 			refresh()))
 		return
+	if WeekKit.incidents_section(w, c, ev, refresh) > 0:
+		c.add_child(UIKit.label("Resolva os problemas da semana antes de começar a noite.", "Muted", true))
+		foot.add_child(UIKit.button("Resolver", "PrimaryButton", func(): WeekKit.open_incident(w, FightWeek.pending(w, ev)[0], refresh)))
+		return
 	var pending := lst.filter(func(b: Bout) -> bool: return b.status == "marcada")
 	c.add_child(UIKit.label("O card na ordem das lutas: das preliminares à principal.", "Muted", true))
 	for i in lst.size():
@@ -133,6 +137,7 @@ func _report(w: GameWorld, ev: FightEvent, c: VBoxContainer) -> void:
 	if fb == null and (r.get("potn", []) as Array).is_empty():
 		bonus.add_child(UIKit.label("Nenhum bônus pago.", "Muted"))
 	c.add_child(UIKit.card_panel(bonus))
+	WeekKit.presser_section(w, ev, c, refresh)
 	c.add_child(UIKit.section_header("Resultados"))
 	var ids: Array = Org.event_bouts(w, ev).map(func(b: Bout) -> int: return b.id)
 	ids.reverse()

@@ -51,6 +51,8 @@ var delegate_cards: bool = true
 ## Presidente: a organização pede este bloqueio quando uma academia recusa uma luta
 ## ("id_a:id_b" → semana em que dá para tentar de novo).
 var bout_block: Dictionary = {}
+## Presidente: imprevistos da semana da luta (lesão, peso) que esperam decisão. Ver FightWeek.
+var incidents: Array = []
 
 
 func new_id() -> int:
@@ -232,7 +234,7 @@ func to_dict() -> Dictionary:
 		"champions": champions, "rankings": rankings, "user_team": user_team_id, "staff_market": staff_market,
 		"played": played_this_week, "ev_count": event_counters, "cal": calendar_weeks, "ch_block": challenge_block,
 		"sign_block": sign_block, "role": role, "followed": followed, "titles": title_history,
-		"delegate": delegate_cards, "bout_block": bout_block}
+		"delegate": delegate_cards, "bout_block": bout_block, "incidents": incidents}
 
 
 static func from_dict(d: Dictionary) -> GameWorld:
@@ -273,4 +275,7 @@ static func from_dict(d: Dictionary) -> GameWorld:
 	w.title_history = d.get("titles", {})
 	w.delegate_cards = bool(d.get("delegate", true))
 	w.bout_block = d.get("bout_block", {})
+	w.incidents = d.get("incidents", [])
+	for i: Dictionary in w.incidents:
+		i["refused"] = (i.get("refused", []) as Array).map(func(v): return int(v))
 	return w

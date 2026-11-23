@@ -11,6 +11,8 @@ var division: String = "M70"
 var rounds: int = 3
 var title: bool = false
 var main_event: bool = false
+## Campeão que perdeu o cinturão na balança: só este lutador pode ganhar o cinturão (-1 = qualquer um).
+var title_for: int = -1
 ## Bolsa de cada lado: {"show": valor por lutar, "win": bônus de vitória}.
 var purse_a: Dictionary = {"show": 0.0, "win": 0.0}
 var purse_b: Dictionary = {"show": 0.0, "win": 0.0}
@@ -39,7 +41,7 @@ func has(fid: int) -> bool:
 
 func to_dict() -> Dictionary:
 	return {"id": id, "ev": event_id, "week": week, "a": a, "b": b, "div": division, "rounds": rounds,
-		"title": title, "main": main_event, "pa": purse_a, "pb": purse_b, "status": status, "res": result, "log": log, "weigh": weigh}
+		"title": title, "main": main_event, "pa": purse_a, "pb": purse_b, "status": status, "res": result, "log": log, "weigh": weigh, "tf": title_for}
 
 
 static func from_dict(d: Dictionary) -> Bout:
@@ -59,4 +61,5 @@ static func from_dict(d: Dictionary) -> Bout:
 	x.result = d.get("res", {})
 	x.log = d.get("log", [])
 	x.weigh = d.get("weigh", {})
+	x.title_for = int(d.get("tf", -1))
 	return x

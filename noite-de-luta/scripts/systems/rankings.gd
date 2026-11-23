@@ -72,7 +72,7 @@ static func apply_result(w: GameWorld, b: Bout) -> void:
 			f.streak = f.streak + 1 if f.streak >= 0 else 1
 		else:
 			f.streak = f.streak - 1 if f.streak <= 0 else -1
-	if b.title and win >= 0:
+	if b.title and win >= 0 and (b.title_for < 0 or b.title_for == win):
 		var champ_before := int(w.champions.get(b.division, -1))
 		w.champions[b.division] = win
 		var wf := w.fighter(win)

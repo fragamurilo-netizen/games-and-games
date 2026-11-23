@@ -88,6 +88,37 @@ func _run() -> void:
 				Career.simulate(w, b)
 			Org.close_event(w, n, Org.auto_bonuses(w, n))
 		GameManager.advance_week()
+	# Semana da luta: uma lesão e um lutador fora do peso, para as telas de decisão.
+	var prelim := Org.event_bouts(w, ev).filter(func(b: Bout) -> bool: return not b.main_event and b.status == "marcada")
+	if prelim.size() >= 2:
+		var bi: Bout = prelim[0]
+		var hurt := w.fighter(bi.b)
+		hurt.injury = {"name": "Costela trincada", "weeks": 6}
+		FightWeek.injury(w, bi, hurt, "Costela trincada", "no camp")
+		var bw: Bout = prelim[1]
+		var lim := float(DataDB.division(bw.division).get("limit_kg", 70.0)) + 0.5
+		bw.weigh = {"kg": [lim + 1.4, lim - 0.2], "missed": [bw.a], "mods": [{}, {}], "cut": [0.1, 0.1]}
+		FightWeek._weigh(w, ev, bw)
+	UIManager.goto("hub")
+	await _shot("p09a_inicio_problemas")
+	var incs := FightWeek.pending(w, ev)
+	for inc: Dictionary in incs:
+		WeekKit.open_incident(w, inc, func(): pass)
+		await _shot("p09b_decidir_" + String(inc["kind"]))
+		UIManager.close_modal()
+	for inc: Dictionary in incs:
+		if String(inc["kind"]) == "lesao":
+			var subs := FightWeek.substitutes(w, inc, 3)
+			var ok := false
+			for sf: Fighter in subs:
+				if bool(FightWeek.offer_sub(w, inc, sf)["ok"]):
+					ok = true
+					break
+			if not ok:
+				FightWeek.cancel_injury(w, inc, true)
+		else:
+			if not bool(FightWeek.catchweight(w, inc, true)["ok"]):
+				FightWeek.cancel_weight(w, inc)
 	UIManager.goto("hub")
 	await _shot("p09_inicio_noite")
 	UIManager.push("night", {"id": ev.id})
@@ -127,6 +158,17 @@ func _run() -> void:
 	Org.close_event(w, ev, Org.auto_bonuses(w, ev))
 	UIManager.current().refresh()
 	await _shot("p17_contas")
+	var sc: Node = UIManager.current()
+	var opts := FightWeek.presser_options(w, ev)
+	if not opts.is_empty():
+		FightWeek.presser_pick(w, ev, opts[0])
+		sc.refresh()
+	await _frames(4)
+	var scr: ScrollContainer = sc.call("scroll")
+	if scr != null:
+		scr.scroll_vertical = 520
+	await _frames(4)
+	await _shot("p17b_coletiva")
 	UIManager.goto("hub")
 	UIManager.switch_area("titles")
 	await _shot("p18_cinturoes")

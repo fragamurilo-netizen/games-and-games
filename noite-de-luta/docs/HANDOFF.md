@@ -1,4 +1,38 @@
-# Noite de Luta — nota de passagem (08/10/2026)
+# Noite de Luta — nota de passagem (23/11/2026)
+
+## Rodada de 23/11/2026: vida de presidente (semana da luta e coletiva)
+
+Ramo de trabalho: `claude/project-thread-cbowjz` (sai de `claude/inspiring-wright-xx78jb`).
+
+- **Semana da luta** (`scripts/systems/fight_week.gd`, imprevistos em `GameWorld.incidents`):
+  - **Lesão** nas 3 semanas antes da noite (chance própria `INJURY_P` + as lesões de treino do
+    `Development._injure`, que no modo presidente viram decisão em vez de cancelar direto).
+    Decisão: substituto em cima da hora (lista com chance de fechar e prêmio por aceitar de 30% da
+    bolsa; o adversário pode recusar alguém muito abaixo), cancelar pagando a bolsa de quem ficou
+    sem luta, ou cancelar sem pagar (perde prestígio). Campeão machucado tira o cinturão da luta.
+  - **Balança** na semana da noite (a pesagem foi antecipada para segunda): peso combinado com
+    20% da bolsa para o adversário (que pode recusar), peso combinado com extra da organização, ou
+    cancelar. Campeão fora do peso **perde o cinturão na balança** (`Bout.title_for`: só o outro
+    pode ganhar); desafiante fora do peso tira o cinturão da luta.
+  - A chance de errar o peso em `Career.weigh_in` foi recalibrada: antes quase ninguém errava;
+    agora ~3% por lutador (perto de uma luta a cada 2–3 noites).
+  - O que o presidente não decide sai pelo padrão (`FightWeek.resolve_default`) antes das lutas.
+  - Telas: cartões "Problemas da semana" no Início do presidente e na noite (a noite não começa
+    com problema aberto), folha de decisão em `scripts/ui/week_kit.gd`. O card mostra "Peso
+    combinado" e "Cinturão vago".
+- **Coletiva pós-luta** (no relatório da noite): até 2 falas entre bônus extra do bolso, criticar
+  os juízes de uma decisão dividida (multa possível), pagar a vitória a quem perdeu a dividida,
+  anunciar a próxima defesa do campeão na próxima PPV (pode dar saia justa), mandar um veterano
+  em fase ruim se aposentar (aceita ou se ofende) e exaltar a casa cheia. Tudo vira notícia.
+- Verificado: `check_scripts` (85, 0 erros), `world_sim` de 52 semanas nos dois papéis com save,
+  capturas `design_shots --role=presidente` (novas: `p09a`, `p09b_decidir_*`, `p17b_coletiva`).
+- Próximos passos da vida de presidente: briga/declaração na coletiva **pré-luta**, cinturão
+  interino quando o campeão fica muito tempo fora, programa de verão de olheiro, contratos e
+  humor dos lutadores com a organização (ver `docs/PRESIDENTE.md`).
+
+---
+
+# Nota anterior (08/10/2026)
 
 Ramo: `claude/inspiring-wright-xx78jb` (parte do trabalho do colega em `claude/festive-maxwell-iuncob`,
 já incorporado). O jogo **roda nos dois papéis**: empresário de academia e presidente da organização.

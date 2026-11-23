@@ -18,6 +18,7 @@ func refresh() -> void:
 	var c := reset()
 	var t := w.user_team()
 	c.add_child(_identity(w, t))
+	var problems := WeekKit.incidents_section(w, c, null, refresh)
 	var night := Org.night_this_week(w)
 	if night != null:
 		c.add_child(_night_card(w, night))
@@ -40,9 +41,13 @@ func refresh() -> void:
 			break
 	if shown == 0:
 		c.add_child(UIKit.label("Semana calma no mundo do MMA.", "Muted"))
-	columnize(c, 1, 2, 1 + (1 if night != null else 0))
+	columnize(c, 1 + (problems + 1 if problems > 0 else 0), 2, 1 + (1 if night != null else 0))
 	var foot := footer()
-	if night != null:
+	var urgent := FightWeek.pending(w, night) if night != null else []
+	if not urgent.is_empty():
+		var first: Dictionary = urgent[0]
+		foot.add_child(UIKit.button("Resolver problemas da noite (%d)" % urgent.size(), "PrimaryButton", func(): WeekKit.open_incident(w, first, refresh)))
+	elif night != null:
 		var nid := night.id
 		foot.add_child(UIKit.button("Ir para a noite de luta", "PrimaryButton", func(): UIManager.push("night", {"id": nid})))
 	else:

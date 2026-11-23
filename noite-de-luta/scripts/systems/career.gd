@@ -60,7 +60,9 @@ static func weigh_in(w: GameWorld, b: Bout) -> Dictionary:
 		var nutri := team.staff_quality("nutri") if team != null else 30.0
 		var cut := maxf(0.0, (f.natural_kg - limit) / f.natural_kg)
 		res["cut"].append(cut)
-		var miss_p := clampf((cut - 0.1) * 3.2 - nutri / 400.0 - f.a("qi") / 1000.0, 0.0, 0.6)
+		# Cerca de 3% erram o peso (no MMA real, perto de uma luta por card); corte grande, nutricionista
+		# fraco e pouca cabeça pesam.
+		var miss_p := clampf(0.03 + (cut - 0.08) * 0.6 - (nutri - 50.0) / 2000.0 - (f.a("qi") - 50.0) / 3000.0, 0.005, 0.4)
 		var kg := limit - r.randf_range(0.0, 0.4)
 		if r.randf() < miss_p:
 			kg = limit + r.randf_range(0.3, 2.4)
@@ -208,6 +210,9 @@ static func _news(w: GameWorld, b: Bout, winner_id: int, method: String, champ_b
 		return
 	var wf := w.fighter(winner_id)
 	var lf := w.fighter(b.other(winner_id))
+	if b.title and b.title_for >= 0 and b.title_for != winner_id:
+		w.add_news("cinturao", "%s vence %s por %s, mas o cinturão dos %s segue vago: %s não bateu o peso." % [wf.display_name(), lf.display_name(), how, Matchmaker.division_name(b.division, true), "ela" if wf.is_female() else "ele"], [wf.id, lf.id], true)
+		return
 	if b.title:
 		if champ_before == winner_id:
 			w.add_news("cinturao", "%s defende o cinturão dos %s: vence %s por %s." % [wf.display_name(), Matchmaker.division_name(b.division, true), lf.display_name(), how], [wf.id, lf.id], true)
@@ -245,6 +250,11 @@ static func cancel_bout(w: GameWorld, b: Bout, reason: String) -> void:
 ## Fecha a semana. As lutas do jogador desta semana já têm de estar feitas (ou são simuladas
 ## aqui, se `auto` = true).
 static func advance_week(w: GameWorld, auto: bool = false) -> void:
+	if w.is_president():
+		# Imprevistos da semana que o presidente não decidiu saem pelo padrão antes das lutas.
+		for ev0: FightEvent in Calendar.events_in_week(w, w.week):
+			if ev0.tier == 2:
+				FightWeek.resolve_default(w, ev0)
 	for ev: FightEvent in Calendar.events_in_week(w, w.week):
 		var org_night := w.is_president() and ev.tier == 2
 		for bid: int in ev.bouts.duplicate():
@@ -256,6 +266,8 @@ static func advance_week(w: GameWorld, auto: bool = false) -> void:
 				continue
 			simulate(w, b)
 		ev.done = true
+		if org_night:
+			FightWeek.resolve_default(w, ev)
 		# Presidente que deixou a semana andar sem fechar a noite: os bônus saem pela sugestão.
 		if org_night and not ev.closed:
 			Org.close_event(w, ev, Org.auto_bonuses(w, ev))
@@ -274,6 +286,7 @@ static func advance_week(w: GameWorld, auto: bool = false) -> void:
 	Matchmaker.book_cpu(w)
 	if w.is_president():
 		Org.delegate_fill(w)
+		FightWeek.roll(w)
 	else:
 		Matchmaker.user_offers(w)
 	_trim(w)

@@ -100,7 +100,11 @@ static func _injure(w: GameWorld, f: Fighter, name: String, weeks: int, where: S
 	f.injury = {"name": name, "weeks": weeks}
 	f.condition = minf(f.condition, 70.0)
 	var b := w.bout(f.bout_id)
-	if b != null and b.status == "marcada" and b.week - w.week < weeks + 1:
+	var ev := w.event(b.event_id) if b != null else null
+	if b != null and b.status == "marcada" and b.week - w.week < weeks + 1 and w.is_president() and ev != null and ev.tier == 2 and not ev.closed:
+		if not FightWeek.has_incident(w, b.id):
+			FightWeek.injury(w, b, f, name, where)
+	elif b != null and b.status == "marcada" and b.week - w.week < weeks + 1:
 		Career.cancel_bout(w, b, "%s se machucou %s (%s)" % [f.display_name(), where, name.to_lower()])
 	elif w.is_user_fighter(f):
 		w.add_news("equipe", "%s se machucou %s: %s, %d semanas fora." % [f.display_name(), where, name.to_lower(), weeks], [f.id], true)
