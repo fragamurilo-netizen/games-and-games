@@ -50,7 +50,7 @@ Ramo de trabalho: `claude/project-thread-cbowjz` (sai de `claude/inspiring-wrigh
   em fase ruim se aposentar (aceita ou se ofende) e exaltar a casa cheia. Tudo vira notícia.
 - Verificado: `check_scripts` (85, 0 erros), `world_sim` de 52 semanas nos dois papéis com save,
   capturas `design_shots --role=presidente` (novas: `p09a`, `p09b_decidir_*`, `p17b_coletiva`).
-- **APK** em `releases/` (0.1.2 código 3; depois 0.1.3 código 4 na rodada 2, mesma chave). Assinado com uma **chave de teste nova** (a da 0.1.1 não
+- **APK** em `releases/` (0.1.2 código 3; depois 0.1.3 código 4 na rodada 2, mesma chave). A chave de teste fica nos arquivos do projeto, em `noite-de-luta/chave-teste/` (fora do git), para os próximos APKs instalarem por cima. Assinado com uma **chave de teste nova** (a da 0.1.1 não
   estava no repositório): no celular, desinstalar a 0.1.1 antes de instalar. Sem acesso ao
   `dl.google.com`, o `apksigner` veio do `uber-apk-signer` (GitHub) dentro de um SDK mínimo
   (`build-tools/34.0.0/apksigner` + um `platform-tools/adb` vazio só para passar na checagem).
