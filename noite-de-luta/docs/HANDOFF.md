@@ -26,6 +26,10 @@ Ramo de trabalho: `claude/project-thread-cbowjz` (sai de `claude/inspiring-wrigh
   em fase ruim se aposentar (aceita ou se ofende) e exaltar a casa cheia. Tudo vira notícia.
 - Verificado: `check_scripts` (85, 0 erros), `world_sim` de 52 semanas nos dois papéis com save,
   capturas `design_shots --role=presidente` (novas: `p09a`, `p09b_decidir_*`, `p17b_coletiva`).
+- **APK 0.1.2** em `releases/` (código 3). Assinado com uma **chave de teste nova** (a da 0.1.1 não
+  estava no repositório): no celular, desinstalar a 0.1.1 antes de instalar. Sem acesso ao
+  `dl.google.com`, o `apksigner` veio do `uber-apk-signer` (GitHub) dentro de um SDK mínimo
+  (`build-tools/34.0.0/apksigner` + um `platform-tools/adb` vazio só para passar na checagem).
 - Próximos passos da vida de presidente: briga/declaração na coletiva **pré-luta**, cinturão
   interino quando o campeão fica muito tempo fora, programa de verão de olheiro, contratos e
   humor dos lutadores com a organização (ver `docs/PRESIDENTE.md`).
