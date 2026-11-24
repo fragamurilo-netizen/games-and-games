@@ -160,7 +160,7 @@ static func demand(w: GameWorld, ev: FightEvent, hype: float, level: int = -1, c
 	var c := city if city != "" else ev.city
 	var t := w.user_team()
 	var rep := t.reputation if t != null else 50.0
-	var interest := 0.25 + pow(clampf(hype, 0.0, 100.0) / 100.0, 1.6) * 2.6 + rep / 300.0
+	var interest := 0.2 + pow(clampf(hype, 0.0, 100.0) / 100.0, 1.6) * 2.4 + rep / 400.0
 	var d := 16000.0 * interest
 	for f: Array in crowd_factors(w, ev, c, nation):
 		d *= 1.0 + float(f[1])

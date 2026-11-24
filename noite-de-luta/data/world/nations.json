@@ -10341,6 +10341,7 @@
 		},
 		"BUL": {
 			"name": "Bulgária",
+			"flag": {"p": "h", "c": ["#FFFFFF", "#00966E", "#D62612"]},
 			"confed": "UEFA",
 			"coef": 54,
 			"national_only": true,
@@ -10348,6 +10349,7 @@
 		},
 		"BLR": {
 			"name": "Belarus",
+			"flag": {"p": "h", "c": ["#CF101A", "#007C30"], "w": [2, 1], "k": {"c": "#FFFFFF", "w": 0.12, "h": 1.0}},
 			"confed": "UEFA",
 			"coef": 42,
 			"national_only": true,
@@ -10369,6 +10371,7 @@
 		},
 		"LTU": {
 			"name": "Lituânia",
+			"flag": {"p": "h", "c": ["#FDB913", "#006A44", "#C1272D"]},
 			"confed": "UEFA",
 			"coef": 39,
 			"national_only": true,
@@ -10383,6 +10386,7 @@
 		},
 		"MDA": {
 			"name": "Moldávia",
+			"flag": {"p": "v", "c": ["#0046AE", "#FFD200", "#CC092F"], "e": {"t": "shield", "c": "#B07E5B", "x": 0.5, "y": 0.5, "s": 0.4}},
 			"confed": "UEFA",
 			"coef": 38,
 			"national_only": true,
@@ -10390,6 +10394,7 @@
 		},
 		"ARM": {
 			"name": "Armênia",
+			"flag": {"p": "h", "c": ["#D90012", "#0033A0", "#F2A800"]},
 			"confed": "UEFA",
 			"coef": 48,
 			"national_only": true,
@@ -10397,6 +10402,7 @@
 		},
 		"AZE": {
 			"name": "Azerbaijão",
+			"flag": {"p": "h", "c": ["#0092BC", "#E4002B", "#00AF66"], "e": {"t": "crescent", "c": "#FFFFFF", "x": 0.46, "y": 0.5, "s": 0.26}},
 			"confed": "UEFA",
 			"coef": 45,
 			"national_only": true,
@@ -10418,6 +10424,7 @@
 		},
 		"KAZ": {
 			"name": "Cazaquistão",
+			"flag": {"p": "solid", "c": ["#00AFCA"], "e": {"t": "sun", "c": "#FEC50C", "x": 0.5, "y": 0.5, "s": 0.4}},
 			"confed": "UEFA",
 			"coef": 45,
 			"national_only": true,
@@ -10705,6 +10712,7 @@
 		},
 		"AFG": {
 			"name": "Afeganistão",
+			"flag": {"p": "v", "c": ["#000000", "#D32011", "#007A36"], "e": {"t": "shield", "c": "#FFFFFF", "x": 0.5, "y": 0.5, "s": 0.3}},
 			"confed": "AFC",
 			"coef": 30,
 			"national_only": true,
@@ -10740,6 +10748,7 @@
 		},
 		"TPE": {
 			"name": "Taipé Chinês",
+			"flag": {"p": "solid", "c": ["#FFFFFF"], "e": {"t": "disc", "c": "#002B7F", "c2": "#FFFFFF", "x": 0.5, "y": 0.47, "s": 0.5}},
 			"confed": "AFC",
 			"coef": 27,
 			"national_only": true,
@@ -10761,6 +10770,7 @@
 		},
 		"IND": {
 			"name": "Índia",
+			"flag": {"p": "h", "c": ["#FF9933", "#FFFFFF", "#138808"], "e": {"t": "disc", "c": "#000080", "c2": "#FFFFFF", "x": 0.5, "y": 0.5, "s": 0.28}},
 			"confed": "AFC",
 			"coef": 42,
 			"national_only": true,
@@ -10796,6 +10806,7 @@
 		},
 		"KGZ": {
 			"name": "Quirguistão",
+			"flag": {"p": "solid", "c": ["#E8112D"], "e": {"t": "sun", "c": "#FFEF00", "x": 0.5, "y": 0.5, "s": 0.45}},
 			"confed": "AFC",
 			"coef": 41,
 			"national_only": true,
@@ -10887,6 +10898,7 @@
 		},
 		"PHI": {
 			"name": "Filipinas",
+			"flag": {"p": "tri", "c": ["#0038A8", "#CE1126"], "t": "#FFFFFF", "e": {"t": "sun", "c": "#FCD116", "x": 0.17, "y": 0.5, "s": 0.2}},
 			"confed": "AFC",
 			"coef": 34,
 			"national_only": true,
@@ -10915,6 +10927,7 @@
 		},
 		"TJK": {
 			"name": "Tajiquistão",
+			"flag": {"p": "h", "c": ["#CC0000", "#FFFFFF", "#006600"], "w": [2, 3, 2], "e": {"t": "stars_arc", "c": "#F8C300", "x": 0.5, "y": 0.56, "s": 0.2}},
 			"confed": "AFC",
 			"coef": 47,
 			"national_only": true,
@@ -10922,6 +10935,7 @@
 		},
 		"THA": {
 			"name": "Tailândia",
+			"flag": {"p": "h", "c": ["#A51931", "#F4F5F8", "#2D2A4A", "#F4F5F8", "#A51931"], "w": [1, 1, 2, 1, 1]},
 			"confed": "AFC",
 			"coef": 49,
 			"national_only": true,
@@ -10943,6 +10957,7 @@
 		},
 		"UZB": {
 			"name": "Uzbequistão",
+			"flag": {"p": "h", "c": ["#0099B5", "#CE1126", "#FFFFFF", "#CE1126", "#1EB53A"], "w": [10, 1, 8, 1, 10], "e": {"t": "crescent", "c": "#FFFFFF", "x": 0.14, "y": 0.17, "s": 0.24}},
 			"confed": "AFC",
 			"coef": 63,
 			"national_only": true,
@@ -10950,6 +10965,7 @@
 		},
 		"VIE": {
 			"name": "Vietnã",
+			"flag": {"p": "solid", "c": ["#DA251D"], "e": {"t": "star", "c": "#FFFF00", "x": 0.5, "y": 0.5, "s": 0.5}},
 			"confed": "AFC",
 			"coef": 42,
 			"national_only": true,
@@ -11076,6 +11092,7 @@
 		},
 		"DOM": {
 			"name": "República Dominicana",
+			"flag": {"p": "quarters", "c": ["#002D62", "#CE1126", "#CE1126", "#002D62"], "x": "#FFFFFF"},
 			"confed": "CONCACAF",
 			"coef": 39,
 			"national_only": true,
@@ -11118,6 +11135,7 @@
 		},
 		"PUR": {
 			"name": "Porto Rico",
+			"flag": {"p": "tri", "c": ["#ED0000", "#FFFFFF", "#ED0000", "#FFFFFF", "#ED0000"], "t": "#0050F0", "e": {"t": "star", "c": "#FFFFFF", "x": 0.17, "y": 0.5, "s": 0.26}},
 			"confed": "CONCACAF",
 			"coef": 34,
 			"national_only": true,
@@ -11167,6 +11185,7 @@
 		},
 		"CUB": {
 			"name": "Cuba",
+			"flag": {"p": "tri", "c": ["#002A8F", "#FFFFFF", "#002A8F", "#FFFFFF", "#002A8F"], "t": "#CF142B", "e": {"t": "star", "c": "#FFFFFF", "x": 0.17, "y": 0.5, "s": 0.26}},
 			"confed": "CONCACAF",
 			"coef": 37,
 			"national_only": true,

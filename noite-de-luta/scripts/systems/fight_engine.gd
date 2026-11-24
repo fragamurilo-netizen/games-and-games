@@ -1062,11 +1062,11 @@ func _beat(type: String, side: int, data: Dictionary = {}) -> void:
 
 
 func _log(side: int, kind: String, text: String) -> void:
+	if not narrate and kind != "fim":
+		return
 	var ev := {"r": round_no, "t": t, "side": side, "kind": kind, "text": text,
 		"st": [float(s[0]["st"]), float(s[1]["st"])], "hd": [float(s[0]["head"]), float(s[1]["head"])],
 		"pos": pos if pos != "chao" else "chao:" + gpos + ":" + str(top)}
-	if not narrate and kind != "fim":
-		return
 	# Números do round até este lance, para o placar ao vivo (cópia: o round continua somando).
 	if narrate and not round_stats.is_empty():
 		var rs: Array = round_stats.back()
@@ -1105,7 +1105,24 @@ func _custom_name(att: int, kind: String) -> String:
 	return String((prof[att]["names"] as Dictionary).get(kind, ""))
 
 
+## Quantas frases cada golpe sorteia em `_hit_text` (direto e gancho só quando pegam na cabeça).
+## Luta sem narração usa esta tabela para gastar o mesmo sorteio sem montar a frase: quem mudar
+## as frases lá embaixo precisa manter os números daqui iguais.
+const HIT_PICKS := {"jab": 3, "chute_baixo": 3, "chute_corpo": 2, "cotovelada": 3, "chute_panturrilha": 3}
+const HIT_PICKS_HEAD := {"direto": 3, "gancho": 3}
+
+
 func _hit_text(att: int, kind: String, zone: String, _dmg: float, counter: bool = false) -> String:
+	if not narrate:
+		# Ninguém vai ler: só o sorteio anda, igual ao da luta narrada (o resultado não muda).
+		if _custom_name(att, kind) != "" and rng.randf() < 0.6:
+			return ""
+		var n := int(HIT_PICKS.get(kind, 0))
+		if n == 0 and zone == "head":
+			n = int(HIT_PICKS_HEAD.get(kind, 0))
+		if n > 0:
+			rng.randi_range(0, n - 1)
+		return ""
 	var a := f[att].short_name()
 	var b := f[1 - att].short_name()
 	var t2 := ""
@@ -1176,7 +1193,10 @@ func _miss_text(att: int, kind: String) -> String:
 
 ## Uma frase sorteada com {a} = lado `i` e {b} = o outro.
 func _say(templates: Array, i: int) -> String:
-	return _pick(templates).format({"a": f[i].short_name(), "b": f[1 - i].short_name()})
+	var tpl := _pick(templates)
+	if not narrate:
+		return ""
+	return tpl.format({"a": f[i].short_name(), "b": f[1 - i].short_name()})
 
 
 func _ko_text(att: int, kind: String) -> String:

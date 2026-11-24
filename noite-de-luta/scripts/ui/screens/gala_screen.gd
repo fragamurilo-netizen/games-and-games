@@ -324,6 +324,9 @@ func _page_review(w: GameWorld, c: VBoxContainer, rv: Dictionary) -> void:
 	var bonus: Dictionary = rv.get("bonus", {})
 	if not bonus.is_empty():
 		sc.add_child(UIKit.colored("%s Bônus: %s." % [String(bonus.get("text", "")), Fmt.money(float(bonus.get("money", 0.0)))], UIColors.GREEN, "Small", true))
+	var div := float(rv.get("div", 0.0))
+	if div > 0.0:
+		sc.add_child(UIKit.label("Os sócios retiraram %s em dividendos: %d%% do lucro do ano. O resto fica no caixa da liga." % [Fmt.money(div), int(Org.DIVIDEND * 100.0)], "Small", true))
 	c.add_child(UIKit.card_panel(sc))
 	var feats := _feats_of_year(w)
 	if not feats.is_empty():

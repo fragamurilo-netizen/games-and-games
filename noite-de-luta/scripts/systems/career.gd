@@ -5,9 +5,23 @@ extends RefCounted
 ## finanças, propostas novas e o calendário andando.
 
 const START_FUNDS := [100000.0, 250000.0, 500000.0]
-## Despesas fixas da academia por semana (aluguel, luz, material) e por lutador (camp).
-const RENT := 1800.0
-const PER_FIGHTER := 250.0
+## Despesas da academia por semana: o fixo (aluguel, luz), por aluno (material, professores de
+## turma) e por lutador da equipe (o dia a dia do camp). Lutador de nível alto custa mais:
+## sparring melhor, especialistas, viagens (`PER_LEVEL` por ponto de nível acima de 50).
+## Aluguel e contas da casa: um piso mais um tanto por ponto de reputação (casa famosa mora em
+## endereço melhor). No fundo do poço a conta encolhe, e a academia enxuta consegue respirar.
+const RENT := 700.0
+const RENT_REP := 25.0
+const PER_FIGHTER := 150.0
+const PER_LEVEL := 20.0
+const PER_STUDENT := 8.0
+## Mensalidade de um aluno, por semana. É o que paga a conta de uma academia de verdade: a
+## equipe de luta dá nome à casa, e o nome enche o tatame.
+const FEE := 36.0
+## Juros por semana sobre o caixa negativo, e a dívida a partir da qual os salários atrasam.
+const DEBT_RATE := 0.004
+const DEBT_BASE := 80000.0
+const DEBT_PER_REP := 2500.0
 
 
 static func new_career(team_name: String, short: String, nation: String, city: String, c1: Color, c2: Color, funds: float, seed_v: int) -> GameWorld:
@@ -174,9 +188,8 @@ static func resolve(w: GameWorld, b: Bout, res: Dictionary, e: FightEngine) -> v
 		if won:
 			# Quem luta no alto do card (e em TV de alcance maior) fica famoso mais rápido.
 			var seen := Card.fame_k(slot) * (TVDeal.fame_k(w) if tier == 2 else 1.0)
-			# Quanto mais famoso, mais difícil crescer: sem isso todo mundo do topo vira estrela.
-			var room := clampf(1.25 - f.popularity / 100.0, 0.25, 1.0)
-			f.popularity = minf(100.0, f.popularity + (1.5 + tier * 1.5 + (2.0 if method != "DEC" else 0.0) + (8.0 if b.title else (4.0 if b.interim else 0.0))) * Persona.fame_k(f, method != "DEC") * seen * room)
+			# Quanto mais perto do teto do ranking, mais difícil crescer (ver Fame).
+			Fame.add(w, f, (1.5 + tier * 1.5 + (2.0 if method != "DEC" else 0.0) + (8.0 if b.title else (4.0 if b.interim else 0.0))) * Persona.fame_k(f, method != "DEC") * seen)
 		elif res_code == "D":
 			# Derrota de nome grande pesa mais do que derrota de desconhecido.
 			f.popularity = maxf(1.0, f.popularity - (1.0 + f.popularity * 0.035))
@@ -367,6 +380,71 @@ static func advance_week(w: GameWorld, auto: bool = false) -> void:
 	Inbox.scan(w)
 
 
+## Quanta gente quer treinar na academia: cresce com a reputação (o nome da casa) e com o apoio
+## da cidade.
+static func student_demand(w: GameWorld) -> int:
+	var t := w.user_team()
+	if t == null or w.is_president():
+		return 0
+	var v := Season.value_of(w) if not w.support.is_empty() else 50.0
+	return int(clampf(round(60.0 + t.reputation * 2.2 + (v - 50.0) * 0.8), SOLO, 400.0))
+
+
+## Quantos alunos a casa consegue atender: o dono dá conta de `SOLO` sozinho e cada profissional
+## do staff abre mais turmas e serviços (os melhores atendem mais gente).
+const SOLO := 45.0
+
+static func student_capacity(w: GameWorld) -> int:
+	var t := w.user_team()
+	if t == null:
+		return 0
+	var cap := SOLO
+	for s: Dictionary in t.staff:
+		cap += 25.0 + float(s.get("quality", 50.0)) * 0.4
+	return int(round(cap))
+
+
+## Alunos pagantes: a procura, até onde a casa atende.
+static func students(w: GameWorld) -> int:
+	return mini(student_demand(w), student_capacity(w))
+
+
+static func tuition(w: GameWorld) -> float:
+	return float(students(w)) * FEE
+
+
+## Quanto um lutador da equipe custa por semana no dia a dia do camp.
+static func fighter_cost(f: Fighter) -> float:
+	return PER_FIGHTER + PER_LEVEL * maxf(0.0, float(f.level()) - 50.0)
+
+
+## Aluguel e despesas da semana (sem os salários do staff).
+static func upkeep(w: GameWorld) -> float:
+	var camp := 0.0
+	for f: Fighter in w.user_fighters():
+		camp += fighter_cost(f)
+	return rent(w) + PER_STUDENT * float(students(w)) + camp
+
+
+static func rent(w: GameWorld) -> float:
+	return snappedf(RENT + RENT_REP * w.user_team().reputation, 10.0)
+
+
+## O que a academia ganha ou perde por semana antes das bolsas: mensalidades e patrocínio menos
+## despesas e salários.
+static func weekly_net(w: GameWorld) -> float:
+	var t := w.user_team()
+	if t == null:
+		return 0.0
+	return tuition(w) + Season.sponsor(w) - upkeep(w) - t.weekly_wages()
+
+
+## Dívida a partir da qual o banco aperta: os salários atrasam e o staff começa a sair.
+static func debt_limit(w: GameWorld) -> float:
+	var t := w.user_team()
+	return DEBT_BASE + (t.reputation if t != null else 0.0) * DEBT_PER_REP
+
+
 static func _finances(w: GameWorld) -> void:
 	if w.is_president():
 		Org.weekly(w)
@@ -374,8 +452,8 @@ static func _finances(w: GameWorld) -> void:
 	var t := w.user_team()
 	if t == null:
 		return
-	var n := w.user_fighters().size()
-	t.add_money(w.week, "Aluguel e despesas da academia", -(RENT + PER_FIGHTER * n))
+	t.add_money(w.week, "Mensalidades dos alunos", tuition(w))
+	t.add_money(w.week, "Aluguel e despesas da academia", -upkeep(w))
 	var wages := t.weekly_wages()
 	if wages > 0.0:
 		t.add_money(w.week, "Salários do staff", -wages)
@@ -384,6 +462,41 @@ static func _finances(w: GameWorld) -> void:
 	if sp > 0.0:
 		t.add_money(w.week, "Patrocínio do comércio local", sp)
 		Season.bump(w, "sponsor", sp)
+	_debt(w, t)
+
+
+## Caixa negativo cobra juros; passando do limite do banco, os salários atrasam e, de quatro em
+## quatro semanas, o profissional mais caro do staff vai embora.
+static func _debt(w: GameWorld, t: Team) -> void:
+	if t.balance >= 0.0:
+		return
+	var fee := snappedf(-t.balance * DEBT_RATE, 10.0)
+	if fee > 0.0:
+		t.add_money(w.week, "Juros da dívida", -fee)
+	if -t.balance < debt_limit(w) or w.week % 4 != 0:
+		return
+	if t.staff.is_empty():
+		_bailout(w, t)
+		return
+	var out: Dictionary = t.staff[0]
+	for s: Dictionary in t.staff:
+		if float(s["wage"]) > float(out["wage"]):
+			out = s
+	t.staff.erase(out)
+	w.add_news("equipe", "Salários atrasados: %s deixou a %s. A dívida passou do limite do banco (%s)." % [String(out["name"]), t.name, Fmt.money(debt_limit(w))], [], true)
+
+
+## Fundo do poço: dívida acima do limite e ninguém mais no staff. Um investidor da cidade
+## assume a dívida e a casa recomeça com o caixa mínimo; o nome da academia sai arranhado.
+const BAILOUT_CASH := 20000.0
+
+static func _bailout(w: GameWorld, t: Team) -> void:
+	var debt := -t.balance
+	t.add_money(w.week, "Investidor local assume a dívida", debt + BAILOUT_CASH)
+	t.reputation = maxf(minf(t.reputation, 8.0), t.reputation - 2.0)
+	w.life["bailout"] = float(w.life.get("bailout", 0.0)) + 1.0
+	Season.nudge(w, -2.0, "Academia socorrida por um investidor")
+	w.add_news("equipe", "A %s quebrou: um investidor da cidade assumiu a dívida de %s e a academia recomeça com %s em caixa. O nome da casa sai arranhado." % [t.name, Fmt.money(debt), Fmt.money(BAILOUT_CASH)], [], true)
 
 
 ## Fim de contrato: os da CPU renovam quase sempre; os do jogador avisam (renovação no perfil).
@@ -418,16 +531,27 @@ static func _trim(w: GameWorld) -> void:
 	if w.week % 8 != 0:
 		return
 	for e: FightEvent in w.events.values():
-		if e.week < w.week - 30:
-			var keep := w.is_president() and e.tier == 2 and e.week >= w.week - 104
-			for bid: int in e.bouts:
-				var b := w.bout(bid)
-				if b != null and (w.is_user_fighter(w.fighter(b.a)) or w.is_user_fighter(w.fighter(b.b)) or (b.title and e.week >= w.week - 260)):
-					keep = true
-			if not keep:
-				for bid: int in e.bouts:
-					w.bouts.erase(bid)
-				w.events.erase(e.id)
+		if e.week >= w.week - 30:
+			continue
+		# As noites da liga do presidente ficam inteiras por dois anos.
+		if w.is_president() and e.tier == 2 and e.week >= w.week - 104:
+			continue
+		# Das noites antigas ficam só as lutas da equipe do jogador e as de cinturão dos últimos
+		# cinco anos. O resto do card sai do save, e os aposentados que só apareciam ali também
+		# podem sair (ver Legacy).
+		var stay: Array = []
+		for bid: int in e.bouts:
+			var b := w.bout(bid)
+			if b == null:
+				continue
+			if w.is_user_fighter(w.fighter(b.a)) or w.is_user_fighter(w.fighter(b.b)) or (b.title and e.week >= w.week - 260):
+				stay.append(bid)
+			else:
+				w.bouts.erase(bid)
+		if stay.is_empty():
+			w.events.erase(e.id)
+		else:
+			e.bouts = stay
 	for b: Bout in w.bouts.values():
 		if b.status == "cancelada" and b.week < w.week - 4:
 			w.bouts.erase(b.id)

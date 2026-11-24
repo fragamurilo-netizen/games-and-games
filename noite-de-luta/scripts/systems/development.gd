@@ -40,6 +40,7 @@ static func week(w: GameWorld) -> void:
 		_age(w, f, f.age(y, m))
 		if w.week - f.last_fight_week > 26:
 			f.popularity = maxf(1.0, f.popularity - 0.15)
+		Fame.week(w, f)
 
 
 static func _recover(w: GameWorld, f: Fighter, team: Team) -> void:
@@ -68,12 +69,17 @@ static func _train(w: GameWorld, f: Fighter, team: Team, age: int, camp_k: float
 	var age_k := 1.5 if age < 21 else (1.25 if age < 25 else (1.0 if age < 29 else (0.55 if age < 32 else 0.2)))
 	var gap := clampf((f.potential - f.level()) / 8.0, 0.0, 1.6)
 	var base: float = 0.16 * age_k * gap * [0.6, 1.0, 1.4][intensity] * camp_k * Morale.train_k(w, f)
+	# O que não muda de um atributo para o outro sai do laço (são mil lutadores por semana).
+	var persona_k := Persona.train_k(f)
+	var coach_of := {}
 	for k: String in Fighter.ATTRS:
-		var g := String(GROUP_OF[k])
-		if k in ["queixo", "coracao"]:
+		if k == "queixo" or k == "coracao":
 			continue # não se treina queixo
-		var coach := team.staff_quality(String(COACH_OF[g])) if team != null else 20.0
-		var amount := base * float(focus[g]) * (0.6 + coach / 100.0) * w.rng.randf_range(0.4, 1.6) * Persona.train_k(f)
+		var g := String(GROUP_OF[k])
+		if not coach_of.has(g):
+			coach_of[g] = team.staff_quality(String(COACH_OF[g])) if team != null else 20.0
+		var coach: float = coach_of[g]
+		var amount := base * float(focus[g]) * (0.6 + coach / 100.0) * w.rng.randf_range(0.4, 1.6) * persona_k
 		var p := float(f.progress.get(k, 0.0)) + amount
 		if p >= 1.0 and f.a(k) < 99.0:
 			f.attrs[k] = f.a(k) + 1.0
@@ -211,7 +217,7 @@ static func _maybe_change_division(w: GameWorld, f: Fighter, age: int) -> void:
 		why = "depois de %d derrotas, tenta a sorte numa categoria abaixo" % losses
 	elif idx < divs.size() - 1 and losses >= 2 and age >= 30 and w.rng.randf() < 0.05:
 		to = idx + 1
-		why = "cansado de cortar peso depois de %d derrotas" % losses
+		why = "%s de cortar peso depois de %d derrotas" % ["cansada" if f.is_female() else "cansado", losses]
 	elif idx < divs.size() - 1 and f.title_defenses >= 3 and f.streak >= 4 and w.rng.randf() < 0.04:
 		to = idx + 1
 		why = "busca um segundo cinturão numa categoria acima"

@@ -242,6 +242,30 @@ static func gap(px: int) -> Control:
 	return c
 
 
+## Lista comprida montada aos poucos: as primeiras linhas na hora e o resto em blocos nos
+## quadros seguintes. A tela abre logo e a rolagem já funciona enquanto o fim da lista chega.
+## `make` recebe o índice e devolve a linha.
+static func fill_rows(parent: Node, count: int, make: Callable, first: int = 12, chunk: int = 8) -> void:
+	for i in mini(count, first):
+		parent.add_child(make.call(i))
+	if count > first:
+		_fill_more(parent, count, make, first, chunk)
+
+
+static func _fill_more(parent: Node, count: int, make: Callable, from: int, chunk: int) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	var i := from
+	while i < count:
+		await tree.process_frame
+		if not is_instance_valid(parent) or parent.is_queued_for_deletion():
+			return
+		for k in chunk:
+			if i >= count:
+				break
+			parent.add_child(make.call(i))
+			i += 1
+
+
 static func flag(code: String, w: int) -> FlagView:
 	var v := FlagView.new()
 	v.custom_minimum_size = Vector2(w, roundi(w / 1.5))

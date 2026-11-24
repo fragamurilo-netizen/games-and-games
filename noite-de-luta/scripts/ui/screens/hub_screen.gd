@@ -7,6 +7,9 @@ const HATS := {"cinturao": "Cinturão", "resultado": "Resultado", "equipe": "Sua
 	"marco": "Marco", "olheiro": "Olheiro", "mercado": "Mercado", "rivalidade": "Rivalidade", "premio": "Prêmios", "hall": "Hall da Fama",
 	"categoria": "Categoria", "visual": "Visual", "meta": "Temporada", "apoio": "Cidade", "conquista": "Conquista"}
 
+## A virada da semana está em andamento (segura o segundo toque no botão).
+var _turning := false
+
 
 func setup(p: Dictionary) -> void:
 	super.setup(p)
@@ -31,7 +34,7 @@ func refresh() -> void:
 	var c := reset()
 	var t := w.user_team()
 	var mine := w.user_fighters()
-	var weekly := Career.RENT + Career.PER_FIGHTER * mine.size() + t.weekly_wages()
+	var weekly := Career.weekly_net(w)
 	var best := ""
 	for f: Fighter in mine:
 		var r := w.rank_of(f)
@@ -40,7 +43,7 @@ func refresh() -> void:
 		elif r > 0 and best != "Campeão" and (best == "" or r < int(best.trim_prefix("#"))):
 			best = "#%d" % r
 	c.add_child(DashKit.identity(w, t, "%s · %s" % [t.city, DataDB.nation_name(t.nation)], "Reputação", [
-		[str(mine.size()), "Lutadores"], [Fmt.money(-weekly), "Por semana"], [best if best != "" else "sem", "Melhor ranking", UIColors.GOLD if best == "Campeão" else Color(0, 0, 0, 0)]], intro_pending))
+		[str(mine.size()), "Lutadores"], [("+" if weekly > 0.0 else "") + Fmt.money(weekly), "Fixo por semana", UIColors.RED if weekly < 0.0 else Color(0, 0, 0, 0)], [best if best != "" else "sem", "Melhor ranking", UIColors.GOLD if best == "Campeão" else Color(0, 0, 0, 0)]], intro_pending))
 	var guide := TutorialKit.hub_card(w, refresh)
 	if guide != null:
 		c.add_child(guide)
@@ -226,6 +229,9 @@ func _team_strip(w: GameWorld, mine: Array) -> Control:
 
 
 func _advance() -> void:
+	if _turning:
+		return
+	_turning = true
 	var w := world()
 	var mine := w.user_fighters().size()
 	var t := w.user_team()
@@ -233,7 +239,10 @@ func _advance() -> void:
 		UIManager.toast("Caixa negativo e ninguém para lutar. Corte custos na Academia.", UIColors.RED)
 	var cash := t.balance
 	var keys := DashKit.open_keys(w)
+	await UIManager.busy("Fechando a semana…")
 	GameManager.advance_week()
+	UIManager.busy_done()
+	_turning = false
 	DashKit.week_turn(world(), cash, keys)
 	intro_pending = true
 	refresh()

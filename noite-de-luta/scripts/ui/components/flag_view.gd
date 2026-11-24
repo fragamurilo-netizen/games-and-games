@@ -93,6 +93,11 @@ func _draw() -> void:
 			draw_rect(Rect2(r.position + Vector2(hw, 0), Vector2(hw, hh)), Color(cols[1]))
 			draw_rect(Rect2(r.position + Vector2(0, hh), Vector2(hw, hh)), Color(cols[2]))
 			draw_rect(Rect2(r.position + Vector2(hw, hh), Vector2(hw, hh)), Color(cols[3]))
+			if spec.has("x"):
+				# Cruz por cima dos quartos (República Dominicana).
+				var xt := r.size.y * 0.16
+				draw_rect(Rect2(r.position.x + (r.size.x - xt) * 0.5, r.position.y, xt, r.size.y), Color(spec["x"]))
+				draw_rect(Rect2(r.position.x, r.position.y + (r.size.y - xt) * 0.5, r.size.x, xt), Color(spec["x"]))
 		"pall":
 			# Simplificação da bandeira sul-africana: faixas + "Y" verde + triângulo escuro.
 			draw_rect(Rect2(r.position, Vector2(r.size.x, r.size.y * 0.5)), Color(cols[0]))
@@ -257,8 +262,21 @@ func _star(c: Vector2, r: float, points: int) -> PackedVector2Array:
 
 
 ## Cor de fundo aproximada num ponto (para "recortar" o crescente).
-func _color_at(_r: Rect2, _p: Vector2) -> Color:
+func _color_at(r: Rect2, p: Vector2) -> Color:
 	var cols: Array = _spec.get("c", ["#888888"])
-	if _spec.get("p", "") == "v" and cols.size() >= 2:
+	var pat := String(_spec.get("p", ""))
+	if pat == "v" and cols.size() >= 2:
 		return Color(cols[1])
+	if pat == "h" and cols.size() >= 2 and r.size.y > 0.0:
+		# Faixa horizontal em que o ponto cai (com os pesos das faixas).
+		var ws: Array = _spec.get("w", [])
+		var total := 0.0
+		for i in cols.size():
+			total += float(ws[i]) if i < ws.size() else 1.0
+		var at := clampf((p.y - r.position.y) / r.size.y, 0.0, 0.999) * total
+		var acc := 0.0
+		for i in cols.size():
+			acc += float(ws[i]) if i < ws.size() else 1.0
+			if at < acc:
+				return Color(cols[i])
 	return Color(cols[0])

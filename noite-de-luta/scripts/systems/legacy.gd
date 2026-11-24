@@ -12,7 +12,7 @@ extends RefCounted
 const HOF_MIN := 46.0
 const HOF_PER_YEAR := 3
 ## Aposentado sem história sai do save depois disso (semanas).
-const PRUNE_AFTER := 156
+const PRUNE_AFTER := 104
 
 const AWARDS := [
 	["lutador", "Lutador do ano"],

@@ -16,7 +16,7 @@ extends RefCounted
 ## Lesão do campeão com pelo menos estas semanas pela frente abre o interino.
 const OUT_WEEKS := 10
 ## Campeão sem lutar há tanto tempo, e sem luta marcada, abre o interino.
-const IDLE_WEEKS := 34
+const IDLE_WEEKS := 40
 ## Bolsa de uma disputa de interino sobre a tabela.
 const PURSE_K := 1.3
 

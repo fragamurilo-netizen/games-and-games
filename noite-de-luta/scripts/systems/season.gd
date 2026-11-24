@@ -28,7 +28,9 @@ const PAST_MAX := 15
 ## Presidente, primeiro ano: os alvos ficam entre o que a liga faz sozinha (matchmaker completando
 ## os cards, nenhuma disputa de cinturão marcada) e o que um presidente presente consegue.
 ## Medidos com tools/season_probe.gd; rever quando a economia do presidente for rebalanceada.
-const FIRST := {"title_bouts": 10.0, "hot": 12.0, "full": 16.0, "crowd": 450000.0, "ppv": 1600000.0, "profit": 95000000.0}
+## Intervenção e troca de sócios arranham o prestígio da liga, mas não abaixo deste piso.
+const REP_FLOOR := 30.0
+const FIRST := {"title_bouts": 12.0, "hot": 12.0, "full": 16.0, "crowd": 430000.0, "ppv": 1800000.0, "profit": 90000000.0}
 const KEEP := ["fights", "wins", "losses", "draws", "fin", "belts", "defs", "title_fights", "purse", "sponsor",
 	"nights", "canceled", "profit", "crowd", "sold", "hot", "ppv", "title_bouts", "new_champs", "full"]
 
@@ -156,7 +158,8 @@ static func reasons(w: GameWorld, limit: int = 8) -> Array:
 	return out
 
 
-## Academia: patrocínio do comércio local por semana (só com a cidade do lado).
+## Academia: patrocínio do comércio local por semana (só com a cidade do lado). Paga pelo nome
+## da casa e pelo movimento: reputação e alunos.
 static func sponsor(w: GameWorld) -> float:
 	var t := w.user_team()
 	if t == null or w.is_president() or w.support.is_empty():
@@ -164,7 +167,7 @@ static func sponsor(w: GameWorld) -> float:
 	var v := value_of(w)
 	if v < COLD or bool(w.support.get("cut", false)):
 		return 0.0
-	return snappedf((v - COLD) / 60.0 * (1200.0 + t.reputation * 60.0), 50.0)
+	return snappedf((v - COLD) / 60.0 * (t.reputation * 40.0 + float(Career.students(w)) * 6.0), 50.0)
 
 
 ## Presidente: verba de marketing liberada (ou segurada) pelos sócios, no hype das noites.
@@ -211,7 +214,7 @@ static func perk_text(w: GameWorld) -> String:
 	if v >= WARM:
 		return "Patrocínio local de %s por semana, e os lutadores da terra querem assinar." % Fmt.money(sp)
 	if sp > 0.0:
-		return "Patrocínio local de %s por semana. Cresce com o apoio e com a reputação." % Fmt.money(sp)
+		return "Patrocínio local de %s por semana. Cresce com o apoio, com a reputação e com os alunos." % Fmt.money(sp)
 	return "Sem patrocínio local. Ele começa com o apoio em %d." % int(COLD)
 
 
@@ -499,7 +502,7 @@ static func _strike(w: GameWorld) -> void:
 		var fee := snappedf(maxf(1000000.0, t.balance * 0.15), 10000.0) if t.balance > 0.0 else 0.0
 		if fee > 0.0:
 			t.add_money(w.week, "Intervenção dos sócios: dividendos extraordinários", -fee)
-		t.reputation = maxf(1.0, t.reputation - 6.0)
+		t.reputation = maxf(minf(t.reputation, REP_FLOOR), t.reputation - 6.0)
 		s["v"] = 42.0
 		s["event"] = {"k": "interv", "week": w.week, "fee": fee}
 		w.life["interv"] = float(w.life.get("interv", 0.0)) + 1.0
@@ -540,7 +543,7 @@ static func new_term(w: GameWorld) -> void:
 		t.add_money(w.week, "Aporte dos novos sócios", floor_cash - t.balance)
 	else:
 		t.add_money(w.week, "Saída dos antigos sócios", -snappedf(t.balance * 0.25, 10000.0))
-	t.reputation = maxf(1.0, t.reputation - 8.0)
+	t.reputation = maxf(minf(t.reputation, REP_FLOOR), t.reputation - 8.0)
 	w.life["terms"] = float(s["terms"])
 	w.add_news("apoio", "Novo mandato na %s: outro grupo de investidores comprou a parte dos antigos sócios e manteve você na presidência." % t.name, [], true)
 
@@ -760,7 +763,9 @@ static func _pick_manager(w: GameWorld, r: RandomNumberGenerator, frac: float, l
 		opts.append(_g("streak", "Emplacar três vitórias seguidas", "Um lutador da academia com três vitórias em sequência.", 3.0, "r", prize * 1.3, 1.0))
 	out.append(_choose(r, opts, avoid))
 	# 3. A casa: equipe, nome ou caixa.
-	var weekly := Career.RENT + Career.PER_FIGHTER * n + t.weekly_wages()
+	# Saldo fixo da casa (mensalidades e patrocínio menos despesas e salários) e o tamanho da conta.
+	var net := Career.weekly_net(w)
+	var bills := Career.upkeep(w) + t.weekly_wages()
 	var house: Array = []
 	if n < 3:
 		house.append(_g("roster", "Ter %d lutadores na equipe" % (n + 2 if n > 0 else 3), "Equipe maior luta mais vezes, e cada bolsa ajuda a pagar a academia.", float(n + 2 if n > 0 else 3), "r", prize * 0.8, 1.0))
@@ -768,9 +773,10 @@ static func _pick_manager(w: GameWorld, r: RandomNumberGenerator, frac: float, l
 		var rep_goal := floorf(rep + clampf(9.0 - rep / 11.0, 3.0, 8.0))
 		if rep_goal <= 96.0:
 			house.append(_g("rep", "Chegar a %d de reputação" % int(rep_goal), "A reputação sobe com vitórias em eventos grandes e abre portas no mercado.", rep_goal, "r", prize, 0.0))
-		var cash_goal := snappedf(t.balance - weekly * 52.0 * frac * 0.6, 5000.0)
+		# O alvo pede um pouco mais do que a casa faz sozinha: o resto vem das bolsas e dos prêmios.
+		var cash_goal := snappedf(t.balance + (net + bills * 0.1) * 52.0 * frac, 5000.0)
 		if cash_goal >= 20000.0:
-			house.append(_g("cash", "Virar o ano com %s em caixa" % Fmt.money(cash_goal), "Vale o caixa quando o ano terminar: a academia precisa se pagar.", cash_goal, "h", prize, 1.0, minf(0.0, t.balance - weekly * 52.0 * frac)))
+			house.append(_g("cash", "Virar o ano com %s em caixa" % Fmt.money(cash_goal), "Vale o caixa quando o ano terminar: a academia precisa se pagar.", cash_goal, "h", prize, 1.0, minf(0.0, t.balance + minf(0.0, net) * 52.0 * frac)))
 		var purse_goal := snappedf(maxf(8000.0, float((last.get("c", {}) as Dictionary).get("purse", 0.0)) * 1.15) * frac, 1000.0)
 		house.append(_g("purse", "Faturar %s em bolsas" % Fmt.money(purse_goal), "A fatia da academia nas bolsas do ano. Evento maior e luta de cinturão pagam muito mais.", purse_goal, "c", prize, 1.0))
 		if top == 0 and best <= 45:
@@ -865,11 +871,22 @@ static func year_end(w: GameWorld, year: int) -> void:
 	if met == 3:
 		nudge(w, 5.0, "Ano de ouro: as três metas cumpridas")
 		w.life["gold"] = float(w.life.get("gold", 0.0)) + 1.0
+	# Presidente: os sócios levam a parte deles do lucro do ano, ou cobram o prejuízo.
+	var div := 0.0
+	if pres:
+		var result := t.balance - float(w.goals.get("cash0", t.balance))
+		if result > 0.0:
+			div = snappedf(result * Org.DIVIDEND, 10000.0)
+			if div > 0.0:
+				t.add_money(w.week, "Dividendos dos sócios (%d%% do lucro do ano)" % int(Org.DIVIDEND * 100.0), -div)
+				nudge(w, clampf(div / 2500000.0, 0.5, 6.0), "Dividendos do ano: %s" % Fmt.money(div))
+		elif result < 0.0:
+			nudge(w, -clampf(-result / 2500000.0, 1.0, 6.0), "Ano fechado no prejuízo")
 	# Com a cidade (ou os sócios) do lado, o ano fecha com um prêmio.
 	var v := value_of(w)
 	if v >= WARM:
 		if pres:
-			var grant := snappedf(Org.OVERHEAD * 4.0, 10000.0)
+			var grant := snappedf(Org.overhead(w) * 2.0, 10000.0)
 			t.add_money(w.week, "Bônus dos sócios pelo ano", grant)
 			t.reputation = minf(100.0, t.reputation + 1.0)
 			bonus = {"money": grant, "text": "Os sócios aprovaram um bônus pelo ano e reforçaram a verba da liga."}
@@ -885,7 +902,7 @@ static func year_end(w: GameWorld, year: int) -> void:
 	var past: Array = w.goals.get("past", [])
 	past.append({"year": year, "items": res, "met": met, "c": keep, "v0": float(w.goals.get("v0", 50.0)), "v1": v,
 		"cash0": float(w.goals.get("cash0", t.balance)), "cash1": t.balance, "rep0": float(w.goals.get("rep0", t.reputation)), "rep1": t.reputation,
-		"bonus": bonus, "term": int(w.support.get("terms", 1))})
+		"bonus": bonus, "div": div, "term": int(w.support.get("terms", 1))})
 	if past.size() > PAST_MAX:
 		past = past.slice(past.size() - PAST_MAX)
 	w.add_news("meta", "Temporada de %d: %s. %s" % [year, verdict(met), "%d de 3 metas cumpridas." % met], [], true)

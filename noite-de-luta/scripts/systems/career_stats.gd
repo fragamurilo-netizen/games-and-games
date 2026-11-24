@@ -429,7 +429,7 @@ static func check_marks(w: GameWorld, f: Fighter, b: Bout = null) -> void:
 			continue
 		f.marks.append([key, w.week])
 		var info: Array = MARKS.get(key, [key, 0.0])
-		f.popularity = minf(100.0, f.popularity + float(info[1]))
+		Fame.add(w, f, float(info[1]))
 		if key == "estreia":
 			continue
 		var mine := w.is_user_fighter(f)

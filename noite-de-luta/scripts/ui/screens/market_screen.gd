@@ -45,11 +45,16 @@ func refresh() -> void:
 		c.add_child(UIKit.label("As estrelas são o potencial como o seu olheiro enxerga: as apagadas são a dúvida.", "Small", true))
 	var hint := {"amador": "Baratos e dispostos. Alguns viram campeões; quase todos precisam de anos.", "profissional": "Já lutam e rendem bolsas, mas olham a reputação da academia.", "veterano": "Experiência e cartel, pouco tempo de carreira pela frente."}
 	c.add_child(UIKit.label(String(hint[_stage]), "Small", true))
-	for i in mini(lst.size(), 80):
+	# A lista é comprida: as primeiras linhas saem na hora e o resto chega nos quadros seguintes
+	# (inteira de uma vez só quando a tela volta já rolada lá para baixo).
+	var rows := UIKit.vbox(c.get_theme_constant(&"separation"))
+	c.add_child(rows)
+	var deep := int(get_meta(&"scroll_y", 0)) > 400
+	UIKit.fill_rows(rows, mini(lst.size(), 80), func(i: int) -> Control:
 		var f: Fighter = lst[i]
 		var p := Signing.chance(w, f, 0.2, 5, 0.0)
 		var line := "%s · %d anos · %s · aceitaria: %s" % [Matchmaker.division_short(f.division), w.age_of(f), FightKit.record_detail(f).split(" · ")[0], Signing.chance_label(p).to_lower()]
-		c.add_child(FightKit.fighter_row(w, f, func(): UIManager.push("fighter", {"id": f.id}), line, UIColors.GREEN if p >= 0.5 else Color(0, 0, 0, 0), "", FightKit.potential_stars(w, f)))
+		return FightKit.fighter_row(w, f, func(): UIManager.push("fighter", {"id": f.id}), line, UIColors.GREEN if p >= 0.5 else Color(0, 0, 0, 0), "", FightKit.potential_stars(w, f)), 80 if deep else 12)
 	TutorialKit.tip(self, "market")
 
 

@@ -34,9 +34,13 @@ func refresh() -> void:
 	if GameManager.has_save():
 		var meta := GameManager.save_summary()
 		var cont := UIKit.button("Continuar", "PrimaryButton", func():
+			# Carreira longa leva um instante para abrir em celular fraco: o aviso aparece antes.
+			await UIManager.busy("Abrindo a carreira…")
 			if GameManager.load_save():
 				UIManager.goto("hub")
+				UIManager.busy_done()
 			else:
+				UIManager.busy_done()
 				UIManager.toast("Não foi possível abrir o save.", UIColors.RED))
 		box.add_child(cont)
 		if not meta.is_empty():

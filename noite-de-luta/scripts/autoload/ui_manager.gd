@@ -310,6 +310,7 @@ func handle_back() -> void:
 	if cur == null:
 		return
 	if cur.screen_name == "menu":
+		GameManager.flush()
 		get_tree().quit()
 	elif area != "hub" and GameManager.has_career() and cur.screen_name == area:
 		switch_area("hub")
@@ -638,6 +639,51 @@ func banner(title: String, lines: Array = []) -> void:
 	tw.tween_interval(0.85)
 	tw.tween_property(holder, "modulate:a", 0.0, 0.25)
 	tw.tween_callback(holder.queue_free)
+
+
+## Aviso no meio da tela enquanto o jogo faz uma conta pesada (a virada da semana), para a
+## tela não parecer travada em celular fraco. Segura o toque. Use com `await`: a função volta
+## depois de o aviso ter sido desenhado, e quem chamou faz a conta e chama `busy_done`.
+var _busy: Control
+
+
+func busy(text: String) -> void:
+	busy_done()
+	if main == null or DisplayServer.get_name() == "headless":
+		return
+	# Fundo escurecido de leve (segura o toque) e uma faixa no meio com a cor de destaque.
+	var layer := ColorRect.new()
+	layer.color = Color(0, 0, 0, 0.32)
+	layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	layer.mouse_filter = Control.MOUSE_FILTER_STOP
+	var holder := CenterContainer.new()
+	holder.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var p := PanelContainer.new()
+	p.theme_type_variation = "Toast"
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var row := UIKit.hbox(14)
+	var bar := ColorRect.new()
+	bar.color = UIColors.ACCENT
+	bar.custom_minimum_size = Vector2(5, 0)
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(bar)
+	var l := UIKit.label(text, "Section")
+	l.custom_minimum_size.x = 280
+	row.add_child(l)
+	p.add_child(row)
+	holder.add_child(p)
+	layer.add_child(holder)
+	main.modal_host.add_child(layer)
+	_busy = layer
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+
+func busy_done() -> void:
+	if is_instance_valid(_busy):
+		_busy.queue_free()
+	_busy = null
 
 
 ## Aviso de comemoração (meta cumprida, conquista): ícone, título e uma linha, com filete

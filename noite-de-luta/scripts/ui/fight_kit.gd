@@ -78,8 +78,9 @@ static func status_text(w: GameWorld, f: Fighter) -> Array:
 	if b != null:
 		var o := w.fighter(b.other(f.id))
 		return ["Luta %s contra %s" % [w.weeks_from_now(b.week), o.short_name()], UIColors.TEXT]
-	if w.week - f.last_fight_week < Matchmaker.rest_weeks(f):
-		return ["Descansando · condição %d%%" % int(f.condition), UIColors.MUTED]
+	var rest := Matchmaker.rest_weeks(f) - (w.week - f.last_fight_week)
+	if rest > 0:
+		return ["Descansando · livre em %d sem." % rest, UIColors.MUTED]
 	return ["Disponível · condição %d%%" % int(f.condition), UIColors.GREEN]
 
 

@@ -11,7 +11,12 @@ extends RefCounted
 
 const START_FUNDS := [6000000.0, 12000000.0, 25000000.0]
 ## Folha da organização (escritório, staff, marketing) por semana.
-const OVERHEAD := 250000.0
+const OVERHEAD := 650000.0
+## O que cada ponto de prestígio acrescenta à folha por semana: liga maior tem mais gente, mais
+## escritórios, mais marketing, programa antidoping e seguro dos lutadores.
+const OVERHEAD_REP := 15000.0
+## Fatia do lucro do ano que vai para os sócios na virada (ver Season.year_end).
+const DIVIDEND := 0.4
 ## Bônus da noite: luta da noite (para os dois) e duas performances.
 const BONUS := 50000.0
 ## Multiplicadores da bolsa que o presidente pode oferecer sobre a tabela.
@@ -351,9 +356,46 @@ static func ensure_main(w: GameWorld, ev: FightEvent) -> void:
 static func delegate_fill(w: GameWorld) -> void:
 	if not w.delegate_cards:
 		return
+	_fill_vacant_belts(w)
 	for ev: FightEvent in upcoming_events(w):
 		if ev.week - w.week <= DELEGATE_WEEKS and ev.week > w.week:
 			auto_fill(w, ev)
+
+
+## Cinturão vago há mais de `VACANT_WEEKS` semanas sem disputa marcada: com o card delegado, o
+## matchmaker fecha a disputa entre os dois mais bem colocados que estiverem livres. Quem quer
+## escolher os nomes marca antes.
+const VACANT_WEEKS := 10
+
+static func _fill_vacant_belts(w: GameWorld) -> void:
+	var vac: Dictionary = w.support.get("vac", {})
+	for d: Dictionary in DataDB.divisions():
+		var div := String(d["id"])
+		if int(w.champions.get(div, -1)) >= 0 or title_booked(w, div) != null:
+			continue
+		if not vac.has(div) or w.week - int(vac[div]) < VACANT_WEEKS:
+			continue
+		for ev: FightEvent in upcoming_events(w):
+			var ahead := ev.week - w.week
+			if ahead < 4 or ahead > 10 or event_bouts(w, ev).size() >= ev.slots:
+				continue
+			if event_bouts(w, ev).filter(func(b: Bout) -> bool: return b.title).size() >= (2 if ev.ppv else 1):
+				continue
+			var pool: Array = []
+			for fid: int in (w.rankings.get(div, []) as Array).slice(0, 10):
+				var f := w.fighter(fid)
+				if f != null and f.bout_id < 0 and f.injury.is_empty() and f.suspension <= ahead and eligible(w, f) and Matchmaker.ready_to_book(w, f, ahead):
+					pool.append(f)
+			var done := false
+			for i in pool.size():
+				for j in range(i + 1, pool.size()):
+					if done or book_reason(w, ev, pool[i], pool[j]) != "" or title_reason(w, pool[i], pool[j]) != "":
+						continue
+					book(w, ev, pool[i], pool[j], true, true, 1.0)
+					w.add_news("cinturao", "Cinturão vago dos %s: o matchmaker fechou %s × %s na %s." % [Matchmaker.division_name(div, true), (pool[i] as Fighter).display_name(), (pool[j] as Fighter).display_name(), ev.name], [(pool[i] as Fighter).id, (pool[j] as Fighter).id], true)
+					done = true
+			if done:
+				break
 
 
 # --- Noite de luta ------------------------------------------------------------------------
@@ -470,14 +512,14 @@ static func close_event(w: GameWorld, ev: FightEvent, bonuses: Dictionary) -> Di
 		paid_bonus += BONUS * 2.0
 		for fid: int in [fb.a, fb.b]:
 			var f := w.fighter(fid)
-			f.popularity = minf(100.0, f.popularity + 3.0)
+			Fame.add(w, f, 3.0)
 		names.append("luta da noite para %s e %s" % [w.fighter(fb.a).short_name(), w.fighter(fb.b).short_name()])
 	for fid: int in potn:
 		var f := w.fighter(int(fid))
 		if f == null:
 			continue
 		paid_bonus += BONUS
-		f.popularity = minf(100.0, f.popularity + 3.0)
+		Fame.add(w, f, 3.0)
 		names.append("performance da noite para %s" % f.short_name())
 	var rep := t.reputation if t != null else 50.0
 	if event_bouts(w, ev).filter(func(b: Bout) -> bool: return b.status == "feita").is_empty():
@@ -506,13 +548,11 @@ static func close_event(w: GameWorld, ev: FightEvent, bonuses: Dictionary) -> Di
 		t.add_money(w.week, "%s: produção e arena" % ev.name, -float(pr["production"]))
 		if paid_bonus > 0.0:
 			t.add_money(w.week, "%s: bônus da noite" % ev.name, -paid_bonus)
-		# Reputação: noite cheia de estrelas e de finalizações faz a organização crescer.
+		# Reputação: noite cheia de estrelas e de finalizações faz a organização crescer. Casa
+		# cheia dá prestígio; arena vazia na transmissão tira.
 		var n := event_bouts(w, ev).size()
-		var gain := (float(pr["draw"]) - 50.0) / 60.0 + finishes * 0.06 - maxf(0.0, ev.slots - n) * 0.25
-		gain *= 1.1 - rep / 110.0
-		# Casa cheia dá prestígio; arena vazia na transmissão tira.
-		gain += Venue.fill_rep(ev, int(pr["crowd"]))
-		t.reputation = clampf(rep + gain, 1.0, 100.0)
+		var gain := (float(pr["draw"]) - 50.0) / 60.0 + finishes * 0.06 - maxf(0.0, ev.slots - n) * 0.25 + Venue.fill_rep(ev, int(pr["crowd"]))
+		t.reputation = clampf(rep + prestige_gain(rep, gain), 1.0, 100.0)
 	ev.closed = true
 	var keep := ev.report
 	ev.report = {"crowd": pr["crowd"], "capacity": pr["capacity"], "gate": pr["gate"], "ppv_buys": pr["ppv_buys"], "ppv": pr["ppv"],
@@ -541,15 +581,35 @@ static func _keep_week_notes(ev: FightEvent, old: Dictionary) -> void:
 			ev.report[k] = old[k]
 
 
+## Quanto do resultado de uma noite vira prestígio: quanto maior a liga, mais difícil crescer
+## (de 55 para 65 é um ano bom; de 85 para 95 são anos de noites grandes). O tombo de uma noite
+## ruim pesa mais para quem tem mais nome a perder.
+static func prestige_gain(rep: float, raw: float) -> float:
+	if raw <= 0.0:
+		return raw * clampf(rep / 100.0, 0.25, 0.9) * 0.6
+	return raw * clampf((106.0 - rep) / 100.0, 0.05, 0.6) * 0.45
+
+
+## Folha e estrutura da organização por semana (cresce com o prestígio).
+static func overhead(w: GameWorld) -> float:
+	var t := w.user_team()
+	var rep := t.reputation if t != null else 50.0
+	return snappedf(OVERHEAD + rep * OVERHEAD_REP, 10000.0)
+
+
 ## Folha semanal da organização.
 static func weekly(w: GameWorld) -> void:
 	var t := w.user_team()
 	if t == null:
 		return
-	t.add_money(w.week, "Folha da organização", -OVERHEAD)
-	# Fama não se sustenta sozinha: acima de 60 a reputação cai devagar sem noites boas.
-	if t.reputation > 60.0:
-		t.reputation -= 0.04
+	t.add_money(w.week, "Folha e estrutura da organização", -overhead(w))
+	# Prestígio não se sustenta sozinho: acima de 50 ele escorre sem noites boas, e escorre
+	# bem mais rápido lá no alto (perto de 1 ponto por ano em 70, 4 em 90, 5 em 95).
+	if t.reputation > 50.0:
+		t.reputation -= pow(t.reputation - 50.0, 2.0) * 0.00005
+	elif t.reputation < 40.0:
+		# Liga com história não some: lá embaixo o prestígio se recupera devagar sozinho.
+		t.reputation += (40.0 - t.reputation) * 0.003
 
 
 ## Registra um campeão novo na história do cinturão.

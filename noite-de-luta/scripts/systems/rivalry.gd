@@ -308,7 +308,7 @@ static func _callouts(w: GameWorld) -> void:
 		if target == null or target.id == loud.id:
 			continue
 		var named := add(w, loud, target, 16.0 + w.rng.randf_range(0.0, 8.0), "provocação pública")
-		loud.popularity = minf(100.0, loud.popularity + 1.0)
+		Fame.add(w, loud, 1.0)
 		var lines: Array = CALLOUTS_F if loud.is_female() else CALLOUTS
 		var mine := w.is_user_fighter(loud) or w.is_user_fighter(target)
 		w.add_news("rivalidade", String(lines[w.rng.randi_range(0, lines.size() - 1)]) % [loud.display_name(), target.display_name()], [loud.id, target.id], mine)

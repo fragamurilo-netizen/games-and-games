@@ -84,8 +84,8 @@ static func _presser_brawl(w: GameWorld, ev: FightEvent, b: Bout) -> void:
 	ev.hype += 8.0 if brawl else 4.0
 	if Rivalry.add(w, loud, other, 28.0 if brawl else 14.0, "briga na coletiva" if brawl else "provocação na coletiva"):
 		Rivalry._announce(w, loud, other, "briga na coletiva" if brawl else "provocação na coletiva")
-	loud.popularity = minf(100.0, loud.popularity + 3.0)
-	other.popularity = minf(100.0, other.popularity + 1.5)
+	Fame.add(w, loud, 3.0)
+	Fame.add(w, other, 1.5)
 	var txt := ""
 	if brawl:
 		txt = "Confusão na coletiva da %s: %s parte para cima de %s e os seguranças separam. A luta vira assunto e os ingressos voam." % [ev.name, loud.display_name(), other.display_name()]
@@ -266,7 +266,7 @@ static func offer_sub(w: GameWorld, i: Dictionary, sub: Fighter) -> Dictionary:
 	i["done"] = true
 	i["outcome"] = "sub"
 	i["sub"] = sub.id
-	sub.popularity = minf(100.0, sub.popularity + 2.0)
+	Fame.add(w, sub, 2.0)
 	w.add_news("organizacao", "%s aceita em cima da hora e substitui %s contra %s na %s." % [sub.display_name(), hurt.short_name(), keep.display_name(), ev.name], [sub.id, keep.id], true)
 	return {"ok": true, "text": "Fechado: %s × %s. %s ganha %s por aceitar em cima da hora." % [keep.short_name(), sub.short_name(), sub.short_name(), Fmt.money(bonus)]}
 
@@ -501,7 +501,7 @@ static func presser_pick(w: GameWorld, ev: FightEvent, o: Dictionary) -> String:
 			if t != null:
 				t.add_money(w.week, "%s: bônus extra para %s" % [ev.name, f.short_name()], -float(o["cost"]))
 				t.reputation = minf(100.0, t.reputation + 0.2)
-			f.popularity = minf(100.0, f.popularity + 2.0)
+			Fame.add(w, f, 2.0)
 			out = "Aplausos na sala: %s ganha mais %s e agradece a organização." % [f.short_name(), Fmt.money(float(o["cost"]))]
 		"juizes":
 			var b := w.bout(int(o["bout"]))
@@ -516,7 +516,7 @@ static func presser_pick(w: GameWorld, ev: FightEvent, o: Dictionary) -> String:
 			if t != null:
 				t.add_money(w.week, "%s: bônus de vitória para %s" % [ev.name, f2.short_name()], -float(o["cost"]))
 				t.reputation = minf(100.0, t.reputation + 0.25)
-			f2.popularity = minf(100.0, f2.popularity + 2.0)
+			Fame.add(w, f2, 2.0)
 			out = "%s recebe o bônus de vitória mesmo com a derrota. Os lutadores elogiam o gesto." % f2.short_name()
 		"anuncia":
 			var champ := w.fighter(int(o["fighter"]))
@@ -526,7 +526,7 @@ static func presser_pick(w: GameWorld, ev: FightEvent, o: Dictionary) -> String:
 			if bool(r["ok"]):
 				if t != null:
 					t.reputation = minf(100.0, t.reputation + 0.4)
-				opp.popularity = minf(100.0, opp.popularity + 3.0)
+				Fame.add(w, opp, 3.0)
 				out = "Anunciado na hora: %s × %s pelo cinturão na %s, com bolsa 25%% acima da tabela." % [champ.short_name(), opp.short_name(), nxt.name]
 			else:
 				if t != null:
@@ -539,7 +539,7 @@ static func presser_pick(w: GameWorld, ev: FightEvent, o: Dictionary) -> String:
 				Development.retire(w, f3)
 				out = "%s concorda: anuncia a aposentadoria no dia seguinte e é aplaudid%s." % [f3.short_name(), _o(f3)]
 			else:
-				f3.popularity = minf(100.0, f3.popularity + 3.0)
+				Fame.add(w, f3, 3.0)
 				if t != null:
 					t.reputation = maxf(1.0, t.reputation - 0.2)
 				out = "%s se ofende: \"Ninguém me aposenta.\" Promete provar que ainda tem lenha e a briga vira manchete." % f3.short_name()

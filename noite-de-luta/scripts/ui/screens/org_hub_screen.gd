@@ -8,6 +8,9 @@ const HATS := {"cinturao": "Cinturão", "resultado": "Resultado", "organizacao":
 	"marco": "Marco", "olheiro": "Olheiros", "mercado": "Mercado", "rivalidade": "Rivalidade", "tv": "Contrato de TV", "premio": "Prêmios",
 	"hall": "Hall da Fama", "categoria": "Categoria", "visual": "Visual", "meta": "Temporada", "apoio": "Sócios", "conquista": "Conquista"}
 
+## A virada da semana está em andamento (segura o segundo toque no botão).
+var _turning := false
+
 
 func setup(p: Dictionary) -> void:
 	super.setup(p)
@@ -170,10 +173,16 @@ func _champions_strip(w: GameWorld) -> Control:
 
 
 func _advance() -> void:
+	if _turning:
+		return
+	_turning = true
 	var w := world()
 	var cash := w.user_team().balance
 	var keys := DashKit.open_keys(w)
+	await UIManager.busy("Fechando a semana…")
 	GameManager.advance_week()
+	UIManager.busy_done()
+	_turning = false
 	DashKit.week_turn(world(), cash, keys)
 	intro_pending = true
 	refresh()

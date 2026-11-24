@@ -1,5 +1,122 @@
 # Noite de Luta — nota de passagem (24/11/2026)
 
+## Rodada 14 de 24/11/2026: equilíbrio e polimento (APK 0.9.0)
+
+Quinta etapa da lista do dono rumo à 1.0: economia nos dois papéis em 10 anos ou mais,
+desempenho em celular fraco, migração de saves e varredura de bugs. O resultado das lutas não
+mudou (`fight_soak --n=100` dá os mesmos totais, linha por linha).
+
+- **Achado principal da varredura: "Continuar" nunca abriu o save.** `GameManager.load_save`
+  lia a primeira linha (o resumo do menu) e depois chamava `get_as_text()`, que no Godot 4
+  devolve o arquivo inteiro sem olhar onde a leitura parou; o JSON vinha com duas raízes, a
+  leitura falhava e o menu dizia "Não foi possível abrir o save". Estava assim desde a 0.1.
+  Agora o resto do arquivo é lido como bytes. Nenhum passeio apertava "Continuar"; o teste novo
+  `tools/save_flow_test.gd` aperta.
+- **Academia: economia refeita** (`scripts/systems/career.gd`). Antes entravam US$ 70 a 290 mil
+  por ano contra US$ 260 a 300 mil de custo (caixa de 250 mil para −827 mil em 12 anos). Agora:
+  **mensalidades** (`FEE` 36 por aluno por semana) de `students(w) = min(procura, capacidade)`;
+  a procura vem da reputação e do apoio da cidade (`student_demand`: 60 + rep × 2,2 + (apoio −
+  50) × 0,8, de 45 a 400) e a capacidade do staff (`student_capacity`: 45 do dono mais 25 +
+  qualidade × 0,4 por profissional). Despesas (`upkeep`): **aluguel que acompanha a reputação**
+  (`rent` = 700 + 25 por ponto), 8 por aluno e 150 por lutador mais 20 por ponto de nível acima
+  de 50 (`fighter_cost`). `weekly_net` é o saldo fixo, mostrado no Início ("Fixo por semana")
+  e na Academia, com aviso de procura maior que a casa ou de staff com turma vazia.
+  **Dívida** (`_debt`): caixa negativo paga 0,4% de juros por semana; passando de
+  `debt_limit` (80 mil + 2,5 mil por ponto de reputação) o profissional mais caro sai a cada
+  4 semanas; sem staff, um **investidor local** assume a dívida (`_bailout`: caixa volta a 20
+  mil, reputação cai até 2 pontos com piso de 8, apoio −2). O patrocínio do comércio agora
+  cresce com reputação e alunos (`Season.sponsor`).
+- **Liga: economia refeita** (`scripts/systems/org.gd`, `season.gd`). Antes sobravam US$ 140
+  milhões por ano (1,69 bilhão em 12 anos, prestígio 100 no quarto ano). Agora: folha e
+  estrutura de `Org.overhead` (650 mil + 15 mil por ponto de prestígio, por semana); **os sócios
+  retiram 40% do lucro do ano** em dividendos (`Org.DIVIDEND`, pago em `Season.year_end`, com
+  linha na cerimônia) e ano no prejuízo custa confiança; prestígio sobe cada vez mais devagar
+  (`Org.prestige_gain`), decai acima de 50 e se recupera abaixo de 40; piso de 30 nas punições
+  dos sócios (`Season.REP_FLOOR`). **Campeão defende duas vezes por ano**: descanso de 24
+  semanas depois de luta de cinturão (`Matchmaker.REST_TITLE`; 7 nas outras) e 40 semanas para
+  ser destituído por inatividade (`Titles.IDLE_WEEKS`); com isso a noite de cinturão volta a
+  ser rara (antes 75% das noites tinham uma). Interesse por ingresso recalibrado em `Venue`.
+  Cinturão vago há 10 semanas sem disputa marcada é preenchido pelo matchmaker quando o
+  jogador delega o card (`Org._fill_vacant_belts`): antes ficava vago para sempre.
+- **Fama com teto** (`scripts/systems/fame.gd`, `class_name Fame`). Todo ganho de fama passa
+  por `Fame.add`: o teto depende do ranking (campeão 88 + 4 por defesa até 100, interino 88,
+  top 5 86, top 10 78, top 15 70, top 30 62, resto 52, fora do ranking 42) e quem está perto
+  ou acima do teto ganha cada vez menos; acima dele a fama escorre toda semana (`Fame.week`).
+  Em 12 anos a elite fica estável (43 a 57 lutadores com 75 ou mais, 14 a 25 com 90 ou mais;
+  antes passava de 100 e de 50).
+- **Metas e conquistas ao dinheiro novo**. `Season.FIRST` com alvos menores para o primeiro
+  ano do presidente; meta de caixa da academia usa `Career.weekly_net`. Duas conquistas eram
+  impossíveis (500 mil e 1 milhão de pay-per-view numa noite; a conta para perto de 370 mil):
+  agora 200, 300 e 350 mil. Também mexidos: ingressos esgotados (75 noites), noites quentes
+  (15 e 100), 10 lutadores com fama 95 e reserva de US$ 250 milhões.
+- **Desempenho** (medido aqui; celular fraco é perto de 6 a 8 vezes mais lento):
+  - **Salvar não trava mais o toque.** `GameManager.save_now` (47 chamadas nas telas) só marca
+    que há o que salvar; o arquivo é escrito por `flush` depois de 2,5 s sem toque, ao pausar
+    ou fechar o app, no botão voltar do menu e ao fechar a carreira. A virada da semana também
+    espera a pausa do jogador, mas a segunda semana seguida grava na hora (no máximo uma
+    semana fica sem ir para o arquivo). Antes cada toque que salvava custava 120 ms no começo
+    e perto de 1 s numa carreira de 12 anos.
+  - **Save de carreira longa**: em 12 anos caiu de 13,4 MB (academia) e 10,4 MB (liga) para
+    5,8 MB, e leva perto de 300 ms. Histórico de lutas, números da luta, atributos e progresso
+    viram listas curtas no arquivo (`Fighter._pack_hist`, `Bout._pack_stats`,
+    `Fighter._packed_attrs`; a leitura aceita o formato antigo); o histórico e o resultado já
+    convertidos ficam guardados (`_hist_pack`, `_res_pack`); números quebrados com poucas
+    casas; `Career._trim` agora tira das noites antigas as lutas que não são de cinturão nem
+    da equipe do jogador (antes a noite inteira ficava por causa de uma luta), e aposentado
+    sem título sai depois de 2 anos (`Legacy.PRUNE_AFTER` 104). Chaves do JSON sem ordenar.
+  - **Semana**: 244 ms no começo e 335 ms em média em 12 anos (antes 324 a 370). Luta sem
+    narração não monta mais as frases (gasta o mesmo sorteio, ver `HIT_PICKS` em
+    `fight_engine.gd`: quem mudar as frases de `_hit_text` mantém a tabela igual) e o treino
+    tirou contas repetidas do laço. Avisos "Fechando a semana…" e "Abrindo a carreira…"
+    (`UIManager.busy`) aparecem antes de a tela parar.
+  - **Telas** (mundo de 12 anos): Início 37 ms, Mercado de 123 para 57 ms (a lista comprida
+    chega em blocos, `UIKit.fill_rows`), Rankings 39, Cinturões 63, Resultados 45.
+- **Migração de saves**. 16 saves de oito versões (0.1.2, 0.1.6, 0.2.0, 0.2.3, 0.3.0, 0.4.0,
+  0.5.0 e 0.6.0, nos dois papéis, 60 semanas cada) abrem na 0.9.0 e jogam mais 30 semanas sem
+  erro; o save sai menor do que entrou. As telas foram percorridas com saves da 0.1.2, 0.3.0 e
+  0.6.0. Save aberto por outra versão do jogo ganha uma cópia em `user://carreira_anterior.json`
+  antes de ser regravado (o resumo do save agora leva a versão do app).
+- **Outros acertos**: bandeiras que faltavam em 19 países (Cazaquistão, Uzbequistão,
+  Quirguistão, Tajiquistão, Azerbaijão, Armênia, Belarus, Moldávia, Lituânia, Bulgária,
+  Tailândia, Filipinas, Cuba, República Dominicana, Porto Rico, Afeganistão, Índia, Taipé
+  Chinês e Vietnã; `FlagView` ganhou cruz no padrão "quarters" e crescente sobre faixas);
+  "cansada de cortar peso" para lutadora; dicas da Academia, de casar lutas e da Organização
+  com as regras novas; card de noite antiga avisa que só ficaram as lutas de cinturão e as da
+  equipe.
+- **Ferramentas novas**: `tools/economy_probe.gd` (de onde o dinheiro vem e para onde vai, ano
+  a ano, por categoria), `tools/perf_probe.gd` (tempo da semana, parte por parte, e do save),
+  `tools/screens_perf.gd` (abre um save e mede a montagem de cada tela) e
+  `tools/save_flow_test.gd` (o caminho real: botão de avançar, save adiado, pausa do app e
+  "Continuar"). O robô do `season_probe` agora disputa cinturão vago, demite staff com turma
+  vazia e recusa luta acima do nível.
+- **Calibragem** (12 anos). Academia ativa em quatro mundos: primeiro ano de +22 a +65 mil;
+  três chegam a US$ 1,2 a 3,2 milhões com reputação de 65 a 100; o mundo de elenco fraco
+  (semente 99) perde de 30 a 60 mil por ano, corta o staff e estaciona perto de zero, sem
+  quebrar. Liga ativa (semente 2027): lucro de US$ 13 a 35 milhões por ano depois dos
+  dividendos, prestígio 63, 73, 77, 78, 82, 85, 87, 88, 89, 93, caixa de 291 milhões no fim,
+  22 a 27 lutas de cinturão por ano. Liga parada (semente 7): caixa oscila entre −19 e +18
+  milhões por ano e o prestígio escorre de 48 para 27. Temporada em 6 anos (sementes 2027 e
+  7): academia com 3, 0, 3, 1, 1, 3 e 3, 2, 3, 3, 3, 3 metas, 10 conquistas no primeiro ano e
+  22 a 23 em seis; presidente com 3, 3, 2, 0, 3, 2 e 3, 1, 2, 2, 3, 0 metas, 14 conquistas no
+  primeiro ano (eram 18) e 32 em seis, sem ultimato.
+- **Verificado**: `check_scripts` (155 scripts, 0 com erro); `fight_soak --n=100` igual linha por
+  linha ao da 0.6.0; `world_sim --weeks=156` nos dois papéis sem erro de script (saves de 3,4 e
+  3,6 MB reabrem); `economy_probe` de 12 anos em quatro sementes da academia e na liga ativa e
+  parada; `season_probe` de 6 anos nos dois papéis; 16 saves de oito versões antigas (0.1.2 a
+  0.6.0, dois papéis) abrem e jogam mais 30 semanas sem erro; `save_flow_test` com todas as
+  conferências verdadeiras (botão de avançar, save adiado, pausa do app, "Continuar");
+  `screens_perf` num mundo de 12 anos; os 20 passeios de telas (`design_shots` nos dois papéis,
+  atletas, eventos, `look_shots`, `ui_shots` e temporada, em pé, deitado 1688×780 e tablet
+  1280×800) sem erro de script, e o passeio da luta de novo depois do último ajuste. O único
+  `ERROR` nos registros é o do driver de som do servidor (ALSA), que não existe aqui.
+  **Não testado em celular de verdade.**
+- **Ficou para depois**: o save ainda é remontado inteiro a cada gravação (perto de 300 ms aqui
+  numa carreira de 12 anos, alguns segundos em celular fraco, agora só quando o jogador para);
+  a primeira abertura do Início e da ficha de um lutador na sessão custa uns 250 ms aqui; a
+  dica "No corner" (`fight`) continua sem tela; a academia rica tem pouco onde gastar no fim.
+- **Próximo**: 1.0 (ícone, abertura, créditos, configurações finais e build pronto para loja,
+  AAB, se o dono quiser publicar).
+
 ## Rodada 13 de 24/11/2026: viciar (APK 0.6.0)
 
 Quarta etapa da lista do dono rumo à 1.0: motivo para jogar a próxima semana e o próximo ano.
@@ -700,7 +817,7 @@ Cinturões com linhagem.
 ## APK de teste
 
 - APKs novos (0.1.2+) ficam nos arquivos do projeto (`noite-de-luta/`), assinados com a chave de
-  teste guardada em `chave-teste/` lá; o atual é o 0.6.0.
+  teste guardada em `chave-teste/` lá; o atual é o 0.9.0.
 - `releases/NoiteDeLuta-0.1.1.apk` (release, arm64, Android 7+; instala por cima da 0.1.0). Assinado com uma chave de teste
   local: um APK novo assinado com outra chave pede desinstalar o antigo antes.
 - Para gerar de novo: modelos de exportação do Godot 4.7.2 (só `android_*.apk` e `version.txt` em
@@ -744,4 +861,8 @@ godot --headless --path . --script res://tools/events_probe.gd -- --weeks=104 [-
 xvfb-run -a -s "-screen 0 1900x1900x24" godot --path . --resolution 780x1688 --script res://tools/design_shots.gd -- --runner=ui_shots_runner --out=/tmp/ui [--part=presidente|luta] [--prefix=l_] [--tablet]   # deitado: --resolution 1688x780; tablet: 1280x800 com --tablet
 godot --headless --path . --script res://tools/season_probe.gd -- --years=5 [--role=presidente] [--seed=2027] [--lazy]
 xvfb-run -a -s "-screen 0 1900x1900x24" godot --path . --resolution 780x1688 --script res://tools/design_shots.gd -- --runner=season_shots_runner --out=/tmp/temporada [--part=presidente] [--tablet]
+godot --headless --path . --script res://tools/economy_probe.gd -- --years=12 [--role=presidente] [--seed=2027] [--lazy] [--funds=0|1|2] [--csv=ARQ]
+godot --headless --path . --script res://tools/perf_probe.gd -- --weeks=104 [--role=presidente] [--seed=2027] [--save=ARQ]
+xvfb-run -a -s "-screen 0 1900x1900x24" godot --path . --resolution 780x1688 --script res://tools/screens_perf.gd -- --in=SAVE.json
+xvfb-run -a -s "-screen 0 1900x1900x24" godot --path . --resolution 780x1688 --script res://tools/save_flow_test.gd -- --out=/tmp/fluxo
 ```

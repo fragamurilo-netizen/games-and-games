@@ -69,6 +69,8 @@ func setup(p: Dictionary) -> void:
 	screen_title = "Luta"
 	intro_enabled = false
 	_speed = AppSettings.fight_speed
+	# O que estava para salvar vai para o arquivo agora, para a gravação não cair no meio da luta.
+	GameManager.flush()
 
 
 func _ready() -> void:

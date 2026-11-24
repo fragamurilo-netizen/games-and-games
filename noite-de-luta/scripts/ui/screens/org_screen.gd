@@ -37,7 +37,7 @@ func refresh() -> void:
 	var fin := UIKit.card("Card", UITokens.S1)
 	fin.add_child(UIKit.label("Finanças", "Section"))
 	fin.add_child(UIKit.kv("Caixa", Fmt.money(t.balance), UIColors.GREEN if t.balance >= 0.0 else UIColors.RED))
-	fin.add_child(UIKit.kv("Folha da organização", Fmt.money(-Org.OVERHEAD) + "/sem.", UIColors.RED))
+	fin.add_child(UIKit.kv("Folha e estrutura", Fmt.money(-Org.overhead(w)) + "/sem.", UIColors.RED))
 	fin.add_child(UIKit.kv("Bônus da noite", "4 × " + Fmt.money(Org.BONUS)))
 	var past := Org.past_events(w)
 	var total := 0.0

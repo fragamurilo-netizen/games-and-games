@@ -236,6 +236,98 @@ func style_label() -> String:
 
 ## Ordem dos números da carreira no save (lista em vez de dicionário: o save agradece).
 const STAT_KEYS := ["n", "t", "sl", "sa", "ab", "oa", "td", "ta", "otd", "ota", "sub", "kd", "kdt", "ctrl"]
+## Campos de uma luta do histórico, na ordem em que vão para o save (uma lista em vez de um
+## dicionário: o histórico é o que mais pesa no arquivo). O que não está aqui vai num dicionário
+## no fim da lista.
+const HIST_KEYS := ["week", "opp", "opp_name", "res", "method", "detail", "round", "time", "event", "tier", "title", "bout", "st"]
+
+
+static func _pack_hist(h: Dictionary) -> Array:
+	var a: Array = []
+	for k: String in HIST_KEYS:
+		var v: Variant = h.get(k)
+		# Depois de um save lido tudo volta como número quebrado: aqui vira inteiro de novo.
+		if v is float and k != "st":
+			v = int(round(float(v)))
+		elif k == "st" and v is Array:
+			v = (v as Array).map(func(x: Variant) -> int: return int(round(float(x))))
+		a.append(v)
+	var extra := {}
+	for k: String in h:
+		if not HIST_KEYS.has(k):
+			extra[k] = h[k]
+	if not extra.is_empty():
+		a.append(extra)
+	return a
+
+
+## Aceita o formato novo (lista) e o dos saves antigos (dicionário).
+static func _unpack_hist(v: Variant) -> Dictionary:
+	if v is Dictionary:
+		return v
+	var a: Array = v
+	var h := {}
+	for i in mini(HIST_KEYS.size(), a.size()):
+		if a[i] != null:
+			h[HIST_KEYS[i]] = a[i]
+	if a.size() > HIST_KEYS.size() and a[HIST_KEYS.size()] is Dictionary:
+		for k: String in a[HIST_KEYS.size()]:
+			h[k] = a[HIST_KEYS.size()][k]
+	return h
+
+
+## O histórico já convertido para o save. Ele só cresce, então cada luta é convertida uma vez
+## (a última é refeita sempre: os números da luta chegam logo depois do resultado). Quem cortar
+## ou trocar o histórico precisa esvaziar esta lista.
+var _hist_pack: Array = []
+
+
+func _packed_history() -> Array:
+	if _hist_pack.size() >= history.size():
+		_hist_pack.resize(maxi(0, history.size() - 1))
+	while _hist_pack.size() < history.size():
+		_hist_pack.append(_pack_hist(history[_hist_pack.size()]))
+	return _hist_pack.duplicate()
+
+
+## Atributos e progresso do treino viram listas na ordem de `ATTRS` (que só pode ganhar itens no
+## fim, nunca mudar de ordem). Atributo inteiro sai sem casa decimal.
+func _packed_attrs() -> Array:
+	var out: Array = []
+	for k: String in ATTRS:
+		var x := float(attrs.get(k, 0.0))
+		out.append(int(roundf(x)) if is_equal_approx(x, roundf(x)) else snappedf(x, 0.001))
+	return out
+
+
+func _packed_progress() -> Array:
+	var out: Array = []
+	for k: String in ATTRS:
+		var x := float(progress.get(k, 0.0))
+		out.append(0 if x == 0.0 else snappedf(x, 0.0001))
+	return out
+
+
+## Aceita a lista do save novo e o dicionário dos saves antigos.
+static func _attr_map(v: Variant, keep_zero: bool) -> Dictionary:
+	if v is Dictionary:
+		return v
+	var out := {}
+	if v is Array:
+		var a: Array = v
+		for i in mini(ATTRS.size(), a.size()):
+			if keep_zero or float(a[i]) != 0.0:
+				out[ATTRS[i]] = float(a[i])
+	return out
+
+
+## Números quebrados com poucas casas no save (o arquivo fica bem menor).
+static func _round_map(m: Dictionary, step: float) -> Dictionary:
+	var out := {}
+	for k: Variant in m:
+		var v: Variant = m[k]
+		out[k] = snappedf(v, step) if v is float else v
+	return out
 
 
 func to_dict() -> Dictionary:
@@ -253,12 +345,12 @@ func to_dict() -> Dictionary:
 			st.append(int(round(float(stats.get(k, 0)))))
 	var d := {
 		"id": id, "first": first, "last": last, "nick": nickname, "ff": family_first, "sex": sex, "nation": nation, "city": city,
-		"eth": eth, "face": face_seed, "look": look, "by": birth_year, "bm": birth_month, "h": height_cm,
-		"r": reach_cm, "sp": southpaw, "nat_kg": natural_kg, "div": division, "base": base, "base2": base2, "attrs": attrs,
-		"pot": potential, "peak": peak_age, "team": team_id, "contract": contract, "rec": record, "am": amateur,
-		"hist": history, "rating": rating, "streak": streak, "last_fw": last_fight_week, "cond": condition,
-		"inj": injury, "susp": suspension, "pop": popularity, "wear": wear, "ret": retired, "rw": retired_week, "titles": titles_won,
-		"defs": title_defenses, "train": training, "bout": bout_id, "ch_lock": challenge_lock, "prog": progress, "traits": traits,
+		"eth": eth, "face": face_seed, "look": _round_map(look, 0.001), "by": birth_year, "bm": birth_month, "h": height_cm,
+		"r": reach_cm, "sp": southpaw, "nat_kg": snappedf(natural_kg, 0.01), "div": division, "base": base, "base2": base2, "attrs": _packed_attrs(),
+		"pot": snappedf(potential, 0.01), "peak": peak_age, "team": team_id, "contract": contract, "rec": record, "am": amateur,
+		"hist": _packed_history(), "rating": snappedf(rating, 0.01), "streak": streak, "last_fw": last_fight_week, "cond": snappedf(condition, 0.01),
+		"inj": injury, "susp": suspension, "pop": snappedf(popularity, 0.001), "wear": snappedf(wear, 0.001), "ret": retired, "rw": retired_week, "titles": titles_won,
+		"defs": title_defenses, "train": training, "bout": bout_id, "ch_lock": challenge_lock, "prog": _packed_progress(), "traits": traits,
 		"st": st, "cv": curve, "cv0": curve_w0, "marks": new_marks, "mk0": ",".join(old_marks), "snaps": snaps, "lk0": look0,
 		"mor": snappedf(morale, 0.1),
 	}
@@ -301,14 +393,15 @@ static func from_dict(d: Dictionary) -> Fighter:
 	f.division = String(d.get("div", "M70"))
 	f.base = String(d.get("base", "mma"))
 	f.base2 = String(d.get("base2", ""))
-	f.attrs = d.get("attrs", {})
+	f.attrs = _attr_map(d.get("attrs", {}), true)
 	f.potential = float(d.get("pot", 60.0))
 	f.peak_age = int(d.get("peak", 29))
 	f.team_id = int(d.get("team", -1))
 	f.contract = d.get("contract", {})
 	f.record = d.get("rec", f.record)
 	f.amateur = d.get("am", f.amateur)
-	f.history = d.get("hist", [])
+	f.history = (d.get("hist", []) as Array).map(_unpack_hist)
+	f._packed_history()
 	f.rating = float(d.get("rating", 1200.0))
 	f.streak = int(d.get("streak", 0))
 	f.last_fight_week = int(d.get("last_fw", -999))
@@ -324,7 +417,7 @@ static func from_dict(d: Dictionary) -> Fighter:
 	f.training = d.get("train", {"focus": "equilibrado", "intensity": 1})
 	f.bout_id = int(d.get("bout", -1))
 	f.challenge_lock = int(d.get("ch_lock", -999))
-	f.progress = d.get("prog", {})
+	f.progress = _attr_map(d.get("prog", {}), false)
 	f.traits = d.get("traits", [])
 	var st: Variant = d.get("st", {})
 	if st is Array:

@@ -86,13 +86,28 @@ func _manager_turn(w: GameWorld, lazy: bool) -> void:
 			if w.user_fighters().size() >= cap:
 				break
 			Signing.offer(w, f, 0.2, 5, 0.0)
+	# Caixa curto: corta o profissional mais caro (o que um jogador atento faria).
+	var idle := Career.student_capacity(w) - Career.student_demand(w) >= 40 and Career.weekly_net(w) < 0.0
+	if not lazy and w.week % 8 == 0 and (t.balance < 25000.0 or idle) and not t.staff.is_empty():
+		var out: Dictionary = t.staff[0]
+		for s: Dictionary in t.staff:
+			if float(s["wage"]) > float(out["wage"]):
+				out = s
+		StaffMarket.fire(w, int(out["id"]))
 	if not lazy and w.week % 13 == 1 and t.staff.size() < 3 and t.balance > 60000.0:
 		for cand: Dictionary in w.staff_market:
 			if t.staff_of(String(cand["role"])).is_empty() and float(cand["wage"]) < 900.0:
 				StaffMarket.hire(w, cand)
 				break
 	for o: Dictionary in w.offers.duplicate():
-		if w.offers.has(o):
+		if not w.offers.has(o):
+			continue
+		# O ativo recusa luta contra alguém bem acima (a não ser que valha cinturão ou o lutador
+		# esteja parado há meses); o parado aceita tudo.
+		var me := w.fighter(int(o["fighter"]))
+		var opp := w.fighter(int(o["opp"]))
+		var belt := bool(o.get("title", false)) or bool(o.get("interim", false))
+		if lazy or belt or me == null or opp == null or opp.level() <= me.level() + 3 or w.week - me.last_fight_week >= 16:
 			Matchmaker.accept_offer(w, o)
 	for f: Fighter in w.user_fighters():
 		if f.contract.has("fights") and int(f.contract["fights"]) <= 0:
@@ -112,7 +127,21 @@ func _president_turn(w: GameWorld) -> void:
 			if Org.title_booked(w, div) != null or Org.event_bouts(w, ev).size() >= ev.slots:
 				continue
 			var champ := w.fighter(int(w.champions.get(div, -1)))
-			if champ == null or not Matchmaker.ready_to_book(w, champ, ev.week - w.week) or champ.bout_id >= 0:
+			if champ == null:
+				# Cinturão vago: os dois mais bem colocados que aceitarem.
+				var top: Array = (w.rankings.get(div, []) as Array).slice(0, 6)
+				var made := false
+				for i in top.size():
+					for j in range(i + 1, top.size()):
+						var fa := w.fighter(int(top[i]))
+						var fb := w.fighter(int(top[j]))
+						if made or Org.book_reason(w, ev, fa, fb) != "" or Org.title_reason(w, fa, fb) != "":
+							continue
+						made = bool(Org.offer_bout(w, ev, fa, fb, true, true, 1.25)["ok"])
+				if made:
+					belts += 1
+				continue
+			if not Matchmaker.ready_to_book(w, champ, ev.week - w.week) or champ.bout_id >= 0:
 				continue
 			for cid: int in (w.rankings.get(div, []) as Array).slice(0, 3):
 				var c := w.fighter(cid)

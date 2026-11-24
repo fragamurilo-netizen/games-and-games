@@ -33,6 +33,8 @@ func refresh() -> void:
 	if lst.is_empty():
 		c.add_child(UIKit.state_block("empty", "Card ainda vazio", "As lutas desta noite ainda não foram anunciadas."))
 		return
+	if ev.done and ev.week < w.week - 38 and not (w.is_president() and ev.tier == 2 and ev.week >= w.week - 104):
+		c.add_child(UIKit.label("Noite antiga: do card ficam guardadas as lutas de cinturão%s." % ("" if w.is_president() else " e as da sua equipe"), "Muted", true))
 	if not ev.done and ev.week >= w.week:
 		c.add_child(EventKit.thermometer(Hype.event(w, ev)))
 	c.add_child(EventKit.card_blocks(w, ev, func(b: Bout): _bout_sheet(w, ev, b)))

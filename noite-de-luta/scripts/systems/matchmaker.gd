@@ -5,8 +5,11 @@ extends RefCounted
 ## adversários perto deles no ranking e podem desafiar, como no LEATHER: perder atrasa os
 ## desafios para cima, e o campeão só defende o cinturão contra os primeiros da fila.
 
-## Semanas mínimas de descanso entre lutas.
+## Semanas mínimas de descanso entre lutas. Depois de uma disputa de cinturão (cinco rounds e
+## um camp inteiro) o descanso é bem maior: campeão defende duas vezes por ano, não seis. É o
+## que faz disputa de cinturão ser rara: não cabe uma em cada noite.
 const REST := 7
+const REST_TITLE := 24
 ## Janela de ranking para casar uma luta, por camada.
 const WINDOW := [26, 12, 5]
 
@@ -15,9 +18,10 @@ static func rest_weeks(f: Fighter) -> int:
 	if f.history.is_empty():
 		return REST
 	var last: Dictionary = f.history.back()
+	var base := REST_TITLE if bool(last.get("title", false)) or bool(last.get("interim", false)) else REST
 	if String(last.get("res", "")) == "D" and String(last.get("method", "")) in ["KO", "TKO"]:
-		return REST + 4
-	return REST
+		return base + 4
+	return base
 
 
 static func ready_to_book(w: GameWorld, f: Fighter, margin: int = 0) -> bool:
@@ -193,7 +197,7 @@ static func shot_promised(w: GameWorld, f: Fighter) -> bool:
 	var r := w.rank_of(f)
 	if r < 1 or r > SHOT_ODDS.size():
 		return false
-	if w.week - champ.last_fight_week > 12 + SHOT_WINDOW:
+	if w.week - champ.last_fight_week > maxi(12, rest_weeks(champ) - 4) + SHOT_WINDOW:
 		return false
 	if _last_opp(champ) == f.id and not Rivalry.rematch_ok(w, champ, f):
 		return false

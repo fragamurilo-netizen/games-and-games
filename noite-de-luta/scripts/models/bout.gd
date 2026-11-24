@@ -44,9 +44,58 @@ func has(fid: int) -> bool:
 	return fid == a or fid == b
 
 
+## Ordem dos números de cada lutador no save (uma lista curta no lugar de um dicionário).
+const STAT_KEYS := ["sig_att", "sig_land", "head", "body", "legs", "kd", "td_att", "td", "sub_att", "ctrl", "rev", "adv", "dmg"]
+
+
+static func _pack_stats(v: Variant) -> Variant:
+	if not (v is Dictionary):
+		return v
+	var st: Dictionary = v
+	var out: Array = []
+	for k: String in STAT_KEYS:
+		var x := float(st.get(k, 0))
+		if k == "ctrl" or k == "dmg":
+			out.append(snappedf(x, 0.1))
+		else:
+			out.append(int(round(x)))
+	return out
+
+
+## Aceita a lista do save novo e o dicionário dos saves antigos.
+static func _unpack_stats(v: Variant) -> Variant:
+	if not (v is Array):
+		return v
+	var a: Array = v
+	var st := {}
+	for i in mini(STAT_KEYS.size(), a.size()):
+		var k: String = STAT_KEYS[i]
+		st[k] = float(a[i]) if k == "ctrl" or k == "dmg" else int(a[i])
+	return st
+
+
+## O resultado já convertido para o save (luta feita não muda mais).
+var _res_pack: Dictionary = {}
+
+
 func to_dict() -> Dictionary:
+	var res := result
+	if result.has("stats"):
+		if status == "feita" and not _res_pack.is_empty():
+			res = _res_pack
+		else:
+			res = result.duplicate()
+			res["stats"] = (result["stats"] as Array).map(_pack_stats)
+			if status == "feita":
+				_res_pack = res
+	var wg := weigh
+	if weigh.has("cut"):
+		wg = weigh.duplicate()
+		wg["cut"] = (weigh["cut"] as Array).map(func(x: Variant) -> float: return snappedf(float(x), 0.0001))
 	var d := {"id": id, "ev": event_id, "week": week, "a": a, "b": b, "div": division, "rounds": rounds,
-		"title": title, "main": main_event, "pa": purse_a, "pb": purse_b, "status": status, "res": result, "log": log, "weigh": weigh, "tf": title_for}
+		"title": title, "main": main_event, "pa": purse_a, "pb": purse_b, "status": status, "res": res, "weigh": wg, "tf": title_for}
+	if not log.is_empty():
+		d["log"] = log
 	if interim:
 		d["int"] = true
 	if billing != 0:
@@ -69,6 +118,8 @@ static func from_dict(d: Dictionary) -> Bout:
 	x.purse_b = d.get("pb", {"show": 0.0, "win": 0.0})
 	x.status = String(d.get("status", "marcada"))
 	x.result = d.get("res", {})
+	if x.result.has("stats"):
+		x.result["stats"] = (x.result["stats"] as Array).map(_unpack_stats)
 	x.log = d.get("log", [])
 	x.weigh = d.get("weigh", {})
 	x.title_for = int(d.get("tf", -1))

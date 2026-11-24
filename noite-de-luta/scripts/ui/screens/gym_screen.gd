@@ -35,10 +35,25 @@ func refresh() -> void:
 	var fin := UIKit.card("Card", UITokens.S1)
 	fin.add_child(UIKit.label("Finanças", "Section"))
 	fin.add_child(UIKit.kv("Caixa", Fmt.money(t.balance), UIColors.RED if t.balance < 0 else UIColors.TEXT))
-	var n := w.user_fighters().size()
-	fin.add_child(UIKit.kv("Aluguel e despesas", Fmt.money(-(Career.RENT + Career.PER_FIGHTER * n)) + "/sem"))
+	var net := Career.weekly_net(w)
+	fin.add_child(UIKit.kv("Mensalidades (%s)" % Fmt.plural(Career.students(w), "aluno", "alunos"), "+" + Fmt.money(Career.tuition(w)) + "/sem", UIColors.GREEN))
+	var sp := Season.sponsor(w)
+	if sp > 0.0:
+		fin.add_child(UIKit.kv("Patrocínio do comércio local", "+" + Fmt.money(sp) + "/sem", UIColors.GREEN))
+	fin.add_child(UIKit.kv("Aluguel e despesas", Fmt.money(-Career.upkeep(w)) + "/sem"))
 	fin.add_child(UIKit.kv("Salários do staff", Fmt.money(-t.weekly_wages()) + "/sem"))
-	fin.add_child(UIKit.label("A academia fica com a fatia combinada de cada bolsa dos seus lutadores.", "Small", true))
+	fin.add_child(UIKit.kv("Saldo fixo da semana", ("+" if net > 0.0 else "") + Fmt.money(net) + "/sem", UIColors.GREEN if net >= 0.0 else UIColors.RED))
+	var want := Career.student_demand(w)
+	var room := Career.student_capacity(w)
+	if want > room:
+		fin.add_child(UIKit.colored("%d pessoas querem treinar aqui, mas a casa só atende %d. Cada profissional do staff abre mais turmas." % [want, room], UIColors.ORANGE, "Small", true))
+	elif room - want >= 40 and net < 0.0 and not t.staff.is_empty():
+		fin.add_child(UIKit.colored("A casa atende %d alunos, mas hoje só %d querem treinar aqui. Staff com turma vazia pesa na folha: vitórias e apoio da cidade trazem mais gente." % [room, want], UIColors.ORANGE, "Small", true))
+	else:
+		fin.add_child(UIKit.label("Os alunos vêm com a reputação da casa e com o apoio da cidade (a casa atende até %d). A academia também fica com a fatia combinada de cada bolsa dos seus lutadores." % room, "Small", true))
+	if t.balance < 0.0:
+		var lim := Career.debt_limit(w)
+		fin.add_child(UIKit.colored("Caixa negativo paga juros toda semana. Passando de %s de dívida, os salários atrasam e o staff começa a sair." % Fmt.money(lim), UIColors.RED if -t.balance >= lim * 0.6 else UIColors.ORANGE, "Small", true))
 	var recent := t.ledger.slice(maxi(0, t.ledger.size() - 10))
 	recent.reverse()
 	if not recent.is_empty():

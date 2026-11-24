@@ -118,9 +118,9 @@ func _support(w: GameWorld, c: VBoxContainer) -> void:
 		]
 	else:
 		rows = [
-			["75 ou mais", "Patrocínio local no máximo, lutadores da terra assinam mais fácil e a prefeitura premia na virada do ano.", UIColors.GREEN],
-			["40 a 74", "Patrocínio do comércio local toda semana. Cresce com o apoio e com a reputação.", UIColors.BLUE],
-			["20 a 39", "Sem patrocínio local.", UIColors.ORANGE],
+			["75 ou mais", "Tatame cheio e patrocínio local no máximo. Lutadores da terra assinam mais fácil e a prefeitura premia na virada do ano.", UIColors.GREEN],
+			["40 a 74", "Mais alunos procuram a academia e o comércio local patrocina toda semana. Os dois crescem com o apoio e com a reputação.", UIColors.BLUE],
+			["20 a 39", "Sem patrocínio local, e os alunos começam a sair.", UIColors.ORANGE],
 			["Abaixo de 20", "Por três semanas seguidas, a cidade vira as costas: a academia perde 3 de reputação e o patrocínio só volta com o apoio em 40.", UIColors.RED],
 		]
 	for r: Array in rows:
