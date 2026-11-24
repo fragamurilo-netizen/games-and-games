@@ -44,6 +44,8 @@ var _ll := 0.0
 var _mw := 0.0
 var _tipw := 1.0
 var _chin_len := 0.0
+## Luz de beleza (rostos femininos): refletor mais de frente e sombra projetada mais leve.
+var _soft := 0.0
 var _hw_tab := PackedFloat32Array()
 var _rx_tab := PackedFloat32Array()
 # Grade em unidades do rosto (x = u, y = v * fh / fw: a mesma escala nos dois eixos)
@@ -53,6 +55,8 @@ var _nx := 0
 var _ny := 0
 var _h := PackedFloat32Array()
 var _in := PackedByteArray()
+## Perfil da cabeça em cada ponto da grade (1 na frente do rosto, 0 no contorno).
+var _d := PackedFloat32Array()
 
 
 ## Desenha a luz por malha no retrato `pv` (com _setup feito), por cima do que já está no rosto.
@@ -80,6 +84,7 @@ func _setup(pv: PortraitView) -> void:
 	_mw = _MW * (1.0 + maxf(0.0, float(f["smile"]) - 0.6) * 0.18)
 	_tipw = float(f.get("nose_tip_width", 1.0))
 	_chin_len = float(f.get("chin_len", 0.0))
+	_soft = pv._soft
 	_hw_tab.resize(257)
 	_rx_tab.resize(257)
 	for i in 257:
@@ -334,14 +339,17 @@ func _run() -> void:
 	var n := _nx * _ny
 	_h.resize(n)
 	_in.resize(n)
+	_d.resize(n)
 	for j in _ny:
 		var v := (_o.y + j * _st) / _a
 		for i in _nx:
 			var u := _o.x + i * _st
 			var id := j * _nx + i
-			if _dome(u, v) > 0.0:
+			var dm := _dome(u, v)
+			_d[id] = dm
+			if dm > 0.0:
 				_in[id] = 1
-				_h[id] = _height(u, v)
+				_h[id] = DEPTH * dm + _relief(u, v) * smoothstep(0.0, 0.4, dm)
 			else:
 				_in[id] = 0
 				_h[id] = 0.0
@@ -352,7 +360,10 @@ func _run() -> void:
 	spc.resize(n)
 	val.fill(0.0)
 	spc.fill(0.0)
-	var L := LIGHT.normalized()
+	# Homens: luz de cima e de lado (volume marcado). Mulheres: mais de frente, sombra curta.
+	var L := LIGHT.lerp(Vector3(-0.16, -0.42, 0.9), _soft * 0.85).normalized()
+	var cast_k := lerpf(0.7, 0.32, _soft)
+	var pen := lerpf(PENUMBRA, 0.55, _soft)
 	var Hv := (L + Vector3(0, 0, 1)).normalized()
 	var dir := Vector2(L.x, L.y).normalized()
 	var rise := L.z / Vector2(L.x, L.y).length()
@@ -374,13 +385,18 @@ func _run() -> void:
 				for s in steps:
 					var t := 0.015 + 0.5 * pow(float(s + 1) / steps, 1.6)
 					var hq := _at(_h, p + dir * t)
-					lit = minf(lit, (h0 + rise * t + 0.004 - hq) / (PENUMBRA * t) + 0.5)
+					lit = minf(lit, (h0 + rise * t + 0.004 - hq) / (pen * t) + 0.5)
 					if lit <= 0.0:
 						break
 				sh = 1.0 - clampf(lit, 0.0, 1.0)
-			var direct := diff * (1.0 - 0.85 * sh)
-			var ao := clampf((hb[id] - h0) * 6.0, 0.0, 0.55) if _in[id] == 1 else 0.0
-			var lum := (0.5 + 0.55 * direct) * (1.0 - ao)
+			var direct := diff * (1.0 - cast_k * sh)
+			# No contorno a cabeça só vira para longe: ali não há vinco para escurecer
+			var front := smoothstep(0.1, 0.5, _d[id])
+			var ao := clampf((hb[id] - h0) * 6.0, 0.0, 0.55) * front if _in[id] == 1 else 0.0
+			var lum := (0.5 + 0.55 * direct) * (1.0 - ao * (1.0 - 0.3 * _soft))
+			# A borda do rosto não cai no preto (o pescoço atrás também é pele): sem isso o
+			# contorno da mandíbula vira um traço escuro de máscara
+			lum = maxf(lum, 0.5 + 0.24 * (1.0 - front))
 			# Rebote frio na borda do lado da sombra, que separa o rosto do fundo
 			lum += 0.07 * pow(1.0 - nrm.z, 2.0) * maxf(0.0, nrm.x)
 			val[id] = lum - BASE
@@ -441,4 +457,4 @@ func _draw(poly: PackedVector2Array, val: PackedFloat32Array, spc: PackedFloat32
 		else:
 			var ad := clampf(-_at(val, q) / (BASE - 0.12), 0.0, 0.95)
 			lc.append(Color(warm.lerp(deep, smoothstep(0.08, 0.45, ad)), ad))
-	pv._r_polyline_colors(line, lc, maxf(1.0, pv._s * 0.004), true)
+	pv._r_polyline_colors(line, lc, maxf(1.2, pv._s * 0.0065), true)

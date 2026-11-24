@@ -1352,6 +1352,7 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	f["lip_l"] = float(f["lip_l"]) * lipk * vrng.randf_range(0.95, 1.08)
 	f["brow_t"] = float(f["brow_t"]) * vrng.randf_range(0.82, 1.28)
 	f["ear"] = float(f["ear"]) * vrng.randf_range(0.92, 1.1)
+	_face_shape(f, seed_value)
 
 	# --- Cabelo -----------------------------------------------------------------
 	var hc_i := RngUtil.weighted_index(rng, ETH_HAIR_COLOR[e])
@@ -1541,6 +1542,9 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	if hc_i == 6 or (hc_i >= 4 and rng.randf() < 0.3):
 		beard_col = beard_col.lerp(HAIR_COLORS[6], 0.35) # barba puxando ao ruivo
 	f["beard_col"] = beard_col.lerp(Color("#D2CFCA"), clampf(gray * 1.15, 0.0, 0.92))
+	# A sobrancelha embranquece bem depois da barba e do cabelo
+	f["brow_nat"] = beard_col
+	f["brow_col"] = beard_col.lerp(Color("#D2CFCA"), clampf(gray * 0.4 - 0.08, 0.0, 0.4))
 
 	# --- Marcas do tempo e detalhes --------------------------------------------
 	f["wrinkles"] = clampf((age - 29) / 14.0, 0.0, 1.0)
@@ -1593,6 +1597,51 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	if f["fem"]:
 		_fem_finish(f)
 	return f
+
+
+## Formato do rosto, num sorteio próprio (o resto da pessoa não muda): oval, comprido, redondo,
+## quadrado, coração, diamante ou retangular de queixo forte. Sem isto todo mundo saía no mesmo
+## oval e a variedade ficava só nos traços.
+static func _face_shape(f: Dictionary, seed_value: int) -> void:
+	var r := RandomNumberGenerator.new()
+	r.seed = hash([seed_value, "formato"])
+	var shape := RngUtil.weighted_index(r, [24, 14, 11, 16, 10, 11, 14])
+	var k := r.randf_range(0.6, 1.0)
+	f["face_shape"] = shape
+	match shape:
+		1: # comprido
+			f["fh"] = float(f["fh"]) * (1.0 + 0.055 * k)
+			f["fw"] = float(f["fw"]) * (1.0 - 0.04 * k)
+			f["jaw_v"] = minf(0.7, float(f["jaw_v"]) + 0.04 * k)
+			f["chin_len"] = float(f.get("chin_len", 0.0)) + 0.03 * k
+		2: # redondo
+			f["fh"] = float(f["fh"]) * (1.0 - 0.04 * k)
+			f["fw"] = float(f["fw"]) * (1.0 + 0.035 * k)
+			f["cheek_w"] = float(f["cheek_w"]) * (1.0 + 0.025 * k)
+			f["jaw"] = minf(0.92, float(f["jaw"]) + 0.05 * k)
+			f["chin_sq"] = maxf(1.25, float(f["chin_sq"]) - 0.3 * k)
+		3: # quadrado
+			f["jaw"] = clampf(float(f["jaw"]) + 0.1 * k, 0.84, 0.95)
+			f["jaw_v"] = clampf(float(f["jaw_v"]) + 0.08 * k, 0.56, 0.7)
+			f["chin_sq"] = float(f["chin_sq"]) + 0.5 * k
+			f["chin_width"] = 1.0 + 0.14 * k
+		4: # coração
+			f["forehead"] = minf(1.0, float(f["forehead"]) + 0.04 * k)
+			f["jaw"] = maxf(0.62, float(f["jaw"]) - 0.09 * k)
+			f["chin_sq"] = maxf(1.2, float(f["chin_sq"]) - 0.35 * k)
+			f["chin_width"] = 1.0 - 0.12 * k
+		5: # diamante
+			f["cheek_w"] = float(f["cheek_w"]) * (1.0 + 0.035 * k)
+			f["cheekbone"] = float(f["cheekbone"]) * (1.0 + 0.3 * k)
+			f["forehead"] = maxf(0.86, float(f["forehead"]) - 0.05 * k)
+			f["jaw"] = maxf(0.64, float(f["jaw"]) - 0.06 * k)
+			f["temple_width"] = 1.0 - 0.06 * k
+		6: # retangular, queixo forte
+			f["fh"] = float(f["fh"]) * (1.0 + 0.03 * k)
+			f["jaw"] = clampf(float(f["jaw"]) + 0.06 * k, 0.8, 0.92)
+			f["chin_len"] = float(f.get("chin_len", 0.0)) + 0.045 * k
+			f["chin_width"] = 1.0 + 0.1 * k
+			f["chin_sq"] = float(f["chin_sq"]) + 0.3 * k
 
 
 ## Fecho das lutadoras, depois da categoria e do físico: o pescoço nunca chega perto da largura da
@@ -1723,6 +1772,8 @@ static func _apply_female(f: Dictionary, seed_value: int, age: int, look: Dictio
 		var natural: Color = HAIR_COLORS[int(f["hair_i"]) if int(f["hair_i"]) != HC_TIPS else 0]
 		f["hair"] = (f["hair"] as Color).lerp(natural, 0.65)
 		f["gray"] = float(f["gray"]) * 0.35
+	# Sobrancelha feita e pintada: não fica grisalha
+	f["brow_col"] = f.get("brow_nat", f["beard_col"])
 	if not look.has("hs"):
 		var tex := clampi(int(f["texture"]), 0, FEM_STYLE_W.size() - 1)
 		var table: Dictionary = FEM_STYLE_W[tex]
