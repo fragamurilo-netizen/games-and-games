@@ -50,6 +50,7 @@ func refresh() -> void:
 		var p := Signing.chance(w, f, 0.2, 5, 0.0)
 		var line := "%s · %d anos · %s · aceitaria: %s" % [Matchmaker.division_short(f.division), w.age_of(f), FightKit.record_detail(f).split(" · ")[0], Signing.chance_label(p).to_lower()]
 		c.add_child(FightKit.fighter_row(w, f, func(): UIManager.push("fighter", {"id": f.id}), line, UIColors.GREEN if p >= 0.5 else Color(0, 0, 0, 0), "", FightKit.potential_stars(w, f)))
+	TutorialKit.tip(self, "market")
 
 
 ## Indicações do olheiro: os nomes que ele trouxe do mercado nos últimos meses, com a faixa do

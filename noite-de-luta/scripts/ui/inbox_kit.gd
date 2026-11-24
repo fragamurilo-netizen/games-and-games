@@ -4,15 +4,16 @@ extends RefCounted
 ## de ação, a folha com a mensagem inteira e quem executa cada ação. As regras estão em Inbox.
 
 const CAT_ICON := {"luta": "glove", "equipe": "users", "contrato": "book", "olheiro": "search", "financas": "money",
-	"noite": "bell", "tv": "play", "cinturao": "belt", "mundo": "globe"}
+	"noite": "bell", "tv": "play", "cinturao": "belt", "temporada": "trophy", "mundo": "globe"}
 const MAIN_LABEL := {"offer": "Ver proposta", "fight_plan": "Plano de luta", "talk": "Conversar", "renew": "Renovar contrato",
 	"camp": "Montar o camp", "fighter": "Abrir a ficha", "market": "Ir ao Mercado", "gym": "Ver as contas", "incident": "Decidir",
-	"night": "Ir para a noite", "tv": "Ver propostas", "org_event": "Montar o card", "venue": "Sede e ingressos", "book_div": "Marcar a luta"}
+	"night": "Ir para a noite", "tv": "Ver propostas", "org_event": "Montar o card", "venue": "Sede e ingressos", "book_div": "Marcar a luta",
+	"season": "Ver a temporada", "gala": "Ir para a cerimônia"}
 
 
 static func cat_color(cat: String) -> Color:
 	match cat:
-		"cinturao":
+		"cinturao", "temporada":
 			return UIColors.GOLD
 		"financas":
 			return UIColors.RED
@@ -112,6 +113,12 @@ static func run(w: GameWorld, m: Dictionary, on_change: Callable) -> void:
 		"venue":
 			Inbox.handle(m)
 			UIManager.push("venue", {"id": _arg_id(m)})
+		"season":
+			if bool(m.get("pend", false)):
+				Inbox.handle(m)
+			UIManager.push("season", {"tab": String((m.get("arg", {}) as Dictionary).get("tab", "metas"))})
+		"gala":
+			UIManager.push("gala", {"year": _arg_id(m, "year")})
 		"book_div":
 			var ev := title_night(w)
 			if ev == null:

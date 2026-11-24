@@ -79,6 +79,7 @@ func refresh() -> void:
 		c.add_child(UIKit.button("Mostrar mais", "TextButton", func():
 			_shown += 50
 			refresh()))
+	TutorialKit.tip(self, "rankings")
 
 
 func _open(w: GameWorld, f: Fighter, challenger: Fighter) -> void:

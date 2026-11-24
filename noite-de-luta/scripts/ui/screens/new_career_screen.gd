@@ -11,6 +11,7 @@ var _nation := "BRA"
 var _city := ""
 var _colors := 0
 var _funds := 1
+var _tutorial := true
 var _name_edit: LineEdit
 
 
@@ -122,6 +123,10 @@ func refresh() -> void:
 		c.add_child(UIKit.segment([["0", "US$ 100 mil"], ["1", "US$ 250 mil"], ["2", "US$ 500 mil"]], str(_funds), func(k: String):
 			_funds = int(k)))
 		c.add_child(UIKit.label("Com menos dinheiro, cada contratação e cada técnico pesam mais. US$ 250 mil é o padrão.", "Small", true))
+	c.add_child(UIKit.section_header("Tutorial guiado"))
+	c.add_child(UIKit.segment([["1", "Ligado"], ["0", "Desligado"]], "1" if _tutorial else "0", func(k: String):
+		_tutorial = k == "1"))
+	c.add_child(UIKit.label("Primeiros passos no Início e uma dica na primeira vez em cada tela. Dá para pular quando quiser.", "Small", true))
 	var f := footer()
 	UIKit.clear(f)
 	f.add_child(UIKit.button("Fundar a academia" if not pres else "Assumir a organização", "PrimaryButton", _start))
@@ -152,5 +157,6 @@ func _start() -> void:
 		w = Org.new_career(_name, "", _nation, Color(String(pair[0])), Color(String(pair[1])), Org.START_FUNDS[_funds], seed_v)
 	else:
 		w = Career.new_career(_name, "", _nation, _city, Color(String(pair[0])), Color(String(pair[1])), Career.START_FUNDS[_funds], seed_v)
+	Tutorial.start(w, _tutorial)
 	GameManager.start_career(w)
 	UIManager.goto("hub")

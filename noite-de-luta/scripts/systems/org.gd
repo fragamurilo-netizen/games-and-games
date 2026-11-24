@@ -53,6 +53,8 @@ static func new_career(org_name: String, short: String, nation: String, c1: Colo
 		if e.week - w.week < 4:
 			auto_fill(w, e)
 	w.add_news("organizacao", "Você assume a presidência da %s. Os primeiros cards já estão anunciados; os próximos são seus." % t.name, [], true)
+	Tutorial.start(w, true)
+	Season.ensure(w)
 	return w
 
 
@@ -252,6 +254,7 @@ static func offer_bout(w: GameWorld, ev: FightEvent, fa: Fighter, fb: Fighter, t
 	var b := book(w, ev, fa, fb, title, main or title or interim, mult)
 	if interim:
 		Titles.mark_interim(w, b)
+	Season.bump(w, "booked")
 	return {"ok": true, "text": "Fechado: %s × %s na %s%s." % [fa.short_name(), fb.short_name(), ev.name, ", valendo o cinturão" if title else (", valendo o cinturão interino" if interim else "")], "bout": b.id}
 
 
@@ -489,6 +492,7 @@ static func close_event(w: GameWorld, ev: FightEvent, bonuses: Dictionary) -> Di
 			"purses": 0.0, "production": loss, "bonus": 0.0, "profit": -loss, "draw": 0.0, "finishes": 0, "fotn": -1, "potn": []}
 		_keep_week_notes(ev, keep0)
 		w.add_news("organizacao", "%s cancelada: sem lutas no card. A organização perde dinheiro e prestígio." % ev.name, [], true)
+		Season.on_night(w, ev, true)
 		return ev.report
 	var income: float = float(pr["gate"]) + float(pr["ppv"]) + float(pr["tv"]) + float(pr["sponsors"])
 	var cost: float = purses + float(pr["production"]) + paid_bonus
@@ -524,6 +528,8 @@ static func close_event(w: GameWorld, ev: FightEvent, bonuses: Dictionary) -> Di
 	if not names.is_empty():
 		txt += " Bônus: " + ", ".join(names) + "."
 	w.add_news("organizacao", txt, [], true)
+	Season.on_night(w, ev)
+	Achievements.check(w)
 	return ev.report
 
 

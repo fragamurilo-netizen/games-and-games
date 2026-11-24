@@ -245,9 +245,9 @@ static func _news_row(w: GameWorld, n: Dictionary, hats: Dictionary) -> PanelCon
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var kind := String(n.get("kind", ""))
 	var cap := UIKit.label("%s · %s" % [String(hats.get(kind, "Notícia")), w.weeks_from_now(int(n["week"]))], "Caps")
-	if kind in ["cinturao", "marco", "premio", "hall"]:
+	if kind in ["cinturao", "marco", "premio", "hall", "meta", "conquista"]:
 		cap.add_theme_color_override(&"font_color", UIColors.GOLD)
-	elif kind in ["equipe", "organizacao", "tv"]:
+	elif kind in ["equipe", "organizacao", "tv", "apoio"]:
 		cap.add_theme_color_override(&"font_color", UIColors.ACCENT)
 	elif kind == "rivalidade":
 		cap.add_theme_color_override(&"font_color", UIColors.ORANGE)
@@ -258,6 +258,9 @@ static func _news_row(w: GameWorld, n: Dictionary, hats: Dictionary) -> PanelCon
 	if not ids.is_empty():
 		var fid := int(ids[0])
 		cb = func(): UIManager.push("fighter", {"id": fid})
+	elif kind in ["meta", "apoio", "conquista"]:
+		var tab := String({"meta": "metas", "apoio": "apoio", "conquista": "conquistas"}[kind])
+		cb = func(): UIManager.push("season", {"tab": tab})
 	return UIKit.tap_row(h, cb)
 
 

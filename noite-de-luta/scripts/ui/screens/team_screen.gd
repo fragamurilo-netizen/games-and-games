@@ -37,3 +37,4 @@ func refresh() -> void:
 			var left := b.week - w.week
 			line = "%s · contra %s · %s" % [rec, w.fighter(b.other(f.id)).short_name(), "sábado" if left <= 0 else "em %d sem." % left]
 		c.add_child(FightKit.fighter_row(w, f, func(): UIManager.push("fighter", {"id": f.id}), line, st[1], "", null, mood, mood_col))
+	TutorialKit.tip(self, "team")

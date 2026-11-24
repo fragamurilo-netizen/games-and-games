@@ -170,6 +170,7 @@ static func sign(w: GameWorld, o: Dictionary) -> void:
 	else:
 		w.tv["next"] = d
 	w.tv_offers = []
+	w.life["tv"] = float(w.life.get("tv", 0.0)) + 1.0
 	w.add_news("tv", "Contrato de TV assinado com a %s (%s) por %s: %s por Fight Night e %s por evento numerado." % [String(p["name"]), String(p["kind"]).to_lower(), years_text(int(o["weeks"])), Fmt.money(float(o["fee"])), Fmt.money(float(o["fee_ppv"]))], [], true)
 
 

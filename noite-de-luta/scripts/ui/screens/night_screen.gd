@@ -75,6 +75,7 @@ func refresh() -> void:
 		foot.add_child(row2)
 	else:
 		foot.add_child(UIKit.button("Fechar a noite", "PrimaryButton", func(): _bonus_sheet(w, ev)))
+	TutorialKit.tip(self, "night")
 
 
 ## Bônus da noite: a luta da noite (os dois lutadores ganham) e duas performances. Vem com a
@@ -117,8 +118,9 @@ func _bonus_sheet(w: GameWorld, ev: FightEvent) -> void:
 		Org.close_event(w, ev, state)
 		GameManager.save_now()
 		UIManager.close_modal()
-		Sfx.play("achievement", -6.0)
-		refresh()))
+		Sfx.play("cash", -6.0)
+		refresh()
+		SeasonKit.celebrate_later(0.8)))
 	UIManager.show_modal(v, true)
 
 

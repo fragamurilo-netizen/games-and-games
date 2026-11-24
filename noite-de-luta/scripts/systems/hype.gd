@@ -183,6 +183,11 @@ static func event(w: GameWorld, ev: FightEvent) -> Dictionary:
 		if float(tvb[1]) != 0.0:
 			rs.append(tvb)
 			v += float(tvb[1])
+		# Verba de marketing: os sócios liberam com confiança alta e seguram com ela baixa.
+		var mk := Season.hype_bonus(w)
+		if float(mk[1]) != 0.0:
+			rs.append(mk)
+			v += float(mk[1])
 	var k := minf(1.0, 0.55 + lst.size() / float(maxi(1, ev.slots)) * 0.45)
 	if k < 0.995:
 		rs.append(["Card incompleto (%d de %d lutas)" % [lst.size(), ev.slots], v * (k - 1.0)])

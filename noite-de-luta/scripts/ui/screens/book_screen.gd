@@ -35,6 +35,7 @@ func refresh() -> void:
 	else:
 		_pick_second(w, ev, fa, c)
 	hide_footer()
+	TutorialKit.tip(self, "book")
 
 
 func _div_tabs(c: VBoxContainer) -> void:

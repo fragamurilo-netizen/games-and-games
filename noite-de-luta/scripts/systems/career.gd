@@ -27,6 +27,8 @@ static func new_career(team_name: String, short: String, nation: String, city: S
 	w.user_team_id = t.id
 	t.ledger.append({"week": 0, "label": "Caixa inicial", "value": funds})
 	w.add_news("equipe", "Nasce a %s, em %s. Hora de montar a equipe." % [t.name, city if city != "" else DataDB.nation_name(nation)], [], true)
+	Tutorial.start(w, true)
+	Season.ensure(w)
 	return w
 
 
@@ -201,6 +203,9 @@ static func resolve(w: GameWorld, b: Bout, res: Dictionary, e: FightEngine) -> v
 	CareerStats.on_bout(w, b, res, e)
 	CareerStats.check_marks(w, fa, b)
 	CareerStats.check_marks(w, fb, b)
+	Season.on_bout(w, b, winner_id, method, ra, rb, champ_before)
+	if w.is_user_fighter(fa) or w.is_user_fighter(fb):
+		Achievements.check(w)
 	# Luta feita: os ajustes da noite não servem mais (só quem errou o peso fica guardado).
 	b.weigh.erase("mods")
 	b.weigh.erase("camp")
@@ -225,6 +230,8 @@ static func _pay(w: GameWorld, b: Bout, winner_id: int) -> void:
 			var cut := float(f.contract.get("cut", 0.2))
 			var label := "%s × %s" % [f.short_name(), w.fighter(other).short_name()]
 			team.add_money(w.week, label, total * cut)
+			if team.is_user:
+				Season.bump(w, "purse", total * cut)
 
 
 static func _reputation(w: GameWorld, b: Bout, winner_id: int, ra: int, rb: int) -> void:
@@ -329,6 +336,7 @@ static func advance_week(w: GameWorld, auto: bool = false) -> void:
 	var y_now := w.year()
 	if int(GameWorld.date_of(w.week - 1)["year"]) < y_now:
 		Legacy.year_end(w, y_now - 1)
+		Season.year_end(w, y_now - 1)
 	if w.week % 4 == 0:
 		Development.month(w)
 		StaffMarket.refresh(w)
@@ -354,6 +362,8 @@ static func advance_week(w: GameWorld, auto: bool = false) -> void:
 	var ut := w.user_team()
 	if ut != null:
 		ut.log_week()
+	Season.week(w)
+	Achievements.check(w)
 	Inbox.scan(w)
 
 
@@ -369,6 +379,11 @@ static func _finances(w: GameWorld) -> void:
 	var wages := t.weekly_wages()
 	if wages > 0.0:
 		t.add_money(w.week, "Salários do staff", -wages)
+	# Com a cidade do lado, o comércio local ajuda a pagar a conta (ver Season).
+	var sp := Season.sponsor(w)
+	if sp > 0.0:
+		t.add_money(w.week, "Patrocínio do comércio local", sp)
+		Season.bump(w, "sponsor", sp)
 
 
 ## Fim de contrato: os da CPU renovam quase sempre; os do jogador avisam (renovação no perfil).

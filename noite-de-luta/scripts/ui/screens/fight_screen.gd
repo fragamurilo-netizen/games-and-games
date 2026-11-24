@@ -758,6 +758,7 @@ func _show_result(fresh: bool = false) -> void:
 				Sfx.play("lose", -6.0)
 			Anim.pulse(hl, 1.06, 0.4)
 			_show_headline(result_panel)
+			SeasonKit.celebrate_later(1.4)
 		var foot := footer()
 		UIKit.clear(foot)
 		foot.add_child(UIKit.button("Continuar", "PrimaryButton", func():

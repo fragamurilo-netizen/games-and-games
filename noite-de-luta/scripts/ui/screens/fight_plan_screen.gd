@@ -111,3 +111,4 @@ func refresh() -> void:
 	go.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(go)
 	foot.add_child(row)
+	TutorialKit.tip(self, "fight_plan")

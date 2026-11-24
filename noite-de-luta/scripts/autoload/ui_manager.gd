@@ -23,6 +23,8 @@ const SCREENS := {
 	"results": "res://scripts/ui/screens/results_screen.gd",
 	"legacy": "res://scripts/ui/screens/legacy_screen.gd",
 	"inbox": "res://scripts/ui/screens/inbox_screen.gd",
+	"season": "res://scripts/ui/screens/season_screen.gd",
+	"gala": "res://scripts/ui/screens/gala_screen.gd",
 	# Presidente da organização
 	"org_hub": "res://scripts/ui/screens/org_hub_screen.gd",
 	"events": "res://scripts/ui/screens/org_events_screen.gd",
@@ -636,6 +638,79 @@ func banner(title: String, lines: Array = []) -> void:
 	tw.tween_interval(0.85)
 	tw.tween_property(holder, "modulate:a", 0.0, 0.25)
 	tw.tween_callback(holder.queue_free)
+
+
+## Aviso de comemoração (meta cumprida, conquista): ícone, título e uma linha, com filete
+## dourado e o som de conquista. Fica um pouco mais na tela do que um aviso comum. Quando vários
+## saem juntos, aparecem dois por vez e os outros esperam na fila, para não cobrir a tela.
+const AWARD_LIVE_MAX := 2
+var _award_queue: Array = []
+var _award_live := 0
+var _award_sfx_at := -10.0
+
+
+func award_toast(title: String, text: String, icon_name: String = "trophy", _sound: bool = true) -> void:
+	if main == null:
+		print("%s: %s" % [title, text])
+		return
+	_award_queue.append([title, text, icon_name])
+	_award_pump()
+
+
+func _award_pump() -> void:
+	if main == null or not is_instance_valid(main) or not is_instance_valid(main.toast_host):
+		_award_queue.clear()
+		_award_live = 0
+		return
+	while _award_live < AWARD_LIVE_MAX and not _award_queue.is_empty():
+		var a: Array = _award_queue.pop_front()
+		_award_show(String(a[0]), String(a[1]), String(a[2]), 2.2 if not _award_queue.is_empty() else 3.2)
+
+
+func _award_done() -> void:
+	_award_live = maxi(0, _award_live - 1)
+	if is_inside_tree():
+		_award_pump.call_deferred()
+
+
+func _award_show(title: String, text: String, icon_name: String, hold: float) -> void:
+	var now := Time.get_ticks_msec() / 1000.0
+	if now - _award_sfx_at >= 1.0:
+		_award_sfx_at = now
+		Sfx.play("achievement", -6.0)
+	_award_live += 1
+	var p := PanelContainer.new()
+	p.tree_exited.connect(_award_done)
+	p.theme_type_variation = "Toast"
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var row := UIKit.hbox(14)
+	var bar := ColorRect.new()
+	bar.color = UIColors.GOLD
+	bar.custom_minimum_size = Vector2(5, 0)
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(bar)
+	var ic := UIKit.icon_rect(icon_name, 34, UIColors.GOLD)
+	ic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(ic)
+	var v := UIKit.vbox(0)
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	v.add_child(UIKit.colored(title, UIColors.GOLD, "Caps"))
+	v.add_child(UIKit.label(text, "H3", true))
+	row.add_child(v)
+	p.add_child(row)
+	main.toast_host.add_child(p)
+	p.modulate.a = 0.0
+	var tw := p.create_tween()
+	tw.tween_property(p, "modulate:a", 1.0, 0.15)
+	if not AppSettings.reduce_motion:
+		p.scale = Vector2(0.9, 0.9)
+		(func():
+			if is_instance_valid(p):
+				p.pivot_offset = p.size * 0.5).call_deferred()
+		tw.parallel().tween_property(p, "scale", Vector2.ONE, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_interval(hold)
+	tw.tween_property(p, "modulate:a", 0.0, 0.3)
+	tw.tween_callback(p.queue_free)
 
 
 var _toast_sfx_at := -10.0

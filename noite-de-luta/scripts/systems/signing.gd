@@ -22,6 +22,8 @@ static func chance(w: GameWorld, f: Fighter, cut: float, fights: int, bonus: flo
 	p -= (fights - 4) * 0.03
 	if f.history.is_empty() and not f.is_pro():
 		p += 0.1 # amador quer uma chance
+	# Lutador da terra olha se a cidade está com a academia (ver Season).
+	p += Season.sign_bonus(w, f)
 	return clampf(p, 0.02, 0.97)
 
 
@@ -68,6 +70,8 @@ static func offer(w: GameWorld, f: Fighter, cut: float, fights: int, bonus: floa
 	if bonus > 0.0:
 		t.add_money(w.week, "Luvas de %s" % f.display_name(), -bonus)
 	w.add_news("equipe", "%s assina com %s: %d lutas, %d%% das bolsas para a equipe." % [f.display_name(), t.name, fights, int(round(cut * 100.0))], [f.id], true)
+	Season.bump(w, "signed")
+	Season.check(w)
 	return {"ok": true, "text": "%s agora é da %s!" % [f.display_name(), t.name]}
 
 
@@ -91,6 +95,7 @@ static func release(w: GameWorld, f: Fighter, by_user: bool = true) -> void:
 	w.offers = w.offers.filter(func(o: Dictionary) -> bool: return int(o["fighter"]) != f.id)
 	if by_user:
 		w.add_news("equipe", "%s foi dispensado da equipe." % f.display_name(), [f.id])
+		Season.on_release(w, f)
 	w.sign_block[f.id] = w.week + 8
 
 

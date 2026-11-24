@@ -107,6 +107,7 @@ func refresh() -> void:
 	yes.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(yes)
 	foot.add_child(row)
+	TutorialKit.tip(self, "offer")
 
 
 ## Folha de negociação: a força na mesa com os motivos, a paciência que resta e cada pedido com

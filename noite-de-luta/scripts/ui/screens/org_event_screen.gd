@@ -91,6 +91,8 @@ func refresh() -> void:
 	row.add_child(auto)
 	row.add_child(add)
 	foot.add_child(row)
+	TutorialKit.tip(self, "org_event")
+	Tutorial.mark(world(), "org_event")
 
 
 ## Ficha da luta: por que ela vende, as bolsas e o que dá para fazer com ela no card.

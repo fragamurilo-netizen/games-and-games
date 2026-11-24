@@ -82,7 +82,7 @@ static func on_bout(w: GameWorld, b: Bout, e: FightEngine) -> void:
 				break
 		var speed := 8.0 if rnd == 1 and tm < 45.0 else (4.0 if rnd == 1 and tm < 120.0 else 0.0)
 		var score := stage + flair + speed + maxf(0.0, lf.level() - 55.0) * 0.5 + (5.0 if method == "KO" else 0.0)
-		_candidate(w, "nocaute", score, b, winner, "%s nocauteia %s com %s, %s" % [wf.display_name(), lf.display_name(), detail, _round_time(rnd, tm)])
+		_candidate(w, "nocaute", score, b, winner, "%s nocauteia %s%s, %s" % [wf.display_name(), lf.display_name(), _move(detail), _round_time(rnd, tm)])
 	elif method == "FIN":
 		var rare := 0.0
 		for k: String in ["calcanhar", "d'arce", "gogoplata", "tarântula", "omoplata", "twister", "triângulo de braço", "joelho", "estrela", "chave de pé", "triângulo"]:
@@ -90,7 +90,14 @@ static func on_bout(w: GameWorld, b: Bout, e: FightEngine) -> void:
 				rare = 6.0
 				break
 		var score2 := stage + rare + maxf(0.0, lf.level() - 55.0) * 0.5 + (5.0 if rnd >= 3 else 0.0) + (4.0 if rnd == 1 and tm < 90.0 else 0.0)
-		_candidate(w, "finalizacao", score2, b, winner, "%s finaliza %s com %s, %s" % [wf.display_name(), lf.display_name(), detail, _round_time(rnd, tm)])
+		_candidate(w, "finalizacao", score2, b, winner, "%s finaliza %s%s, %s" % [wf.display_name(), lf.display_name(), _move(detail), _round_time(rnd, tm)])
+
+
+## "nocaute (overhand)" vira " (overhand)": o golpe sem repetir o desfecho que o verbo já diz.
+static func _move(detail: String) -> String:
+	var a := detail.find("(")
+	var z := detail.rfind(")")
+	return " (%s)" % detail.substr(a + 1, z - a - 1) if a >= 0 and z > a + 1 else ""
 
 
 static func _how(b: Bout) -> String:
@@ -237,7 +244,9 @@ static func _induct(w: GameWorld, year: int) -> void:
 	cands.sort_custom(func(x: Fighter, y: Fighter) -> bool: return legacy_score(x) > legacy_score(y))
 	var names: Array = []
 	for f: Fighter in cands.slice(0, HOF_PER_YEAR):
-		var why := "%s, %s" % [f.record_text(), "%d %s" % [f.titles_won, "cinturão" if f.titles_won == 1 else "cinturões"] if f.titles_won > 0 else "%d vitórias" % int(f.record["w"])]
+		var why := "Cartel %s" % f.record_text()
+		if f.titles_won > 0:
+			why += ", %d %s" % [f.titles_won, "cinturão" if f.titles_won == 1 else "cinturões"]
 		if f.title_defenses > 0:
 			why += ", %d %s" % [f.title_defenses, "defesa" if f.title_defenses == 1 else "defesas"]
 		w.hall.append({"id": f.id, "name": f.display_name(), "year": year, "div": f.division, "nation": f.nation, "text": why, "score": snappedf(legacy_score(f), 0.1)})

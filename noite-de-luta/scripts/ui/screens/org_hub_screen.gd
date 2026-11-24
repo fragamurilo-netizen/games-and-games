@@ -6,7 +6,7 @@ extends BaseScreen
 
 const HATS := {"cinturao": "Cinturão", "resultado": "Resultado", "organizacao": "Sua organização", "aposentadoria": "Aposentadoria",
 	"marco": "Marco", "olheiro": "Olheiros", "mercado": "Mercado", "rivalidade": "Rivalidade", "tv": "Contrato de TV", "premio": "Prêmios",
-	"hall": "Hall da Fama", "categoria": "Categoria", "visual": "Visual"}
+	"hall": "Hall da Fama", "categoria": "Categoria", "visual": "Visual", "meta": "Temporada", "apoio": "Sócios", "conquista": "Conquista"}
 
 
 func setup(p: Dictionary) -> void:
@@ -14,10 +14,18 @@ func setup(p: Dictionary) -> void:
 	screen_title = "Início"
 
 
+func on_show() -> void:
+	super.on_show()
+	var w := world()
+	if w != null:
+		(func(): SeasonKit.board_event(w, refresh)).call_deferred()
+
+
 func refresh() -> void:
 	var w := world()
 	if w == null:
 		return
+	TutorialKit.sync(w)
 	Inbox.scan(w)
 	screen_subtitle = "Semana de " + GameWorld.week_text(w.week)
 	UIManager.refresh_chrome()
@@ -31,6 +39,9 @@ func refresh() -> void:
 	var tv := String({"aberta": "Aberta", "cabo": "Assinatura", "streaming": "Streaming"}.get(String(w.tv.get("partner", "")), "Sem contrato"))
 	c.add_child(DashKit.identity(w, t, "Presidente · sede em %s" % DataDB.nation_name(t.nation), "Prestígio", [
 		[str(ups_all.size()), "Noites marcadas"], ["%d/%d" % [champs, w.champions.size()], "Campeões"], [tv, "TV"]], intro_pending))
+	var guide := TutorialKit.hub_card(w, refresh)
+	if guide != null:
+		c.add_child(guide)
 	var night := Org.night_this_week(w)
 	var hero := 0
 	var ups := ups_all.filter(func(e: FightEvent) -> bool: return e != night)
@@ -46,6 +57,9 @@ func refresh() -> void:
 		c.add_child(hv)
 		hero = 1
 	c.add_child(InboxKit.todo_block(w, refresh))
+	var season := SeasonKit.hub_card(w, intro_pending)
+	if season != null:
+		c.add_child(season)
 	var ag := DashKit.agenda(w, _agenda(w, ups, hero == 1 and night == null), 7)
 	if ag != null:
 		c.add_child(ag)
@@ -55,7 +69,8 @@ func refresh() -> void:
 	var nb := UIKit.vbox(UITokens.S1)
 	DashKit.news(w, nb, HATS)
 	c.add_child(nb)
-	columnize(c, 1, 2, hero)
+	columnize(c, 1, 2, hero + (1 if guide != null else 0))
+	SeasonKit.celebrate(w)
 	var foot := footer()
 	var urgent := FightWeek.pending(w, night) if night != null else []
 	if not urgent.is_empty():
@@ -119,8 +134,8 @@ func _agenda(w: GameWorld, ups: Array, skip_first: bool) -> Array:
 			"cb": func(): UIManager.push("tv")})
 	var aw := DashKit.awards_week(w)
 	if aw >= 0:
-		items.append({"week": aw, "title": "Prêmios de %d" % w.year(), "text": "Lutador, luta, nocaute e revelação do ano", "color": UIColors.GOLD,
-			"cb": func(): UIManager.push("legacy")})
+		items.append({"week": aw, "title": "Noite de gala de %d" % w.year(), "text": "Prêmios do ano, balanço das metas e metas novas", "color": UIColors.GOLD,
+			"cb": func(): UIManager.push("season")})
 	return items
 
 
@@ -164,3 +179,4 @@ func _advance() -> void:
 	refresh()
 	play_intro()
 	scroll_to_top()
+	SeasonKit.after_week(world(), refresh)

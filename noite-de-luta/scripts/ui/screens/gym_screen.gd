@@ -72,6 +72,7 @@ func refresh() -> void:
 	])
 	c.add_child(menu)
 	columnize(c, 1, 2, 1)
+	TutorialKit.tip(self, "gym")
 
 
 func _rep_text(r: float) -> String:

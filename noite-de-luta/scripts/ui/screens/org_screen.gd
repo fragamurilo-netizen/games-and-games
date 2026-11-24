@@ -62,3 +62,4 @@ func refresh() -> void:
 		if shown >= 30:
 			break
 	columnize(c, 0, 2, 1)
+	TutorialKit.tip(self, "org")

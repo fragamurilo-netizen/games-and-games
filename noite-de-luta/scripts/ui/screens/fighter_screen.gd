@@ -38,6 +38,7 @@ func refresh() -> void:
 		"contrato":
 			_contrato(w, f, c)
 	_actions(w, f)
+	TutorialKit.tip(self, "fighter")
 
 
 func _header(w: GameWorld, f: Fighter) -> Control:
@@ -487,10 +488,12 @@ func _treino(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 		items.append([k, String(fo["name"]), String(fo["help"])])
 	c.add_child(UIKit.option_grid(items, String(f.training.get("focus", "equilibrado")), func(k: String):
 		f.training["focus"] = k
+		Tutorial.mark(world(), "treino")
 		refresh()))
 	c.add_child(UIKit.section_header("Intensidade"))
 	c.add_child(UIKit.segment([["0", "Leve"], ["1", "Normal"], ["2", "Pesado"]], str(int(f.training.get("intensity", 1))), func(k: String):
 		f.training["intensity"] = int(k)
+		Tutorial.mark(world(), "treino")
 		refresh()))
 	var txt: String = ["Evolui devagar, quase sem risco de lesão. Bom na semana antes da luta.", "O ritmo de sempre.", "Evolui mais rápido, mas a condição física cai e o risco de lesão sobe."][int(f.training.get("intensity", 1))]
 	c.add_child(UIKit.label(txt, "Small", true))

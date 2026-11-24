@@ -41,6 +41,8 @@ func refresh() -> void:
 		cities.add_child(_city_row(w, ev, String(r[1]), String(r[2]), r[3], locked))
 	c.add_child(cities)
 	columnize(c, 1, 2)
+	TutorialKit.tip(self, "venue")
+	Tutorial.mark(world(), "venue")
 
 
 func _summary(w: GameWorld, ev: FightEvent, pr: Dictionary, locked: bool, frozen: bool) -> Control:

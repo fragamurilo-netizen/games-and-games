@@ -1,5 +1,6 @@
 extends BaseScreen
-## Opções do aparelho: som, vibração, velocidade da luta ao vivo e movimento.
+## Opções do aparelho (som, vibração, velocidade da luta ao vivo e movimento) e, com uma carreira
+## aberta, as dicas de primeira vez das telas.
 
 
 func setup(p: Dictionary) -> void:
@@ -20,6 +21,25 @@ func refresh() -> void:
 	c.add_child(UIKit.segment(items, str(AppSettings.fight_speed), func(k: String):
 		AppSettings.fight_speed = int(k)
 		AppSettings.save_settings()))
+	var w := world()
+	if w == null:
+		return
+	# Da carreira aberta: as dicas de primeira vez das telas.
+	c.add_child(UIKit.section_header("Ajuda nesta carreira"))
+	var tips := CheckButton.new()
+	tips.text = "Dicas na primeira visita a cada tela"
+	tips.button_pressed = bool(w.tut.get("tips_on", false))
+	tips.custom_minimum_size.y = UITokens.H_BUTTON
+	tips.toggled.connect(func(v: bool):
+		w.tut["tips_on"] = v
+		GameManager.save_now())
+	c.add_child(tips)
+	c.add_child(UIKit.button("Mostrar todas as dicas de novo", "GhostButton", func():
+		w.tut["tips"] = {}
+		w.tut["tips_on"] = true
+		GameManager.save_now()
+		UIManager.toast("As dicas voltam a aparecer na próxima visita a cada tela.")
+		refresh()))
 
 
 func _toggle(text: String, on: bool, cb: Callable) -> Control:

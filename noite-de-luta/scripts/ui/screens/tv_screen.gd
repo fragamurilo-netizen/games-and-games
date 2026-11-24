@@ -40,6 +40,8 @@ func refresh() -> void:
 	else:
 		c.add_child(UIKit.state_block("empty", "Nenhuma proposta por enquanto", "As propostas chegam %d semanas antes do fim do contrato. Noites quentes e prestígio alto fazem os parceiros pagarem mais." % TVDeal.NOTICE))
 	columnize(c, 0, 2)
+	TutorialKit.tip(self, "tv")
+	Tutorial.mark(world(), "tv")
 
 
 func _current(w: GameWorld) -> Control:

@@ -90,6 +90,7 @@ func refresh() -> void:
 		GameManager.save_now()
 		refresh()))
 	foot.get_parent().visible = unread > 0
+	TutorialKit.tip(self, "inbox")
 
 
 static func _cap(t: String) -> String:

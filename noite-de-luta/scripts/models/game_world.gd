@@ -74,6 +74,23 @@ var tv_offers: Array = []
 var inbox: Array = []
 var inbox_seq: int = 0
 var inbox_news_week: int = 0
+## Temporada do jogador: {year, items: as três metas, c: contadores do ano, past: os anos
+## fechados, v0/cash0/rep0: como o ano começou}. Ver Season.
+var goals: Dictionary = {}
+## Quem cobra o jogador: o apoio da cidade (academia) ou a confiança dos sócios (presidente).
+## {v (0 a 100), log, why: [[semana, variação, motivo, etiqueta]], low, ult, strikes, terms}. Ver Season.
+var support: Dictionary = {}
+## Contadores da carreira inteira (vitórias, cinturões, noites, público...). Ver Season.bump.
+var life: Dictionary = {}
+## Conquistas: chave -> semana em que saiu. Ver Achievements.
+var feats: Dictionary = {}
+## Cerimônia de fim de ano à espera do jogador: {year, seen}. Ver Season.year_end.
+var gala: Dictionary = {}
+## Tutorial guiado: {on, done: {passo: semana}, tips: {dica: true}, seen: {tela: true}}. Ver Tutorial.
+var tut: Dictionary = {}
+## O que a interface ainda tem para comemorar (meta cumprida, conquista): [{k, t, x}]. Não vai
+## para o save: quem perdeu a festa encontra tudo na caixa de entrada.
+var pops: Array = []
 
 
 func new_id() -> int:
@@ -264,7 +281,8 @@ func to_dict() -> Dictionary:
 		"delegate": delegate_cards, "bout_block": bout_block, "incidents": incidents,
 		"season": season, "awards": awards, "hall": hall, "scouting": scouting,
 		"rival": rivalries, "interim": interim, "tv": tv, "tv_offers": tv_offers, "belt_wait": belt_wait,
-		"inbox": inbox, "inbox_seq": inbox_seq, "inbox_nw": inbox_news_week}
+		"inbox": inbox, "inbox_seq": inbox_seq, "inbox_nw": inbox_news_week,
+		"goals": goals, "support": support, "life": life, "feats": feats, "gala": gala, "tut": tut}
 
 
 static func from_dict(d: Dictionary) -> GameWorld:
@@ -330,6 +348,19 @@ static func from_dict(d: Dictionary) -> GameWorld:
 	w.inbox_news_week = int(d.get("inbox_nw", w.week))
 	for i: Dictionary in w.incidents:
 		i["refused"] = (i.get("refused", []) as Array).map(func(v): return int(v))
+	w.goals = d.get("goals", {})
+	w.support = d.get("support", {})
+	w.life = d.get("life", {})
+	w.feats = d.get("feats", {})
+	w.gala = d.get("gala", {})
+	# Save de antes do tutorial: quem já está jogando não volta para os primeiros passos.
+	w.tut = d.get("tut", Tutorial.for_old_save())
+	# Save de antes das metas: a temporada começa de onde o jogador está, e o que ele já tem
+	# (reputação, caixa, campeões) vira conquista sem foguetório.
+	var fresh := w.goals.is_empty()
+	Season.ensure(w)
+	if fresh:
+		Achievements.check(w, true)
 	# Save de antes dos marcos de carreira: o passado de cada um entra sem data, de uma vez.
 	CareerStats.ensure_all_marks(w)
 	return w

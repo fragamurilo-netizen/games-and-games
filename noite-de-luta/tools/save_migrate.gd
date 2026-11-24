@@ -23,6 +23,9 @@ func _initialize() -> void:
 			if not f.marks.is_empty():
 				with_marks += 1
 	print("aberto: %s, semana %d, %d lutadores; profissionais com marcos %d de %d; notícias %d" % [w.role, w.week, w.fighters.size(), with_marks, pros, w.news.size()])
+	print("temporada: %d metas (%s), %s %.0f, conquistas %d (%d pontos, sem aviso: %d na fila), guia %s, dicas pendentes %s" % [Season.items(w).size(),
+		"; ".join(Season.items(w).map(func(g: Dictionary) -> String: return String(g["t"]))), Season.meter_short(w), Season.value_of(w), Achievements.count(w), Achievements.points(w), w.pops.size(),
+		"ligado" if Tutorial.active(w) else "desligado", str(Tutorial.TIPS.keys().filter(func(k: String) -> bool: return Tutorial.tip_due(w, k)))])
 	var news0 := w.news.size()
 	var week0 := w.week
 	for i in weeks:
@@ -41,6 +44,7 @@ func _initialize() -> void:
 		var r := CareerStats.rates(f)
 		print("* %s %s moral %.0f (%s) conhecido %.2f potencial %s números em %d lutas (histórico %d) marcos %d curva %d" % [f.display_name(), f.record_text(), f.morale, Morale.label(f), f.known,
 			str(Scouting.estimate(w, f).get("lo", "?")), int(r["n"]), f.history.size(), f.marks.size(), CareerStats.curve_points(w, f).size()])
+	print("temporada depois: %s %.0f, conquistas %d, metas cumpridas %d, cerimônia %s" % [Season.meter_short(w), Season.value_of(w), Achievements.count(w), int(Season.life(w, "goals_met")), str(w.gala)])
 	var js := JSON.stringify(w.to_dict())
 	var w2 := GameWorld.from_dict(JSON.parse_string(js))
 	print("depois de %d semanas: semana %d, save %d KB (era %d KB), recarregado com %d lutadores" % [weeks, w2.week, js.length() / 1024, txt.length() / 1024, w2.fighters.size()])

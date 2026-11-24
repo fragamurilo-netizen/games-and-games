@@ -44,3 +44,4 @@ func refresh() -> void:
 			var id := ev.id
 			c.add_child(OrgKit.event_card(w, ev, func(): UIManager.push("org_event", {"id": id})))
 	columnize(c, 3 if _view == "next" else 1, 2)
+	TutorialKit.tip(self, "events")

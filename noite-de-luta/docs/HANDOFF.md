@@ -1,5 +1,98 @@
 # Noite de Luta — nota de passagem (24/11/2026)
 
+## Rodada 13 de 24/11/2026: viciar (APK 0.6.0)
+
+Quarta etapa da lista do dono rumo à 1.0: motivo para jogar a próxima semana e o próximo ano.
+O motor da luta não mudou (`fight_soak --n=100` dá os mesmos totais).
+
+- **Metas da temporada** (`scripts/systems/season.gd`, `class_name Season`). Três metas por ano,
+  escolhidas na virada com sorteio próprio (`hash([seed, ano, "metas"])`, não gasta o do mundo):
+  uma esportiva, uma de resultados ou de público e uma da casa. Empresário: defender cinturão,
+  degrau no ranking (o melhor da casa × 0,9), disputar cinturão, vitórias, vitórias antes do
+  fim, saldo positivo, três seguidas, equipe, reputação, caixa na virada, bolsas, estrear na
+  Liga Global. Presidente: disputas de cinturão, noites quentes, público, cards completos,
+  pay-per-view, lucro das noites, prestígio. Modos: `c` conta no ano, `r` basta alcançar, `h`
+  vale como o ano terminar. Meta batida paga na hora (`Season.check` e `_reward`: dinheiro,
+  reputação e +6 no termômetro); meta perdida custa na virada (5 para o presidente, 3 para a
+  academia); as três cumpridas dão +5. O alvo do presidente sai da média dos últimos três anos
+  (`_base`) vezes 1,03 (0,97 com prestígio de 95 para cima), com piso de 80% do alvo do
+  primeiro ano (`FIRST`) e teto do calendário. Contadores do ano em `w.goals["c"]`, da
+  carreira em `w.life` (`Season.bump`, `peak`); os ganchos estão em `Career.resolve`
+  (`on_bout`), `Org.close_event` (`on_night`), `Signing` e `Career._pay`.
+- **Pressão** (mesmo arquivo). Um termômetro de 0 a 100 em `w.support["v"]`: **apoio da
+  cidade** para a academia (começa em 42) e **confiança dos sócios** para o presidente (50).
+  Faixas em 20, 40 e 75 (`LOW`, `COLD`, `WARM`), com cinco nomes (`level_name`). Cada mexida
+  tem motivo guardado (`nudge`, junta o mesmo motivo por até 8 semanas; `reasons` para a
+  tela) e toda semana o valor volta 1,2% em direção a 50. Academia: vitória sobe (mais em
+  evento grande e em casa), derrota desce pouco, campeão segura, equipe vazia, academia parada
+  e caixa negativo descem; de 40 para cima o comércio local paga patrocínio semanal
+  (`sponsor`), de 75 para cima lutador da terra assina mais fácil (`sign_bonus`) e a prefeitura
+  premia na virada; três semanas abaixo de 20 e a cidade vira as costas (−3 de reputação, sem
+  patrocínio até voltar a 40). Presidente: cada noite é comparada com as últimas seis do mesmo
+  tipo (lucro e hype), noite cancelada e no prejuízo pesam, cinturão vago há mais de 6 semanas
+  sem disputa marcada desce, prestígio subindo ou caindo mexe; de 75 para cima os sócios
+  liberam verba (+3 de hype em toda noite, `hype_bonus`), abaixo de 20 seguram (−2); três
+  semanas abaixo de 20 e vem o **ultimato** (12 semanas para voltar a 35). Ultimato perdido:
+  na primeira vez, **intervenção** (15% do caixa em dividendos, −6 de prestígio, volta a 42);
+  na segunda, **fim do mandato** (`Season.fired`): o jogador escolhe "Começar novo mandato"
+  (`new_term`: caixa volta ao mínimo ou perde um quarto, −8 de prestígio, termômetro em 50) ou
+  sai para o menu. Uma semana sem escolher e o mandato novo começa sozinho.
+- **Conquistas** (`scripts/systems/achievements.gd`). 82 no total: 46 para o empresário e 44
+  para o presidente (8 valem para os dois), em cinco grupos (lutas, cinturões, noites, a casa,
+  temporada) e três níveis (bronze 10, prata 25, ouro 50 pontos). Cada linha de `DEFS` é
+  `[chave, papel, grupo, nível, título, texto, medida, alvo, escondida]`; a medida é um
+  contador de carreira (`life:...`) ou `rep`, `cash`, `debt`, `roster`, `staff`, `champs`,
+  `sup`, `stars95`. `Achievements.check` roda depois de cada luta, noite e semana. Os pontos
+  dão o **título de gestor** (`RANKS`: Novato, Promessa, Profissional, Respeitado, Estrela aos
+  500, Lenda aos 800).
+- **Cerimônia de fim de ano** (`gala_screen.gd`, tela "gala"). `Season.year_end` roda depois de
+  `Legacy.year_end`, fecha as metas, guarda o balanço em `w.goals["past"]` (até 15 anos),
+  sorteia as metas novas e deixa `w.gala = {year, seen: false}`. Ao avançar a semana da virada,
+  `SeasonKit.after_week` abre a noite de gala sozinha, em etapas: abertura com os números da
+  casa, prêmios do ano (os da academia destacados), Hall da Fama, "Sua temporada" (veredito,
+  metas, termômetro do ano e conquistas) e as metas do ano novo. Dá para rever em Temporada,
+  aba Anos. Os avisos de conquista esperam a cerimônia acabar.
+- **Tutorial guiado** (`scripts/systems/tutorial.gd`, `scripts/ui/tutorial_kit.gd`). Cartão
+  "Primeiros passos" no Início com seis passos por papel, botão que leva à tela certa e
+  "Pular o guia"; os passos se cumprem jogando (`Tutorial.sync`), o último rende US$ 3 mil à
+  academia e a conquista. **Dica de primeira vez** no alto de 16 telas (`TutorialKit.tip`,
+  textos em `Tutorial.TIPS`), com "Entendi" e "Não mostrar dicas"; em Opções dá para religar e
+  rever todas. A nova carreira tem o interruptor "Tutorial guiado".
+- **Telas e peças**: tela "season" (`season_screen.gd`) com as abas Metas, Cidade ou Sócios
+  (termômetro grande, linha das últimas 26 semanas, o que cada faixa rende, os motivos),
+  Conquistas e Anos; cartão da temporada no Início dos dois papéis; `scripts/ui/season_kit.gd`
+  (termômetro, linha de meta, linha de conquista, cartão de título, comemorações, aviso de
+  intervenção e de fim de mandato); `scripts/ui/components/support_bar.gd`;
+  `UIManager.award_toast` (aviso dourado com fila: dois por vez). Caixa de entrada: grupo
+  "Temporada" com pendências da cerimônia, das metas novas, do ultimato e do apoio baixo.
+- **Save**: `GameWorld.goals`, `support`, `life`, `feats`, `gala`, `tut` (e `pops`, que não é
+  salvo). Save antigo ganha metas proporcionais ao que falta do ano, o termômetro no valor
+  inicial, as conquistas que já merece sem aviso, o guia desligado e só a dica da tela nova.
+- **Acertos de carona**: estreante sem luta aparecia como "sem luta há 1000 semanas" na caixa
+  de entrada; prêmio do ano dizia "nocauteia com nocaute"; texto do Hall da Fama repetia as
+  vitórias.
+- **Ferramentas novas**: `tools/season_probe.gd` (joga N anos sozinho, ativo ou parado com
+  `--lazy`, e mostra metas, termômetro, contadores e conquistas ano a ano) e
+  `tools/season_shots_runner.gd` (passeio pelas telas da etapa; `--part=presidente`).
+  `save_migrate.gd` agora mostra o que a temporada preencheu no save antigo.
+- **Calibragem** (6 anos, sementes 2027 e 7). Academia ativa: 3, 1, 3, 3, 1, 3 e 3, 0, 1, 2,
+  1, 0 metas, cidade entre 23 e 93. Academia parada: 3, 0, 0, 2, 2, 0, cidade caindo até 18.
+  Presidente ativo: 3, 3, 2, 3, 2, 1 e 3, 2, 3, 3, 1, 0, sem ultimato em 6 anos. Presidente
+  parado: 0, 3, 1, 3, 0, 3, com uma intervenção no segundo ano.
+- **Verificado**: `check_scripts` 148 scripts, 0 erros; `fight_soak --n=100` igual; `world_sim
+  --weeks=156` nos dois papéis sem erro; saves da 0.5.0 migrados nos dois papéis; passeio da
+  etapa em pé, deitado e tablet; `design_shots` nos dois papéis, atletas, eventos, `look_shots`
+  e os passeios da 0.5 em pé, deitado e tablet sem erro. **Não testado em celular de verdade.**
+- **Ficou para a 0.9**: a economia da academia é negativa de nascença (bolsas de uns US$ 10 a
+  30 mil por ano contra mais de US$ 130 mil de custo; o patrocínio local só ajuda) e a do
+  presidente é generosa demais (US$ 115 milhões de lucro no primeiro ano); por isso os alvos
+  de `FIRST` e as conquistas de caixa precisam de outra passada depois do reequilíbrio. O
+  presidente ativo ganha 18 conquistas no primeiro ano (muita coisa de uma vez). A fama infla
+  com os anos. O save cresce cerca de 1,3 MB por ano de jogo. "Cansado de cortar peso" sai no
+  masculino para lutadora.
+- **Próximo**: 0.9 (equilíbrio e polimento: economia nos dois papéis em 10 anos ou mais,
+  desempenho em celular fraco, migração de saves, varredura de bugs).
+
 ## Rodada 12 de 24/11/2026: UI e HUD profissionais (APK 0.5.0)
 
 Terceira etapa da lista do dono rumo à 1.0. O motor da luta só ganhou dados para a tela (não
@@ -607,7 +700,7 @@ Cinturões com linhagem.
 ## APK de teste
 
 - APKs novos (0.1.2+) ficam nos arquivos do projeto (`noite-de-luta/`), assinados com a chave de
-  teste guardada em `chave-teste/` lá; o atual é o 0.5.0.
+  teste guardada em `chave-teste/` lá; o atual é o 0.6.0.
 - `releases/NoiteDeLuta-0.1.1.apk` (release, arm64, Android 7+; instala por cima da 0.1.0). Assinado com uma chave de teste
   local: um APK novo assinado com outra chave pede desinstalar o antigo antes.
 - Para gerar de novo: modelos de exportação do Godot 4.7.2 (só `android_*.apk` e `version.txt` em
@@ -649,4 +742,6 @@ godot --headless --path . --script res://tools/save_migrate.gd -- --in=/tmp/save
 xvfb-run -a -s "-screen 0 1900x1900x24" godot --path . --resolution 780x1688 --script res://tools/design_shots.gd -- --runner=events_shots_runner --out=/tmp/eventos [--part=empresario]
 godot --headless --path . --script res://tools/events_probe.gd -- --weeks=104 [--role=presidente]
 xvfb-run -a -s "-screen 0 1900x1900x24" godot --path . --resolution 780x1688 --script res://tools/design_shots.gd -- --runner=ui_shots_runner --out=/tmp/ui [--part=presidente|luta] [--prefix=l_] [--tablet]   # deitado: --resolution 1688x780; tablet: 1280x800 com --tablet
+godot --headless --path . --script res://tools/season_probe.gd -- --years=5 [--role=presidente] [--seed=2027] [--lazy]
+xvfb-run -a -s "-screen 0 1900x1900x24" godot --path . --resolution 780x1688 --script res://tools/design_shots.gd -- --runner=season_shots_runner --out=/tmp/temporada [--part=presidente] [--tablet]
 ```

@@ -24,12 +24,13 @@ const CARD_WEEKS := 6
 
 const CATS := {
 	"luta": "Lutas", "equipe": "Equipe", "contrato": "Contratos", "olheiro": "Olheiro", "financas": "Finanças",
-	"noite": "Noites", "tv": "TV", "cinturao": "Cinturões", "mundo": "Mundo",
+	"noite": "Noites", "tv": "TV", "cinturao": "Cinturões", "temporada": "Temporada", "mundo": "Mundo",
 }
 const NEWS_TITLES := {
 	"equipe": "Sua academia", "organizacao": "Sua organização", "olheiro": "Relatório do olheiro", "marco": "Marco de carreira",
 	"cinturao": "Cinturão", "rivalidade": "Rivalidade", "resultado": "Resultado", "tv": "Contrato de TV", "premio": "Prêmios do ano",
 	"hall": "Hall da Fama", "aposentadoria": "Aposentadoria", "categoria": "Troca de categoria", "mercado": "Mercado",
+	"meta": "Meta da temporada", "conquista": "Conquista",
 }
 ## Notícias que já viram pendência (não repetir como aviso).
 const NEWS_SKIP := ["O contrato de ", "está infeliz na equipe", "Três propostas estão na mesa", "A organização precisa decidir"]
@@ -233,12 +234,48 @@ static func _manager(w: GameWorld) -> Array:
 				[f.id], "fighter", {"id": f.id}, 45))
 		var idle := w.week - f.last_fight_week
 		if f.bout_id < 0 and f.available() and not with_offer.has(f.id) and idle >= IDLE_WEEKS and Matchmaker.ready_to_book(w, f, 0):
-			out.append(_c("parado:%d" % f.id, "luta", "Comissão técnica", "%s está sem luta há %d semanas" % [f.short_name(), idle],
-				"Lutador parado perde ritmo e moral. Desafie alguém pelo ranking ou espere uma proposta.", [f.id], "fighter", {"id": f.id}, 30))
+			var never := f.last_fight_week < 0
+			out.append(_c("parado:%d" % f.id, "luta", "Comissão técnica", "%s ainda não tem luta marcada" % f.short_name() if never else "%s está sem luta há %d semanas" % [f.short_name(), idle],
+				"Quem não luta não ganha ritmo nem nome. Desafie alguém pelo ranking ou espere uma proposta." if never else "Lutador parado perde ritmo e moral. Desafie alguém pelo ranking ou espere uma proposta.", [f.id], "fighter", {"id": f.id}, 30))
 	if t.balance < 0.0:
 		out.append(_c("caixa", "financas", "Financeiro", "Caixa no vermelho: %s" % Fmt.money(t.balance),
 			"Sem caixa, camp fora de casa e sparring param. Corte custos na Academia ou feche uma luta.", [], "gym", {}, 70))
+	_season(w, out)
 	return out
+
+
+## Os dois papéis: a cerimônia à espera, as metas do ano, o termômetro baixo e o ultimato.
+static func _season(w: GameWorld, out: Array) -> void:
+	var pres := w.is_president()
+	var who := "Conselho de sócios" if pres else "Associação comercial"
+	if Season.gala_pending(w):
+		var y := int(w.gala["year"])
+		out.append(_c("gala:%d" % y, "temporada", "Liga", "Noite de gala de %d" % y,
+			"Os prêmios do ano, o balanço da sua temporada e as metas de %d." % (y + 1), [], "gala", {"year": y}, 96))
+	if w.goals.is_empty() or w.support.is_empty():
+		return
+	var gy := int(w.goals.get("year", 0))
+	var names: Array = Season.items(w).map(func(g: Dictionary) -> String: return String(g["t"]))
+	out.append(_c("metas:%d" % gy, "temporada", who, "Metas de %d" % gy,
+		"%s. Cada uma rende dinheiro, %s e %s." % ["; ".join(names), "prestígio" if pres else "reputação", "a confiança dos sócios" if pres else "o apoio da cidade"],
+		[], "season", {"tab": "metas"}, 36))
+	var v := Season.value_of(w)
+	var ult: Dictionary = w.support.get("ult", {})
+	var worst := ""
+	var low := 0.0
+	for e: Array in Season.reasons(w, 6):
+		if float(e[1]) < low:
+			low = float(e[1])
+			worst = String(e[2])
+	if pres and not ult.is_empty():
+		var left := maxi(0, int(ult["until"]) - w.week)
+		out.append(_c("ult:%d" % int(ult["until"]), "temporada", who, "Ultimato dos sócios: %s" % Fmt.plural(left, "semana", "semanas"),
+			"A confiança está em %d e precisa chegar a %d. Sem isso, os sócios %s." % [int(round(v)), int(float(ult["need"])),
+			"encerram o seu mandato" if int(w.support.get("strikes", 0)) >= 1 else "intervêm na organização"], [], "season", {"tab": "apoio"}, 86))
+	elif v < Season.COLD:
+		out.append(_c("apoio:baixo", "temporada", who, "Os sócios estão inquietos" if pres else "A cidade está desconfiada da academia",
+			"%s em %d.%s" % ["Confiança" if pres else "Apoio", int(round(v)), (" O que mais pesou: %s." % worst.to_lower()) if worst != "" else ""],
+			[], "season", {"tab": "apoio"}, 46))
 
 
 # --- Presidente ----------------------------------------------------------------------------
@@ -299,6 +336,7 @@ static func _president(w: GameWorld) -> Array:
 	if t.balance < 0.0:
 		out.append(_c("caixa", "financas", "Financeiro", "Caixa no vermelho: %s" % Fmt.money(t.balance),
 			"As noites continuam, mas o prestígio cai. Veja as contas na Organização.", [], "gym", {}, 70))
+	_season(w, out)
 	return out
 
 
@@ -330,6 +368,9 @@ static func _import_news(w: GameWorld) -> int:
 			from = Scouting.scout_name(w)
 		elif kind == "premio" or kind == "hall":
 			cat = "mundo"
+		elif kind in ["meta", "apoio", "conquista"]:
+			cat = "temporada"
+			from = "Carreira" if kind == "conquista" else ("Conselho de sócios" if pres else "Associação comercial")
 		elif pres:
 			if kind == "organizacao":
 				cat = "noite"
@@ -355,8 +396,15 @@ static func _import_news(w: GameWorld) -> int:
 		if skip or have.has(key):
 			continue
 		have[key] = true
-		var c := _c(key, cat, from, String(NEWS_TITLES.get(kind, "Notícia")), text, ids, "fighter" if not ids.is_empty() else ("tv" if kind == "tv" else "none"),
-			{"id": int(ids[0])} if not ids.is_empty() else {}, 10)
+		var act := "fighter" if not ids.is_empty() else ("tv" if kind == "tv" else "none")
+		var arg: Dictionary = {"id": int(ids[0])} if not ids.is_empty() else {}
+		var title := String(NEWS_TITLES.get(kind, "Notícia"))
+		if kind in ["meta", "apoio", "conquista"]:
+			act = "season"
+			arg = {"tab": {"meta": "metas", "apoio": "apoio", "conquista": "conquistas"}[kind]}
+			if kind == "apoio":
+				title = Season.meter_name(w)
+		var c := _c(key, cat, from, title, text, ids, act, arg, 10)
 		_add(w, c, false)
 		(w.inbox.back() as Dictionary)["wk"] = int(n["week"])
 		added += 1
