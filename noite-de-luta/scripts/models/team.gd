@@ -21,6 +21,10 @@ var kind: String = "academia"
 var staff: Array = []
 ## Lançamentos da semana para a tela de finanças: [{week, label, value}] (últimos 80).
 var ledger: Array = []
+## Só a equipe do jogador: caixa e reputação no fim de cada semana (últimas 26), para o painel
+## inicial mostrar a tendência.
+var cash_log: Array = []
+var rep_log: Array = []
 
 
 func add_money(week: int, label: String, value: float) -> void:
@@ -28,6 +32,15 @@ func add_money(week: int, label: String, value: float) -> void:
 	ledger.append({"week": week, "label": label, "value": value})
 	if ledger.size() > 120:
 		ledger = ledger.slice(ledger.size() - 120)
+
+
+## Fecha a semana no histórico do painel (caixa em milhares, reputação com uma casa).
+func log_week() -> void:
+	cash_log.append(int(round(balance / 1000.0)))
+	rep_log.append(snappedf(reputation, 0.1))
+	if cash_log.size() > 26:
+		cash_log = cash_log.slice(cash_log.size() - 26)
+		rep_log = rep_log.slice(rep_log.size() - 26)
 
 
 func staff_of(role: String) -> Dictionary:
@@ -54,8 +67,12 @@ func weekly_wages() -> float:
 
 
 func to_dict() -> Dictionary:
-	return {"id": id, "name": name, "short": short, "nation": nation, "city": city, "c1": color1.to_html(false),
+	var d := {"id": id, "name": name, "short": short, "nation": nation, "city": city, "c1": color1.to_html(false),
 		"c2": color2.to_html(false), "rep": reputation, "bal": balance, "user": is_user, "staff": staff, "ledger": ledger, "kind": kind}
+	if not cash_log.is_empty():
+		d["clog"] = cash_log
+		d["rlog"] = rep_log
+	return d
 
 
 static func from_dict(d: Dictionary) -> Team:
@@ -73,4 +90,6 @@ static func from_dict(d: Dictionary) -> Team:
 	t.staff = d.get("staff", [])
 	t.ledger = d.get("ledger", [])
 	t.kind = String(d.get("kind", "academia"))
+	t.cash_log = (d.get("clog", []) as Array).map(func(v): return int(v))
+	t.rep_log = (d.get("rlog", []) as Array).map(func(v): return float(v))
 	return t

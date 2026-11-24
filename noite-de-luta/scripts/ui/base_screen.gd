@@ -11,7 +11,22 @@ var screen_subtitle: String = ""
 var show_top: bool = true
 var show_nav: bool = true
 
+## Entrada animada dos cartões: vale na primeira vez que a tela aparece e sempre que alguém
+## religar (o Início, depois de avançar a semana). `play_intro` consome.
+var intro_pending := true
+## Telas que montam o conteúdo aos poucos (a luta) desligam a entrada.
+var intro_enabled := true
+## Peças do esqueleto, guardadas por referência: uma tela pode mudar a rolagem e o rodapé de
+## lugar (a luta, com o celular deitado, põe os dois numa coluna ao lado do palco).
+var _scroll_node: ScrollContainer
+var _margin_node: MarginContainer
+var _content_node: VBoxContainer
+var _footer_node: PanelContainer
+var _footer_box: VBoxContainer
+
 ## Largura máxima do conteúdo em telas largas (o resto vira margem, centralizando).
+## Falso para telas que cuidam da própria largura (a luta em duas colunas).
+var fit_content := true
 var max_content_width := 1100.0:
 	set(v):
 		if not is_equal_approx(v, max_content_width):
@@ -35,6 +50,7 @@ func _init() -> void:
 	sc.scroll_deadzone = 14
 	sc.follow_focus = false
 	body.add_child(sc)
+	_scroll_node = sc
 	var m := MarginContainer.new()
 	m.name = "Margin"
 	m.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -43,10 +59,12 @@ func _init() -> void:
 	m.add_theme_constant_override(&"margin_top", UITokens.S3)
 	m.add_theme_constant_override(&"margin_bottom", UITokens.S6)
 	sc.add_child(m)
+	_margin_node = m
 	var c := VBoxContainer.new()
 	c.name = "Content"
 	c.add_theme_constant_override(&"separation", UITokens.S4)
 	m.add_child(c)
+	_content_node = c
 	var f := PanelContainer.new()
 	f.name = "Footer"
 	f.visible = false
@@ -56,6 +74,8 @@ func _init() -> void:
 	fb.name = "FooterBox"
 	fb.add_theme_constant_override(&"separation", UITokens.S2)
 	f.add_child(fb)
+	_footer_node = f
+	_footer_box = fb
 
 
 func _notification(what: int) -> void:
@@ -69,15 +89,15 @@ func _max_width() -> float:
 
 ## Centraliza o conteúdo quando a tela é mais larga que `max_content_width`.
 func _fit_content_width() -> void:
-	var m := get_node_or_null("Body/Scroll/Margin") as MarginContainer
-	if m == null:
+	var m := _margin_node
+	if m == null or not fit_content:
 		return
 	var max_w := _max_width()
 	var side := maxi(UITokens.GUTTER, int((size.x - max_w) * 0.5))
 	if m.get_theme_constant(&"margin_left") != side:
 		m.add_theme_constant_override(&"margin_left", side)
 		m.add_theme_constant_override(&"margin_right", side)
-	var f := get_node_or_null("Body/Footer/FooterBox") as Control
+	var f: Control = _footer_box
 	if f != null:
 		var fs := maxi(0, int((size.x - max_w) * 0.5))
 		f.custom_minimum_size.x = 0
@@ -117,16 +137,15 @@ func world() -> GameWorld:
 
 
 func content() -> VBoxContainer:
-	return get_node_or_null("Body/Scroll/Margin/Content") as VBoxContainer
+	return _content_node
 
 
 ## Limpa o conteúdo e o rodapé antes de reconstruir.
 func reset() -> VBoxContainer:
 	var c := content()
 	UIKit.clear(c)
-	var fb := get_node_or_null("Body/Footer/FooterBox") as VBoxContainer
-	if fb != null:
-		UIKit.clear(fb)
+	if _footer_box != null:
+		UIKit.clear(_footer_box)
 	hide_footer()
 	return c
 
@@ -142,22 +161,45 @@ func columnize(c: Container, start: int = 0, max_cols: int = 2, pinned: int = 0)
 	UIKit.columns(c, cards, content_width(), max_cols, pinned)
 
 
+## Toca a entrada dos cartões do conteúdo (em colunas, na ordem de leitura), uma vez.
+func play_intro() -> void:
+	if not intro_pending:
+		return
+	intro_pending = false
+	var c := content()
+	if c == null or not intro_enabled:
+		return
+	var nodes: Array = []
+	for ch in c.get_children():
+		if not ch.has_meta(&"columns"):
+			nodes.append(ch)
+			continue
+		var k := 0
+		var more := true
+		while more:
+			more = false
+			for col in ch.get_children():
+				if k < col.get_child_count():
+					nodes.append(col.get_child(k))
+					more = true
+			k += 1
+	Anim.stagger(nodes)
+
+
 ## Área fixa na base da tela (o botão principal). Fica oculta até ser usada.
 func footer() -> VBoxContainer:
-	var f := get_node_or_null("Body/Footer") as Control
-	if f != null:
-		f.visible = true
-	return get_node_or_null("Body/Footer/FooterBox") as VBoxContainer
+	if _footer_node != null:
+		_footer_node.visible = true
+	return _footer_box
 
 
 func hide_footer() -> void:
-	var f := get_node_or_null("Body/Footer") as Control
-	if f != null:
-		f.visible = false
+	if _footer_node != null:
+		_footer_node.visible = false
 
 
 func scroll() -> ScrollContainer:
-	return get_node_or_null("Body/Scroll") as ScrollContainer
+	return _scroll_node
 
 
 func scroll_to_top() -> void:

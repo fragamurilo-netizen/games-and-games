@@ -1,10 +1,16 @@
 class_name FightScreen
 extends BaseScreen
-## A luta ao vivo, em texto (como no LEATHER): placar com o relógio do round, fôlego e dano de
-## cada um e a narração lance a lance. No intervalo, o corner: números do round, a leitura do
-## técnico e o plano para o round seguinte. No fim, o resultado e a bolsa.
+## A luta ao vivo, como numa transmissão: o placar (round, relógio, fôlego, dano e a linha de
+## números da luta), o palco com a luta animada e três abas embaixo: os lances narrados, os
+## números ao vivo (round ou luta inteira) e o placar não oficial da transmissão.
+## No intervalo, o corner: números do round, a leitura do técnico e o plano para o round
+## seguinte. No fim, a ficha dos juízes round a round, o resultado e a bolsa.
 ## Com `spectator` (presidente, ou um fã assistindo), ninguém é "a sua equipe": os dois corners
 ## ajustam o plano sozinhos e o intervalo mostra o que cada um pediu.
+## Com o aparelho deitado, o placar e o palco ficam à esquerda e as abas, o conteúdo e o rodapé
+## vão para uma coluna à direita.
+
+const TABS := [["lances", "Lances"], ["numeros", "Números"], ["placar", "Placar"]]
 
 var _e: FightEngine
 var _b: Bout
@@ -18,11 +24,14 @@ var _speed := 1
 var _plan: Dictionary = {}
 var _feed: VBoxContainer
 var _board: PanelContainer
+var _board_holder: MarginContainer
 var _clock_lbl: Label
 var _round_lbl: Label
+var _pips: FightHud.Pips
 var _bars: Array = [] # [ProgressBar fôlego, ProgressBar dano] por lado
 var _pos_lbl: Label
-var _bars_box: HBoxContainer
+var _bars_box: Control
+var _mini: FightHud.MiniLine
 var _spectator := false
 ## Luta animada (lances do motor encenados) e onde ela está na lista de lances.
 var _stage: FightStage2D
@@ -30,26 +39,54 @@ var _stage_holder: MarginContainer
 var _view3d: FightView3D
 var _bi := 0
 var _skip := false
+## Abas embaixo do palco e os números ao vivo: `_base` soma os rounds que já acabaram e
+## `_live` é o round atual até o último lance mostrado (o motor corre o round inteiro antes).
+var _tab := "lances"
+var _tabs_holder: MarginContainer
+var _scope := "luta"
+var _num_box: VBoxContainer
+var _num_panel: FightHud.StatPanel
+var _score_box: VBoxContainer
+var _lean_bar: FightHud.DuelBar
+var _lean_lbl: Label
+var _base: Array = [{}, {}]
+var _live: Array = [{}, {}]
+## Esqueleto: em pé é uma coluna só; deitado, placar e palco à esquerda e o resto numa coluna.
+var _body: VBoxContainer
+var _split: HBoxContainer
+var _side_col: VBoxContainer
+var _land := false
+var _laid := false
+## Revelação dos cartões na decisão (um juiz por vez).
+var _reveal: Tween
+var _reveal_nodes: Array = []
+var _after_reveal := Callable()
 
 
 func setup(p: Dictionary) -> void:
 	super.setup(p)
 	show_nav = false
 	screen_title = "Luta"
+	intro_enabled = false
 	_speed = AppSettings.fight_speed
 
 
 func _ready() -> void:
 	var w := world()
+	_body = get_node("Body")
 	_b = w.bout(int(params["bout"]))
 	var ev := w.event(_b.event_id)
 	screen_title = ev.name
 	screen_subtitle = "%s × %s" % [w.fighter(_b.a).short_name(), w.fighter(_b.b).short_name()]
 	_spectator = bool(params.get("spectator", false))
 	_side = -1 if _spectator else (0 if w.is_user_fighter(w.fighter(_b.a)) else 1)
+	_base = [FightHud.blank(), FightHud.blank()]
+	_live = [FightHud.blank(), FightHud.blank()]
 	_build_board(w)
 	if _b.status != "feita":
 		_build_stage(w)
+	_build_tabs()
+	_layout()
 	if _b.status == "feita":
 		_state = "done"
 		_board_done()
@@ -65,8 +102,81 @@ func _ready() -> void:
 	_start_round()
 
 
+## A luta é montada uma vez; girar o aparelho só troca o esqueleto de lugar.
 func refresh() -> void:
-	pass # a luta é montada uma vez; nada reconstrói no meio
+	if _body != null:
+		_layout()
+
+
+# --- Esqueleto --------------------------------------------------------------------------
+
+func _layout() -> void:
+	var land := UILayout.is_landscape() and _stage_holder != null
+	if not _laid or land != _land:
+		_laid = true
+		_land = land
+		for n: Control in [_board_holder, _stage_holder, _tabs_holder, _scroll_node, _footer_node]:
+			if n != null and n.get_parent() != null:
+				n.get_parent().remove_child(n)
+		if _split != null:
+			_split.queue_free()
+			_split = null
+			_side_col = null
+		if land:
+			_split = HBoxContainer.new()
+			_split.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			_split.add_theme_constant_override(&"separation", 0)
+			_body.add_child(_split)
+			var left := VBoxContainer.new()
+			left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			left.add_theme_constant_override(&"separation", 0)
+			_split.add_child(left)
+			left.add_child(_board_holder)
+			left.add_child(_stage_holder)
+			_side_col = VBoxContainer.new()
+			_side_col.add_theme_constant_override(&"separation", 0)
+			_split.add_child(_side_col)
+			for n: Control in [_tabs_holder, _scroll_node, _footer_node]:
+				_side_col.add_child(n)
+		else:
+			for n: Control in [_board_holder, _stage_holder, _tabs_holder, _scroll_node, _footer_node]:
+				if n != null:
+					_body.add_child(n)
+		fit_content = not land
+		_tabs_holder.add_theme_constant_override(&"margin_left", 0 if land else UITokens.GUTTER_DENSE)
+		if land:
+			_margin_node.add_theme_constant_override(&"margin_left", 0)
+			_margin_node.add_theme_constant_override(&"margin_right", UITokens.GUTTER_DENSE)
+			_footer_box.custom_minimum_size.x = 0
+			_footer_box.size_flags_horizontal = Control.SIZE_FILL
+		else:
+			_fit_content_width()
+	if _side_col != null:
+		_side_col.custom_minimum_size.x = clampf(UILayout.viewport.x * 0.46, 440.0, 640.0)
+	if _stage_holder != null:
+		_stage_holder.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_stage_holder.size_flags_vertical = Control.SIZE_EXPAND_FILL if _land else Control.SIZE_FILL
+		_stage_holder.add_theme_constant_override(&"margin_bottom", UITokens.S2 if _land else 0)
+		_size_stage()
+
+
+## Em pé, o palco encolhe quando a luta acaba: o resultado precisa do espaço.
+func _stage_h() -> float:
+	if _land:
+		return 220.0
+	return FightStage2D.stage_height() * (0.66 if _state == "done" else 1.0)
+
+
+func _size_stage(animate: bool = false) -> void:
+	var h := _stage_h()
+	for n: Control in [_stage, _view3d]:
+		if n == null:
+			continue
+		if animate and Anim.on() and n.custom_minimum_size.y > h:
+			var tw := n.create_tween()
+			tw.tween_property(n, "custom_minimum_size:y", h, 0.35).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		else:
+			n.custom_minimum_size.y = h
 
 
 # --- Placar fixo ------------------------------------------------------------------------
@@ -81,24 +191,35 @@ func _build_board(w: GameWorld) -> void:
 		var side := UIKit.hbox(8)
 		side.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var bar := ColorRect.new()
-		bar.color = UIColors.CORNER_RED if i == 0 else UIColors.CORNER_BLUE
+		bar.color = FightHud.corner_color(i)
 		bar.custom_minimum_size = Vector2(5, 52)
 		var p := FightKit.portrait(w, f, 52)
+		var tv := UIKit.vbox(-2)
+		tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		var n := UIKit.label(f.short_name(), "H3")
 		n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var rk := w.rank_text(f)
+		var sub := UIKit.label("Sua equipe" if i == _side else ("%s · %s" % [rk, f.record_text()] if rk != "Sem ranking" else f.record_text()), "Meta")
+		sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		if i == _side:
+			sub.add_theme_color_override(&"font_color", UIColors.GOLD)
+		tv.add_child(n)
+		tv.add_child(sub)
 		if i == 0:
 			side.add_child(bar)
 			side.add_child(p)
-			side.add_child(n)
+			side.add_child(tv)
 		else:
 			n.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-			side.add_child(n)
+			sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			side.add_child(tv)
 			side.add_child(p)
 			side.add_child(bar)
 		top.add_child(side)
 		if i == 0:
 			var mid := UIKit.vbox(-4)
+			mid.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			_round_lbl = UIKit.label("R1", "Caps")
 			_round_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			mid.add_child(_round_lbl)
@@ -106,34 +227,43 @@ func _build_board(w: GameWorld) -> void:
 			_clock_lbl.add_theme_font_override(&"font", DataTable.tabular_font())
 			_clock_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			mid.add_child(_clock_lbl)
+			_pips = FightHud.Pips.new()
+			_pips.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+			_pips.set_round(1, _b.rounds)
+			mid.add_child(UIKit.margin(_pips, 0, 4, 0, 0))
 			top.add_child(mid)
 	v.add_child(top)
-	var bars := UIKit.hbox(UITokens.S3)
+	# Fôlego e dano: uma linha para cada, com o rótulo no meio (vermelho à esquerda, azul à direita).
+	var bars := UIKit.vbox(4)
 	_bars_box = bars
-	for i in 2:
-		var bv := UIKit.vbox(3)
-		bv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var st := UIKit.bar(100.0, 100.0, UIColors.GREEN, 8)
-		var dm := UIKit.bar(0.0, 100.0, UIColors.RED, 5)
-		var cap := UIKit.label("Sua equipe · fôlego e dano" if i == _side else "Fôlego e dano", "Meta")
-		cap.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT if i == 0 else HORIZONTAL_ALIGNMENT_RIGHT
-		bv.add_child(st)
-		bv.add_child(dm)
-		bv.add_child(cap)
-		if i == 1:
-			st.fill_mode = ProgressBar.FILL_END_TO_BEGIN
-			dm.fill_mode = ProgressBar.FILL_END_TO_BEGIN
-		bars.add_child(bv)
-		_bars.append([st, dm])
+	_bars = [[null, null], [null, null]]
+	var defs := [["Fôlego", UIColors.GREEN, 8, 100.0], ["Dano", UIColors.RED, 6, 0.0]]
+	for k in defs.size():
+		var row := UIKit.hbox(UITokens.S2)
+		for i in 2:
+			var pb := UIKit.bar(float(defs[k][3]), 100.0, defs[k][1], int(defs[k][2]))
+			pb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			pb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			if i == 1:
+				pb.fill_mode = ProgressBar.FILL_END_TO_BEGIN
+			_bars[i][k] = pb
+			row.add_child(pb)
+			if i == 0:
+				var cap := UIKit.label(String(defs[k][0]), "Caps")
+				cap.custom_minimum_size.x = 76
+				cap.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				row.add_child(cap)
+		bars.add_child(row)
 	v.add_child(bars)
-	_pos_lbl = UIKit.label("Em pé, no centro", "Small")
+	_mini = FightHud.MiniLine.new()
+	_mini.set_stats(_base[0], _base[1])
+	v.add_child(_mini)
+	_pos_lbl = UIKit.label("Em pé, no centro", "Meta")
 	_pos_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_pos_lbl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	v.add_child(_pos_lbl)
-	_board.add_child(UIKit.margin(v, 0, 0, 0, 0))
-	var body := get_node("Body")
-	var holder := UIKit.margin(_board, UITokens.GUTTER_DENSE, UITokens.S2, UITokens.GUTTER_DENSE, 0)
-	body.add_child(holder)
-	body.move_child(holder, 0)
+	_board.add_child(v)
+	_board_holder = UIKit.margin(_board, UITokens.GUTTER_DENSE, UITokens.S2, UITokens.GUTTER_DENSE, 0)
 
 
 ## Luta que já acabou sem passar na tela (simulada): o placar mostra onde ela terminou, sem as
@@ -141,10 +271,17 @@ func _build_board(w: GameWorld) -> void:
 func _board_done() -> void:
 	var r := _b.result
 	var finish := not (String(r.get("method", "")) in ["DEC", "EMP"])
-	_round_lbl.text = "Fim · R%d" % (int(r.get("round", 1)) if finish else _b.rounds)
+	var last := int(r.get("round", 1)) if finish else _b.rounds
+	_round_lbl.text = "Fim · R%d" % last
 	_clock_lbl.text = Fmt.clock(maxf(0.0, FightEngine.ROUND_S - float(r.get("time", 0.0)))) if finish else "0:00"
+	_pips.set_round(last, _b.rounds, true)
 	_bars_box.visible = false
 	_pos_lbl.text = "Luta encerrada"
+	var st: Array = r.get("stats", [])
+	if st.size() == 2:
+		_mini.set_stats(st[0], st[1])
+	else:
+		_mini.visible = false
 
 
 func _build_stage(w: GameWorld) -> void:
@@ -154,13 +291,16 @@ func _build_stage(w: GameWorld) -> void:
 	if ev0 != null and ev0.name.rstrip("0123456789 ") != "":
 		_stage.logo = ev0.name.rstrip("0123456789 ").to_upper()
 	_stage_holder = MarginContainer.new()
-	for k: String in ["margin_left", "margin_right"]:
-		_stage_holder.add_theme_constant_override(k, UITokens.GUTTER_DENSE)
+	_stage_holder.add_theme_constant_override(&"margin_left", UITokens.GUTTER_DENSE)
+	_stage_holder.add_theme_constant_override(&"margin_right", UITokens.GUTTER_DENSE)
 	_stage_holder.add_theme_constant_override(&"margin_top", UITokens.S2)
-	var body := get_node("Body")
-	body.add_child(_stage_holder)
-	body.move_child(_stage_holder, 1)
 	_mount_view()
+
+
+func _build_tabs() -> void:
+	var seg := UIKit.segment(TABS, _tab, func(k: String): _set_tab(k))
+	_tabs_holder = UIKit.margin(seg, UITokens.GUTTER_DENSE, UITokens.S2, UITokens.GUTTER_DENSE, 0)
+	_tabs_holder.visible = false
 
 
 ## Põe a luta na vista escolhida (2D, 3D ou escondida no modo texto, onde ela segue tocando).
@@ -176,12 +316,12 @@ func _mount_view() -> void:
 		var ev := world().event(_b.event_id)
 		var logo := ev.name.rstrip("0123456789 ") if ev != null else ""
 		_view3d.setup(_stage, UIColors.CORNER_RED, logo)
-		_view3d.custom_minimum_size.y = FightStage2D.stage_height()
 		_stage_holder.add_child(_view3d)
 	else:
 		_stage.visible = true
 		_stage_holder.add_child(_stage)
 	_stage_holder.visible = AppSettings.fight_view != "texto"
+	_size_stage()
 
 
 func _feed_stage() -> void:
@@ -226,6 +366,39 @@ func _update_board(ev: Dictionary) -> void:
 		_pos_lbl.text = "Em pé"
 
 
+## Números ao vivo: a linha do placar (luta inteira) e a aba aberta.
+func _refresh_live() -> void:
+	var tot := [FightHud.sum([_base[0], _live[0]]), FightHud.sum([_base[1], _live[1]])]
+	_mini.set_stats(tot[0], tot[1])
+	if _state != "round":
+		return
+	if _tab == "numeros" and _num_panel != null:
+		if _scope == "luta":
+			_num_panel.set_stats(tot[0], tot[1])
+		else:
+			_num_panel.set_stats(_live[0], _live[1])
+	elif _tab == "placar" and _lean_bar != null:
+		var w := world()
+		_lean_bar.set_values(FightHud.weight(_live[0]), FightHud.weight(_live[1]))
+		_lean_lbl.text = FightHud.lean_text(_live[0], _live[1], w.fighter(_b.a).short_name(), w.fighter(_b.b).short_name())
+
+
+func _set_tab(k: String) -> void:
+	_tab = k
+	if _feed != null:
+		_feed.visible = k == "lances"
+	if _num_box != null:
+		_num_box.visible = k == "numeros"
+	if _score_box != null:
+		_score_box.visible = k == "placar"
+	_refresh_live()
+	var sc := scroll()
+	if k == "lances":
+		(func(): if is_instance_valid(sc): sc.scroll_vertical = int(sc.get_v_scroll_bar().max_value)).call_deferred()
+	else:
+		sc.scroll_vertical = 0
+
+
 # --- Round ao vivo ----------------------------------------------------------------------
 
 func _start_round() -> void:
@@ -234,11 +407,48 @@ func _start_round() -> void:
 	_shown = 0
 	_clock = 0.0
 	_round_lbl.text = "R%d de %d" % [_e.round_no, _e.rounds]
+	_pips.set_round(_e.round_no, _e.rounds)
+	var prev: Array = [[], []]
+	for r in _e.round_stats.size() - 1:
+		for i in 2:
+			(prev[i] as Array).append(_e.round_stats[r][i])
+	_base = [FightHud.sum(prev[0]), FightHud.sum(prev[1])]
+	_live = [FightHud.blank(), FightHud.blank()]
 	var c := reset()
 	_feed = UIKit.vbox(UITokens.S1)
 	c.add_child(_feed)
+	_build_numbers(c)
+	_build_score(c)
+	_tabs_holder.visible = true
+	_set_tab(_tab)
 	_controls()
 	set_process(true)
+
+
+## Aba "Números": a comparação completa, da luta inteira ou só do round que está correndo.
+func _build_numbers(c: Container) -> void:
+	_num_box = UIKit.vbox(UITokens.S2)
+	_num_box.add_child(UIKit.segment([["luta", "Luta inteira"], ["round", "%dº round" % _e.round_no]], _scope, func(k: String):
+		_scope = k
+		_refresh_live()))
+	_num_panel = FightHud.StatPanel.new()
+	_num_box.add_child(_num_panel)
+	c.add_child(_num_box)
+
+
+## Aba "Placar": os rounds fechados pela conta da transmissão e quem leva o round de agora.
+func _build_score(c: Container) -> void:
+	var w := world()
+	_score_box = UIKit.vbox(UITokens.S2)
+	_score_box.add_child(FightHud.legend(w.fighter(_b.a).short_name(), w.fighter(_b.b).short_name()))
+	_score_box.add_child(FightHud.cards_table(["Transmissão"], [FightHud.broadcast_cards(_e.round_stats, _e.round_no - 1)], _e.rounds, _e.round_no - 1))
+	_lean_lbl = UIKit.label("Round ainda sem dono", "H3")
+	_lean_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_score_box.add_child(_lean_lbl)
+	_lean_bar = FightHud.DuelBar.new(8)
+	_score_box.add_child(_lean_bar)
+	_score_box.add_child(UIKit.label("Placar não oficial, pelos números da transmissão. Os cartões dos juízes só saem no fim.", "Meta", true))
+	c.add_child(_score_box)
 
 
 func _controls() -> void:
@@ -270,12 +480,17 @@ func _process(delta: float) -> void:
 	var held := _stage != null and _stage_holder.visible and _stage.holding() and _clock < 9000.0
 	if not held:
 		_clock += delta * AppSettings.FIGHT_SPEEDS[clampi(_speed, 0, AppSettings.FIGHT_SPEEDS.size() - 1)]
-	var last_t := 0.0
+	var last: Dictionary = {}
 	while _shown < _events.size() and float((_events[_shown] as Dictionary)["t"]) <= _clock:
-		var ev: Dictionary = _events[_shown]
-		_add_line(ev)
-		last_t = float(ev["t"])
+		last = _events[_shown]
+		_add_line(last)
 		_shown += 1
+	if not last.is_empty():
+		_update_board(last)
+		_refresh_live()
+		if _tab == "lances":
+			var sc := scroll()
+			(func(): if is_instance_valid(sc): sc.scroll_vertical = int(sc.get_v_scroll_bar().max_value)).call_deferred()
 	_feed_stage()
 	var shown_clock := minf(_clock, FightEngine.ROUND_S)
 	if _shown > 0 and _shown >= _events.size():
@@ -297,7 +512,7 @@ func _add_line(ev: Dictionary) -> void:
 	h.add_child(t)
 	var mark := ColorRect.new()
 	mark.custom_minimum_size = Vector2(3, 0)
-	mark.color = Color(0, 0, 0, 0) if side < 0 else (UIColors.CORNER_RED if side == 0 else UIColors.CORNER_BLUE)
+	mark.color = Color(0, 0, 0, 0) if side < 0 else FightHud.corner_color(side)
 	h.add_child(mark)
 	var var_name := "H3" if kind in ["forte", "kd", "fin", "fim", "queda"] else ("Small" if kind == "info" else "")
 	var l := UIKit.label(String(ev["text"]), var_name, true)
@@ -307,12 +522,13 @@ func _add_line(ev: Dictionary) -> void:
 		l.add_theme_color_override(&"font_color", UIColors.ORANGE)
 	h.add_child(l)
 	_feed.add_child(h)
-	_update_board(ev)
+	var ls: Array = ev.get("ls", [])
+	if ls.size() == 2:
+		_live = ls
 	if kind == "kd":
 		Sfx.play("applause" if _side < 0 or side == _side else "boo", -8.0)
 		Sfx.vibrate(60)
-	var sc := scroll()
-	(func(): if is_instance_valid(sc): sc.scroll_vertical = int(sc.get_v_scroll_bar().max_value)).call_deferred()
+		Anim.pulse(_mini, 1.05, 0.4)
 
 
 func _end_round() -> void:
@@ -326,8 +542,28 @@ func _end_round() -> void:
 
 # --- Corner -----------------------------------------------------------------------------
 
+## O cartão do intervalo: os números do round que acabou e o placar da transmissão até aqui.
+func _interval_cards(c: Container) -> VBoxContainer:
+	var w := world()
+	var rs: Array = _e.round_stats.back()
+	var card := UIKit.card("CardHighlight", UITokens.S2)
+	card.add_child(UIKit.label("Intervalo · fim do %dº round" % _e.round_no, "Section"))
+	var panel := FightHud.StatPanel.new(["sig", "kd", "td", "sub_att", "ctrl"])
+	panel.set_stats(rs[0], rs[1])
+	card.add_child(panel)
+	c.add_child(UIKit.card_panel(card))
+	var sc := UIKit.card("Card", UITokens.S1)
+	sc.add_child(UIKit.label("Placar da transmissão", "Section"))
+	sc.add_child(FightHud.legend(w.fighter(_b.a).short_name(), w.fighter(_b.b).short_name()))
+	sc.add_child(FightHud.cards_table(["Transmissão"], [FightHud.broadcast_cards(_e.round_stats, _e.round_no)], _e.rounds))
+	sc.add_child(UIKit.label("Não oficial: os cartões dos juízes só saem no fim.", "Meta", true))
+	c.add_child(UIKit.card_panel(sc))
+	return card
+
+
 func _corner() -> void:
 	_state = "corner"
+	_tabs_holder.visible = false
 	if _spectator:
 		_corner_both()
 		return
@@ -337,18 +573,14 @@ func _corner() -> void:
 	var rs: Array = _e.round_stats.back()
 	var c := reset()
 	_feed = null
-	var card := UIKit.card("CardHighlight", UITokens.S1)
-	card.add_child(UIKit.label("Intervalo · fim do %dº round" % _e.round_no, "Section"))
-	var stats := [["Golpes certos", "sig_land"], ["Quedas", "td"], ["Knockdowns", "kd"], ["Tentativas de finalização", "sub_att"]]
-	for s: Array in stats:
-		card.add_child(_versus(String(s[0]), float(rs[0][s[1]]), float(rs[1][s[1]])))
-	card.add_child(_versus("Controle (s)", roundf(float(rs[0]["ctrl"])), roundf(float(rs[1]["ctrl"]))))
-	card.add_child(UIKit.label(_corner_read(rs), "", true))
+	_num_panel = null
+	_lean_bar = null
+	var card := _interval_cards(c)
+	card.add_child(UIKit.label(_read_for(rs, _side), "", true))
 	var stam := float(_e.s[_side]["st"])
 	card.add_child(UIKit.kv("Fôlego de %s" % me.short_name(), "%d%%" % int(stam * 100.0), UIColors.GREEN if stam > 0.6 else (UIColors.ORANGE if stam > 0.35 else UIColors.RED)))
 	if float(_e.s[_side]["cut"]) > 0.5:
 		card.add_child(UIKit.colored("O corte está feio. Mais um round apanhando e o médico pode parar a luta.", UIColors.RED, "Small", true))
-	c.add_child(UIKit.card_panel(card))
 	c.add_child(UIKit.section_header("Plano para o %dº round" % (_e.round_no + 1)))
 	var pc := UIKit.card("Card", UITokens.S2)
 	pc.add_child(PlanEditor.build(_plan, func(): pass, false))
@@ -363,6 +595,7 @@ func _corner() -> void:
 		_e.plans[other] = FightPlan.adjust(_e.plans[other], _e.f[other], lost, float(_e.s[other]["st"]), _e.rounds - _e.round_no)
 		_start_round()))
 	scroll().scroll_vertical = 0
+	Anim.stagger(c.get_children())
 
 
 ## Intervalo visto de fora: os números do round e o que cada corner pediu para o próximo.
@@ -371,12 +604,9 @@ func _corner_both() -> void:
 	var rs: Array = _e.round_stats.back()
 	var c := reset()
 	_feed = null
-	var card := UIKit.card("CardHighlight", UITokens.S1)
-	card.add_child(UIKit.label("Intervalo · fim do %dº round" % _e.round_no, "Section"))
-	for s: Array in [["Golpes certos", "sig_land"], ["Quedas", "td"], ["Knockdowns", "kd"], ["Tentativas de finalização", "sub_att"]]:
-		card.add_child(_versus(String(s[0]), float(rs[0][s[1]]), float(rs[1][s[1]])))
-	card.add_child(_versus("Controle (s)", roundf(float(rs[0]["ctrl"])), roundf(float(rs[1]["ctrl"]))))
-	c.add_child(UIKit.card_panel(card))
+	_num_panel = null
+	_lean_bar = null
+	_interval_cards(c)
 	for i in 2:
 		var me := w.fighter(_b.a if i == 0 else _b.b)
 		var lost := _e._rounds_lost(i)
@@ -384,7 +614,7 @@ func _corner_both() -> void:
 		var cc := UIKit.card("Card", UITokens.S1)
 		var head := UIKit.hbox(8)
 		var bar := ColorRect.new()
-		bar.color = UIColors.CORNER_RED if i == 0 else UIColors.CORNER_BLUE
+		bar.color = FightHud.corner_color(i)
 		bar.custom_minimum_size = Vector2(4, 30)
 		head.add_child(bar)
 		head.add_child(UIKit.label("Corner de %s" % me.short_name(), "H3"))
@@ -400,35 +630,14 @@ func _corner_both() -> void:
 	UIKit.clear(foot)
 	foot.add_child(UIKit.button("Começar o %dº round" % (_e.round_no + 1), "PrimaryButton", func(): _start_round()))
 	scroll().scroll_vertical = 0
+	Anim.stagger(c.get_children())
 
 
-## O que o corner `i` diz no intervalo, pelos números do round.
+## O que o corner `i` diz no intervalo, pelos números do round (o técnico chuta quem levou o
+## round; não vê os cartões dos juízes).
 func _read_for(rs: Array, i: int) -> String:
-	var sc := [0.0, 0.0]
-	for k in 2:
-		var st: Dictionary = rs[k]
-		sc[k] = float(st["sig_land"]) + float(st["kd"]) * 8.0 + float(st["td"]) * 2.5 + float(st["ctrl"]) / 25.0 + float(st["sub_att"]) * 1.5 + float(st["dmg"]) * 1.5
-	var mine: float = sc[i]
-	var theirs: float = sc[1 - i]
-	if mine > theirs * 1.25:
-		return "“Esse round é nosso. Continua assim.”"
-	if theirs > mine * 1.25:
-		return "“Perdemos esse round. Precisa mudar alguma coisa.”"
-	return "“Round apertado, pode ter ido para qualquer lado.”"
-
-
-func _versus(label: String, a: float, b: float) -> Control:
-	return UIKit.versus_row(label, str(int(a)), str(int(b)), a, b)
-
-
-## O técnico chuta quem levou o round, pelos números (não vê os cartões dos juízes).
-func _corner_read(rs: Array) -> String:
-	var sc := [0.0, 0.0]
-	for i in 2:
-		var st: Dictionary = rs[i]
-		sc[i] = float(st["sig_land"]) + float(st["kd"]) * 8.0 + float(st["td"]) * 2.5 + float(st["ctrl"]) / 25.0 + float(st["sub_att"]) * 1.5 + float(st["dmg"]) * 1.5
-	var mine: float = sc[_side]
-	var theirs: float = sc[1 - _side]
+	var mine := FightHud.weight(rs[i])
+	var theirs := FightHud.weight(rs[1 - i])
 	if mine > theirs * 1.25:
 		return "“Esse round é nosso. Continua assim.”"
 	if theirs > mine * 1.25:
@@ -445,7 +654,9 @@ func _finish() -> void:
 	Career.resolve(w, _b, res, _e)
 	keep_log(_b, _e)
 	GameManager.save_now()
-	_show_result()
+	_pips.set_round(_e.round_no, _e.rounds, true)
+	_size_stage(true)
+	_show_result(true)
 
 
 ## Guarda os lances principais da luta para rever no perfil.
@@ -457,31 +668,127 @@ static func keep_log(b: Bout, e: FightEngine) -> void:
 	b.log = lg.slice(maxi(0, lg.size() - 60))
 
 
-func _show_result() -> void:
+## O resultado. Na decisão, a ficha dos juízes vem antes do anúncio e, se a luta acabou agora
+## na tela (`fresh`), cada juiz aparece na sua vez. Depois de uma finalização ou nocaute, os
+## cartões entram mais abaixo, em "Como estava nos cartões".
+func _show_result(fresh: bool = false) -> void:
 	set_process(false)
-	if _side < 0:
-		_show_result_neutral()
-		return
+	_tabs_holder.visible = false
 	var w := world()
 	var c := reset()
-	var log_box := UIKit.vbox(UITokens.S1)
-	if true:
-		for ev: Dictionary in _b.log:
-			var h := UIKit.hbox(8)
-			h.add_child(UIKit.label("R%d %s" % [int(ev["r"]), Fmt.clock(FightEngine.ROUND_S - float(ev["t"]))], "Meta"))
-			h.add_child(UIKit.label(String(ev["text"]), "Small", true))
-			log_box.add_child(h)
-	var me := w.fighter(_b.a if _side == 0 else _b.b)
-	var wid := int(_b.result.get("winner_id", -1))
+	_feed = null
+	_num_panel = null
+	_lean_bar = null
+	var res := _b.result
+	var wid := int(res.get("winner_id", -1))
+	var dec := String(res.get("method", "")) in ["DEC", "EMP"]
+	var rcards: Array = res.get("rcards", [])
+	var has_cards := rcards.size() == 3 and not (rcards[0] as Array).is_empty()
+	var fa := w.fighter(_b.a)
+	var fb := w.fighter(_b.b)
+	var me: Fighter = null if _side < 0 else (fa if _side == 0 else fb)
+	var judge_rows: Array = []
+	if dec and has_cards:
+		var jc := UIKit.card("Card", UITokens.S1)
+		jc.add_child(UIKit.label("Cartões dos juízes", "Section"))
+		jc.add_child(FightHud.legend(fa.short_name(), fb.short_name()))
+		var table := FightHud.cards_table(FightHud.judge_names(_b), rcards, _b.rounds)
+		jc.add_child(table)
+		judge_rows = table.get_meta(&"rows")
+		c.add_child(UIKit.card_panel(jc))
 	var card := UIKit.card("CardHighlight", UITokens.S2)
-	var headline := "Empate" if wid < 0 else ("Vitória de %s!" % w.fighter(wid).display_name())
-	var hl := UIKit.label(headline, "Title", true)
-	if wid >= 0:
-		hl.add_theme_color_override(&"font_color", UIColors.GOLD if wid == me.id else UIColors.TEXT)
+	var hl := UIKit.label("Empate" if wid < 0 else "Vitória de %s!" % w.fighter(wid).display_name(), "Title", true)
+	if wid >= 0 and (me != null and wid == me.id or me == null and _b.title):
+		hl.add_theme_color_override(&"font_color", UIColors.GOLD)
 	card.add_child(hl)
 	card.add_child(UIKit.label(FightKit.result_text(_b), "H3", true))
-	if String(_b.result.get("method", "")) in ["DEC", "EMP"]:
+	if dec and not has_cards:
 		card.add_child(UIKit.kv("Juízes", FightKit.cards_text(_b)))
+	if me != null:
+		_result_mine(w, card, me, wid)
+	else:
+		_result_neutral(w, card, wid)
+	var result_panel := UIKit.card_panel(card)
+	c.add_child(result_panel)
+	var rest: Array = []
+	if not dec and has_cards:
+		var kc := UIKit.card("Card", UITokens.S1)
+		kc.add_child(UIKit.label("Como estava nos cartões", "Section"))
+		kc.add_child(FightHud.legend(fa.short_name(), fb.short_name()))
+		kc.add_child(FightHud.cards_table(FightHud.judge_names(_b), rcards, _b.rounds))
+		rest.append(UIKit.card_panel(kc))
+	var totals := FightHud.totals_panel(_b)
+	if totals != null:
+		var nc := UIKit.card("Card", UITokens.S2)
+		nc.add_child(UIKit.label("Números da luta", "Section"))
+		nc.add_child(FightHud.legend(fa.short_name(), fb.short_name()))
+		nc.add_child(totals)
+		rest.append(UIKit.card_panel(nc))
+	if not _b.log.is_empty():
+		var lc := UIKit.vbox(UITokens.S1)
+		lc.add_child(UIKit.section_header("Lances principais"))
+		for ev: Dictionary in _b.log:
+			var h := UIKit.hbox(8)
+			var tl := UIKit.label("R%d %s" % [int(ev["r"]), Fmt.clock(FightEngine.ROUND_S - float(ev["t"]))], "Meta")
+			tl.custom_minimum_size.x = 84
+			tl.add_theme_font_override(&"font", DataTable.tabular_font())
+			h.add_child(tl)
+			var mark := ColorRect.new()
+			mark.custom_minimum_size = Vector2(3, 0)
+			var sd := int(ev.get("side", -1))
+			mark.color = Color(0, 0, 0, 0) if sd < 0 else FightHud.corner_color(sd)
+			h.add_child(mark)
+			h.add_child(UIKit.label(String(ev["text"]), "Small", true))
+			lc.add_child(h)
+		rest.append(lc)
+	for n: Control in rest:
+		c.add_child(n)
+	scroll().scroll_vertical = 0
+	var done := func():
+		_reveal_nodes = []
+		if me == null:
+			Sfx.play("applause", -6.0)
+		elif wid == me.id:
+			Sfx.play("win", -4.0)
+		elif wid >= 0:
+			Sfx.play("lose", -6.0)
+		Anim.pulse(hl, 1.06, 0.4)
+		_show_headline(result_panel)
+		var foot := footer()
+		UIKit.clear(foot)
+		foot.add_child(UIKit.button("Continuar", "PrimaryButton", func():
+			if me != null:
+				UIManager.goto("hub")
+			else:
+				UIManager.back()))
+	if fresh and not judge_rows.is_empty() and Anim.on():
+		_play_reveal(judge_rows, [result_panel] + rest, done)
+	else:
+		done.call()
+		if fresh:
+			Anim.stagger(c.get_children())
+
+
+## Depois dos cartões, a rolagem desce o que faltar para o anúncio aparecer inteiro.
+func _show_headline(panel: Control) -> void:
+	var sc := scroll()
+	(func():
+		if not is_instance_valid(sc) or not is_instance_valid(panel):
+			return
+		var top := panel.global_position.y - sc.global_position.y + sc.scroll_vertical
+		var want := int(clampf(top + minf(panel.size.y, 260.0) - sc.size.y, 0.0, top))
+		if want <= sc.scroll_vertical:
+			return
+		if Anim.on():
+			var tw := sc.create_tween()
+			tw.tween_property(sc, "scroll_vertical", want, 0.35).set_delay(0.15).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		else:
+			sc.scroll_vertical = want).call_deferred()
+
+
+## A parte do resultado que só interessa a quem tem um lutador na luta: o dinheiro, o cartel,
+## o ranking, os marcos e a moral.
+func _result_mine(w: GameWorld, card: VBoxContainer, me: Fighter, wid: int) -> void:
 	var p := _b.purse_of(me.id)
 	var earned := (float(p["show"]) + (float(p["win"]) if wid == me.id else 0.0)) * float(me.contract.get("cut", 0.2))
 	card.add_child(UIKit.kv("Para a academia", Fmt.money(earned), UIColors.GREEN))
@@ -499,39 +806,12 @@ func _show_result() -> void:
 		if int(e[0]) == w.week:
 			mood_d += int(e[1])
 	card.add_child(UIKit.kv("Moral", "%s (%s)" % [Morale.label(me).to_lower(), Fmt.signed(mood_d)] if mood_d != 0 else Morale.label(me).to_lower(), UIColors.GREEN if mood_d > 0 else (UIColors.RED if mood_d < 0 else UIColors.TEXT)))
-	var nums := CareerStats.bout_line(me.history.back()) if not me.history.is_empty() else ""
-	if nums != "":
-		card.add_child(UIKit.label("Números de %s: %s." % [me.short_name(), nums], "Small", true))
 	if not me.injury.is_empty():
 		card.add_child(UIKit.colored("%s saiu com %s (%d semanas)." % [me.short_name(), String(me.injury["name"]).to_lower(), int(me.injury["weeks"])], UIColors.RED, "Small", true))
-	c.add_child(UIKit.card_panel(card))
-	if log_box.get_child_count() > 0:
-		c.add_child(UIKit.section_header("Lances principais"))
-		c.add_child(log_box)
-	if wid == me.id:
-		Sfx.play("win", -4.0)
-	elif wid >= 0:
-		Sfx.play("lose", -6.0)
-	var foot := footer()
-	UIKit.clear(foot)
-	foot.add_child(UIKit.button("Continuar", "PrimaryButton", func(): UIManager.goto("hub")))
-	scroll().scroll_vertical = 0
 
 
-## Resultado visto de fora (presidente ou fã): o vencedor, como foi, os cartões, os cartéis e o
-## ranking dos dois, e os lances principais.
-func _show_result_neutral() -> void:
-	var w := world()
-	var c := reset()
-	var wid := int(_b.result.get("winner_id", -1))
-	var card := UIKit.card("CardHighlight", UITokens.S2)
-	var hl := UIKit.label("Empate" if wid < 0 else "Vitória de %s!" % w.fighter(wid).display_name(), "Title", true)
-	if _b.title and wid >= 0:
-		hl.add_theme_color_override(&"font_color", UIColors.GOLD)
-	card.add_child(hl)
-	card.add_child(UIKit.label(FightKit.result_text(_b), "H3", true))
-	if String(_b.result.get("method", "")) in ["DEC", "EMP"]:
-		card.add_child(UIKit.kv("Juízes", FightKit.cards_text(_b)))
+## Resultado visto de fora (presidente ou fã): o cinturão, os cartéis e o ranking dos dois.
+func _result_neutral(w: GameWorld, card: VBoxContainer, wid: int) -> void:
 	if _b.title and wid >= 0:
 		card.add_child(UIKit.colored("%s é o campeão dos %s." % [w.fighter(wid).short_name(), Matchmaker.division_name(_b.division, true)], UIColors.GOLD, "H3", true))
 	for fid: int in [_b.a, _b.b]:
@@ -539,16 +819,37 @@ func _show_result_neutral() -> void:
 		card.add_child(UIKit.kv(f.short_name(), "%s · %s" % [f.record_text(), w.rank_text(f)]))
 		if not f.injury.is_empty():
 			card.add_child(UIKit.colored("%s saiu com %s (%d semanas)." % [f.short_name(), String(f.injury["name"]).to_lower(), int(f.injury["weeks"])], UIColors.RED, "Small", true))
-	c.add_child(UIKit.card_panel(card))
-	if not _b.log.is_empty():
-		c.add_child(UIKit.section_header("Lances principais"))
-		for ev: Dictionary in _b.log:
-			var h := UIKit.hbox(8)
-			h.add_child(UIKit.label("R%d %s" % [int(ev["r"]), Fmt.clock(FightEngine.ROUND_S - float(ev["t"]))], "Meta"))
-			h.add_child(UIKit.label(String(ev["text"]), "Small", true))
-			c.add_child(h)
-	Sfx.play("applause", -6.0)
+
+
+## Um juiz por vez, depois o anúncio. O botão do rodapé corta a espera.
+func _play_reveal(rows: Array, after: Array, done: Callable) -> void:
+	_reveal_nodes = rows + after
+	_after_reveal = done
+	for n: Control in _reveal_nodes:
+		n.modulate.a = 0.0
 	var foot := footer()
 	UIKit.clear(foot)
-	foot.add_child(UIKit.button("Continuar", "PrimaryButton", func(): UIManager.back()))
-	scroll().scroll_vertical = 0
+	foot.add_child(UIKit.button("Ver o resultado", "PrimaryButton", _end_reveal))
+	_reveal = create_tween()
+	_reveal.tween_interval(0.5)
+	for r: Control in rows:
+		_reveal.tween_callback(func(): Sfx.play("score", -4.0))
+		_reveal.tween_property(r, "modulate:a", 1.0, 0.25)
+		_reveal.tween_interval(0.85)
+	_reveal.tween_interval(0.35)
+	_reveal.tween_callback(_end_reveal)
+
+
+func _end_reveal() -> void:
+	if _reveal != null and _reveal.is_valid():
+		_reveal.kill()
+	_reveal = null
+	var nodes := _reveal_nodes
+	for n: Control in nodes:
+		if is_instance_valid(n) and n.modulate.a < 1.0:
+			var tw := n.create_tween()
+			tw.tween_property(n, "modulate:a", 1.0, 0.2)
+	var cb := _after_reveal
+	_after_reveal = Callable()
+	if cb.is_valid():
+		cb.call()

@@ -22,6 +22,7 @@ const SCREENS := {
 	"titles": "res://scripts/ui/screens/titles_screen.gd",
 	"results": "res://scripts/ui/screens/results_screen.gd",
 	"legacy": "res://scripts/ui/screens/legacy_screen.gd",
+	"inbox": "res://scripts/ui/screens/inbox_screen.gd",
 	# Presidente da organização
 	"org_hub": "res://scripts/ui/screens/org_hub_screen.gd",
 	"events": "res://scripts/ui/screens/org_events_screen.gd",
@@ -223,6 +224,7 @@ func _show(screen: BaseScreen, from_x: float) -> void:
 	_apply_chrome(screen)
 	screen.on_show()
 	_animate_in(screen, from_x)
+	screen.play_intro()
 
 
 ## Transição curta: a tela entra deslizando do lado de onde veio (avançar = da direita,

@@ -1380,7 +1380,9 @@ func _draw() -> void:
 	var h := size.y
 	if rigs.is_empty() or w < 10.0:
 		return
-	_U = h / 9.6
+	# A escala vem da altura; num quadro alto demais (tablet deitado) a largura segura, para os
+	# dois lutadores caberem, e o que sobra em cima é o teto escuro do ginásio.
+	_U = minf(h / 9.6, w / 12.5)
 	_ground = h * 0.88
 	_sh = Vector2(sin(_rt * 70.0), cos(_rt * 53.0)) * _shake * _U * 0.18
 	# O tranco do golpe forte fecha um pouco o quadro (e dá folga para o tremor nas bordas).
@@ -1533,7 +1535,7 @@ func _draw_plates(w: float, h: float) -> void:
 		var t := fmod(_bt - 0.8, 3.8)
 		var stt: Dictionary = _stat[_focus]
 		_plate(w, h, _focus, smoothstep(0.7, 0.95, t) * (1.0 - smoothstep(3.5, 3.75, t)), "NO CANTO VERMELHO" if _focus == 0 else "NO CANTO AZUL",
-			String((_info[_focus] as Dictionary)["name"]), "Golpes certos  %d   ·   Quedas  %d" % [int(stt["g"]), int(stt["q"])])
+			String((_info[_focus] as Dictionary)["name"]), "No round:  %s   ·   %s" % [Fmt.plural(int(stt["g"]), "golpe certo", "golpes certos"), Fmt.plural(int(stt["q"]), "queda", "quedas")])
 
 
 ## Uma placa (terço inferior): faixa escura inclinada com a cor do canto, entrando pelo lado

@@ -1,0 +1,246 @@
+class_name DashKit
+extends RefCounted
+## Peças do painel inicial dos dois papéis: o cartão da casa (identidade, caixa com tendência e
+## números), a agenda das próximas semanas e as faixas que rolam para o lado (equipe, campeões).
+
+
+## "12 dez" (sem o dia da semana).
+static func short_date(week: int) -> String:
+	return GameWorld.fight_date_text(week, false).trim_prefix("sáb, ")
+
+
+## "nesta sem.", "em 3 sem."
+static func short_when(w: GameWorld, week: int) -> String:
+	var n := week - w.week
+	if n <= 0:
+		return "nesta sem."
+	if n == 1:
+		return "na próxima"
+	return "em %d sem." % n
+
+
+## Cartão da casa. `tiles` = [[valor, legenda, cor], ...].
+static func identity(w: GameWorld, t: Team, sub: String, rep_caption: String, tiles: Array, intro: bool) -> PanelContainer:
+	var card := UIKit.card("CardHighlight", UITokens.S2)
+	var h := UIKit.hbox(UITokens.S3)
+	var badge := TeamBadge.new()
+	badge.team = t
+	badge.custom_minimum_size = Vector2(76, 76)
+	badge.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	h.add_child(badge)
+	var v := UIKit.vbox(2)
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var nm := UIKit.label(t.name, "Section")
+	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	v.add_child(nm)
+	var sl := UIKit.label(sub, "Small")
+	sl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	v.add_child(sl)
+	var rep := UIKit.hbox(8)
+	var st := StarsView.new()
+	st.star_size = 18
+	st.stars = StarsView.from_value(t.reputation)
+	st.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	rep.add_child(st)
+	var rc := rep_caption
+	var n := t.rep_log.size()
+	if n >= 2:
+		var d := t.reputation - float(t.rep_log[maxi(0, n - 5)])
+		if absf(d) >= 0.5:
+			rc += " %s" % ("subindo" if d > 0.0 else "caindo")
+	rep.add_child(UIKit.label(rc, "Caps"))
+	v.add_child(rep)
+	h.add_child(v)
+	card.add_child(h)
+	card.add_child(_cash(t, intro))
+	var stats := UIKit.hbox(0)
+	for it: Array in tiles:
+		stats.add_child(UIKit.stat_tile(String(it[0]), String(it[1]), it[2] if it.size() > 2 else Color(0, 0, 0, 0)))
+	card.add_child(stats)
+	return UIKit.card_panel(card)
+
+
+## Caixa: o número, quanto mudou nas últimas semanas e a linha de tendência.
+static func _cash(t: Team, intro: bool) -> Control:
+	var h := UIKit.hbox(UITokens.S2)
+	var v := UIKit.vbox(0)
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	v.add_child(UIKit.label("Caixa", "Caps"))
+	var val := UIKit.label(Fmt.money(t.balance), "Title")
+	val.add_theme_color_override(&"font_color", UIColors.RED if t.balance < 0.0 else UIColors.TEXT)
+	v.add_child(val)
+	var series: Array = t.cash_log.duplicate()
+	var now_k := int(round(t.balance / 1000.0))
+	if series.is_empty() or int(series.back()) != now_k:
+		series.append(now_k)
+	var n := series.size()
+	if n >= 2:
+		var weeks := mini(4, n - 1)
+		var ref := float(series[n - 1 - weeks]) * 1000.0
+		var d := t.balance - ref
+		var txt := "%s%s em %s" % ["+" if d >= 0.0 else "−", Fmt.money(absf(d)), Fmt.plural(weeks, "semana", "semanas")]
+		v.add_child(UIKit.colored(txt, UIColors.GREEN if d >= 0.0 else UIColors.RED, "Caps"))
+		if intro:
+			Anim.count(val, ref, t.balance, func(x: float) -> String: return Fmt.money(x))
+	else:
+		v.add_child(UIKit.label("A tendência aparece com as semanas", "Caps"))
+	h.add_child(v)
+	if n >= 3:
+		var sp := Sparkline.new()
+		sp.values = series
+		sp.color = UIColors.GREEN if float(series[n - 1]) >= float(series[0]) else UIColors.RED
+		sp.custom_minimum_size = Vector2(190, 64)
+		sp.size_flags_horizontal = Control.SIZE_SHRINK_END
+		sp.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		if intro:
+			Anim.grow(sp, "reveal", 1.0, 0.7, 0.1)
+		h.add_child(sp)
+	return h
+
+
+## Agenda: `items` = [{week, title, text, cb, color}] (qualquer ordem). Devolve null se vazia.
+static func agenda(w: GameWorld, items: Array, limit: int = 6) -> Control:
+	if items.is_empty():
+		return null
+	items.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a["week"]) < int(b["week"]))
+	var v := UIKit.vbox(UITokens.S1)
+	v.add_child(UIKit.section_header("Agenda"))
+	var rows: Array = []
+	for it: Dictionary in items.slice(0, limit):
+		var h := UIKit.hbox(UITokens.S2)
+		var dv := UIKit.vbox(-2)
+		dv.custom_minimum_size.x = 112
+		dv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		var col: Color = it.get("color", Color(0, 0, 0, 0))
+		var dl := UIKit.label(short_date(int(it["week"])), "H3")
+		if col.a > 0.0:
+			dl.add_theme_color_override(&"font_color", col)
+		dv.add_child(dl)
+		dv.add_child(UIKit.label(short_when(w, int(it["week"])), "Caps"))
+		h.add_child(dv)
+		var tv := UIKit.vbox(0)
+		tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		var tl := UIKit.label(String(it["title"]))
+		tl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		tv.add_child(tl)
+		var xl := UIKit.label(String(it.get("text", "")), "Small")
+		xl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		xl.visible = xl.text != ""
+		tv.add_child(xl)
+		h.add_child(tv)
+		var cb: Callable = it.get("cb", Callable())
+		if cb.is_valid():
+			var ic := UIKit.icon_rect("forward", 20, UIColors.DIM)
+			ic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			h.add_child(ic)
+		var row := UIKit.tap_row(h, cb)
+		row.custom_minimum_size.y = UITokens.H_ROW - 8
+		rows.append(row)
+	v.add_child(UIKit.menu_group(rows))
+	return v
+
+
+## Faixa que rola para o lado, com título de seção e link.
+static func strip(title: String, tiles: Array, action: String = "", cb: Callable = Callable()) -> Control:
+	var v := UIKit.vbox(UITokens.S1)
+	v.add_child(UIKit.section_header(title, action, cb))
+	var sc := ScrollContainer.new()
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	sc.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	sc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var h := UIKit.hbox(UITokens.S1)
+	for t in tiles:
+		h.add_child(t)
+	sc.add_child(h)
+	v.add_child(sc)
+	return v
+
+
+## Cartãozinho de lutador para as faixas: retrato, nome, uma etiqueta e a situação.
+static func fighter_tile(w: GameWorld, f: Fighter, tag: String, tag_color: Color, line: String, line_color: Color, cb: Callable) -> PanelContainer:
+	var v := UIKit.vbox(2)
+	v.custom_minimum_size.x = 150
+	var top := UIKit.label(tag, "Caps")
+	top.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	top.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	if tag_color.a > 0.0:
+		top.add_theme_color_override(&"font_color", UIColors.ink(tag_color))
+	v.add_child(top)
+	if f != null:
+		var p := FightKit.portrait(w, f, 104)
+		p.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		v.add_child(p)
+	else:
+		var hole := PanelContainer.new()
+		hole.theme_type_variation = "IconTile"
+		hole.custom_minimum_size = Vector2(104, 104)
+		hole.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		var ic := UIKit.icon_rect("belt", 44, UIColors.DIM)
+		ic.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		ic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		hole.add_child(ic)
+		v.add_child(hole)
+	var nm := UIKit.label(f.short_name() if f != null else "Vago", "H3")
+	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	v.add_child(nm)
+	var ln := UIKit.label(line, "Caps")
+	ln.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ln.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	if line_color.a > 0.0:
+		ln.add_theme_color_override(&"font_color", UIColors.ink(line_color))
+	v.add_child(ln)
+	var row := UIKit.tap_row(v, cb, "Card")
+	row.custom_minimum_size.x = 174
+	return row
+
+
+## Semanas até a virada do ano (a cerimônia dos prêmios), ou -1 se está longe.
+static func awards_week(w: GameWorld) -> int:
+	for k in range(1, 9):
+		if int(GameWorld.date_of(w.week + k)["year"]) > w.year():
+			return w.week + k
+	return -1
+
+
+## Notícias recentes (as mesmas dos dois papéis), em um bloco só.
+static func news(w: GameWorld, c: VBoxContainer, hats: Dictionary, limit: int = 8) -> void:
+	c.add_child(UIKit.section_header("Notícias", "Resultados", func(): UIManager.push("results")))
+	var rows: Array = []
+	for i in range(w.news.size() - 1, -1, -1):
+		var n: Dictionary = w.news[i]
+		if w.week - int(n["week"]) > 6 or rows.size() >= limit:
+			break
+		rows.append(_news_row(w, n, hats))
+	if rows.is_empty():
+		c.add_child(UIKit.label("Semana calma no mundo do MMA.", "Muted"))
+	else:
+		c.add_child(UIKit.menu_group(rows))
+
+
+static func _news_row(w: GameWorld, n: Dictionary, hats: Dictionary) -> PanelContainer:
+	var h := UIKit.hbox(UITokens.S2)
+	var ids: Array = n.get("fighters", [])
+	if not ids.is_empty() and w.fighter(int(ids[0])) != null:
+		var p := FightKit.portrait(w, w.fighter(int(ids[0])), 56)
+		p.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		h.add_child(p)
+	var v := UIKit.vbox(2)
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var kind := String(n.get("kind", ""))
+	var cap := UIKit.label("%s · %s" % [String(hats.get(kind, "Notícia")), w.weeks_from_now(int(n["week"]))], "Caps")
+	if kind in ["cinturao", "marco", "premio", "hall"]:
+		cap.add_theme_color_override(&"font_color", UIColors.GOLD)
+	elif kind in ["equipe", "organizacao", "tv"]:
+		cap.add_theme_color_override(&"font_color", UIColors.ACCENT)
+	elif kind == "rivalidade":
+		cap.add_theme_color_override(&"font_color", UIColors.ORANGE)
+	v.add_child(cap)
+	v.add_child(UIKit.label(String(n["text"]), "H3" if bool(n.get("important", false)) else "", true))
+	h.add_child(v)
+	var cb := Callable()
+	if not ids.is_empty():
+		var fid := int(ids[0])
+		cb = func(): UIManager.push("fighter", {"id": fid})
+	return UIKit.tap_row(h, cb)

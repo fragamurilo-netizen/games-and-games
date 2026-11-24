@@ -70,6 +70,10 @@ var belt_wait: Dictionary = {}
 ## Presidente: contrato de TV em vigor e as propostas na mesa. Ver TVDeal.
 var tv: Dictionary = {}
 var tv_offers: Array = []
+## Caixa de entrada do jogador: pendências e avisos (ver Inbox).
+var inbox: Array = []
+var inbox_seq: int = 0
+var inbox_news_week: int = 0
 
 
 func new_id() -> int:
@@ -259,7 +263,8 @@ func to_dict() -> Dictionary:
 		"sign_block": sign_block, "role": role, "followed": followed, "titles": title_history,
 		"delegate": delegate_cards, "bout_block": bout_block, "incidents": incidents,
 		"season": season, "awards": awards, "hall": hall, "scouting": scouting,
-		"rival": rivalries, "interim": interim, "tv": tv, "tv_offers": tv_offers, "belt_wait": belt_wait}
+		"rival": rivalries, "interim": interim, "tv": tv, "tv_offers": tv_offers, "belt_wait": belt_wait,
+		"inbox": inbox, "inbox_seq": inbox_seq, "inbox_nw": inbox_news_week}
 
 
 static func from_dict(d: Dictionary) -> GameWorld:
@@ -320,6 +325,9 @@ static func from_dict(d: Dictionary) -> GameWorld:
 	w.tv = d.get("tv", {})
 	w.tv_offers = d.get("tv_offers", [])
 	w.belt_wait = d.get("belt_wait", {})
+	w.inbox = d.get("inbox", [])
+	w.inbox_seq = int(d.get("inbox_seq", 0))
+	w.inbox_news_week = int(d.get("inbox_nw", w.week))
 	for i: Dictionary in w.incidents:
 		i["refused"] = (i.get("refused", []) as Array).map(func(v): return int(v))
 	# Save de antes dos marcos de carreira: o passado de cada um entra sem data, de uma vez.

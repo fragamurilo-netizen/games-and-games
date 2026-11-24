@@ -1015,6 +1015,8 @@ func _score_round() -> void:
 func finalize() -> Dictionary:
 	if finished:
 		result["stats"] = [s[0]["total"], s[1]["total"]]
+		if not (cards[0] as Array).is_empty():
+			result["rcards"] = cards.duplicate(true)
 		return result
 	var votes := [0, 0]
 	var totals: Array = []
@@ -1044,7 +1046,7 @@ func finalize() -> Dictionary:
 		method = "EMP"
 		detail = "empate"
 	result = {"winner": winner, "method": method, "detail": detail, "round": rounds, "time": ROUND_S, "cards": totals,
-		"stats": [s[0]["total"], s[1]["total"]]}
+		"rcards": cards.duplicate(true), "stats": [s[0]["total"], s[1]["total"]]}
 	return result
 
 
@@ -1065,6 +1067,10 @@ func _log(side: int, kind: String, text: String) -> void:
 		"pos": pos if pos != "chao" else "chao:" + gpos + ":" + str(top)}
 	if not narrate and kind != "fim":
 		return
+	# Números do round até este lance, para o placar ao vivo (cópia: o round continua somando).
+	if narrate and not round_stats.is_empty():
+		var rs: Array = round_stats.back()
+		ev["ls"] = [(rs[0] as Dictionary).duplicate(), (rs[1] as Dictionary).duplicate()]
 	_round_events.append(ev)
 	events.append(ev)
 

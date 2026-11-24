@@ -653,6 +653,7 @@ static func columns(c: Container, cards: Array, width: float, max_cols: int = 3,
 			c.add_child(cards[k])
 		return
 	var row := hbox(UITokens.S4)
+	row.set_meta(&"columns", true)
 	var cols: Array = []
 	var load: Array = []
 	for _k in n:

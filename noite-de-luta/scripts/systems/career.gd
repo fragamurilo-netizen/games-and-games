@@ -351,6 +351,10 @@ static func advance_week(w: GameWorld, auto: bool = false) -> void:
 	else:
 		Matchmaker.user_offers(w)
 	_trim(w)
+	var ut := w.user_team()
+	if ut != null:
+		ut.log_week()
+	Inbox.scan(w)
 
 
 static func _finances(w: GameWorld) -> void:

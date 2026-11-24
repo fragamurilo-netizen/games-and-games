@@ -54,6 +54,7 @@ func _ready() -> void:
 	_update_safe_area()
 	_update_layout()
 	top_bar.back_pressed.connect(func(): UIManager.handle_back())
+	top_bar.mail_pressed.connect(func(): UIManager.push("inbox"))
 	bottom_nav.tab_selected.connect(_on_tab)
 	GameManager.world_changed.connect(func(): UIManager.refresh_chrome())
 	UIManager.goto("menu")
@@ -253,6 +254,7 @@ func apply_chrome(screen: BaseScreen, can_go_back: bool) -> void:
 	bottom_nav.visible = screen.show_nav and GameManager.has_career()
 	if screen.show_top:
 		top_bar.set_state(screen.screen_title, screen.screen_subtitle, can_go_back, team)
+		top_bar.set_mail(team != null and screen.show_nav, Inbox.pending(GameManager.world).size() if team != null else 0)
 	bottom_nav.set_role(GameManager.world.role if GameManager.has_career() else "empresario")
 	bottom_nav.select(UIManager.area)
 	bottom_nav.queue_redraw()
