@@ -85,8 +85,7 @@ func refresh() -> void:
 	tape.add_child(FightKit.tape(w, w.fighter(b.a), w.fighter(b.b)))
 	c.add_child(UIKit.card_panel(tape))
 	c.add_child(UIKit.section_header("Atributos de %s" % opp.short_name()))
-	for x: Control in FightKit.attr_blocks(opp, me):
-		c.add_child(x)
+	c.add_child(FightKit.attr_card(opp, me))
 	c.add_child(UIKit.section_header("Plano para o 1º round"))
 	var pc := UIKit.card("Card", UITokens.S2)
 	pc.add_child(PlanEditor.build(_plan, func(): plans[b.id] = _plan.duplicate()))

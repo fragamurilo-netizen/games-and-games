@@ -37,6 +37,11 @@ func _wait(s: float) -> void:
 
 func _shot(name: String) -> void:
 	await _frames(6)
+	var _pw := 0
+	while Portraits.pending() > 0 and _pw < 1200:
+		await get_tree().process_frame
+		_pw += 1
+	await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png("%s/%s%s.png" % [out_dir, prefix, name])
 	print("[tela] ", name)
@@ -121,6 +126,9 @@ func _manager() -> void:
 	UIManager.back()
 	await _wait(0.5)
 	_press("Avançar semana")
+	await _wait(0.1)
+	while DashKit.closing or GameManager.turning:
+		await get_tree().process_frame
 	await _wait(0.3)
 	await _shot("u06_semana_virou")
 	await _wait(1.6)

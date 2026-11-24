@@ -23,6 +23,11 @@ func _frames(n: int) -> void:
 
 func _shot(name: String) -> void:
 	await _frames(6)
+	var _pw := 0
+	while Portraits.pending() > 0 and _pw < 1200:
+		await get_tree().process_frame
+		_pw += 1
+	await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png("%s/%s%s.png" % [out_dir, prefix, name])
 	print("[tela] ", name)

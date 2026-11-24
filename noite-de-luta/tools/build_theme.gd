@@ -11,9 +11,5 @@ func _initialize() -> void:
 
 
 func _start() -> void:
-	# O tema é gravado com a paleta escura e o dourado (as cores de referência de UIColors.themed).
-	var ui_colors: GDScript = load("res://scripts/ui/ui_colors.gd")
-	if bool(ui_colors.get("light")) or ui_colors.get("_applied") != "":
-		push_warning("paleta já alterada ao gerar o tema")
 	load("res://tools/build_theme_runner.gd").new().build()
 	quit()

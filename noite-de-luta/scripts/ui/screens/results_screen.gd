@@ -21,7 +21,7 @@ func refresh() -> void:
 		for e: FightEvent in Calendar.events_in_week(w, w.week):
 			if e.done or e.closed or Org.event_bouts(w, e).any(func(b: Bout) -> bool: return b.status == "feita"):
 				_wk = w.week
-	screen_subtitle = "Semana de " + GameWorld.week_text(_wk)
+	screen_subtitle = "Semana de " + GameWorld.week_short(_wk)
 	UIManager.refresh_chrome()
 	var c := reset()
 	var items: Array = []

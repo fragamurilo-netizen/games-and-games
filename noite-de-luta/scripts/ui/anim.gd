@@ -4,8 +4,8 @@ extends RefCounted
 ## jogo roda sem tela (ferramentas e testes): entrada escalonada dos cartões, números que
 ## contam, barras que enchem e o pulso de quem mudou de valor.
 
-const STEP := 0.035
-const MAX_STAGGER := 9
+const STEP := 0.018
+const MAX_STAGGER := 5
 
 
 static func on() -> bool:
@@ -25,11 +25,11 @@ static func stagger(nodes: Array, start: float = 0.0) -> void:
 		var d := start + STEP * mini(i, MAX_STAGGER)
 		i += 1
 		c.modulate.a = 0.0
-		c.scale = Vector2(0.97, 0.97)
+		c.scale = Vector2(0.985, 0.985)
 		_center_pivot(c)
 		var tw := c.create_tween().set_parallel()
-		tw.tween_property(c, "modulate:a", 1.0, 0.18).set_delay(d)
-		tw.tween_property(c, "scale", Vector2.ONE, 0.26).set_delay(d).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tw.tween_property(c, "modulate:a", 1.0, 0.1).set_delay(d)
+		tw.tween_property(c, "scale", Vector2.ONE, 0.14).set_delay(d).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 
 static func _center_pivot(c: Control) -> void:

@@ -234,6 +234,12 @@ static func week_text(w: int) -> String:
 	return "%d de %s de %d" % [int(d["day"]), Fmt.MONTHS_FULL[int(d["month"]) - 1], int(d["year"])]
 
 
+## A mesma data, curta, para os títulos: "18 jan 2027".
+static func week_short(w: int) -> String:
+	var d := date_of(w)
+	return "%d %s %d" % [int(d["day"]), Fmt.MONTHS[int(d["month"]) - 1], int(d["year"])]
+
+
 ## "em 3 semanas", "nesta semana", "há 2 semanas".
 func weeks_from_now(w: int) -> String:
 	var n := w - week

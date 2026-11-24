@@ -16,16 +16,17 @@ const S5 := 24
 const S6 := 36
 const S8 := 48
 ## Margem lateral das telas (contexto denso: GUTTER_DENSE).
-const GUTTER := 24
-const GUTTER_DENSE := 18
+const GUTTER := 20
+const GUTTER_DENSE := 16
 
-## Raios: 0 (tabela, linha, campo), 6 (objeto, botão, campo de texto), 12 (topo de folha e
-## diálogo). R_XS e R_MD ficam como apelidos de 6 para o código antigo.
+## Raios: 10 (etiquetas, segmentos), 14 (botões, campos, retratos), 20 (cartões, folhas,
+## diálogos). Cápsulas (chips) usam R_PILL. R_XS fica como apelido para o código antigo.
 const R_NONE := 0
-const R_XS := 6
-const R_SM := 6
-const R_MD := 6
-const R_LG := 12
+const R_XS := 10
+const R_SM := 10
+const R_MD := 14
+const R_LG := 20
+const R_PILL := 999
 
 ## Tipografia (DESIGN.md › Typography).
 const F_SCORE := 60
@@ -54,6 +55,6 @@ const H_ROW := 84
 const H_NAV := 96
 
 ## Divisor fino dentro de superfícies (mapeado no modo claro em UIColors.LIGHT_EXTRA).
-const HAIRLINE := Color("#262B30")
+const HAIRLINE := Color("#232B38")
 ## Fundo das barras (superior, navegação, rodapés).
-const BAR := Color("#111417")
+const BAR := Color("#0E1218")

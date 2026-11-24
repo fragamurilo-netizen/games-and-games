@@ -464,6 +464,8 @@ var _beard_data: Array = []
 # quando a tela o recria (listas de elenco, mercado, etc.).
 var _rec: Array = []
 var _recording := false
+## Grava os comandos sem desenhar (o retrato está fora da árvore, em outra thread).
+var _silent := false
 static var _cmd_cache: Dictionary = {}
 static var _cmd_cache_order: Array = []
 const CMD_CACHE_MAX := 720
@@ -538,9 +540,24 @@ func is_fighter_frame() -> bool:
 # ---------------------------------------------------------------------------
 
 func _draw() -> void:
+	_paint(false)
+
+
+## Monta as três camadas do retrato sem desenhar nada e devolve [[chave, comandos], ...]. É o que
+## o PortraitCache usa: o retrato fica fora da árvore, com `size` já posto, e esta conta roda em
+## outra thread (tudo aqui é do próprio objeto; as tabelas compartilhadas têm trava).
+func build_layers() -> Array:
+	_silent = true
+	var out := _paint(true)
+	_silent = false
+	return out
+
+
+func _paint(collect: bool) -> Array:
+	var out: Array = []
 	var s := minf(size.x, size.y)
 	if s <= 4.0:
-		return
+		return out
 	var o := Vector2((size.x - s) * 0.5, (size.y - s) * 0.5)
 	var c := o + Vector2(s * 0.5, s * 0.5)
 	_fm = is_fm()
@@ -548,8 +565,9 @@ func _draw() -> void:
 	_ml = mesh_light == 1 or (mesh_light < 0 and mesh_light_default)
 	_rect = Rect2(o, Vector2(s, s))
 	if photo != null:
-		_draw_photo(c, s)
-		return
+		if not collect:
+			_draw_photo(c, s)
+		return out
 	if _dirty or _f.is_empty():
 		_f = FaceGen.features(face_seed, eth, age, look)
 		_dirty = false
@@ -569,7 +587,7 @@ func _draw() -> void:
 		if (layers >> int(pair[1])) & 1 == 0:
 			continue
 		var key: int = pair[0]
-		if _cmd_cache.has(key):
+		if not collect and _cmd_cache.has(key):
 			_replay(_cmd_cache[key])
 			continue
 		if not ready:
@@ -601,11 +619,15 @@ func _draw() -> void:
 			2:
 				_layer_front()
 		_recording = false
-		_cmd_cache[key] = _rec
-		_cmd_cache_order.append(key)
-		if _cmd_cache_order.size() > CMD_CACHE_MAX:
-			_cmd_cache.erase(_cmd_cache_order.pop_front())
+		if collect:
+			out.append([key, _rec])
+		else:
+			_cmd_cache[key] = _rec
+			_cmd_cache_order.append(key)
+			if _cmd_cache_order.size() > CMD_CACHE_MAX:
+				_cmd_cache.erase(_cmd_cache_order.pop_front())
 		_rec = []
+	return out
 
 
 func _layer_back() -> void:
@@ -897,7 +919,11 @@ const BEARD_DENS := 320.0
 static var _detail_cache: Dictionary = {}
 
 
+static var _detail_lock := Mutex.new()
+
+
 static func _detail_tex(name: String) -> CanvasTexture:
+	_detail_lock.lock()
 	if not _detail_cache.has(name):
 		var path := "res://assets/portrait/%s.png" % name
 		var ct: CanvasTexture = null
@@ -907,7 +933,9 @@ static func _detail_tex(name: String) -> CanvasTexture:
 			ct.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 			ct.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 		_detail_cache[name] = ct
-	return _detail_cache[name]
+	var out: CanvasTexture = _detail_cache[name]
+	_detail_lock.unlock()
+	return out
 
 
 ## Repete a malha `m` ([idx, pts, cols]) com a textura `name` por cima. A cor de cada vértice
@@ -5511,87 +5539,103 @@ func _accessories() -> void:
 # ---------------------------------------------------------------------------
 
 func _r_line(a: Vector2, b: Vector2, col: Color, w: float = -1.0, aa: bool = false) -> void:
-	draw_line(a, b, col, w, aa)
+	if not _silent:
+		draw_line(a, b, col, w, aa)
 	if _recording:
 		_rec.append([0, a, b, col, w, aa])
 
 
 func _r_polyline(pts: PackedVector2Array, col: Color, w: float = -1.0, aa: bool = false) -> void:
-	draw_polyline(pts, col, w, aa)
+	if not _silent:
+		draw_polyline(pts, col, w, aa)
 	if _recording:
 		_rec.append([1, pts, col, w, aa])
 
 
 func _r_polyline_colors(pts: PackedVector2Array, cols: PackedColorArray, w: float = -1.0, aa: bool = false) -> void:
-	draw_polyline_colors(pts, cols, w, aa)
+	if not _silent:
+		draw_polyline_colors(pts, cols, w, aa)
 	if _recording:
 		_rec.append([2, pts, cols, w, aa])
 
 
 func _r_circle(p: Vector2, r: float, col: Color) -> void:
-	draw_circle(p, r, col, true, -1.0, true)
+	if not _silent:
+		draw_circle(p, r, col, true, -1.0, true)
 	if _recording:
 		_rec.append([3, p, r, col])
 
 
 func _r_arc(c: Vector2, r: float, a0: float, a1: float, n: int, col: Color, w: float = -1.0, aa: bool = false) -> void:
-	draw_arc(c, r, a0, a1, n, col, w, aa)
+	if not _silent:
+		draw_arc(c, r, a0, a1, n, col, w, aa)
 	if _recording:
 		_rec.append([4, c, r, a0, a1, n, col, w, aa])
 
 
 func _r_polygon(pts: PackedVector2Array, cols: PackedColorArray) -> void:
-	draw_polygon(pts, cols)
+	if not _silent:
+		draw_polygon(pts, cols)
 	if _recording:
 		_rec.append([5, pts, cols])
 
 
 func _r_colored_polygon(pts: PackedVector2Array, col: Color, uvs: PackedVector2Array = PackedVector2Array(), tex: Texture2D = null) -> void:
-	draw_colored_polygon(pts, col, uvs, tex)
+	if not _silent:
+		draw_colored_polygon(pts, col, uvs, tex)
 	if _recording:
 		_rec.append([6, pts, col, uvs, tex])
 
 
 func _r_string(font: Font, pos: Vector2, text: String, fs: int, col: Color) -> void:
-	draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col)
+	if not _silent:
+		draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col)
 	if _recording:
 		_rec.append([8, font, pos, text, fs, col])
 
 
 func _r_tri(idx: PackedInt32Array, pts: PackedVector2Array, cols: PackedColorArray) -> void:
-	RenderingServer.canvas_item_add_triangle_array(get_canvas_item(), idx, pts, cols)
+	if not _silent:
+		RenderingServer.canvas_item_add_triangle_array(get_canvas_item(), idx, pts, cols)
 	if _recording:
 		_rec.append([7, idx, pts, cols])
 
 
 func _r_tex_tri(idx: PackedInt32Array, pts: PackedVector2Array, cols: PackedColorArray, uvs: PackedVector2Array, tex: Texture2D) -> void:
-	RenderingServer.canvas_item_add_triangle_array(get_canvas_item(), idx, pts, cols, uvs, PackedInt32Array(), PackedFloat32Array(), tex.get_rid())
+	if not _silent:
+		RenderingServer.canvas_item_add_triangle_array(get_canvas_item(), idx, pts, cols, uvs, PackedInt32Array(), PackedFloat32Array(), tex.get_rid())
 	if _recording:
 		_rec.append([9, idx, pts, cols, uvs, tex])
 
 
 func _replay(cmds: Array) -> void:
-	var ci := get_canvas_item()
+	replay_to(self, cmds)
+
+
+## Repete comandos gravados em outro item (o PortraitCache desenha o retrato numa textura).
+## Só vale dentro do `_draw` de `item`.
+static func replay_to(item: CanvasItem, cmds: Array) -> void:
+	var ci := item.get_canvas_item()
 	for c: Array in cmds:
 		match int(c[0]):
 			0:
-				draw_line(c[1], c[2], c[3], c[4], c[5])
+				item.draw_line(c[1], c[2], c[3], c[4], c[5])
 			1:
-				draw_polyline(c[1], c[2], c[3], c[4])
+				item.draw_polyline(c[1], c[2], c[3], c[4])
 			2:
-				draw_polyline_colors(c[1], c[2], c[3], c[4])
+				item.draw_polyline_colors(c[1], c[2], c[3], c[4])
 			3:
-				draw_circle(c[1], c[2], c[3], true, -1.0, true)
+				item.draw_circle(c[1], c[2], c[3], true, -1.0, true)
 			4:
-				draw_arc(c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8])
+				item.draw_arc(c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8])
 			5:
-				draw_polygon(c[1], c[2])
+				item.draw_polygon(c[1], c[2])
 			6:
-				draw_colored_polygon(c[1], c[2], c[3], c[4])
+				item.draw_colored_polygon(c[1], c[2], c[3], c[4])
 			7:
 				RenderingServer.canvas_item_add_triangle_array(ci, c[1], c[2], c[3])
 			8:
-				draw_string(c[1], c[2], c[3], HORIZONTAL_ALIGNMENT_LEFT, -1, c[4], c[5])
+				item.draw_string(c[1], c[2], c[3], HORIZONTAL_ALIGNMENT_LEFT, -1, c[4], c[5])
 			9:
 				var tex: Texture2D = c[5]
 				if tex != null:

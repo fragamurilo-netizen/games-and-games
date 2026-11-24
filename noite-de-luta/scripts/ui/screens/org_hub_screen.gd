@@ -8,10 +8,6 @@ const HATS := {"cinturao": "Cinturão", "resultado": "Resultado", "organizacao":
 	"marco": "Marco", "olheiro": "Olheiros", "mercado": "Mercado", "rivalidade": "Rivalidade", "tv": "Contrato de TV", "premio": "Prêmios",
 	"hall": "Hall da Fama", "categoria": "Categoria", "visual": "Visual", "meta": "Temporada", "apoio": "Sócios", "conquista": "Conquista"}
 
-## A virada da semana está em andamento (segura o segundo toque no botão).
-var _turning := false
-
-
 func setup(p: Dictionary) -> void:
 	super.setup(p)
 	screen_title = "Início"
@@ -30,7 +26,7 @@ func refresh() -> void:
 		return
 	TutorialKit.sync(w)
 	Inbox.scan(w)
-	screen_subtitle = "Semana de " + GameWorld.week_text(w.week)
+	screen_subtitle = "Semana de " + GameWorld.week_short(w.week)
 	UIManager.refresh_chrome()
 	var c := reset()
 	var t := w.user_team()
@@ -40,11 +36,8 @@ func refresh() -> void:
 			champs += 1
 	var ups_all := Org.upcoming_events(w)
 	var tv := String({"aberta": "Aberta", "cabo": "Assinatura", "streaming": "Streaming"}.get(String(w.tv.get("partner", "")), "Sem contrato"))
-	c.add_child(DashKit.identity(w, t, "Presidente · sede em %s" % DataDB.nation_name(t.nation), "Prestígio", [
-		[str(ups_all.size()), "Noites marcadas"], ["%d/%d" % [champs, w.champions.size()], "Campeões"], [tv, "TV"]], intro_pending))
-	var guide := TutorialKit.hub_card(w, refresh)
-	if guide != null:
-		c.add_child(guide)
+	# Primeiro o que a semana pede: a noite de hoje (ou a próxima), o passo do guia e o que espera
+	# decisão. A organização, a temporada e o mundo vêm depois.
 	var night := Org.night_this_week(w)
 	var hero := 0
 	var ups := ups_all.filter(func(e: FightEvent) -> bool: return e != night)
@@ -59,7 +52,12 @@ func refresh() -> void:
 		hv.add_child(OrgKit.event_card(w, nx, func(): UIManager.push("org_event", {"id": nid0})))
 		c.add_child(hv)
 		hero = 1
+	var guide := TutorialKit.hub_card(w, refresh)
+	if guide != null:
+		c.add_child(guide)
 	c.add_child(InboxKit.todo_block(w, refresh))
+	c.add_child(DashKit.identity(w, t, "Presidente · sede em %s" % DataDB.nation_name(t.nation), "Prestígio", [
+		[str(ups_all.size()), "Noites marcadas"], ["%d/%d" % [champs, w.champions.size()], "Campeões"], [tv, "TV"]], intro_pending))
 	var season := SeasonKit.hub_card(w, intro_pending)
 	if season != null:
 		c.add_child(season)
@@ -72,7 +70,7 @@ func refresh() -> void:
 	var nb := UIKit.vbox(UITokens.S1)
 	DashKit.news(w, nb, HATS)
 	c.add_child(nb)
-	columnize(c, 1, 2, hero + (1 if guide != null else 0))
+	columnize(c, 0, 2, hero)
 	SeasonKit.celebrate(w)
 	var foot := footer()
 	var urgent := FightWeek.pending(w, night) if night != null else []
@@ -83,12 +81,32 @@ func refresh() -> void:
 		var nid := night.id
 		foot.add_child(UIKit.button("Ir para a noite de luta", "PrimaryButton", func(): UIManager.push("night", {"id": nid})))
 	else:
-		foot.add_child(UIKit.button("Avançar semana", "PrimaryButton", _advance, "fast"))
+		var adv := UIKit.button("Avançar semana", "PrimaryButton", func(): DashKit.close_week(self, false), "fast")
+		if guide != null:
+			foot.add_child(adv)
+		else:
+			var arow := UIKit.hbox(UITokens.S2)
+			var skip := UIKit.button("Adiantar", "GhostButton", func(): DashKit.close_week(self, true), "skip")
+			skip.custom_minimum_size.y = 76
+			skip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			skip.size_flags_stretch_ratio = 0.6
+			arow.add_child(skip)
+			adv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			arow.add_child(adv)
+			foot.add_child(arow)
 
 
 func _night_card(w: GameWorld, ev: FightEvent) -> Control:
-	var card := UIKit.card("CardHighlight", UITokens.S2)
-	card.add_child(UIKit.label("Noite de luta · " + ev.name, "Section"))
+	var card := UIKit.card("CardHighlight", UITokens.S1)
+	var head := UIKit.hbox(8)
+	var k := UIKit.kicker("Noite de luta")
+	k.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(k)
+	head.add_child(UIKit.pill("Hoje", UIColors.RED))
+	card.add_child(head)
+	var nm := UIKit.label(ev.name, "Section")
+	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	card.add_child(nm)
 	var lst := Org.event_bouts(w, ev)
 	var done := lst.filter(func(b: Bout) -> bool: return b.status == "feita").size()
 	card.add_child(UIKit.label("%s · %s · %d de %d lutas feitas" % [GameWorld.fight_date_text(ev.week), ev.city, done, lst.size()], "Small"))
@@ -170,22 +188,3 @@ func _champions_strip(w: GameWorld) -> Control:
 			col = UIColors.ORANGE
 		tiles.append(DashKit.fighter_tile(w, f, tag, UIColors.GOLD, line, col, func(): UIManager.push("fighter", {"id": fid})))
 	return DashKit.strip("Campeões", tiles, "Cinturões", func(): UIManager.switch_area("titles"))
-
-
-func _advance() -> void:
-	if _turning:
-		return
-	_turning = true
-	var w := world()
-	var cash := w.user_team().balance
-	var keys := DashKit.open_keys(w)
-	await UIManager.busy("Fechando a semana…")
-	GameManager.advance_week()
-	UIManager.busy_done()
-	_turning = false
-	DashKit.week_turn(world(), cash, keys)
-	intro_pending = true
-	refresh()
-	play_intro()
-	scroll_to_top()
-	SeasonKit.after_week(world(), refresh)

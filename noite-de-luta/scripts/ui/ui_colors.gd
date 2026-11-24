@@ -1,23 +1,25 @@
 class_name UIColors
 extends RefCounted
-## Paleta do jogo (DESIGN.md › Colors): grafite em degraus de tom, texto de giz e estados sóbrios.
-## O destaque é a cor da equipe do jogador; no menu, o dourado. Vermelho e azul dos corners só
-## existem no contexto da luta (CORNER_RED / CORNER_BLUE). Telas não escrevem cor solta.
+## Paleta do jogo: noite de arena. Fundo preto azulado em degraus, texto de giz, dourado da marca
+## para o que é ação e destaque, e os estados em cores vivas (verde, vermelho, laranja, azul).
+## Vermelho e azul dos corners (CORNER_RED / CORNER_BLUE) marcam os dois lados de uma luta. As
+## cores da equipe do jogador aparecem no escudo e nos retratos da casa. Telas não escrevem cor
+## solta.
 
-const D_BG := Color("#121416")
-const D_SURFACE := Color("#1A1D20")
-const D_SURFACE_2 := Color("#23272B")
-const D_SURFACE_3 := Color("#2F3439")
-const D_LINE := Color("#363C42")
-const D_TEXT := Color("#F1F0EC")
-const D_MUTED := Color("#A5ABB2")
-const D_DIM := Color("#8A9199")
-const D_GOLD := Color("#D3A94A")
-const D_GOLD_DARK := Color("#A8843A")
-const D_GREEN := Color("#57976B")
-const D_RED := Color("#C75B5B")
-const D_BLUE := Color("#6F93B8")
-const D_ORANGE := Color("#D39B45")
+const D_BG := Color("#0B0D12")
+const D_SURFACE := Color("#151A23")
+const D_SURFACE_2 := Color("#1E2531")
+const D_SURFACE_3 := Color("#2B3443")
+const D_LINE := Color("#313B4B")
+const D_TEXT := Color("#F4F3EF")
+const D_MUTED := Color("#AEB6C2")
+const D_DIM := Color("#808B9B")
+const D_GOLD := Color("#F2C14E")
+const D_GOLD_DARK := Color("#B88A2A")
+const D_GREEN := Color("#3FC380")
+const D_RED := Color("#F0555D")
+const D_BLUE := Color("#5B9BF0")
+const D_ORANGE := Color("#F5A342")
 
 static var BG := D_BG
 static var SURFACE := D_SURFACE
@@ -29,45 +31,42 @@ static var MUTED := D_MUTED
 static var DIM := D_DIM
 static var GOLD := D_GOLD
 static var GOLD_DARK := D_GOLD_DARK
-const ON_GOLD := Color("#1A1300")
+const ON_GOLD := Color("#17120A")
 static var GREEN := D_GREEN
 static var RED := D_RED
 static var BLUE := D_BLUE
 static var ORANGE := D_ORANGE
+## Fundo neutro dos retratos (o quadro em degradê do Portrait).
+static var PORTRAIT := Color("#3A4558")
 ## Modo claro ainda não existe neste jogo; o nome fica para o código portado do MUR.
 static var light := false
 
-## Corners da luta: vermelho (esquerda) e azul (direita). Só no cartaz, na luta e no resultado.
-const CORNER_RED := Color("#B3262E")
-const CORNER_BLUE := Color("#2E5C9E")
+## Corners da luta: vermelho (esquerda) e azul (direita).
+const CORNER_RED := Color("#C42B35")
+const CORNER_BLUE := Color("#2F68C4")
 
-## Destaque da interface: dourado no menu; na carreira, a cor da equipe do jogador.
+## Destaque da interface: o dourado da marca, em todas as telas.
 static var ACCENT := D_GOLD
 static var ACCENT_DARK := D_GOLD_DARK
 static var ON_ACCENT := ON_GOLD
-## Cores da equipe (faixa da barra superior); transparentes fora de uma carreira.
+## Cores da equipe (escudo, retratos da casa); transparentes fora de uma carreira.
 static var TEAM_1 := Color(0, 0, 0, 0)
 static var TEAM_2 := Color(0, 0, 0, 0)
-static var _theme_refs: Array = []
-static var _applied := ""
+## Tom da equipe para fundos de retrato e faixas: a mais viva das duas cores, visível no escuro.
+static var TEAM_TONE := PORTRAIT
 
 
-## Pinta o destaque com as cores da equipe (c1 nulo = dourado do menu).
+## Guarda as cores da equipe do jogador (c1 nulo = fora de uma carreira). O destaque da interface
+## não muda mais com a equipe: é sempre o dourado da marca.
 static func apply_colors(c1: Variant, c2: Variant) -> void:
-	var key := "" if c1 == null else "#%s|#%s" % [(c1 as Color).to_html(false), (c2 as Color).to_html(false)]
-	if key == _applied:
-		return
-	_applied = key
 	if c1 == null:
-		ACCENT = D_GOLD
 		TEAM_1 = Color(0, 0, 0, 0)
 		TEAM_2 = Color(0, 0, 0, 0)
+		TEAM_TONE = PORTRAIT
 	else:
-		ACCENT = team_accent(c1, c2)
 		TEAM_1 = c1
 		TEAM_2 = c2
-	_fit_accent()
-	_repaint_theme()
+		TEAM_TONE = team_accent(c1, c2)
 
 
 ## A mais viva das duas cores, clareada até aparecer bem no fundo escuro.
@@ -87,54 +86,6 @@ static func team_accent(c1: Color, c2: Color) -> Color:
 			best_score = score
 			best = col
 	return best
-
-
-static func _fit_accent() -> void:
-	ACCENT = readable_on(ACCENT, [BG, SURFACE, SURFACE_2], 4.5)
-	ON_ACCENT = on_color(ACCENT)
-	if ON_ACCENT.get_luminance() < 0.5 and _same_rgb(ACCENT, D_GOLD):
-		ON_ACCENT = ON_GOLD
-	ACCENT_DARK = ACCENT
-	for amt: float in [0.25, 0.2, 0.15, 0.1, 0.06]:
-		var d := ACCENT.darkened(amt)
-		if contrast(ON_ACCENT, d) >= 3.0:
-			ACCENT_DARK = d
-			break
-
-
-## O tema é gravado com o dourado; aqui o dourado do tema vira o destaque atual.
-static func _repaint_theme() -> void:
-	var th := ThemeDB.get_project_theme()
-	if th == null:
-		return
-	th.set_block_signals(true)
-	if _theme_refs.is_empty():
-		for type in th.get_type_list():
-			for nm in th.get_stylebox_list(type):
-				var sb := th.get_stylebox(nm, type) as StyleBoxFlat
-				if sb == null:
-					continue
-				for prop in ["bg_color", "border_color"]:
-					var c: Color = sb.get(prop)
-					if _is_gold(c):
-						_theme_refs.append([sb, prop, c])
-			for nm in th.get_color_list(type):
-				var c := th.get_color(nm, type)
-				if _is_gold(c):
-					_theme_refs.append([th, [type, nm], c])
-	for r: Array in _theme_refs:
-		var orig: Color = r[2]
-		var nc := Color(ACCENT, orig.a) if _same_rgb(orig, D_GOLD) else (Color(ACCENT_DARK, orig.a) if _same_rgb(orig, D_GOLD_DARK) else Color(ON_ACCENT, orig.a))
-		if r[1] is Array:
-			(r[0] as Theme).set_color(r[1][1], r[1][0], nc)
-		else:
-			(r[0] as Object).set(String(r[1]), nc)
-	th.set_block_signals(false)
-	th.emit_changed()
-
-
-static func _is_gold(c: Color) -> bool:
-	return _same_rgb(c, D_GOLD) or _same_rgb(c, D_GOLD_DARK) or _same_rgb(c, ON_GOLD)
 
 
 ## Mantido para o código vindo do MUR: no modo escuro a cor fica como está.
@@ -227,14 +178,19 @@ static func tone_of(a: Color, b: Color) -> Color:
 	return a
 
 
-## Escala de atributos e notas (DESIGN.md › Colors): sálvia, oliva, ocre, ferrugem, tijolo.
+## Escala de atributos e notas: verde, lima, dourado, laranja, vermelho.
 static func attr_color(v: float) -> Color:
 	if v >= 80.0:
-		return Color("#7FB28C")
+		return Color("#3FC380")
 	if v >= 70.0:
-		return Color("#9DB46C")
+		return Color("#9CCB52")
 	if v >= 60.0:
-		return Color("#C4AE5C")
+		return Color("#F2C14E")
 	if v >= 50.0:
-		return Color("#C98A4B")
-	return Color("#C75B5B")
+		return Color("#F5A342")
+	return Color("#F0555D")
+
+
+## A cor `c` como fundo de etiqueta ou faixa: o mesmo matiz, escuro o bastante para texto claro.
+static func tinted(c: Color, amount: float = 0.18) -> Color:
+	return SURFACE.lerp(Color(c, 1.0), amount)

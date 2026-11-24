@@ -7,10 +7,6 @@ const HATS := {"cinturao": "Cinturão", "resultado": "Resultado", "equipe": "Sua
 	"marco": "Marco", "olheiro": "Olheiro", "mercado": "Mercado", "rivalidade": "Rivalidade", "premio": "Prêmios", "hall": "Hall da Fama",
 	"categoria": "Categoria", "visual": "Visual", "meta": "Temporada", "apoio": "Cidade", "conquista": "Conquista"}
 
-## A virada da semana está em andamento (segura o segundo toque no botão).
-var _turning := false
-
-
 func setup(p: Dictionary) -> void:
 	super.setup(p)
 	screen_title = "Início"
@@ -29,7 +25,7 @@ func refresh() -> void:
 		return
 	TutorialKit.sync(w)
 	Inbox.scan(w)
-	screen_subtitle = "Semana de " + GameWorld.week_text(w.week)
+	screen_subtitle = "Semana de " + GameWorld.week_short(w.week)
 	UIManager.refresh_chrome()
 	var c := reset()
 	var t := w.user_team()
@@ -42,11 +38,8 @@ func refresh() -> void:
 			best = "Campeão"
 		elif r > 0 and best != "Campeão" and (best == "" or r < int(best.trim_prefix("#"))):
 			best = "#%d" % r
-	c.add_child(DashKit.identity(w, t, "%s · %s" % [t.city, DataDB.nation_name(t.nation)], "Reputação", [
-		[str(mine.size()), "Lutadores"], [("+" if weekly > 0.0 else "") + Fmt.money(weekly), "Fixo por semana", UIColors.RED if weekly < 0.0 else Color(0, 0, 0, 0)], [best if best != "" else "sem", "Melhor ranking", UIColors.GOLD if best == "Campeão" else Color(0, 0, 0, 0)]], intro_pending))
-	var guide := TutorialKit.hub_card(w, refresh)
-	if guide != null:
-		c.add_child(guide)
+	# Primeiro o que a semana pede: a luta de hoje (ou a próxima), o passo do guia e o que espera
+	# decisão. A casa, a equipe e o mundo vêm depois.
 	var pending := Career.pending_user_bouts(w)
 	for b: Bout in pending:
 		c.add_child(_fight_night(w, b))
@@ -56,15 +49,20 @@ func refresh() -> void:
 		if nxt != null:
 			c.add_child(nxt)
 			hero = 1
+	var guide := TutorialKit.hub_card(w, refresh)
+	if guide != null:
+		c.add_child(guide)
 	c.add_child(InboxKit.todo_block(w, refresh))
+	c.add_child(DashKit.identity(w, t, "%s · %s" % [t.city, DataDB.nation_name(t.nation)], "Reputação", [
+		[str(mine.size()), "Lutadores"], [("+" if weekly > 0.0 else "") + Fmt.money(weekly), "Fixo por semana", UIColors.RED if weekly < 0.0 else Color(0, 0, 0, 0)], [best if best != "" else "sem", "Melhor ranking", UIColors.GOLD if best == "Campeão" else Color(0, 0, 0, 0)]], intro_pending))
+	if not mine.is_empty():
+		c.add_child(_team_strip(w, mine))
 	var season := SeasonKit.hub_card(w, intro_pending)
 	if season != null:
 		c.add_child(season)
 	var ag := DashKit.agenda(w, _agenda(w, mine, pending))
 	if ag != null:
 		c.add_child(ag)
-	if not mine.is_empty():
-		c.add_child(_team_strip(w, mine))
 	OrgKit.awards_banner(w, c)
 	OrgKit.followed_section(w, c)
 	c.add_child(UIKit.menu_group([
@@ -75,29 +73,81 @@ func refresh() -> void:
 	var nb := UIKit.vbox(UITokens.S1)
 	DashKit.news(w, nb, HATS)
 	c.add_child(nb)
-	columnize(c, 1, 2, pending.size() + hero + (1 if guide != null else 0))
+	columnize(c, 0, 2, pending.size() + hero)
 	SeasonKit.celebrate(w)
 	var foot := footer()
 	if pending.is_empty():
-		foot.add_child(UIKit.button("Avançar semana", "PrimaryButton", _advance, "fast"))
+		# Semana sem luta: fechar uma, ou adiantar até aparecer algo para decidir. (Com o guia dos
+		# primeiros passos na tela fica só o botão de uma semana.)
+		var adv := UIKit.button("Avançar semana", "PrimaryButton", func(): DashKit.close_week(self, false), "fast")
+		if guide != null:
+			foot.add_child(adv)
+		else:
+			var arow := UIKit.hbox(UITokens.S2)
+			var skip := UIKit.button("Adiantar", "GhostButton", func(): DashKit.close_week(self, true), "skip")
+			skip.custom_minimum_size.y = 76
+			skip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			skip.size_flags_stretch_ratio = 0.6
+			arow.add_child(skip)
+			adv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			arow.add_child(adv)
+			foot.add_child(arow)
 	else:
-		foot.add_child(UIKit.button("Lute antes de avançar", "PrimaryButton", func(): UIManager.push("fight_plan", {"bout": (pending[0] as Bout).id})))
+		# Luta da casa nesta semana: assistir (com o plano) ou resolver na hora. Sem botão travado.
+		var b0: Bout = pending[0]
+		var row := UIKit.hbox(UITokens.S2)
+		var sim := UIKit.button("Simular", "GhostButton", func(): _simulate(b0))
+		sim.custom_minimum_size.y = 76
+		sim.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		sim.size_flags_stretch_ratio = 0.6
+		row.add_child(sim)
+		var go := UIKit.button("Ir para a luta", "PrimaryButton", func(): UIManager.push("fight_plan", {"bout": b0.id}))
+		go.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(go)
+		foot.add_child(row)
+	# A equipe e os campeões ficam prontos em segundo plano: abrir Equipe e Rankings não espera.
+	Portraits.prewarm(w, mine)
+	var champs: Array = []
+	for div: String in w.champions:
+		champs.append(w.fighter(int(w.champions[div])))
+	Portraits.prewarm(w, champs)
+
+
+## Resolve a luta na hora, com o plano do técnico, e mostra o resultado.
+func _simulate(b: Bout) -> void:
+	var w := world()
+	if b == null or b.status != "marcada":
+		refresh()
+		return
+	var side := 0 if w.is_user_fighter(w.fighter(b.a)) else 1
+	var me := w.fighter(b.a if side == 0 else b.b)
+	var opp := w.fighter(b.b if side == 0 else b.a)
+	var e := Career.engine_for(w, b, true)
+	e.set_plan(side, FightPlan.suggest(me, opp))
+	var res := e.run_all()
+	Career.resolve(w, b, res, e)
+	FightScreen.keep_log(b, e)
+	GameManager.save_now()
+	UIManager.push("fight", {"bout": b.id, "fresh": true})
 
 
 func _fight_night(w: GameWorld, b: Bout) -> Control:
 	var ev := w.event(b.event_id)
-	var card := UIKit.card("CardHighlight", UITokens.S2)
+	var card := UIKit.card("CardHighlight", UITokens.S1)
 	var head := UIKit.hbox(8)
-	var t := UIKit.label("Noite de luta · " + ev.name, "Section")
-	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	head.add_child(t)
+	var k := UIKit.kicker("Noite de luta")
+	k.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(k)
+	if b.title or b.interim:
+		head.add_child(UIKit.pill("Cinturão" if b.title else "Interino", UIColors.GOLD))
+	head.add_child(UIKit.pill("Hoje", UIColors.RED))
 	card.add_child(head)
-	var what := " · valendo o cinturão" if b.title else (" · valendo o interino" if b.interim else "")
-	card.add_child(UIKit.label("%s · %s%s" % [GameWorld.fight_date_text(b.week), ev.city, what], "Small"))
-	card.add_child(FightKit.faceoff(w, w.fighter(b.a), w.fighter(b.b), 120))
-	var go := UIKit.button("Plano de luta", "PrimaryButton", func(): UIManager.push("fight_plan", {"bout": b.id}))
-	card.add_child(go)
+	var t := UIKit.label(ev.name, "Section")
+	t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	card.add_child(t)
+	card.add_child(UIKit.label("%s · %s · %s" % [GameWorld.fight_date_text(b.week), ev.city, Matchmaker.division_short(b.division)], "Small"))
+	card.add_child(UIKit.gap(4))
+	card.add_child(FightKit.faceoff(w, w.fighter(b.a), w.fighter(b.b), 140))
 	return UIKit.card_panel(card)
 
 
@@ -116,17 +166,18 @@ func _next_fight(w: GameWorld, mine: Array) -> Control:
 	var left := best.week - w.week
 	var card := UIKit.card("Card", UITokens.S1)
 	var head := UIKit.hbox(8)
-	var el := UIKit.eyebrow("Próxima luta")
+	var el := UIKit.kicker("Próxima luta")
 	el.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(el)
-	var cnt := UIKit.colored("Faltam %s" % Fmt.plural(left, "semana", "semanas"), UIColors.GOLD if best.title or best.interim else UIColors.TEXT, "Caps")
-	head.add_child(cnt)
+	if best.title or best.interim:
+		head.add_child(UIKit.pill("Cinturão" if best.title else "Interino", UIColors.GOLD))
+	head.add_child(UIKit.pill("Faltam %s" % Fmt.plural(left, "semana", "semanas"), UIColors.BLUE))
 	card.add_child(head)
-	card.add_child(FightKit.faceoff(w, w.fighter(best.a), w.fighter(best.b), 96))
-	var what := " · cinturão" if best.title else (" · cinturão interino" if best.interim else "")
-	var info := UIKit.label("%s · %s%s" % [ev.name if ev != null else "", GameWorld.fight_date_text(best.week, false), what], "Small")
-	info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var info := UIKit.label("%s · %s" % [ev.name if ev != null else "", GameWorld.fight_date_text(best.week, false)], "Small")
+	info.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	card.add_child(info)
+	card.add_child(UIKit.gap(2))
+	card.add_child(FightKit.faceoff(w, w.fighter(best.a), w.fighter(best.b), 108))
 	if Camp.in_window(w, who) or float(who.camp.get("pts", 0.0)) > 0.0:
 		var pts := float(Camp.ensure(w, who).get("pts", 0.0))
 		var row := UIKit.hbox(UITokens.S2)
@@ -134,7 +185,7 @@ func _next_fight(w: GameWorld, mine: Array) -> Control:
 		var bar := UIKit.bar(0.0, 100.0, UIColors.ACCENT, 8)
 		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		Anim.grow(bar, "value", pts, 0.6, 0.15)
+		Anim.grow(bar, "value", pts, 0.4, 0.05)
 		row.add_child(bar)
 		row.add_child(UIKit.label("%d%% · %s" % [int(round(pts)), Camp.label(pts).to_lower()], "Caps"))
 		card.add_child(row)
@@ -226,26 +277,3 @@ func _team_strip(w: GameWorld, mine: Array) -> Control:
 			tcol = UIColors.RED if tone <= -2 else UIColors.ORANGE
 		tiles.append(DashKit.fighter_tile(w, f, tag, tcol, line, col, func(): UIManager.push("fighter", {"id": fid})))
 	return DashKit.strip("Equipe (%d)" % mine.size(), tiles, "Ver equipe", func(): UIManager.switch_area("team"))
-
-
-func _advance() -> void:
-	if _turning:
-		return
-	_turning = true
-	var w := world()
-	var mine := w.user_fighters().size()
-	var t := w.user_team()
-	if t.balance < 0.0 and mine == 0:
-		UIManager.toast("Caixa negativo e ninguém para lutar. Corte custos na Academia.", UIColors.RED)
-	var cash := t.balance
-	var keys := DashKit.open_keys(w)
-	await UIManager.busy("Fechando a semana…")
-	GameManager.advance_week()
-	UIManager.busy_done()
-	_turning = false
-	DashKit.week_turn(world(), cash, keys)
-	intro_pending = true
-	refresh()
-	play_intro()
-	scroll_to_top()
-	SeasonKit.after_week(world(), refresh)

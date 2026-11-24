@@ -12,12 +12,21 @@ static func hub_card(w: GameWorld, on_change: Callable) -> Control:
 	var steps := Tutorial.steps(w)
 	var cur := Tutorial.current(w)
 	var done := Tutorial.done_count(w)
-	var card := UIKit.card("CardHighlight", UITokens.S2)
+	# Compacto: o passo da vez com o botão que leva até lá; o andamento em pontinhos; pular no x.
+	var card := UIKit.card("Card", UITokens.S1)
 	var head := UIKit.hbox(8)
-	var el := UIKit.eyebrow("Primeiros passos", UIColors.ACCENT)
+	var el := UIKit.kicker("Primeiros passos · %d de %d" % [done + 1, steps.size()])
 	el.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	el.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	head.add_child(el)
-	head.add_child(UIKit.label("Passo %d de %d" % [done + 1, steps.size()], "Caps"))
+	var skip := UIKit.button("Pular o guia", "TextButton", func():
+		UIManager.confirm("Pular os primeiros passos?", "As dicas das telas continuam aparecendo na primeira vez. Dá para rever tudo jogando.", "Pular", func():
+			Tutorial.skip(w)
+			GameManager.save_now()
+			on_change.call()))
+	skip.custom_minimum_size.y = 44
+	skip.add_theme_color_override(&"font_color", UIColors.DIM)
+	head.add_child(skip)
 	card.add_child(head)
 	var pips := UIKit.hbox(4)
 	for i in steps.size():
@@ -28,28 +37,22 @@ static func hub_card(w: GameWorld, on_change: Callable) -> Control:
 		pip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		pips.add_child(pip)
 	card.add_child(pips)
-	card.add_child(UIKit.label(String(cur[1]), "Section", true))
-	card.add_child(UIKit.label(String(cur[2]), "Small", true))
-	var bar := UIKit.hbox(UITokens.S1)
-	var skip := UIKit.button("Pular o guia", "GhostButton", func():
-		UIManager.confirm("Pular os primeiros passos?", "As dicas das telas continuam aparecendo na primeira vez. Dá para rever tudo jogando.", "Pular", func():
-			Tutorial.skip(w)
-			GameManager.save_now()
-			on_change.call()))
-	skip.custom_minimum_size.y = UITokens.H_BUTTON_SM
-	skip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	bar.add_child(skip)
+	var body := UIKit.hbox(UITokens.S2)
+	var tv := UIKit.vbox(2)
+	tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	tv.add_child(UIKit.label(String(cur[1]), "H3", true))
+	tv.add_child(UIKit.label(String(cur[2]), "Small", true))
+	body.add_child(tv)
 	var dest := String(cur[4])
 	if dest != "":
 		var go := UIKit.button(String(cur[3]), "PrimaryButton", func(): _go(w, dest))
 		go.custom_minimum_size.y = UITokens.H_BUTTON_SM
-		go.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		go.size_flags_stretch_ratio = 1.4
-		go.clip_text = true
-		bar.add_child(go)
-	else:
+		go.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		body.add_child(go)
+	card.add_child(body)
+	if dest == "":
 		card.add_child(UIKit.colored("Acontece na semana da luta. Avance as semanas até lá.", UIColors.MUTED, "Caps", true))
-	card.add_child(bar)
 	return UIKit.card_panel(card)
 
 
@@ -102,31 +105,30 @@ static func tip(screen: BaseScreen, key: String) -> void:
 		Tutorial.tip_seen(w, key)
 		screen.set_meta(&"tip", key)
 	var d: Array = Tutorial.TIPS[key]
-	var card := UIKit.card("CardFlat", UITokens.S1)
-	var head := UIKit.hbox(8)
-	head.add_child(UIKit.icon_rect("info", 22, UIColors.ACCENT))
-	var t := UIKit.colored("Dica · %s" % String(d[0]), UIColors.ACCENT, "Caps")
-	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	head.add_child(t)
-	card.add_child(head)
-	card.add_child(UIKit.label(String(d[1]), "Small", true))
-	var p := UIKit.card_panel(card)
-	var bar := UIKit.hbox(UITokens.S1)
-	var off := UIKit.button("Não mostrar dicas", "TextButton", func():
-		Tutorial.tips_off(w)
+	# Uma faixa fina: o ícone, o texto e o x. Um toque em qualquer ponto dela fecha. (Desligar as
+	# dicas de vez fica nas Opções.)
+	var row := UIKit.hbox(UITokens.S2)
+	var ic := UIKit.icon_rect("info", 24, UIColors.ACCENT)
+	ic.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	row.add_child(ic)
+	var t := UIKit.label(String(d[1]), "Small", true)
+	# Duas linhas bastam para dizer do que se trata; o primeiro toque abre o resto.
+	t.max_lines_visible = 2
+	t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	row.add_child(t)
+	var x := UIKit.icon_rect("close", 20, UIColors.DIM)
+	x.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	row.add_child(x)
+	var holder: Array = [null]
+	var p := UIKit.tap_row(row, func():
+		if t.max_lines_visible > 0 and t.get_line_count() > t.max_lines_visible:
+			t.max_lines_visible = -1
+			return
 		screen.remove_meta(&"tip")
-		p.queue_free())
-	off.add_theme_color_override(&"font_color", UIColors.MUTED)
-	bar.add_child(off)
-	var gap := Control.new()
-	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	bar.add_child(gap)
-	var ok := UIKit.button("Entendi", "TextButton", func():
-		screen.remove_meta(&"tip")
-		p.queue_free())
-	bar.add_child(ok)
-	card.add_child(bar)
+		if is_instance_valid(holder[0]):
+			(holder[0] as Node).queue_free(), "CardFlat")
+	holder[0] = p
+	p.set_meta(&"tip_card", true)
 	var c := screen.content()
 	c.add_child(p)
 	c.move_child(p, 0)

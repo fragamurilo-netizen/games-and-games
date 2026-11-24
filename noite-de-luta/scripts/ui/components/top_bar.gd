@@ -12,10 +12,11 @@ var subtitle_lbl: Label
 var money_lbl: Label
 var mail_btn: Button
 var _mail_badge: CountBadge
+var _money_box: PanelContainer
 var _cash := 0.0
 var _cash_team := -1
 
-const TITLE_MAX := 31
+const TITLE_MAX := 34
 const TITLE_MIN := 24
 
 
@@ -34,14 +35,14 @@ func _ready() -> void:
 		back_pressed.emit())
 	row.add_child(back_btn)
 	badge = TeamBadge.new()
-	badge.custom_minimum_size = Vector2(52, 52)
+	badge.custom_minimum_size = Vector2(56, 56)
 	badge.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(badge)
 	var titles := UIKit.vbox(-4)
 	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	titles.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(titles)
-	title_lbl = UIKit.label("Noite de Luta", "H2")
+	title_lbl = UIKit.label("Noite de Luta", "Screen")
 	title_lbl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	title_lbl.add_theme_font_size_override(&"font_size", TITLE_MAX)
 	title_lbl.resized.connect(_fit_title)
@@ -63,21 +64,32 @@ func _ready() -> void:
 	_mail_badge = CountBadge.new()
 	mail_btn.add_child(_mail_badge)
 	row.add_child(mail_btn)
+	# O caixa numa cápsula, com a moeda dourada.
+	_money_box = PanelContainer.new()
+	var mb := StyleBoxFlat.new()
+	mb.bg_color = UIColors.SURFACE_2
+	mb.border_color = UIColors.LINE
+	mb.set_border_width_all(1)
+	mb.set_corner_radius_all(UITokens.R_PILL)
+	mb.content_margin_left = 12
+	mb.content_margin_right = 16
+	mb.content_margin_top = 6
+	mb.content_margin_bottom = 6
+	mb.anti_aliasing = true
+	_money_box.add_theme_stylebox_override(&"panel", mb)
+	_money_box.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_money_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var mr := UIKit.hbox(6)
+	mr.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var coin := UIKit.icon_rect("money", 24, UIColors.GOLD)
+	coin.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	mr.add_child(coin)
 	money_lbl = UIKit.label("", "Stat")
 	money_lbl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	money_lbl.add_theme_font_size_override(&"font_size", 24)
-	row.add_child(money_lbl)
-	row.add_child(UIKit.gap(6))
-
-
-## Faixa nas duas cores da equipe na base da barra (a identidade do save, sempre à vista).
-func _draw() -> void:
-	if UIColors.TEAM_1.a > 0.0:
-		var h := 4.0
-		draw_rect(Rect2(0, size.y - h, size.x * 0.72, h), UIColors.TEAM_1)
-		draw_rect(Rect2(size.x * 0.72, size.y - h, size.x * 0.28, h), UIColors.TEAM_2)
-	else:
-		draw_rect(Rect2(0, size.y - 1.0, size.x, 1.0), UITokens.HAIRLINE)
+	money_lbl.add_theme_font_size_override(&"font_size", 23)
+	mr.add_child(money_lbl)
+	_money_box.add_child(mr)
+	row.add_child(_money_box)
 
 
 func set_state(title: String, subtitle: String, show_back: bool, team: Team) -> void:
@@ -88,7 +100,7 @@ func set_state(title: String, subtitle: String, show_back: bool, team: Team) -> 
 	subtitle_lbl.text = subtitle
 	subtitle_lbl.visible = subtitle != ""
 	badge.visible = team != null and not show_back
-	money_lbl.visible = team != null
+	_money_box.visible = team != null
 	if team != null:
 		badge.team = team
 		var base := UIColors.TEXT if team.balance >= 0 else UIColors.RED
@@ -152,7 +164,10 @@ class CountBadge extends Control:
 		var w := maxf(24.0, tw + 12.0)
 		var r := Rect2(size.x - w - 2.0, 4.0, w, 24.0)
 		var sb := StyleBoxFlat.new()
-		sb.bg_color = UIColors.ACCENT
+		sb.bg_color = UIColors.RED
+		sb.border_color = UIColors.BG
+		sb.set_border_width_all(2)
 		sb.set_corner_radius_all(12)
+		sb.anti_aliasing = true
 		draw_style_box(sb, r)
-		draw_string(font, Vector2(r.position.x + (w - tw) * 0.5, r.position.y + 18.0), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UIColors.ON_ACCENT)
+		draw_string(font, Vector2(r.position.x + (w - tw) * 0.5, r.position.y + 18.0), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color.WHITE)

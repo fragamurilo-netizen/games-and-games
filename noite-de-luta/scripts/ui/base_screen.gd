@@ -118,9 +118,24 @@ func setup(p: Dictionary) -> void:
 	params = p
 
 
-## Chamado sempre que a tela aparece (inclusive ao voltar de outra).
+## O estado em que o conteúdo foi montado (ver `_stamp`).
+var _built_stamp := ""
+
+
+## Chamado sempre que a tela aparece (inclusive ao voltar de outra). Voltar a uma tela que já
+## estava montada, sem nada ter mudado no mundo nem no formato da janela, não remonta nada: ela
+## reaparece na hora.
 func on_show() -> void:
+	var st := _stamp()
+	if st == _built_stamp and _content_node != null and _content_node.get_child_count() > 0:
+		return
 	refresh()
+	_built_stamp = _stamp()
+
+
+func _stamp() -> String:
+	var w := GameManager.world
+	return "%d|%d|%s|%s" % [GameManager.rev, w.week if w != null else -1, UILayout.viewport, AppSettings.reduce_motion]
 
 
 func on_hide() -> void:

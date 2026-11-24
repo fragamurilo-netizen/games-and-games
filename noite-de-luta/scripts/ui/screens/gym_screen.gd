@@ -33,16 +33,31 @@ func refresh() -> void:
 	c.add_child(UIKit.card_panel(id))
 	# Finanças
 	var fin := UIKit.card("Card", UITokens.S1)
-	fin.add_child(UIKit.label("Finanças", "Section"))
-	fin.add_child(UIKit.kv("Caixa", Fmt.money(t.balance), UIColors.RED if t.balance < 0 else UIColors.TEXT))
 	var net := Career.weekly_net(w)
-	fin.add_child(UIKit.kv("Mensalidades (%s)" % Fmt.plural(Career.students(w), "aluno", "alunos"), "+" + Fmt.money(Career.tuition(w)) + "/sem", UIColors.GREEN))
 	var sp := Season.sponsor(w)
+	var income := Career.tuition(w) + sp
+	var costs := Career.upkeep(w) + t.weekly_wages()
+	var fh := UIKit.hbox(8)
+	var ft := UIKit.label("Finanças", "Section")
+	ft.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	fh.add_child(ft)
+	fh.add_child(UIKit.pill(("+" if net > 0.0 else "") + Fmt.money(net) + " por semana", UIColors.GREEN if net >= 0.0 else UIColors.RED))
+	fin.add_child(fh)
+	var tiles := UIKit.hbox(0)
+	for it: Array in [[Fmt.money(t.balance), "Caixa", UIColors.RED if t.balance < 0.0 else Color(0, 0, 0, 0)],
+			["+" + Fmt.money(income), "Entra por semana", UIColors.GREEN], [Fmt.money(-costs), "Sai por semana", UIColors.RED]]:
+		var tile := UIKit.stat_tile(String(it[0]), String(it[1]), it[2])
+		for l in tile.find_children("*", "Label", true, false):
+			if (l as Label).theme_type_variation == &"Stat":
+				(l as Label).add_theme_font_size_override(&"font_size", UITokens.F_SECTION)
+		tiles.add_child(tile)
+	fin.add_child(tiles)
+	fin.add_child(UIKit.separator())
+	fin.add_child(UIKit.kv("Mensalidades (%s)" % Fmt.plural(Career.students(w), "aluno", "alunos"), "+" + Fmt.money(Career.tuition(w)), UIColors.GREEN))
 	if sp > 0.0:
-		fin.add_child(UIKit.kv("Patrocínio do comércio local", "+" + Fmt.money(sp) + "/sem", UIColors.GREEN))
-	fin.add_child(UIKit.kv("Aluguel e despesas", Fmt.money(-Career.upkeep(w)) + "/sem"))
-	fin.add_child(UIKit.kv("Salários do staff", Fmt.money(-t.weekly_wages()) + "/sem"))
-	fin.add_child(UIKit.kv("Saldo fixo da semana", ("+" if net > 0.0 else "") + Fmt.money(net) + "/sem", UIColors.GREEN if net >= 0.0 else UIColors.RED))
+		fin.add_child(UIKit.kv("Patrocínio do comércio local", "+" + Fmt.money(sp), UIColors.GREEN))
+	fin.add_child(UIKit.kv("Aluguel e despesas", Fmt.money(-Career.upkeep(w))))
+	fin.add_child(UIKit.kv("Salários do staff", Fmt.money(-t.weekly_wages())))
 	var want := Career.student_demand(w)
 	var room := Career.student_capacity(w)
 	if want > room:
@@ -54,7 +69,7 @@ func refresh() -> void:
 	if t.balance < 0.0:
 		var lim := Career.debt_limit(w)
 		fin.add_child(UIKit.colored("Caixa negativo paga juros toda semana. Passando de %s de dívida, os salários atrasam e o staff começa a sair." % Fmt.money(lim), UIColors.RED if -t.balance >= lim * 0.6 else UIColors.ORANGE, "Small", true))
-	var recent := t.ledger.slice(maxi(0, t.ledger.size() - 10))
+	var recent := t.ledger.slice(maxi(0, t.ledger.size() - 5))
 	recent.reverse()
 	if not recent.is_empty():
 		fin.add_child(UIKit.label("Últimos lançamentos", "Caps"))

@@ -4,44 +4,30 @@ extends RefCounted
 ## atributo, cartel, ficha comparativa (tale of the tape) e textos de resultado.
 
 
-## Retrato quadrado (DESIGN.md › Retrato). Até 64 px: quadro liso de `surface-raised`; acima,
-## o fundo de arena do próprio retrato (luz de octógono).
-static func portrait(w: GameWorld, f: Fighter, px: int) -> PortraitView:
-	var v := PortraitView.new()
-	v.custom_minimum_size = Vector2(px, px)
+## Retrato do lutador: a imagem guardada pelo PortraitCache num quadro de cantos arredondados.
+## `tone` pinta o fundo (corner, equipe, campeão); sem ele, o tom neutro do tema.
+static func portrait(w: GameWorld, f: Fighter, px: int, tone: Color = Color(0, 0, 0, 0)) -> Portrait:
+	var v := Portrait.new()
 	v.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	v.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var t := w.team(f.team_id) if w != null else null
-	if t != null:
-		v.gear_trim = t.color1
-	v.stage = px > 64
-	v.set_face(f.face_seed, f.eth, w.age_of(f) if w != null else 28, f.look)
-	if px <= 64:
-		var r := ColorRect.new()
-		r.color = UIColors.SURFACE_2
-		r.show_behind_parent = true
-		r.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		r.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		v.add_child(r)
+	v.tone = tone
+	v.setup(Portraits.spec_of(w, f), px)
 	return v
 
 
-static func staff_portrait(s: Dictionary, px: int, accent: Color) -> PortraitView:
-	var v := PortraitView.new()
-	v.custom_minimum_size = Vector2(px, px)
+## O lutador recortado, sem quadro (cartazes, cabeçalho da ficha).
+static func cutout(w: GameWorld, f: Fighter, px: int, flip: bool = false) -> Portrait:
+	var v := portrait(w, f, px)
+	v.cutout = true
+	v.flip = flip
+	return v
+
+
+static func staff_portrait(s: Dictionary, px: int, accent: Color) -> Portrait:
+	var v := Portrait.new()
 	v.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	v.fight_body = false
-	v.stage = false
 	var look := {"fem": 1} if bool(s.get("fem", false)) else {}
-	v.set_person(int(s.get("face", 1)), int(s.get("eth", 1)), int(s.get("age", 40)), accent, look)
-	var r := ColorRect.new()
-	r.color = UIColors.SURFACE_2
-	r.show_behind_parent = true
-	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	r.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	v.add_child(r)
+	v.setup({"seed": int(s.get("face", 1)), "eth": int(s.get("eth", 1)), "age": int(s.get("age", 40)), "look": look, "suit": true, "accent": accent}, px)
 	return v
 
 
@@ -84,34 +70,45 @@ static func status_text(w: GameWorld, f: Fighter) -> Array:
 	return ["Disponível · condição %d%%" % int(f.condition), UIColors.GREEN]
 
 
-## Linha de lista: retrato, nome e segunda linha; à direita o ranking e o nível.
+## Tom do fundo do retrato: a cor da equipe para quem é da casa, dourado para o campeão, neutro
+## para o resto do mundo.
+static func tone_of(w: GameWorld, f: Fighter) -> Color:
+	if w == null or f == null:
+		return Color(0, 0, 0, 0)
+	if w.is_user_fighter(f):
+		return UIColors.TEAM_TONE.darkened(0.25)
+	if w.rank_of(f) == 0:
+		return UIColors.GOLD.darkened(0.35)
+	return Color(0, 0, 0, 0)
+
+
+## Linha de lista: retrato, nome e segunda linha; à direita o ranking e o nível num quadrinho.
 ## `right_node` troca o ranking por outra coisa (as estrelas do olheiro, no mercado).
 static func fighter_row(w: GameWorld, f: Fighter, cb: Callable, line2: String = "", line2_color: Color = Color(0, 0, 0, 0), right: String = "", right_node: Control = null, tag: String = "", tag_color: Color = Color(0, 0, 0, 0)) -> PanelContainer:
 	var h := UIKit.hbox(UITokens.S2)
-	h.add_child(portrait(w, f, 56))
-	var tv := UIKit.vbox(0)
+	h.add_child(portrait(w, f, 72, tone_of(w, f)))
+	var tv := UIKit.vbox(2)
 	tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var top := UIKit.hbox(8)
-	top.add_child(UIKit.flag(f.nation, 30))
+	var fl := UIKit.flag(f.nation, 28)
+	fl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	top.add_child(fl)
 	var n := UIKit.label(f.display_name(), "H3")
 	n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(n)
-	# Etiqueta curta ao lado do nome (o humor, por exemplo): não disputa espaço com a linha de baixo.
-	if tag != "":
-		var tg := UIKit.label(tag, "Caps")
-		if tag_color.a > 0.0:
-			tg.add_theme_color_override(&"font_color", UIColors.ink(tag_color))
-		top.add_child(tg)
 	tv.add_child(top)
 	var sub := UIKit.label(line2 if line2 != "" else "%s · %s" % [Matchmaker.division_short(f.division), f.record_text()], "Small")
 	sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	if line2_color.a > 0.0:
 		sub.add_theme_color_override(&"font_color", UIColors.ink(line2_color))
 	tv.add_child(sub)
+	# Etiqueta curta (o humor, por exemplo) embaixo, em cápsula: não disputa espaço com o nome.
+	if tag != "":
+		tv.add_child(UIKit.pill(tag, tag_color if tag_color.a > 0.0 else UIColors.MUTED, 17))
 	h.add_child(tv)
-	var rv := UIKit.vbox(0)
+	var rv := UIKit.vbox(4)
 	rv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	if right_node != null:
 		right_node.size_flags_horizontal = Control.SIZE_SHRINK_END
@@ -122,12 +119,12 @@ static func fighter_row(w: GameWorld, f: Fighter, cb: Callable, line2: String = 
 		if w.rank_of(f) == 0:
 			rk.add_theme_color_override(&"font_color", UIColors.GOLD)
 		rv.add_child(rk)
-	var lv := level_label(f.level())
-	lv.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	var lv := UIKit.badge(str(f.level()), UIColors.attr_color(f.level()))
+	lv.tooltip_text = "Nível geral"
 	rv.add_child(lv)
 	h.add_child(rv)
 	var row := UIKit.tap_row(h, cb)
-	row.custom_minimum_size.y = UITokens.H_ROW
+	row.custom_minimum_size.y = 96
 	return row
 
 
@@ -185,6 +182,59 @@ static func attr_blocks(f: Fighter, against: Fighter = null) -> Array:
 			card.add_child(attr_row(k, f.a(k), against.a(k) if against != null else -1.0))
 		out.append(UIKit.card_panel(card))
 	return out
+
+
+## Nomes curtos para a ficha em duas colunas.
+const ATTR_SHORT := {"def_finalizacao": "Def. finalização", "def_queda": "Def. de queda", "defesa": "Defesa em pé"}
+
+
+## Os 18 atributos num cartão só: cada grupo com a média e os seis atributos em duas colunas.
+## Cabe numa dobra da tela (os três blocos empilhados ocupavam duas).
+static func attr_card(f: Fighter, against: Fighter = null) -> Control:
+	var card := UIKit.card("Card", UITokens.S2)
+	var first := true
+	for g: Array in Fighter.GROUPS:
+		if not first:
+			card.add_child(UIKit.separator())
+		first = false
+		var head := UIKit.hbox(8)
+		var t := UIKit.kicker(String(g[0]))
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		head.add_child(t)
+		head.add_child(UIKit.badge(str(int(round(f.avg(g[1])))), UIColors.attr_color(f.avg(g[1])), 22, 48))
+		card.add_child(head)
+		var grid := GridContainer.new()
+		grid.columns = 2
+		grid.add_theme_constant_override(&"h_separation", 24)
+		grid.add_theme_constant_override(&"v_separation", 10)
+		for k: String in g[1]:
+			var cell := UIKit.vbox(3)
+			cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			var h := UIKit.hbox(6)
+			var n := UIKit.label(String(ATTR_SHORT.get(k, Fighter.ATTR_NAMES.get(k, k))), "Small")
+			n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			n.tooltip_text = String(Fighter.ATTR_HELP.get(k, ""))
+			n.mouse_filter = Control.MOUSE_FILTER_PASS
+			h.add_child(n)
+			var value := f.a(k)
+			if against != null:
+				var d := int(round(value - against.a(k)))
+				if d != 0:
+					var dl := UIKit.label(Fmt.signed(d), "Caps")
+					dl.add_theme_color_override(&"font_color", UIColors.ink(UIColors.GREEN if d > 0 else UIColors.RED))
+					h.add_child(dl)
+			var val := UIKit.label(str(int(value)), "H3")
+			val.add_theme_color_override(&"font_color", level_color(value))
+			val.add_theme_font_override(&"font", DataTable.tabular_font())
+			val.custom_minimum_size.x = 36
+			val.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			h.add_child(val)
+			cell.add_child(h)
+			cell.add_child(UIKit.bar(value, 100.0, UIColors.attr_color(value), 5))
+			grid.add_child(cell)
+		card.add_child(grid)
+	return UIKit.card_panel(card)
 
 
 ## Texto do resultado do ponto de vista do lutador `fid` ("Vitória por nocaute (gancho), R2 3:12").
@@ -311,40 +361,40 @@ static func physique_text(f: Fighter) -> String:
 	return t.substr(0, 1).to_upper() + t.substr(1) + "."
 
 
-## Faixa dos corners: retratos frente a frente, vermelho à esquerda e azul à direita.
-## `corners` falso: antes de a luta ser marcada ainda não há corner (barra neutra).
+## Frente a frente: os dois retratos em quadros na cor dos corners (vermelho à esquerda, azul à
+## direita), o "VS" no meio e, embaixo de cada um, nome, apelido, bandeira e cartel.
+## `corners` falso: antes de a luta ser marcada ainda não há corner (quadros neutros).
 static func faceoff(w: GameWorld, fa: Fighter, fb: Fighter, px: int = 150, corners: bool = true) -> HBoxContainer:
-	var h := UIKit.hbox(UITokens.S2)
+	var h := UIKit.hbox(UITokens.S1)
 	for i in 2:
 		var f := fa if i == 0 else fb
-		var v := UIKit.vbox(6)
+		var v := UIKit.vbox(4)
 		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var p := portrait(w, f, px)
+		var tone := (UIColors.CORNER_RED if i == 0 else UIColors.CORNER_BLUE) if corners else Color(0, 0, 0, 0)
+		var p := portrait(w, f, px, tone)
 		v.add_child(p)
-		var bar := ColorRect.new()
-		bar.color = (UIColors.CORNER_RED if i == 0 else UIColors.CORNER_BLUE) if corners else UIColors.LINE
-		bar.custom_minimum_size = Vector2(px, 4)
-		bar.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		v.add_child(bar)
 		var n := UIKit.label(f.display_name(), "H3")
 		n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		n.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(n)
-		if f.nickname != "":
-			var nk := UIKit.label("“%s”" % f.nickname, "Small")
+		if f.nickname != "" and px >= 96:
+			var nk := UIKit.colored("“%s”" % f.nickname, UIColors.GOLD, "Small")
 			nk.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			nk.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 			v.add_child(nk)
 		var fl := UIKit.hbox(6)
 		fl.alignment = BoxContainer.ALIGNMENT_CENTER
-		fl.add_child(UIKit.flag(f.nation, 30))
+		var fg := UIKit.flag(f.nation, 28)
+		fg.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		fl.add_child(fg)
 		fl.add_child(UIKit.label(f.record_text() if f.is_pro() else "Estreia", "Small"))
 		v.add_child(fl)
 		h.add_child(v)
 		if i == 0:
-			var vs := UIKit.label("×", "Title")
+			var vs := UIKit.label("VS", "Section" if px < 110 else "Title")
 			vs.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 			vs.custom_minimum_size.y = px
 			vs.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-			vs.add_theme_color_override(&"font_color", UIColors.DIM)
+			vs.add_theme_color_override(&"font_color", UIColors.GOLD)
 			h.add_child(vs)
 	return h

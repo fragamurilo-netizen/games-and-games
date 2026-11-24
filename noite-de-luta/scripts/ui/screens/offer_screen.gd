@@ -79,8 +79,7 @@ func refresh() -> void:
 	tape.add_child(FightKit.tape(w, f, opp))
 	c.add_child(UIKit.card_panel(tape))
 	c.add_child(UIKit.section_header("Atributos de %s" % opp.short_name()))
-	for x: Control in FightKit.attr_blocks(opp, f):
-		c.add_child(x)
+	c.add_child(FightKit.attr_card(opp, f))
 	c.add_child(UIKit.label("Os números verdes e vermelhos são a diferença para %s." % f.short_name(), "Small", true))
 	columnize(c, 1, 2, 1)
 	var foot := footer()

@@ -50,6 +50,9 @@ func _turn_week(w: GameWorld) -> void:
 		Career.advance_week(w, true)
 		UIManager.current().refresh()
 		SeasonKit.after_week(w, UIManager.current().refresh)
+	await _wait(0.1)
+	while DashKit.closing or GameManager.turning:
+		await get_tree().process_frame
 	await _wait(1.4)
 
 

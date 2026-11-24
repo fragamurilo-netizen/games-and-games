@@ -14,6 +14,12 @@ const BACKUP_PATH := "user://carreira_anterior.json"
 const SAVE_IDLE_MS := 2500
 
 var world: GameWorld = null
+## Sobe sempre que o mundo pode ter mudado (algo foi salvo, a semana virou, o jogador tocou em
+## alguma coisa que não era só navegar). As telas guardadas comparam este número para saber se
+## precisam se remontar ao voltar (BaseScreen.on_show).
+var rev := 0
+## A semana está sendo fechada em outra thread: ninguém lê nem grava o mundo até acabar.
+var turning := false
 var _dirty := false
 var _last_touch := 0
 ## Semanas viradas que ainda não foram para o arquivo (no máximo uma fica esperando).
@@ -33,7 +39,7 @@ func _input(event: InputEvent) -> void:
 func _process(_delta: float) -> void:
 	if not _dirty:
 		set_process(false)
-	elif Time.get_ticks_msec() - _last_touch >= SAVE_IDLE_MS:
+	elif not turning and Time.get_ticks_msec() - _last_touch >= SAVE_IDLE_MS:
 		flush()
 
 
@@ -56,6 +62,7 @@ func user_team() -> Team:
 
 func start_career(w: GameWorld) -> void:
 	world = w
+	rev += 1
 	_write()
 	world_changed.emit()
 
@@ -96,6 +103,7 @@ static func save_summary(path: String = SAVE_PATH) -> Dictionary:
 func save_now() -> void:
 	if world == null:
 		return
+	rev += 1
 	_dirty = true
 	_last_touch = Time.get_ticks_msec()
 	set_process(true)
@@ -103,7 +111,7 @@ func save_now() -> void:
 
 ## Escreve agora o que estiver pendente.
 func flush() -> void:
-	if _dirty:
+	if _dirty and not turning:
 		_write()
 
 
@@ -143,6 +151,7 @@ func load_save() -> bool:
 		DirAccess.copy_absolute(ProjectSettings.globalize_path(SAVE_PATH), ProjectSettings.globalize_path(BACKUP_PATH))
 	_dirty = false
 	world = GameWorld.from_dict(d)
+	rev += 1
 	world_changed.emit()
 	return true
 
@@ -156,10 +165,38 @@ func delete_save() -> void:
 ## Fecha a semana (as lutas do jogador já jogadas) e salva.
 func advance_week() -> void:
 	Career.advance_week(world)
+	_after_week()
+
+
+## A mesma virada, com a conta em outra thread: a tela continua viva (o aviso de "fechando a
+## semana" anima) em vez de congelar por alguns segundos em celular fraco. Usar com `await`.
+## Enquanto dura, nada mais mexe no mundo: o aviso segura o toque e o salvamento espera.
+## Várias semanas seguidas (o botão Adiantar): o arquivo é gravado uma vez só, no fim.
+var batch := false
+
+
+func advance_week_async() -> void:
+	if turning or world == null:
+		return
+	if DisplayServer.get_name() == "headless":
+		advance_week()
+		return
+	turning = true
+	var w := world
+	var id := WorkerThreadPool.add_task(func() -> void: Career.advance_week(w), true, "virar a semana")
+	while not WorkerThreadPool.is_task_completed(id):
+		await get_tree().process_frame
+	WorkerThreadPool.wait_for_task_completion(id)
+	turning = false
+	_after_week()
+
+
+func _after_week() -> void:
+	rev += 1
 	# A semana virada vai para o arquivo quando o jogador parar para ler a tela. Quem vira
 	# semana atrás de semana sem parar salva na hora a cada duas.
 	_weeks_pending += 1
-	if _weeks_pending >= 2:
+	if _weeks_pending >= 2 and not batch:
 		_write()
 	else:
 		save_now()

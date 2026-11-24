@@ -27,6 +27,7 @@ config/icon="res://assets/brand/icone.png"
 GameManager="*res://scripts/autoload/game_manager.gd"
 AudioManager="*res://scripts/autoload/audio_manager.gd"
 UIManager="*res://scripts/autoload/ui_manager.gd"
+Portraits="*res://scripts/autoload/portraits.gd"
 
 [debug]
 

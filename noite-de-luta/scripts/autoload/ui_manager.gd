@@ -52,10 +52,16 @@ var stacks: Dictionary = {} # área -> Array[BaseScreen]
 var stack: Array = [] # pilha da área atual (a mesma instância de stacks[area])
 var _modals: Array = []
 var _script_cache: Dictionary = {}
+## Quadro da última troca de tela (main.gd usa para saber se um toque só navegou).
+var nav_frame := -1
 
 
 func register_main(m: Node) -> void:
 	main = m
+	# Os scripts das telas são lidos em segundo plano logo na abertura: a primeira visita a cada
+	# tela não paga a leitura e a compilação do script.
+	for path: String in SCREENS.values():
+		ResourceLoader.load_threaded_request(path)
 
 
 ## Reconstrói a tela atual agora.
@@ -81,7 +87,11 @@ func _instance(name: String, params: Dictionary) -> BaseScreen:
 	if GameManager.has_career():
 		real = String((ROLE_SCREENS.get(GameManager.world.role, {}) as Dictionary).get(name, name))
 	if not _script_cache.has(real):
-		_script_cache[real] = load(SCREENS[real])
+		var path: String = SCREENS[real]
+		var res: Resource = null
+		if ResourceLoader.load_threaded_get_status(path) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+			res = ResourceLoader.load_threaded_get(path)
+		_script_cache[real] = res if res != null else load(path)
 	var node: BaseScreen = _script_cache[real].new()
 	node.screen_name = name
 	node.setup(params)
@@ -91,6 +101,7 @@ func _instance(name: String, params: Dictionary) -> BaseScreen:
 ## Abre uma tela do zero. Área (Início, Elenco...): recomeça a pilha dela. Fora das áreas
 ## (menu, boas-vindas, nova carreira): descarta todas as pilhas.
 func goto(name: String, params: Dictionary = {}) -> void:
+	nav_frame = Engine.get_process_frames()
 	close_all_modals()
 	if name in tabs():
 		_hide_top()
@@ -107,6 +118,7 @@ func goto(name: String, params: Dictionary = {}) -> void:
 ## Toque na barra de navegação: volta à área como ela estava. Tocar na área atual sobe
 ## para a raiz dela (ou para o topo da lista, se já estiver na raiz).
 func switch_area(a: String) -> void:
+	nav_frame = Engine.get_process_frames()
 	close_all_modals()
 	if a == area:
 		if stack.size() > 1:
@@ -129,6 +141,7 @@ func switch_area(a: String) -> void:
 
 
 func pop_to_root() -> void:
+	nav_frame = Engine.get_process_frames()
 	close_all_modals()
 	while stack.size() > 1:
 		var s: BaseScreen = stack.pop_back()
@@ -187,17 +200,19 @@ func _free_stack(a: String) -> void:
 
 ## Empilha uma tela (perfil, negociação...). "Voltar" retorna à anterior.
 func push(name: String, params: Dictionary = {}) -> void:
+	nav_frame = Engine.get_process_frames()
 	close_all_modals()
 	var cur := current()
 	if cur != null:
 		_remember_scroll(cur)
 		cur.on_hide()
-		_animate_out(cur, -32.0, false)
-	_show(_instance(name, params), 56.0)
+		_animate_out(cur, -20.0, false)
+	_show(_instance(name, params), 36.0)
 
 
 ## Substitui a tela do topo (fluxos lineares: pré-jogo → partida → resultados).
 func replace(name: String, params: Dictionary = {}) -> void:
+	nav_frame = Engine.get_process_frames()
 	close_all_modals()
 	var cur := current()
 	if cur != null:
@@ -212,19 +227,20 @@ func back() -> bool:
 		return true
 	if stack.size() <= 1:
 		return false
+	nav_frame = Engine.get_process_frames()
 	var cur: BaseScreen = stack.pop_back()
 	cur.on_hide()
 	# A tela que sai vai para baixo da que volta: o toque já é da tela de trás.
 	if cur.get_parent() != null:
 		cur.get_parent().move_child(cur, 0)
-	_animate_out(cur, 40.0, true)
+	_animate_out(cur, 28.0, true)
 	var prev := current()
 	prev.visible = true
 	prev.process_mode = Node.PROCESS_MODE_INHERIT
 	_apply_chrome(prev)
 	prev.on_show()
 	_restore_scroll(prev)
-	_animate_in(prev, -40.0)
+	_animate_in(prev, -24.0)
 	return true
 
 
@@ -245,11 +261,15 @@ func _animate_in(screen: Control, from_x: float) -> void:
 	if AppSettings.reduce_motion:
 		from_x = 0.0
 	screen.position.x = from_x
+	if not Anim.on():
+		screen.modulate.a = 1.0
+		screen.position.x = 0.0
+		return
 	var tw := screen.create_tween().set_parallel()
 	screen.set_meta(&"nav_tw", tw)
-	tw.tween_property(screen, "modulate:a", 1.0, 0.16 if from_x != 0.0 else 0.12)
+	tw.tween_property(screen, "modulate:a", 1.0, 0.09 if from_x != 0.0 else 0.07)
 	if from_x != 0.0:
-		tw.tween_property(screen, "position:x", 0.0, 0.22).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tw.tween_property(screen, "position:x", 0.0, 0.14).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 
 ## A tela que sai some deslizando para o lado contrário de quem entra. Com `free_after` ela é
@@ -264,8 +284,8 @@ func _animate_out(screen: Control, to_x: float, free_after: bool) -> void:
 		return
 	var tw := screen.create_tween().set_parallel()
 	screen.set_meta(&"nav_tw", tw)
-	tw.tween_property(screen, "modulate:a", 0.0, 0.12)
-	tw.tween_property(screen, "position:x", to_x, 0.16).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(screen, "modulate:a", 0.0, 0.07)
+	tw.tween_property(screen, "position:x", to_x, 0.1).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tw.chain().tween_callback(func():
 		if free_after:
 			screen.queue_free()
@@ -332,7 +352,7 @@ func handle_back() -> void:
 func show_modal(content: Control, as_sheet: bool = false, dismissable: bool = true) -> Control:
 	var layer: Control = main.modal_host
 	var dim := ColorRect.new()
-	dim.color = Color(0, 0, 0, 0.62)
+	dim.color = Color(0.02, 0.03, 0.05, 0.72)
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	dim.mouse_filter = Control.MOUSE_FILTER_STOP
 	layer.add_child(dim)
@@ -399,10 +419,10 @@ func show_modal(content: Control, as_sheet: bool = false, dismissable: bool = tr
 		Sfx.play("sheet", -9.0)
 	# Entrada: o fundo escurece e o painel sobe um pouco (a folha inferior vem de baixo).
 	dim.modulate.a = 0.0
-	holder.position.y = 90.0 if as_sheet else 24.0
+	holder.position.y = 60.0 if as_sheet else 16.0
 	var tw := dim.create_tween().set_parallel()
-	tw.tween_property(dim, "modulate:a", 1.0, 0.14)
-	tw.tween_property(holder, "position:y", 0.0, 0.22).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(dim, "modulate:a", 1.0, 0.09)
+	tw.tween_property(holder, "position:y", 0.0, 0.15).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	return dim
 
 
@@ -502,9 +522,9 @@ func close_modal() -> void:
 	m.add_child(shield)
 	var holder := m.get_child(0) as Control
 	var tw := m.create_tween().set_parallel()
-	tw.tween_property(m, "modulate:a", 0.0, 0.12)
+	tw.tween_property(m, "modulate:a", 0.0, 0.08)
 	if holder != null:
-		tw.tween_property(holder, "position:y", holder.position.y + 28.0, 0.12).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+		tw.tween_property(holder, "position:y", holder.position.y + 20.0, 0.08).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	tw.chain().tween_callback(m.queue_free)
 
 
@@ -562,136 +582,174 @@ func info(title: String, body: String) -> void:
 # Toasts
 # ---------------------------------------------------------------------------
 
+var _toast_live: Control
+
+
+## Aviso curto no alto da tela. Um de cada vez: o novo toma o lugar do anterior.
 func toast(text: String, color: Color = UIColors.TEXT) -> void:
 	if main == null:
 		print(text)
 		return
 	_toast_sound(color)
+	if is_instance_valid(_toast_live):
+		_toast_live.queue_free()
 	var p := PanelContainer.new()
+	_toast_live = p
 	p.theme_type_variation = "Toast"
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	# Faixa de cor à esquerda diz o tipo do aviso (verde bom, vermelho ruim, neutro).
-	var row := UIKit.hbox(14)
-	var bar := ColorRect.new()
-	bar.color = color if color != UIColors.TEXT else UIColors.ACCENT
-	bar.custom_minimum_size = Vector2(5, 0)
-	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(bar)
+	# A bolinha de cor diz o tipo do aviso (verde bom, vermelho ruim, dourado neutro).
+	var row := UIKit.hbox(12)
+	var dot := Dot.new()
+	dot.color = color if color != UIColors.TEXT else UIColors.ACCENT
+	row.add_child(dot)
 	var l := UIKit.label(text, "", true)
-	l.add_theme_color_override(&"font_color", color)
+	l.add_theme_font_size_override(&"font_size", UITokens.F_BODY_SMALL + 1)
 	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(l)
 	p.add_child(row)
 	main.toast_host.add_child(p)
+	main.toast_host.move_child(p, 0)
 	p.modulate.a = 0.0
 	var tw := p.create_tween()
-	tw.tween_property(p, "modulate:a", 1.0, 0.15)
-	if not AppSettings.reduce_motion:
-		# Chega assentando (o contêiner cuida da posição; a escala dá o movimento).
-		p.scale = Vector2(0.94, 0.94)
-		(func():
-			if is_instance_valid(p):
-				p.pivot_offset = p.size * 0.5).call_deferred()
-		tw.parallel().tween_property(p, "scale", Vector2.ONE, 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tw.tween_interval(2.4)
-	tw.tween_property(p, "modulate:a", 0.0, 0.3)
+	tw.tween_property(p, "modulate:a", 1.0, 0.1)
+	tw.tween_interval(clampf(1.3 + text.length() * 0.022, 1.6, 3.2))
+	tw.tween_property(p, "modulate:a", 0.0, 0.2)
 	tw.tween_callback(p.queue_free)
 
 
-## Faixa que passa no meio da tela e some sozinha (a semana que começou, com o que mudou).
-## Não segura o toque: quem avança várias semanas seguidas não espera por ela.
-var _banner: Control
+class Dot extends Control:
+	var color := Color.WHITE
+
+	func _init() -> void:
+		custom_minimum_size = Vector2(12, 12)
+		size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func _draw() -> void:
+		draw_circle(size * 0.5, 6.0, color, true, -1.0, true)
 
 
+## A semana que começou, com o que mudou, num aviso só no alto da tela: o título e, embaixo, os
+## itens lado a lado, cada um na sua cor. Não segura o toque e não cobre o conteúdo.
 func banner(title: String, lines: Array = []) -> void:
-	if main == null or AppSettings.reduce_motion or DisplayServer.get_name() == "headless":
+	if main == null or DisplayServer.get_name() == "headless":
 		return
-	if is_instance_valid(_banner):
-		_banner.queue_free()
-	var layer: Control = main.modal_host
-	var holder := CenterContainer.new()
-	holder.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if is_instance_valid(_toast_live):
+		_toast_live.queue_free()
 	var p := PanelContainer.new()
-	p.theme_type_variation = "Popover"
+	_toast_live = p
+	p.theme_type_variation = "Toast"
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var v := UIKit.vbox(4)
-	v.custom_minimum_size.x = 380
-	var t := UIKit.label(title, "Section")
-	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(t)
-	for ln: Array in lines:
-		var l := UIKit.label(String(ln[0]), "Small")
-		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		if ln.size() > 1 and (ln[1] as Color).a > 0.0:
-			l.add_theme_color_override(&"font_color", ln[1])
-		v.add_child(l)
+	var v := UIKit.vbox(0)
+	v.add_child(UIKit.kicker(title))
+	if not lines.is_empty():
+		var row := UIKit.hbox(14)
+		for ln: Array in lines:
+			var l := UIKit.label(String(ln[0]), "H3")
+			l.add_theme_font_size_override(&"font_size", UITokens.F_BODY_SMALL + 1)
+			if ln.size() > 1 and (ln[1] as Color).a > 0.0:
+				l.add_theme_color_override(&"font_color", ln[1])
+			row.add_child(l)
+		v.add_child(row)
 	p.add_child(v)
-	holder.add_child(p)
-	layer.add_child(holder)
-	_banner = holder
-	holder.modulate.a = 0.0
-	p.scale = Vector2(0.9, 0.9)
-	(func():
-		if is_instance_valid(p):
-			p.pivot_offset = p.size * 0.5).call_deferred()
-	var tw := holder.create_tween()
-	tw.tween_property(holder, "modulate:a", 1.0, 0.12)
-	tw.parallel().tween_property(p, "scale", Vector2.ONE, 0.24).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tw.tween_interval(0.85)
-	tw.tween_property(holder, "modulate:a", 0.0, 0.25)
-	tw.tween_callback(holder.queue_free)
+	main.toast_host.add_child(p)
+	main.toast_host.move_child(p, 0)
+	p.modulate.a = 0.0
+	var tw := p.create_tween()
+	tw.tween_property(p, "modulate:a", 1.0, 0.1)
+	tw.tween_interval(1.7)
+	tw.tween_property(p, "modulate:a", 0.0, 0.2)
+	tw.tween_callback(p.queue_free)
 
 
 ## Aviso no meio da tela enquanto o jogo faz uma conta pesada (a virada da semana), para a
 ## tela não parecer travada em celular fraco. Segura o toque. Use com `await`: a função volta
 ## depois de o aviso ter sido desenhado, e quem chamou faz a conta e chama `busy_done`.
 var _busy: Control
+var _busy_label: Label
+## O jogador tocou no aviso enquanto ele estava na tela (quem adianta várias semanas para aqui).
+var busy_tapped := false
 
 
-func busy(text: String) -> void:
+func busy(text: String, hint: String = "") -> void:
 	busy_done()
+	busy_tapped = false
 	if main == null or DisplayServer.get_name() == "headless":
 		return
-	# Fundo escurecido de leve (segura o toque) e uma faixa no meio com a cor de destaque.
+	# Fundo escurecido (segura o toque) e, no meio, o aviso com o arco dourado girando.
 	var layer := ColorRect.new()
-	layer.color = Color(0, 0, 0, 0.32)
+	layer.color = Color(UIColors.BG, 0.78)
 	layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	layer.mouse_filter = Control.MOUSE_FILTER_STOP
 	var holder := CenterContainer.new()
 	holder.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var p := PanelContainer.new()
-	p.theme_type_variation = "Toast"
-	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var row := UIKit.hbox(14)
-	var bar := ColorRect.new()
-	bar.color = UIColors.ACCENT
-	bar.custom_minimum_size = Vector2(5, 0)
-	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(bar)
+	var v := UIKit.vbox(UITokens.S2)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.custom_minimum_size.x = 340
+	var sp := Spinner.new()
+	sp.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	v.add_child(sp)
 	var l := UIKit.label(text, "Section")
-	l.custom_minimum_size.x = 280
-	row.add_child(l)
-	p.add_child(row)
-	holder.add_child(p)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(l)
+	_busy_label = l
+	if hint != "":
+		var hl := UIKit.label(hint, "Muted", true)
+		hl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(hl)
+		layer.gui_input.connect(func(ev: InputEvent):
+			if (ev is InputEventMouseButton or ev is InputEventScreenTouch) and ev.is_pressed():
+				busy_tapped = true)
+	var box := PanelContainer.new()
+	box.theme_type_variation = "Popover"
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(UIKit.margin(v, 20, 16, 20, 16))
+	holder.add_child(box)
 	layer.add_child(holder)
 	main.modal_host.add_child(layer)
 	_busy = layer
+	layer.modulate.a = 0.0
+	layer.create_tween().tween_property(layer, "modulate:a", 1.0, 0.08)
 	await get_tree().process_frame
 	await get_tree().process_frame
+
+
+## Arco que gira enquanto o jogo faz uma conta comprida.
+class Spinner extends Control:
+	var _a := 0.0
+
+	func _init() -> void:
+		custom_minimum_size = Vector2(72, 72)
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func _process(delta: float) -> void:
+		_a = fmod(_a + delta * 5.2, TAU)
+		queue_redraw()
+
+	func _draw() -> void:
+		var c := size * 0.5
+		draw_arc(c, 28.0, 0.0, TAU, 40, Color(1, 1, 1, 0.1), 6.0, true)
+		draw_arc(c, 28.0, _a, _a + 1.9, 20, UIColors.GOLD, 6.0, true)
+
+
+## Troca o texto do aviso sem tirá-lo da tela.
+func busy_text(text: String) -> void:
+	if is_instance_valid(_busy) and is_instance_valid(_busy_label):
+		_busy_label.text = text
 
 
 func busy_done() -> void:
 	if is_instance_valid(_busy):
 		_busy.queue_free()
 	_busy = null
+	_busy_label = null
 
 
 ## Aviso de comemoração (meta cumprida, conquista): ícone, título e uma linha, com filete
 ## dourado e o som de conquista. Fica um pouco mais na tela do que um aviso comum. Quando vários
 ## saem juntos, aparecem dois por vez e os outros esperam na fila, para não cobrir a tela.
-const AWARD_LIVE_MAX := 2
+const AWARD_LIVE_MAX := 1
 var _award_queue: Array = []
 var _award_live := 0
 var _award_sfx_at := -10.0
@@ -712,7 +770,13 @@ func _award_pump() -> void:
 		return
 	while _award_live < AWARD_LIVE_MAX and not _award_queue.is_empty():
 		var a: Array = _award_queue.pop_front()
-		_award_show(String(a[0]), String(a[1]), String(a[2]), 2.2 if not _award_queue.is_empty() else 3.2)
+		if _award_queue.size() >= 2:
+			# Muitos de uma vez (uma virada de semana cheia): o primeiro aparece e o resto vira um
+			# aviso só, em vez de uma fila que cobre a tela por dez segundos.
+			var more := _award_queue.size()
+			_award_queue.clear()
+			_award_queue.append(["E mais %d" % more, "Veja em Temporada › Conquistas", "trophy"])
+		_award_show(String(a[0]), String(a[1]), String(a[2]), 1.5 if not _award_queue.is_empty() else 2.2)
 
 
 func _award_done() -> void:
@@ -732,32 +796,23 @@ func _award_show(title: String, text: String, icon_name: String, hold: float) ->
 	p.theme_type_variation = "Toast"
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var row := UIKit.hbox(14)
-	var bar := ColorRect.new()
-	bar.color = UIColors.GOLD
-	bar.custom_minimum_size = Vector2(5, 0)
-	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(bar)
-	var ic := UIKit.icon_rect(icon_name, 34, UIColors.GOLD)
+	var ic := UIKit.icon_rect(icon_name, 30, UIColors.GOLD)
 	ic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(ic)
-	var v := UIKit.vbox(0)
+	var v := UIKit.vbox(-2)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	v.add_child(UIKit.colored(title, UIColors.GOLD, "Caps"))
-	v.add_child(UIKit.label(text, "H3", true))
+	v.add_child(UIKit.kicker(title))
+	var tl := UIKit.label(text, "H3", true)
+	tl.add_theme_font_size_override(&"font_size", UITokens.F_BODY_SMALL + 1)
+	v.add_child(tl)
 	row.add_child(v)
 	p.add_child(row)
 	main.toast_host.add_child(p)
 	p.modulate.a = 0.0
 	var tw := p.create_tween()
-	tw.tween_property(p, "modulate:a", 1.0, 0.15)
-	if not AppSettings.reduce_motion:
-		p.scale = Vector2(0.9, 0.9)
-		(func():
-			if is_instance_valid(p):
-				p.pivot_offset = p.size * 0.5).call_deferred()
-		tw.parallel().tween_property(p, "scale", Vector2.ONE, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(p, "modulate:a", 1.0, 0.1)
 	tw.tween_interval(hold)
-	tw.tween_property(p, "modulate:a", 0.0, 0.3)
+	tw.tween_property(p, "modulate:a", 0.0, 0.2)
 	tw.tween_callback(p.queue_free)
 
 

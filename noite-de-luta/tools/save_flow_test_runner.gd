@@ -13,6 +13,11 @@ func _frames(n: int) -> void:
 
 
 func _shot(name: String) -> void:
+	var _pw := 0
+	while Portraits.pending() > 0 and _pw < 1200:
+		await get_tree().process_frame
+		_pw += 1
+	await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png("%s/%s.png" % [out_dir, name])
 
@@ -46,6 +51,8 @@ func _run() -> void:
 	await _frames(1)
 	await _shot("turn_busy")
 	print("durante: semana ", w.week, " (antes ", week0, ") · aviso na tela: ", is_instance_valid(UIManager.get("_busy")))
+	while DashKit.closing or GameManager.turning:
+		await get_tree().process_frame
 	await _frames(4)
 	print("depois: semana ", w.week, " · aviso na tela: ", is_instance_valid(UIManager.get("_busy")), " · pendente: ", GameManager.get("_dirty"), " · semanas esperando: ", GameManager.get("_weeks_pending"))
 	await _shot("turn_after")
@@ -61,6 +68,9 @@ func _run() -> void:
 			print("sem botão (luta pendente?)")
 			break
 		btn.pressed.emit()
+		await _frames(2)
+		while DashKit.closing or GameManager.turning:
+			await get_tree().process_frame
 		await _frames(5)
 		print("semana ", w.week, " · pendente: ", GameManager.get("_dirty"), " · esperando: ", GameManager.get("_weeks_pending"))
 	# Sair de cena grava o que estiver pendente.

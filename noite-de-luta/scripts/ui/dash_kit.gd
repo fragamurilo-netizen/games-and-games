@@ -19,28 +19,32 @@ static func short_when(w: GameWorld, week: int) -> String:
 	return "em %d sem." % n
 
 
-## Cartão da casa. `tiles` = [[valor, legenda, cor], ...].
+## Cartão da casa: escudo, nome e reputação numa linha; o caixa com a tendência; e os números.
+## `tiles` = [[valor, legenda, cor], ...].
 static func identity(w: GameWorld, t: Team, sub: String, rep_caption: String, tiles: Array, intro: bool) -> PanelContainer:
-	var card := UIKit.card("CardHighlight", UITokens.S2)
-	var h := UIKit.hbox(UITokens.S3)
+	var card := UIKit.card("Card", UITokens.S2)
+	var h := UIKit.hbox(UITokens.S2)
 	var badge := TeamBadge.new()
 	badge.team = t
-	badge.custom_minimum_size = Vector2(76, 76)
+	badge.custom_minimum_size = Vector2(60, 60)
 	badge.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	h.add_child(badge)
-	var v := UIKit.vbox(2)
+	var v := UIKit.vbox(0)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	v.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var nm := UIKit.label(t.name, "Section")
 	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	v.add_child(nm)
 	var sl := UIKit.label(sub, "Small")
 	sl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	v.add_child(sl)
-	var rep := UIKit.hbox(8)
+	h.add_child(v)
+	var rep := UIKit.vbox(0)
+	rep.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var st := StarsView.new()
 	st.star_size = 18
 	st.stars = StarsView.from_value(t.reputation)
-	st.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	st.size_flags_horizontal = Control.SIZE_SHRINK_END
 	rep.add_child(st)
 	var rc := rep_caption
 	var n := t.rep_log.size()
@@ -48,22 +52,15 @@ static func identity(w: GameWorld, t: Team, sub: String, rep_caption: String, ti
 		var d := t.reputation - float(t.rep_log[maxi(0, n - 5)])
 		if absf(d) >= 0.5:
 			rc += " %s" % ("subindo" if d > 0.0 else "caindo")
-	rep.add_child(UIKit.label(rc, "Caps"))
-	v.add_child(rep)
-	h.add_child(v)
-	if UILayout.is_wide():
-		# Tela larga (celular deitado, tablet): a casa e o caixa dividem a mesma linha.
-		var top := UIKit.hbox(UITokens.S4)
-		h.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		h.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		top.add_child(h)
-		var cash := _cash(t, intro)
-		cash.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		top.add_child(cash)
-		card.add_child(top)
-	else:
-		card.add_child(h)
-		card.add_child(_cash(t, intro))
+	var rl := UIKit.label(rc, "Caps")
+	rl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	rep.add_child(rl)
+	h.add_child(rep)
+	card.add_child(h)
+	var inset := PanelContainer.new()
+	inset.theme_type_variation = "CardInset"
+	inset.add_child(_cash(t, intro))
+	card.add_child(inset)
 	var stats := UIKit.hbox(0)
 	for it: Array in tiles:
 		stats.add_child(UIKit.stat_tile(String(it[0]), String(it[1]), it[2] if it.size() > 2 else Color(0, 0, 0, 0)))
@@ -172,26 +169,21 @@ static func strip(title: String, tiles: Array, action: String = "", cb: Callable
 	return v
 
 
-## Cartãozinho de lutador para as faixas: retrato, nome, uma etiqueta e a situação.
+## Cartãozinho de lutador para as faixas: retrato grande, nome, a situação numa cápsula e uma
+## etiqueta (o ranking, ou o humor quando pede atenção).
 static func fighter_tile(w: GameWorld, f: Fighter, tag: String, tag_color: Color, line: String, line_color: Color, cb: Callable) -> PanelContainer:
-	var v := UIKit.vbox(2)
-	v.custom_minimum_size.x = 150
-	var top := UIKit.label(tag, "Caps")
-	top.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	top.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	if tag_color.a > 0.0:
-		top.add_theme_color_override(&"font_color", UIColors.ink(tag_color))
-	v.add_child(top)
+	var v := UIKit.vbox(4)
+	v.custom_minimum_size.x = 148
 	if f != null:
-		var p := FightKit.portrait(w, f, 104)
+		var p := FightKit.portrait(w, f, 148, FightKit.tone_of(w, f))
 		p.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		v.add_child(p)
 	else:
 		var hole := PanelContainer.new()
 		hole.theme_type_variation = "IconTile"
-		hole.custom_minimum_size = Vector2(104, 104)
+		hole.custom_minimum_size = Vector2(148, 148)
 		hole.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		var ic := UIKit.icon_rect("belt", 44, UIColors.DIM)
+		var ic := UIKit.icon_rect("belt", 56, UIColors.DIM)
 		ic.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		ic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		hole.add_child(ic)
@@ -200,14 +192,20 @@ static func fighter_tile(w: GameWorld, f: Fighter, tag: String, tag_color: Color
 	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	v.add_child(nm)
-	var ln := UIKit.label(line, "Caps")
-	ln.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ln.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	if line_color.a > 0.0:
-		ln.add_theme_color_override(&"font_color", UIColors.ink(line_color))
+	var top := UIKit.label(tag, "Caps")
+	top.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	top.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	if tag_color.a > 0.0:
+		top.add_theme_color_override(&"font_color", UIColors.ink(tag_color))
+	v.add_child(top)
+	var ln := UIKit.pill(line, line_color if line_color.a > 0.0 else UIColors.MUTED, 17)
+	ln.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	v.add_child(ln)
+	var box := StyleBoxEmpty.new()
+	box.set_content_margin_all(6)
 	var row := UIKit.tap_row(v, cb, "Card")
-	row.custom_minimum_size.x = 174
+	row.add_theme_stylebox_override(&"panel", box)
+	row.custom_minimum_size.x = 160
 	return row
 
 
@@ -274,12 +272,82 @@ static func open_keys(w: GameWorld) -> Array:
 	return out
 
 
+## No máximo de semanas que o Adiantar fecha de uma vez.
+const SKIP_MAX := 12
+## A virada da semana está em andamento (segura o segundo toque no botão).
+static var closing := false
+
+
+## Fecha a semana a partir do Início (dos dois papéis). Com `many`, segue fechando até aparecer
+## algo que peça o jogador: uma luta da casa ou uma noite da liga, uma novidade na caixa de
+## entrada, a gala, os sócios ou o caixa no vermelho. A conta roda fora da tela (o aviso anima).
+static func close_week(screen: BaseScreen, many: bool = false) -> void:
+	if closing or GameManager.world == null:
+		return
+	closing = true
+	var w := GameManager.world
+	var t := w.user_team()
+	if not w.is_president() and t.balance < 0.0 and w.user_fighters().is_empty():
+		UIManager.toast("Caixa negativo e ninguém para lutar. Corte custos na Academia.", UIColors.RED)
+	var cash := t.balance
+	var keys := open_keys(w)
+	if many:
+		await UIManager.busy("Adiantando…", "Para na próxima novidade. Toque para parar.")
+	else:
+		await UIManager.busy("Fechando a semana…")
+	GameManager.batch = many
+	var n := 0
+	while true:
+		await GameManager.advance_week_async()
+		n += 1
+		if not many or n >= SKIP_MAX or UIManager.busy_tapped or needs_player(GameManager.world, keys, cash):
+			break
+		UIManager.busy_text("Semana de %s" % GameWorld.week_short(GameManager.world.week))
+	GameManager.batch = false
+	UIManager.busy_done()
+	closing = false
+	w = GameManager.world
+	if w == null:
+		return
+	week_turn(w, cash, keys, n)
+	if not is_instance_valid(screen) or UIManager.current() != screen:
+		return
+	screen.intro_pending = true
+	screen.refresh()
+	screen.play_intro()
+	screen.scroll_to_top()
+	SeasonKit.after_week(w, screen.refresh)
+
+
+## Há algo novo que pede o jogador? (É o que faz o Adiantar parar.)
+static func needs_player(w: GameWorld, open_before: Array, cash_before: float) -> bool:
+	if w == null:
+		return true
+	if w.is_president():
+		if Org.night_this_week(w) != null:
+			return true
+	elif not Career.pending_user_bouts(w).is_empty():
+		return true
+	if not Season.event(w).is_empty() or Season.gala_pending(w):
+		return true
+	var t := w.user_team()
+	if t != null and t.balance < 0.0 and cash_before >= 0.0:
+		return true
+	Inbox.scan(w)
+	for m: Dictionary in Inbox.pending(w):
+		if not open_before.has(String(m.get("key", ""))):
+			return true
+	return false
+
+
 ## A semana virou: o som, a faixa com a data nova e o que mudou (caixa e novidades na caixa de
 ## entrada). `cash_before` e `open_before` são de antes de avançar.
-static func week_turn(w: GameWorld, cash_before: float, open_before: Array) -> void:
+static func week_turn(w: GameWorld, cash_before: float, open_before: Array, weeks: int = 1) -> void:
 	Sfx.play("week", -6.0)
 	var t := w.user_team()
 	var lines: Array = []
+	if weeks > 1:
+		lines.append(["%d semanas" % weeks, UIColors.TEXT])
 	var d := (t.balance - cash_before) if t != null else 0.0
 	if absf(d) >= 1.0:
 		lines.append(["%s%s no caixa" % ["+" if d >= 0.0 else "−", Fmt.money(absf(d))], UIColors.GREEN if d >= 0.0 else UIColors.RED])
@@ -288,9 +356,9 @@ static func week_turn(w: GameWorld, cash_before: float, open_before: Array) -> v
 		if not open_before.has(String(m.get("key", ""))):
 			fresh += 1
 	if fresh > 0:
-		lines.append([Fmt.plural(fresh, "novidade para resolver", "novidades para resolver"), UIColors.GOLD])
+		lines.append([Fmt.plural(fresh, "novidade", "novidades"), UIColors.GOLD])
 		later(0.5, "mail", -9.0)
-	UIManager.banner("Semana de " + GameWorld.week_text(w.week), lines)
+	UIManager.banner("Semana de " + GameWorld.week_short(w.week), lines)
 
 
 ## Um som daqui a pouco (para não empilhar tudo no mesmo instante).

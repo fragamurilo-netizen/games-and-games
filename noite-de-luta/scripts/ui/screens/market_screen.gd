@@ -41,10 +41,10 @@ func refresh() -> void:
 	if lst.is_empty():
 		c.add_child(UIKit.state_block("empty", "Ninguém livre aqui agora", "Contratos acabam e novos amadores aparecem todo mês."))
 		return
-	if Scouting.quality(w) > 0.0:
-		c.add_child(UIKit.label("As estrelas são o potencial como o seu olheiro enxerga: as apagadas são a dúvida.", "Small", true))
-	var hint := {"amador": "Baratos e dispostos. Alguns viram campeões; quase todos precisam de anos.", "profissional": "Já lutam e rendem bolsas, mas olham a reputação da academia.", "veterano": "Experiência e cartel, pouco tempo de carreira pela frente."}
-	c.add_child(UIKit.label(String(hint[_stage]), "Small", true))
+	var hint := {"amador": "Baratos e dispostos; quase todos precisam de anos.", "profissional": "Já rendem bolsas, mas olham a reputação da casa.", "veterano": "Experiência e cartel, pouco tempo pela frente."}
+	var hl := UIKit.label(String(hint[_stage]), "Muted")
+	hl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	c.add_child(hl)
 	# A lista é comprida: as primeiras linhas saem na hora e o resto chega nos quadros seguintes
 	# (inteira de uma vez só quando a tela volta já rolada lá para baixo).
 	var rows := UIKit.vbox(c.get_theme_constant(&"separation"))
@@ -62,12 +62,16 @@ func refresh() -> void:
 ## teto que ele enxerga em cada um.
 func _scout_finds(w: GameWorld, c: VBoxContainer) -> void:
 	if Scouting.quality(w) <= 0.0:
-		c.add_child(UIKit.label("Sem olheiro, o potencial de quem está no mercado é um mistério. Há candidatos na aba Staff.", "Small", true))
+		# Sem olheiro: uma linha que leva direto aos candidatos, em vez de um parágrafo.
+		c.add_child(UIKit.menu_group([
+			UIKit.menu_row("search", "Sem olheiro", "O potencial fica oculto. Ver candidatos", func():
+				_tab = "staff"
+				refresh()),
+		]))
 		return
 	var finds := Scouting.finds(w)
 	var jobs := Scouting.jobs(w)
 	if finds.is_empty() and jobs.is_empty():
-		c.add_child(UIKit.label("%s traz indicações todo mês. Para saber mais de alguém, abra o perfil e mande observar." % Scouting.scout_name(w), "Small", true))
 		return
 	if not finds.is_empty():
 		c.add_child(UIKit.section_header("Indicações do olheiro"))
@@ -86,12 +90,12 @@ func _scout_finds(w: GameWorld, c: VBoxContainer) -> void:
 func _staff(w: GameWorld, c: VBoxContainer) -> void:
 	screen_subtitle = "Candidatos deste mês"
 	UIManager.refresh_chrome()
-	c.add_child(UIKit.label("Mais velho e mais rodado custa mais e rende mais. Os candidatos mudam todo mês.", "Small", true))
 	var t := w.user_team()
 	for role: String in StaffMarket.ORDER:
 		c.add_child(UIKit.section_header(StaffMarket.role_name(role)))
-		c.add_child(UIKit.label(String(StaffMarket.ROLES[role]["help"]), "Small", true))
 		var cur := t.staff_of(role)
+		var help := UIKit.label(String(StaffMarket.ROLES[role]["help"]), "Muted", true)
+		c.add_child(help)
 		if not cur.is_empty():
 			c.add_child(UIKit.colored("Na academia: %s (%d)" % [String(cur["name"]), int(cur["quality"])], UIColors.ACCENT, "Small"))
 		for cand: Dictionary in w.staff_market:

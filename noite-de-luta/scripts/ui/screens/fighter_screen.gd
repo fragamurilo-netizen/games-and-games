@@ -4,6 +4,8 @@ extends BaseScreen
 
 var _tab := "ficha"
 var _f: Fighter
+## A lista do que pesa na moral está aberta.
+var _moral_open := false
 
 
 func setup(p: Dictionary) -> void:
@@ -110,16 +112,18 @@ func _ficha(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 	var cut := maxf(0.0, (f.natural_kg - limit) / f.natural_kg)
 	body.add_child(UIKit.kv("Peso fora de luta", "%s (corte de %d%%)" % [Fmt.kg(f.natural_kg), int(round(cut * 100.0))], UIColors.ORANGE if cut > 0.11 else UIColors.TEXT))
 	body.add_child(UIKit.kv("Condição física", "%d%%" % int(f.condition), UIColors.GREEN if f.condition >= 90.0 else (UIColors.ORANGE if f.condition >= 70.0 else UIColors.RED)))
-	var cards: Array = [UIKit.card_panel(body), _persona_card(f), _style_card(f)]
+	# Primeiro o que decide uma contratação ou uma luta: os atributos, o teto e o humor. O físico,
+	# o estilo e a personalidade vêm depois.
+	var cards: Array = [FightKit.attr_card(f)]
 	if not f.retired:
-		# Na equipe do jogador a moral vem primeiro (é onde ele age); nos outros, depois do físico.
-		cards.insert(0 if w.is_user_fighter(f) else 1, _moral_card(w, f))
-		cards.insert(2, _potential_card(w, f))
-	if not f.retired:
+		cards.append(_potential_card(w, f))
+		cards.append(_moral_card(w, f))
 		var rv := _rivals_card(w, f)
 		if rv != null:
-			cards.insert(mini(3, cards.size()), rv)
-	cards.append_array(FightKit.attr_blocks(f))
+			cards.append(rv)
+	cards.append(UIKit.card_panel(body))
+	cards.append(_style_card(f))
+	cards.append(_persona_card(f))
 	for x: Control in cards:
 		c.add_child(x)
 	columnize(c, 2, 2)
@@ -176,28 +180,48 @@ func _moral_card(w: GameWorld, f: Fighter) -> Control:
 	card.add_child(UIKit.bar(f.morale, 100.0, col, 10))
 	var tr := Morale.trend(w, f)
 	card.add_child(UIKit.label(Morale.effect_text(f) + (" Está subindo." if tr > 0 else (" Está caindo." if tr < 0 else "")), "Small", true))
-	var fs := Morale.factors(w, f)
-	if not fs.is_empty():
-		card.add_child(UIKit.label("O que pesa", "Caps"))
-		for it: Array in fs:
-			var v := int(round(float(it[1])))
-			if v != 0:
-				card.add_child(UIKit.kv(String(it[0]), Fmt.signed(v), UIColors.GREEN if v > 0 else UIColors.RED))
-	if not f.mood_log.is_empty():
-		card.add_child(UIKit.label("Últimas semanas", "Caps"))
-		for i in range(f.mood_log.size() - 1, maxi(-1, f.mood_log.size() - 4), -1):
-			var e: Array = f.mood_log[i]
-			card.add_child(UIKit.kv("%s, %s" % [String(e[2]), w.weeks_from_now(int(e[0]))], Fmt.signed(int(e[1])), UIColors.GREEN if int(e[1]) > 0 else UIColors.RED))
 	if mine:
 		if not f.promise.is_empty():
 			card.add_child(UIKit.label("Promessa em aberto: luta marcada em até %s." % Fmt.plural(maxi(0, int(f.promise.get("until", w.week)) - w.week), "semana", "semanas"), "Small", true))
 		if w.week < f.push_until:
 			card.add_child(UIKit.label("Cobrança em curso: treina mais forte por %s." % Fmt.plural(f.push_until - w.week, "semana", "semanas"), "Small", true))
+	# O porquê fica a um toque: a lista inteira aberta empurrava o resto da ficha para baixo.
+	var fs := Morale.factors(w, f)
+	var has_detail := not fs.is_empty() or not f.mood_log.is_empty()
+	var foot := UIKit.hbox(8)
+	if has_detail:
+		var more := UIKit.button("Fechar" if _moral_open else "O que pesa", "TextButton", func():
+			_moral_open = not _moral_open
+			refresh())
+		more.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		foot.add_child(more)
+	foot.add_child(UIKit.spacer())
+	if mine:
 		var wait := Morale.talk_wait(w, f)
 		if wait > 0:
-			card.add_child(UIKit.label("Nova conversa em %s." % Fmt.plural(wait, "semana", "semanas"), "Muted"))
+			var wl := UIKit.label("Nova conversa em %s" % Fmt.plural(wait, "semana", "semanas"), "Muted")
+			wl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			foot.add_child(wl)
 		else:
-			card.add_child(UIKit.button("Conversar", "GhostButton", func(): TalkSheet.open(w, f, func(): refresh()), "chat"))
+			var talk := UIKit.button("Conversar", "GhostButton", func(): TalkSheet.open(w, f, func(): refresh()), "chat")
+			talk.size_flags_horizontal = Control.SIZE_SHRINK_END
+			foot.add_child(talk)
+	if foot.get_child_count() > 1:
+		card.add_child(foot)
+	else:
+		foot.free()
+	if _moral_open and has_detail:
+		if not fs.is_empty():
+			card.add_child(UIKit.label("O que pesa", "Caps"))
+			for it: Array in fs:
+				var v := int(round(float(it[1])))
+				if v != 0:
+					card.add_child(UIKit.kv(String(it[0]), Fmt.signed(v), UIColors.GREEN if v > 0 else UIColors.RED))
+		if not f.mood_log.is_empty():
+			card.add_child(UIKit.label("Últimas semanas", "Caps"))
+			for i in range(f.mood_log.size() - 1, maxi(-1, f.mood_log.size() - 4), -1):
+				var e: Array = f.mood_log[i]
+				card.add_child(UIKit.kv("%s, %s" % [String(e[2]), w.weeks_from_now(int(e[0]))], Fmt.signed(int(e[1])), UIColors.GREEN if int(e[1]) > 0 else UIColors.RED))
 	return UIKit.card_panel(card)
 
 

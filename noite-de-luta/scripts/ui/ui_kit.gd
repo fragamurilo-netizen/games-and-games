@@ -56,7 +56,7 @@ static func button(text: String, variation: String = "", cb: Callable = Callable
 		b.pressed.connect(func():
 			Sfx.click()
 			cb.call())
-	b.custom_minimum_size.y = 72 if variation != "ChipButton" else 52
+	b.custom_minimum_size.y = (76 if variation == "PrimaryButton" else 68) if variation != "ChipButton" else 52
 	b.focus_mode = Control.FOCUS_ALL
 	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	press_fx(b)
@@ -329,9 +329,11 @@ static func bar(value: float, max_value: float, color: Color, h: int = 10) -> Pr
 	return pb
 
 
-## Título de seção dentro de cartões: texto normal em cor secundária.
+## Título de seção dentro de cartões: rótulo pequeno em caixa alta.
 static func section(text: String) -> Label:
-	return label(text, "Eyebrow")
+	var l := label(text, "Eyebrow")
+	l.uppercase = true
+	return l
 
 
 static func separator() -> HSeparator:
@@ -461,21 +463,59 @@ static func _ignore_mouse(n: Node) -> void:
 		_ignore_mouse(c)
 
 
-## Etiqueta de estado ("Em casa", "Lesionado", arquétipo): só o texto na cor do estado, sem
-## cápsula. Com tudo virando pílula a tela perde a hierarquia.
+static var _pill_boxes: Dictionary = {}
+
+
+## Etiqueta de estado ("Disponível", "Lesionado", o humor): cápsula com o fundo tingido pela cor
+## do estado e o texto na mesma cor. Para estado, não para qualquer palavra.
 static func pill(text: String, color: Color, font_size: int = 18) -> PanelContainer:
 	var p := PanelContainer.new()
-	var box := StyleBoxEmpty.new()
-	box.content_margin_top = 1
-	box.content_margin_bottom = 1
-	p.add_theme_stylebox_override(&"panel", box)
+	var key := color.to_html(false)
+	if not _pill_boxes.has(key):
+		var box := StyleBoxFlat.new()
+		box.bg_color = Color(color, 0.16)
+		box.set_corner_radius_all(UITokens.R_PILL)
+		box.content_margin_left = 12
+		box.content_margin_right = 12
+		box.content_margin_top = 2
+		box.content_margin_bottom = 2
+		box.anti_aliasing = true
+		_pill_boxes[key] = box
+	p.add_theme_stylebox_override(&"panel", _pill_boxes[key])
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	color = UIColors.readable_on(color, [UIColors.SURFACE, UIColors.SURFACE_2, UIColors.BG], 4.5)
-	var l := label(soften(text), "Caps")
+	p.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var l := label(soften(text), "Chip")
 	l.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
-	l.add_theme_color_override(&"font_color", color)
-	# Nunca abaixo da legenda do DESIGN.md (18 px): pílula de 14–16 sumia no celular
-	l.add_theme_font_size_override(&"font_size", maxi(font_size, 17) + 1)
+	l.add_theme_color_override(&"font_color", UIColors.readable_on(color, [UIColors.SURFACE_2], 4.5))
+	l.add_theme_font_size_override(&"font_size", maxi(font_size, 17))
+	p.add_child(l)
+	return p
+
+
+## Número em destaque num quadrinho tingido (o nível do lutador, a nota, a posição).
+static func badge(text: String, color: Color, font_size: int = 24, min_w: int = 52) -> PanelContainer:
+	var p := PanelContainer.new()
+	var key := "b" + color.to_html(false)
+	if not _pill_boxes.has(key):
+		var box := StyleBoxFlat.new()
+		box.bg_color = Color(color, 0.17)
+		box.set_corner_radius_all(UITokens.R_SM)
+		box.content_margin_left = 8
+		box.content_margin_right = 8
+		box.content_margin_top = 2
+		box.content_margin_bottom = 2
+		box.anti_aliasing = true
+		_pill_boxes[key] = box
+	p.add_theme_stylebox_override(&"panel", _pill_boxes[key])
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	p.custom_minimum_size.x = min_w
+	p.size_flags_horizontal = Control.SIZE_SHRINK_END
+	p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var l := label(text, "Stat")
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.add_theme_color_override(&"font_color", UIColors.readable_on(color, [UIColors.SURFACE_2], 4.5))
+	l.add_theme_font_size_override(&"font_size", font_size)
 	p.add_child(l)
 	return p
 
@@ -497,20 +537,37 @@ static func flow(sep: int = 8) -> HFlowContainer:
 
 # --- Sistema de design: componentes compostos -------------------------------------------
 
-## Rótulo pequeno acima de títulos ("Próxima partida"), em cor secundária.
+## Rótulo pequeno em caixa alta acima de títulos ("Próxima luta"), em cor secundária.
 static func eyebrow(text: String, color: Color = Color(0, 0, 0, 0)) -> Label:
 	var l := label(text, "Eyebrow")
+	l.uppercase = true
 	if color.a > 0.0:
 		l.add_theme_color_override(&"font_color", color)
 	return l
 
 
-## Cabeçalho de seção: filete na cor do clube, título em caixa alta e, opcional, um link à
-## direita ("VER TUDO").
+## Rótulo miúdo em caixa alta e espaçada, na cor de destaque (acima de um título de cartaz).
+static func kicker(text: String, color: Color = Color(0, 0, 0, 0)) -> Label:
+	var l := label(text, "Kicker")
+	l.uppercase = true
+	if color.a > 0.0:
+		l.add_theme_color_override(&"font_color", color)
+	return l
+
+
+## Cabeçalho de seção: marca dourada, título em caixa alta e, opcional, um link à direita.
 static func section_header(text: String, action: String = "", cb: Callable = Callable()) -> HBoxContainer:
 	var h := hbox(10)
 	h.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var mark := ColorRect.new()
+	mark.color = UIColors.ACCENT
+	mark.custom_minimum_size = Vector2(5, 22)
+	mark.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	mark.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	h.add_child(mark)
 	var l := label(text, "Eyebrow")
+	l.uppercase = true
+	l.add_theme_color_override(&"font_color", UIColors.TEXT)
 	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	h.add_child(l)
@@ -589,13 +646,15 @@ static func segment(items: Array, selected: String, cb: Callable) -> PanelContai
 static func menu_row(icon_name: String, title: String, subtitle: String, cb: Callable, trailing: Control = null) -> PanelContainer:
 	var h := hbox(16)
 	if icon_name != "":
-		var ic := icon_rect(icon_name, 26, UIColors.MUTED)
-		ic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		h.add_child(ic)
+		var tile := PanelContainer.new()
+		tile.theme_type_variation = "IconTile"
+		tile.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		tile.add_child(icon_rect(icon_name, 28, UIColors.ACCENT))
+		h.add_child(tile)
 	var tv := vbox(0)
 	tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var t := label(title)
+	var t := label(title, "H3")
 	t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	tv.add_child(t)
 	if subtitle != "":
@@ -786,7 +845,7 @@ static func action_tile(icon_name: String, title: String, subtitle: String, cb: 
 	var tile := PanelContainer.new()
 	tile.theme_type_variation = "IconTile"
 	tile.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	tile.add_child(icon_rect(icon_name, 28, UIColors.ACCENT if highlight else UIColors.MUTED))
+	tile.add_child(icon_rect(icon_name, 28, UIColors.ACCENT))
 	v.add_child(tile)
 	var t := label(title, "H3")
 	t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS

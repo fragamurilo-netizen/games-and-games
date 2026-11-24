@@ -35,9 +35,17 @@ func _ready() -> void:
 	_configure_window()
 	UILayout.viewport = get_viewport_rect().size
 	$Background.color = UIColors.BG
+	_add_night()
+	# Avisos no alto da tela, por cima da barra: embaixo eles cobriam o botão principal.
+	toast_host.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	toast_host.alignment = BoxContainer.ALIGNMENT_BEGIN
+	var tb := toast_host.get_parent() as MarginContainer
+	tb.add_theme_constant_override(&"margin_bottom", 0)
+	tb.add_theme_constant_override(&"margin_left", 24)
+	tb.add_theme_constant_override(&"margin_right", 24)
 	add_child(TouchScroll.new())
 	get_viewport().gui_focus_changed.connect(_on_focus_changed)
-	_shadow = _edge(Color(0, 0, 0, 0.45), Color(0, 0, 0, 0))
+	_shadow = _edge(Color(UIColors.BG, 0.9), Color(UIColors.BG, 0.0))
 	_fade = _edge(Color(UIColors.BG, 0.0), Color(UIColors.BG, 0.92))
 	_wake_timer = Timer.new()
 	_wake_timer.one_shot = true
@@ -59,6 +67,37 @@ func _ready() -> void:
 	GameManager.world_changed.connect(func(): UIManager.refresh_chrome())
 	UIKit.install_switches()
 	UIManager.goto("menu")
+
+
+## A noite atrás das telas: o clarão do refletor no alto e um resto de vermelho e de azul nos
+## cantos (os dois corners). Uma imagem pequena esticada, um quadrilátero só.
+func _add_night() -> void:
+	var w := 48
+	var h := 96
+	var img := Image.create(w, h, false, Image.FORMAT_RGB8)
+	var bg := UIColors.BG
+	for y in h:
+		for x in w:
+			var u := float(x) / float(w - 1)
+			var v := float(y) / float(h - 1)
+			var top := maxf(0.0, 1.0 - Vector2((u - 0.5) * 1.5, v * 2.4).length())
+			var red := maxf(0.0, 1.0 - Vector2(u * 1.7, v * 3.4).length())
+			var blue := maxf(0.0, 1.0 - Vector2((1.0 - u) * 1.7, v * 3.4).length())
+			var c := bg
+			c = c.lerp(Color("#22324F"), top * top * 0.55)
+			c = c.lerp(UIColors.CORNER_RED, red * red * 0.2)
+			c = c.lerp(UIColors.CORNER_BLUE, blue * blue * 0.24)
+			img.set_pixel(x, y, c)
+	var r := TextureRect.new()
+	r.name = "Night"
+	r.texture = ImageTexture.create_from_image(img)
+	r.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	r.stretch_mode = TextureRect.STRETCH_SCALE
+	r.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	r.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(r)
+	move_child(r, $Background.get_index() + 1)
 
 
 func _configure_window() -> bool:
@@ -114,7 +153,7 @@ func _process(delta: float) -> void:
 	if is_instance_valid(sc) and sc.is_visible_in_tree():
 		var area := Rect2(sc.get_global_rect().position - screen_host.global_position, sc.size)
 		_shadow.position = area.position
-		_shadow.size = Vector2(area.size.x, 18)
+		_shadow.size = Vector2(area.size.x, 26)
 		_fade.position = Vector2(area.position.x, area.end.y - 56)
 		_fade.size = Vector2(area.size.x, 56)
 		var bar := sc.get_v_scroll_bar()
@@ -211,7 +250,7 @@ func _refresh_current_layout() -> void:
 		return
 	var sc := cur.scroll()
 	var old_scroll := sc.scroll_vertical if is_instance_valid(sc) else 0
-	if not UIManager.refresh_current():
+	if GameManager.turning or not UIManager.refresh_current():
 		return
 	if is_instance_valid(sc):
 		sc.set_deferred("scroll_vertical", old_scroll)
@@ -237,6 +276,13 @@ func _update_safe_area() -> void:
 			bottom = maxf(0.0, (win_size.y - safe.end.y) * k.y)
 			right = maxf(0.0, (win_size.x - safe.end.x) * k.x)
 	_safe = Rect2(left, top, right, bottom)
+	if is_instance_valid(toast_host):
+		# Os avisos passam por cima da barra do topo (como uma notificação), sem cobrir o conteúdo.
+		var tbox := toast_host.get_parent() as MarginContainer
+		var side := maxi(16, int((vp_size.x - 760.0) * 0.5))
+		tbox.add_theme_constant_override(&"margin_top", int(top) + 10)
+		tbox.add_theme_constant_override(&"margin_left", int(left) + side)
+		tbox.add_theme_constant_override(&"margin_right", int(right) + side)
 	for entry in [[&"margin_top", top], [&"margin_bottom", bottom], [&"margin_left", left], [&"margin_right", right]]:
 		var value := int(entry[1])
 		if safe_area.get_theme_constant(entry[0]) != value:
@@ -251,7 +297,7 @@ func apply_chrome(screen: BaseScreen, can_go_back: bool) -> void:
 		UIColors.apply_colors(null, null)
 	top_bar.visible = screen.show_top
 	# Celular deitado: a altura é curta, a barra superior encolhe.
-	top_bar.custom_minimum_size.y = 72 if UILayout.is_landscape() and not UILayout.is_tablet() else 88
+	top_bar.custom_minimum_size.y = 72 if UILayout.is_landscape() and not UILayout.is_tablet() else 92
 	bottom_nav.visible = screen.show_nav and GameManager.has_career()
 	if screen.show_top:
 		top_bar.set_state(screen.screen_title, screen.screen_subtitle, can_go_back, team)
@@ -321,12 +367,26 @@ func _input(event: InputEvent) -> void:
 	elif event is InputEventMouseButton or event is InputEventScreenTouch:
 		_keys_nav = false
 	var tap: bool = (event is InputEventMouseButton and not event.pressed) or (event is InputEventScreenTouch and not event.pressed)
+	if event is InputEventMouseButton and event.pressed:
+		_press_at = event.position
 	if tap:
 		_drop_button_focus.call_deferred()
+		# Um toque (não um arrasto de rolagem) que não levou a outra tela pode ter mudado alguma
+		# coisa: as telas guardadas se remontam quando voltarem a aparecer.
+		if event is InputEventMouseButton and (event.position as Vector2).distance_to(_press_at) < 24.0:
+			_after_tap.call_deferred(Engine.get_process_frames())
 	if event is InputEventScreenTouch and not event.pressed:
 		# Tela de toque não tem "passar por cima": sem isto a linha tocada ficava acesa até o
 		# próximo toque, porque o mouse emulado continua parado onde o dedo saiu.
 		_clear_hover.call_deferred()
+
+
+var _press_at := Vector2.ZERO
+
+
+func _after_tap(frame: int) -> void:
+	if UIManager.nav_frame < frame:
+		GameManager.rev += 1
 
 
 func _clear_hover() -> void:
