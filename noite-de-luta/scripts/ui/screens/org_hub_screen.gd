@@ -19,6 +19,10 @@ func refresh() -> void:
 	var t := w.user_team()
 	c.add_child(_identity(w, t))
 	var problems := WeekKit.incidents_section(w, c, null, refresh)
+	var tv_notice := 0
+	if TVDeal.pending(w):
+		c.add_child(_tv_notice(w))
+		tv_notice = 1
 	var night := Org.night_this_week(w)
 	if night != null:
 		c.add_child(_night_card(w, night))
@@ -42,7 +46,7 @@ func refresh() -> void:
 			break
 	if shown == 0:
 		c.add_child(UIKit.label("Semana calma no mundo do MMA.", "Muted"))
-	columnize(c, 1 + (problems + 1 if problems > 0 else 0), 2, 1 + (1 if night != null else 0))
+	columnize(c, 1 + (problems + 1 if problems > 0 else 0) + tv_notice, 2, 1 + (1 if night != null else 0))
 	var foot := footer()
 	var urgent := FightWeek.pending(w, night) if night != null else []
 	if not urgent.is_empty():
@@ -90,6 +94,21 @@ func _identity(w: GameWorld, t: Team) -> Control:
 	return UIKit.card_panel(card)
 
 
+## Aviso de decisão pendente: o contrato de TV está acabando e há propostas na mesa.
+func _tv_notice(w: GameWorld) -> Control:
+	var h := UIKit.hbox(UITokens.S2)
+	var ic := UIKit.icon_rect("mail", 28, UIColors.ORANGE)
+	ic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	h.add_child(ic)
+	var v := UIKit.vbox(0)
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	v.add_child(UIKit.colored("Contrato de TV: %s na mesa" % Fmt.plural(w.tv_offers.size(), "proposta", "propostas"), UIColors.ORANGE, "H3"))
+	v.add_child(UIKit.label("O atual termina em %s. Sem decisão, ele renova pagando menos." % Fmt.plural(TVDeal.weeks_left(w), "semana", "semanas"), "Small", true))
+	h.add_child(v)
+	h.add_child(UIKit.icon_rect("forward", 20, UIColors.DIM))
+	return UIKit.tap_row(h, func(): UIManager.push("tv"))
+
+
 func _night_card(w: GameWorld, ev: FightEvent) -> Control:
 	var card := UIKit.card("CardHighlight", UITokens.S2)
 	card.add_child(UIKit.label("Noite de luta · " + ev.name, "Section"))
@@ -101,6 +120,15 @@ func _night_card(w: GameWorld, ev: FightEvent) -> Control:
 		card.add_child(FightKit.faceoff(w, w.fighter(main.a), w.fighter(main.b), 120))
 		if main.title:
 			card.add_child(UIKit.colored("Valendo o cinturão dos %s" % Matchmaker.division_name(main.division, true), UIColors.GOLD, "Small"))
+		elif main.interim:
+			card.add_child(UIKit.colored("Valendo o cinturão interino dos %s" % Matchmaker.division_name(main.division, true), UIColors.GOLD, "Small"))
+		var hv := Hype.event_value(w, ev)
+		var hb := HeatBar.new()
+		hb.value = hv
+		hb.bar_h = 8.0
+		hb.marker = false
+		card.add_child(hb)
+		card.add_child(EventKit.hype_tag(hv, true))
 	else:
 		card.add_child(UIKit.colored("O card está vazio: a noite vai ser cancelada se ninguém lutar.", UIColors.RED, "Small", true))
 	return UIKit.card_panel(card)
@@ -114,12 +142,14 @@ func _news_row(w: GameWorld, n: Dictionary) -> Control:
 	var v := UIKit.vbox(2)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var kind := String(n.get("kind", ""))
-	var chapeu: String = {"cinturao": "Cinturão", "resultado": "Resultado", "organizacao": "Sua organização", "aposentadoria": "Aposentadoria", "marco": "Marco", "olheiro": "Olheiros", "mercado": "Mercado"}.get(kind, "Notícia")
+	var chapeu: String = {"cinturao": "Cinturão", "resultado": "Resultado", "organizacao": "Sua organização", "aposentadoria": "Aposentadoria", "marco": "Marco", "olheiro": "Olheiros", "mercado": "Mercado", "rivalidade": "Rivalidade", "tv": "Contrato de TV"}.get(kind, "Notícia")
 	var cap := UIKit.label("%s · %s" % [chapeu, w.weeks_from_now(int(n["week"]))], "Caps")
 	if kind == "cinturao":
 		cap.add_theme_color_override(&"font_color", UIColors.GOLD)
-	elif kind == "organizacao":
+	elif kind == "organizacao" or kind == "tv":
 		cap.add_theme_color_override(&"font_color", UIColors.ACCENT)
+	elif kind == "rivalidade":
+		cap.add_theme_color_override(&"font_color", UIColors.ORANGE)
 	v.add_child(cap)
 	v.add_child(UIKit.label(String(n["text"]), "H3" if bool(n.get("important", false)) else "", true))
 	h.add_child(v)

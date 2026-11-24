@@ -84,7 +84,12 @@ static func leverage(w: GameWorld, o: Dictionary) -> Dictionary:
 	var rep := (t.reputation if t != null else 30.0) / 400.0
 	if rep >= 0.1:
 		rs.append(["A academia é respeitada", rep])
-	return {"value": clampf(fame + rank + streak + hype + notice + star + rep, -0.4, 0.6), "reasons": rs}
+	# A chance de cinturão é o prêmio: quem desafia tem menos força para exigir.
+	var shot := 0.0
+	if (bool(o.get("title", false)) or bool(o.get("interim", false))) and r != 0 and not w.is_interim(f):
+		shot = -0.14
+		rs.append(["Chance de cinturão ninguém recusa: a organização sabe disso", shot])
+	return {"value": clampf(fame + rank + streak + hype + notice + star + rep, -0.4, 0.6) + shot, "reasons": rs}
 
 
 static func leverage_label(v: float) -> String:
@@ -123,7 +128,7 @@ static func chance(w: GameWorld, o: Dictionary, key: String) -> float:
 	if key == "card":
 		# Subir para a principal ou a co-principal custa mais do que sair das preliminares.
 		cost += {"prelim": 0.0, "card": 0.15, "co": 0.3}.get(slot_of(w, o), 0.0) as float
-	return clampf(0.55 + float(leverage(w, o)["value"]) - cost, 0.03, 0.97)
+	return clampf(0.5 + float(leverage(w, o)["value"]) - cost, 0.03, 0.97)
 
 
 ## Outra noite da mesma camada, de 2 a 6 semanas depois da proposta, com vaga.

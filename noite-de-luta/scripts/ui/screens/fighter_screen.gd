@@ -114,10 +114,50 @@ func _ficha(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 		# Na equipe do jogador a moral vem primeiro (é onde ele age); nos outros, depois do físico.
 		cards.insert(0 if w.is_user_fighter(f) else 1, _moral_card(w, f))
 		cards.insert(2, _potential_card(w, f))
+	if not f.retired:
+		var rv := _rivals_card(w, f)
+		if rv != null:
+			cards.insert(mini(3, cards.size()), rv)
 	cards.append_array(FightKit.attr_blocks(f))
 	for x: Control in cards:
 		c.add_child(x)
 	columnize(c, 2, 2)
+
+
+## Rivais (quem tem história com ele e por quê) e, para quem está perto do cinturão, o que a
+## liga sinalizou: a vez na fila, o interino, a unificação.
+func _rivals_card(w: GameWorld, f: Fighter) -> Control:
+	var rivals := Rivalry.of(w, f)
+	var notes: Array = []
+	if w.is_interim(f):
+		notes.append("%s interin%s: a próxima luta é a unificação contra o campeão." % ["Campeã" if f.is_female() else "Campeão", "a" if f.is_female() else "o"])
+	elif w.rank_of(f) == 0:
+		var out := Titles.champion_out(w, f.division)
+		var it := Titles.interim_of(w, f.division)
+		if it != null:
+			notes.append("Há campeão interino na categoria (%s): a próxima defesa é a unificação." % it.display_name())
+		elif out != "":
+			notes.append("Fora de combate: a liga pode criar um cinturão interino.")
+	elif Matchmaker.shot_promised(w, f):
+		var champ := w.fighter(int(w.champions.get(f.division, -1)))
+		notes.append("A liga sinalizou a próxima disputa de cinturão para %s, contra %s. Vale esperar a proposta em vez de aceitar outra luta." % [f.short_name(), champ.display_name() if champ != null else "o campeão"])
+	if rivals.is_empty() and notes.is_empty():
+		return null
+	var card := UIKit.card("Card", UITokens.S1)
+	card.add_child(UIKit.label("Rivais e cinturão" if not notes.is_empty() else "Rivais", "Section"))
+	for n: String in notes:
+		card.add_child(UIKit.colored(n, UIColors.GOLD, "Small", true))
+	for it2: Array in rivals.slice(0, 3):
+		var o: Fighter = it2[0]
+		var e: Dictionary = it2[1]
+		var heat := float(e.get("heat", 0.0))
+		var oid := o.id
+		var h2h := Rivalry.h2h_text(f, o.id)
+		var line := "%s · %s" % [Rivalry.label(heat), String(e.get("why", "eles têm história"))]
+		card.add_child(FightKit.fighter_row(w, o, func(): UIManager.push("fighter", {"id": oid}), line, UIColors.ORANGE if heat >= Rivalry.NAMED else Color(0, 0, 0, 0), h2h))
+	if not rivals.is_empty():
+		card.add_child(UIKit.label("Luta contra rival vende mais, a equipe dele aceita mais fácil e ganhar (ou perder) mexe mais com a moral.", "Small", true))
+	return UIKit.card_panel(card)
 
 
 ## Moral: o humor de hoje, o que pesa, o que mexeu nas últimas semanas e, na equipe do jogador,

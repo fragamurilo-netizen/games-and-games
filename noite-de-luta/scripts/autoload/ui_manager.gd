@@ -27,6 +27,8 @@ const SCREENS := {
 	"events": "res://scripts/ui/screens/org_events_screen.gd",
 	"org_event": "res://scripts/ui/screens/org_event_screen.gd",
 	"book": "res://scripts/ui/screens/book_screen.gd",
+	"venue": "res://scripts/ui/screens/venue_screen.gd",
+	"tv": "res://scripts/ui/screens/tv_screen.gd",
 	"night": "res://scripts/ui/screens/night_screen.gd",
 	"org": "res://scripts/ui/screens/org_screen.gd",
 }

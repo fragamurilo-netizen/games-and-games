@@ -56,6 +56,13 @@ func _pick_first(w: GameWorld, ev: FightEvent, c: VBoxContainer) -> void:
 		c.add_child(UIKit.colored("Já há luta pelo cinturão marcada nesta categoria (%s)." % w.event(tb.event_id).name, UIColors.GOLD, "Small", true))
 	elif champ_id < 0:
 		c.add_child(UIKit.colored("Cinturão vago: marque dois do top 10 valendo o título.", UIColors.GOLD, "Small", true))
+	else:
+		var it := Titles.interim_of(w, _div)
+		var out := Titles.champion_out(w, _div)
+		if it != null:
+			c.add_child(UIKit.colored("%s é o campeão interino: a próxima disputa de cinturão é a unificação contra o campeão." % it.display_name(), UIColors.GOLD, "Small", true))
+		elif out != "":
+			c.add_child(UIKit.colored("%s. Dá para marcar uma disputa de cinturão interino entre dois dos oito primeiros." % (out.substr(0, 1).to_upper() + out.substr(1)), UIColors.GOLD, "Small", true))
 	c.add_child(UIKit.label("Escolha o primeiro lutador.", "Muted"))
 	for f: Fighter in Org.roster(w, _div):
 		var why := _status(w, ev, f)
@@ -95,7 +102,8 @@ func _pick_second(w: GameWorld, ev: FightEvent, fa: Fighter, c: VBoxContainer) -
 		if why == "":
 			var title := Org.title_reason(w, fa, o) == "" and (w.rank_of(fa) == 0 or w.rank_of(o) == 0 or int(w.champions.get(fa.division, -1)) < 0)
 			var p := _chance(w, ev, fa, o, title, 1.0)
-			line = "%s · aceite %s" % [o.record_text(), Signing.chance_label(p).to_lower()]
+			var hv := float(Hype.pair(w, fa, o, title, false, ev.nation)["value"])
+			line = "%s · aceite %s · hype %d" % [o.record_text(), Signing.chance_label(p).to_lower(), int(round(hv))]
 			col = Color(0, 0, 0, 0)
 		var oid := o.id
 		var row := FightKit.fighter_row(w, o, func():
@@ -133,40 +141,66 @@ func _last(w: GameWorld, f: Fighter) -> String:
 	return "%s %s" % [{"V": "venceu", "D": "perdeu", "E": "empatou"}.get(String(h.get("res", "")), ""), w.weeks_from_now(int(h.get("week", w.week)))]
 
 
-## A oferta: cinturão (quando pode), luta principal e a bolsa, com a chance de aceite.
+## A oferta: cinturão ou interino (quando pode), luta principal e a bolsa, com o hype que a
+## luta traz para a noite, o lugar dela no card e a chance de aceite.
 func _offer_sheet(w: GameWorld, ev: FightEvent, fa: Fighter, fb: Fighter) -> void:
 	var can_title := Org.title_reason(w, fa, fb) == ""
+	var can_interim := not can_title and Titles.interim_reason(w, fa, fb) == ""
 	var state := {"title": can_title and (w.rank_of(fa) == 0 or w.rank_of(fb) == 0 or int(w.champions.get(fa.division, -1)) < 0),
-		"main": not Org.has_main(w, ev), "mult": 1.0}
+		"interim": can_interim, "main": not Org.has_main(w, ev), "mult": 1.0}
 	var v := UIKit.vbox(UITokens.S2)
 	v.custom_minimum_size.x = 560
-	v.add_child(FightKit.faceoff(w, fa, fb, 110))
+	v.add_child(FightKit.faceoff(w, fa, fb, 84))
+	var heat := UIKit.vbox(0)
+	v.add_child(heat)
 	var opts := UIKit.vbox(UITokens.S1)
 	v.add_child(opts)
 	var info := UIKit.vbox(4)
 	v.add_child(info)
 	var update := func() -> void:
+		UIKit.clear(heat)
 		UIKit.clear(info)
 		var mult: float = state["mult"]
+		var belt := bool(state["title"]) or bool(state["interim"])
+		heat.add_child(EventKit.thermometer(Hype.pair(w, fa, fb, bool(state["title"]), bool(state["interim"]), ev.nation), "Hype da luta", "", false, 4))
+		var slot := "principal" if belt or bool(state["main"]) else Card.slot_guess(w, ev, fa, fb, false)
+		if slot == "principal" and not belt and not bool(state["main"]):
+			slot = "co"
+		info.add_child(UIKit.kv("Lugar no card", Card.slot_name(slot)))
 		for f: Fighter in [fa, fb]:
 			var p := Org.table_purse(w, f, bool(state["title"]))
-			info.add_child(UIKit.kv("Bolsa de %s" % f.short_name(), "%s + %s" % [Fmt.money(snappedf(float(p["show"]) * mult, 500.0)), Fmt.money(snappedf(float(p["win"]) * mult, 500.0))]))
-		var ch := _chance(w, ev, fa, fb, bool(state["title"]), mult)
+			var k := mult * (Titles.PURSE_K if bool(state["interim"]) else 1.0)
+			info.add_child(UIKit.kv("Bolsa de %s" % f.short_name(), "%s + %s" % [Fmt.money(snappedf(float(p["show"]) * k, 500.0)), Fmt.money(snappedf(float(p["win"]) * k, 500.0))]))
+		var ch := _chance(w, ev, fa, fb, belt, mult)
 		info.add_child(UIKit.kv("Chance de as equipes aceitarem", Signing.chance_label(ch), UIColors.GREEN if ch >= 0.5 else UIColors.ORANGE))
 	if can_title:
+		var unify := Titles.interim_of(w, fa.division) != null and int(w.champions.get(fa.division, -1)) >= 0
 		var tb := CheckButton.new()
-		tb.text = "Valendo o cinturão (5 rounds)"
+		tb.text = "Unificação do cinturão (5 rounds)" if unify else "Valendo o cinturão (5 rounds)"
 		tb.button_pressed = bool(state["title"])
 		tb.custom_minimum_size.y = UITokens.H_BUTTON_SM
 		tb.toggled.connect(func(on: bool):
 			state["title"] = on
 			update.call())
 		opts.add_child(tb)
+	elif can_interim:
+		var ib := CheckButton.new()
+		ib.text = "Valendo o cinturão interino (5 rounds)"
+		ib.button_pressed = true
+		ib.custom_minimum_size.y = UITokens.H_BUTTON_SM
+		ib.toggled.connect(func(on: bool):
+			state["interim"] = on
+			update.call())
+		opts.add_child(ib)
+		var out := Titles.champion_out(w, fa.division)
+		opts.add_child(UIKit.label("%s. O vencedor fica com o interino e enfrenta o campeão na volta." % (out.substr(0, 1).to_upper() + out.substr(1)), "Small", true))
 	var mb := CheckButton.new()
 	mb.text = "Luta principal da noite"
 	mb.button_pressed = bool(state["main"])
 	mb.custom_minimum_size.y = UITokens.H_BUTTON_SM
-	mb.toggled.connect(func(on: bool): state["main"] = on)
+	mb.toggled.connect(func(on: bool):
+		state["main"] = on
+		update.call())
 	opts.add_child(mb)
 	var items: Array = []
 	for i in Org.PURSE_STEPS.size():
@@ -177,7 +211,7 @@ func _offer_sheet(w: GameWorld, ev: FightEvent, fa: Fighter, fb: Fighter) -> voi
 		update.call()))
 	update.call()
 	var go := UIKit.button("Oferecer a luta", "PrimaryButton", func():
-		var r := Org.offer_bout(w, ev, fa, fb, bool(state["title"]), bool(state["main"]), float(state["mult"]))
+		var r := Org.offer_bout(w, ev, fa, fb, bool(state["title"]), bool(state["main"]), float(state["mult"]), bool(state["interim"]) and not bool(state["title"]))
 		UIManager.close_modal()
 		GameManager.save_now()
 		if bool(r["ok"]):

@@ -1,5 +1,94 @@
 # Noite de Luta — nota de passagem (24/11/2026)
 
+## Rodada 11 de 24/11/2026: montagem dos eventos (APK 0.4.0)
+
+Segunda etapa da lista do dono rumo à 1.0. Sete sistemas novos em `scripts/systems/`, com as
+telas nos dois papéis. O motor da luta não mudou (`fight_soak --n=100` dá os mesmos totais).
+
+- **Card em blocos** (`card.gd`). `FightEvent.bouts` vai da abertura até a principal (a última).
+  De trás para a frente: luta principal, co-principal, resto do card principal (3, 4 ou 5 lutas
+  por camada, `MAIN_CARD`) e preliminares. A ordem sai sozinha pelo peso de cada luta (`weight`:
+  fama, ranking, cinturão, rivalidade, lugar combinado) até o presidente mexer à mão (`move`,
+  `set_main`; daí `FightEvent.manual`). Disputa de cinturão não sai do topo. O lugar muda a fama
+  de quem vence (`fame_k`: principal 1,3, co 1,15, card 1,0, preliminar 0,8) e nome grande nas
+  preliminares fica contrariado (`Morale`).
+- **Termômetro de hype com motivo** (`hype.gd`). `Hype.pair` devolve o valor de 0 a 100 e a
+  lista de motivos com os pontos: fama dos dois (30% do nome maior, 22% do menor, pela curva
+  `fame_pull`), superluta, cinturão (12), unificação (16), interino (7), rivalidade, revanche e
+  trilogia (com desconto quando o público já viu demais), duelo de ranqueados, sequência,
+  invicto, finalizadores, falastrão, lutar em casa. `Hype.event` é a principal inteira, 12% da
+  co-principal, 2% de cada luta do resto do card principal e o que cerca a noite (numerado, TV
+  aberta, card incompleto esfria). Faixas: frio até 35, morno, aquecendo a partir de 52, quente a
+  partir de 70, pegando fogo a partir de 85. É este número que enche a arena, vende pay-per-view e
+  paga o bônus de audiência.
+- **Sede, arena e ingresso** (`venue.gd`, presidente). Cada cidade tem tamanho de mercado e poder
+  de compra (`MARKET`) e lotação (`CITY_CAP`). Três arenas (`TYPES`: ginásio com 36% da lotação,
+  arena, estádio com três vezes) e cinco faixas de preço (`PRICE_K` de 0,6 a 1,8). A procura sai
+  do hype, da reputação e dos fatores da cidade (`crowd_factors`: mercado, lutadores da casa,
+  cidade cansada de receber a liga, cidade que não vê a liga há mais de um ano e meio). Casa
+  cheia dá prestígio, casa vazia tira (`fill_rep`). Sede e arena travam 3 semanas antes
+  (`LOCK_WEEKS`); o preço muda até a semana da luta. `Venue.preview` faz a conta de uma escolha
+  sem mexer no evento (é o que enche as tabelas da tela).
+- **Contrato de TV** (`tv_deal.gd`, presidente; `GameWorld.tv`, `tv_offers`). Três parceiros
+  (`PARTNERS`): TV aberta (paga 78%, patrocínio +45%, fama 25% mais rápida, +3 de hype),
+  assinatura (o meio-termo) e streaming (paga 120% e leva o pay-per-view por um fixo alto por
+  evento numerado). Bônus de audiência de 15% quando a noite passa de 65 de hype. Oito semanas
+  antes do fim chegam três propostas; dá para pedir 10% ou 20% a mais (`ask`, pela força na mesa:
+  reputação e hype médio das últimas noites); no segundo "não" o parceiro sai da mesa. Sem
+  decisão, o contrato atual renova por seis meses com desconto. Saves antigos ganham um contrato
+  curto de assinatura (`ensure`).
+- **Rivalidades e revanches** (`rivalry.gd`, `GameWorld.rivalries`). Par de lutadores com calor
+  de 0 a 100 e o motivo que mais pesou: luta apertada, disputa de cinturão, zebra, peso perdido,
+  provocação pública, briga na coletiva. Esfria com o tempo e depois de trilogia decidida. Vende
+  a luta, mexe com a moral, facilita o aceite e libera a revanche imediata (`rematch_ok`: calor a
+  partir de 34, luta apertada, ou ex-campeão com defesas). Limite: quatro lutas entre os mesmos
+  dois (`Matchmaker.face_reason`). Só guarda rivalidade de quem importa (top 40, equipe do
+  jogador, seguidos).
+- **Cinturão interino e unificação** (`titles.gd`, `GameWorld.interim`, `Bout.interim`). Campeão
+  com lesão de 10 semanas ou mais, ou parado há 34 sem luta marcada, abre o interino (bolsa 1,3
+  vez a tabela, cinco rounds, luta principal). Na volta, a luta seguinte dele é a unificação. Se
+  o cinturão vagar, o interino é promovido; se o interino perder luta que não vale cinturão, o
+  interino fica vago. No mundo que anda sozinho a liga marca tudo (`Titles.week`); o presidente
+  decide na oferta. Para isso existir, `development.gd` passou a sortear lesões sérias (ombro 6 a
+  14 semanas, joelho 8 a 24): 16% das lesões de treino e 24% das de luta dura.
+- **Empresário negocia bolsa e luta** (`negotiation.gd`). A proposta chega com hype, lugar no
+  card e bolsa. Pedidos (`ASKS`): 15%, 30% ou 50% a mais, mais garantido e menos bônus, apostar
+  na vitória, outra data (para o camp inteiro) e um lugar melhor no card. A organização responde
+  pela força do lutador na mesa (`leverage`, com motivos: fama para aquela camada, ranking,
+  sequência, hype da luta, aviso curto, reputação da academia; chance de cinturão tira 14
+  pontos). Ela aceita, chega no meio, mantém ou perde a paciência (3) e retira a proposta. Cada
+  assunto só uma vez. No desafio (`challenge_screen`) dá para pedir tabela, 20% ou 40% a mais.
+- **Vaga reservada para o cinturão** (`Matchmaker.shot_promised`, `user_shot`). Lutador do
+  jogador entre os quatro primeiros pode ter a próxima disputa sinalizada (85%, 55%, 30%, 15%
+  pela posição, sorteio fixo pelo campeão): a liga não marca o campeão com outro enquanto isso e
+  a proposta chega com 80% de chance por semana. A ficha e a proposta avisam que vale esperar.
+  O mesmo vale para o interino (`Titles.waiting_user`, `GameWorld.belt_wait`, espera 3 semanas).
+- **Telas**. Novas: `venue_screen` ("venue", sede e ingressos), `tv_screen` ("tv"). Refeitas:
+  `org_event_screen` (termômetro, sede, previsão das contas, card em blocos, ficha da luta com
+  subir, descer, virar principal), `event_screen`, `offer_screen` (com a folha "Negociar"),
+  `challenge_screen`. Mexidas: `book_screen` (interino e unificação, hype e lugar no card na
+  oferta), `titles_screen`, `fighter_screen` (cartão "Rivais"), os dois inícios, `org_screen`.
+  Peças: `scripts/ui/event_kit.gd` (termômetro, etiqueta de hype, card em blocos, tabelas de
+  escolha) e `scripts/ui/components/heat_bar.gd` (barra de cinco faixas).
+- **Save**: `Bout.interim` e `billing`; `FightEvent.venue`, `ticket`, `manual`; `GameWorld`
+  `rivalries`, `interim`, `belt_wait`, `tv`, `tv_offers` (tudo só quando diferente do padrão).
+  Saves da 0.3.0 abrem nos dois papéis e seguem 30 semanas sem erro. Save de 3 anos: 5,6 MB.
+- **Ferramentas novas**: `tools/events_probe.gd` (hype por faixa, revanches, interinos,
+  negociações e contas em números) e `tools/events_shots_runner.gd` (21 telas do presidente e,
+  com `--part=empresario`, 13 do empresário).
+- **Verificado**: `check_scripts` 130 scripts, 0 erros; `fight_soak --n=100` igual; `world_sim
+  --weeks=156` nos dois papéis sem erro; saves da 0.3.0 migrados nos dois papéis; `design_shots`
+  nos dois papéis, passeio dos atletas, `look_shots`, os dois passeios da etapa e um passeio em
+  tablet (1280×800) sem erro. **Não testado em celular de verdade.**
+- **Ficou para depois (0.9)**: a economia do presidente continua frouxa (de US$ 12 mi para perto
+  de US$ 200 mi em 2 anos; Fight Night dá perto de US$ 1,9 mi e numerado perto de US$ 6,6 mi de
+  resultado): sede, ingresso e TV já mudam a conta de cada noite, mas o nível geral precisa de
+  aperto. Na sonda do presidente quase toda noite fica de "aquecendo" para cima porque ela marca
+  cinturão em toda noite; conferir jogando. O equilíbrio da negociação só foi visto por sonda.
+- **Próximo**: 0.5 (UI e HUD profissionais: painel inicial novo, caixa de entrada com ações,
+  transições e animações, HUD da luta com estatísticas ao vivo e ficha dos juízes, sons, celular
+  deitado e tablet).
+
 ## Rodada 10 de 24/11/2026: atletas de verdade (APK 0.3.0)
 
 Primeira etapa da lista do dono rumo à 1.0. Seis coisas, todas ligadas à simulação e às telas, nos
@@ -450,7 +539,7 @@ Cinturões com linhagem.
 ## APK de teste
 
 - APKs novos (0.1.2+) ficam nos arquivos do projeto (`noite-de-luta/`), assinados com a chave de
-  teste guardada em `chave-teste/` lá; o atual é o 0.3.0.
+  teste guardada em `chave-teste/` lá; o atual é o 0.4.0.
 - `releases/NoiteDeLuta-0.1.1.apk` (release, arm64, Android 7+; instala por cima da 0.1.0). Assinado com uma chave de teste
   local: um APK novo assinado com outra chave pede desinstalar o antigo antes.
 - Para gerar de novo: modelos de exportação do Godot 4.7.2 (só `android_*.apk` e `version.txt` em
@@ -489,4 +578,6 @@ xvfb-run -a -s "-screen 0 1900x1900x24" godot --path . --resolution 780x1688 --s
 godot --headless --path . --script res://tools/athletes_probe.gd -- --weeks=104
 godot --headless --path . --script res://tools/save_dump.gd -- --out=/tmp/save.json --weeks=60 [--role=presidente]
 godot --headless --path . --script res://tools/save_migrate.gd -- --in=/tmp/save.json [--weeks=20]
+xvfb-run -a -s "-screen 0 1900x1900x24" godot --path . --resolution 780x1688 --script res://tools/design_shots.gd -- --runner=events_shots_runner --out=/tmp/eventos [--part=empresario]
+godot --headless --path . --script res://tools/events_probe.gd -- --weeks=104 [--role=presidente]
 ```

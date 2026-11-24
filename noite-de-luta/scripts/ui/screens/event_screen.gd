@@ -1,5 +1,7 @@
 extends BaseScreen
-## Card de uma noite: as lutas da principal para a primeira, com resultado quando já foi.
+## Card de uma noite visto de fora (empresário, fã): o termômetro de hype com os motivos e as
+## lutas em blocos, da principal para as preliminares, com o resultado quando já foi. Tocar numa
+## luta mostra por que ela vende e leva ao perfil dos dois.
 
 
 func setup(p: Dictionary) -> void:
@@ -17,38 +19,44 @@ func refresh() -> void:
 	screen_title = ev.name
 	screen_subtitle = "%s · %s" % [ev.city, GameWorld.fight_date_text(ev.week)]
 	UIManager.refresh_chrome()
-	c.add_child(UIKit.label(Rankings.tier_name(ev.tier), "Caps"))
-	var ids: Array = ev.bouts.duplicate()
-	ids.reverse()
-	for bid: int in ids:
-		var b := w.bout(bid)
-		if b == null:
-			continue
-		var fa := w.fighter(b.a)
-		var fb := w.fighter(b.b)
-		var card := UIKit.card("CardHighlight" if (w.is_user_fighter(fa) or w.is_user_fighter(fb)) else "Card", UITokens.S1)
-		var cap := ("Luta principal · " if b.main_event else "") + ("Cinturão · " if b.title else "") + Matchmaker.division_short(b.division)
-		card.add_child(UIKit.label(cap, "Caps"))
-		for i in 2:
-			var f := fa if i == 0 else fb
-			var h := UIKit.hbox(UITokens.S2)
-			var bar := ColorRect.new()
-			bar.color = UIColors.CORNER_RED if i == 0 else UIColors.CORNER_BLUE
-			bar.custom_minimum_size = Vector2(4, 48)
-			h.add_child(bar)
-			h.add_child(FightKit.portrait(w, f, 48))
-			var n := UIKit.label(f.display_name(), "H3")
-			n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-			h.add_child(n)
-			var won := b.status == "feita" and int(b.result.get("winner_id", -1)) == f.id
-			if won:
-				h.add_child(UIKit.colored("Venceu", UIColors.GREEN, "Caps"))
-			h.add_child(UIKit.label(w.rank_text(f), "Caps"))
-			card.add_child(h)
-		if b.status == "feita":
-			var rt := FightKit.result_text(b)
-			if String(b.result.get("method", "")) == "DEC":
-				rt += " (%s)" % FightKit.cards_text(b)
-			card.add_child(UIKit.label(rt, "Small", true))
-		c.add_child(UIKit.card_panel(card))
+	var lst := Card.bouts(w, ev)
+	var head := UIKit.card("Card", UITokens.S1)
+	var hh := UIKit.hbox(8)
+	var tl := UIKit.label(Rankings.tier_name(ev.tier), "Section")
+	tl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	hh.add_child(tl)
+	hh.add_child(UIKit.label(Fmt.plural(lst.size(), "luta", "lutas"), "H3"))
+	head.add_child(hh)
+	head.add_child(UIKit.label("%s, %s · %s" % [ev.city, DataDB.nation_name(ev.nation), w.weeks_from_now(ev.week)], "Small", true))
+	c.add_child(UIKit.card_panel(head))
+	if lst.is_empty():
+		c.add_child(UIKit.state_block("empty", "Card ainda vazio", "As lutas desta noite ainda não foram anunciadas."))
+		return
+	if not ev.done and ev.week >= w.week:
+		c.add_child(EventKit.thermometer(Hype.event(w, ev)))
+	c.add_child(EventKit.card_blocks(w, ev, func(b: Bout): _bout_sheet(w, ev, b)))
+
+
+func _bout_sheet(w: GameWorld, ev: FightEvent, b: Bout) -> void:
+	var fa := w.fighter(b.a)
+	var fb := w.fighter(b.b)
+	var v := UIKit.vbox(UITokens.S2)
+	v.custom_minimum_size.x = 560
+	var head := UIKit.hbox(8)
+	var nm := UIKit.label("%s × %s" % [fa.short_name(), fb.short_name()], "Section")
+	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	head.add_child(nm)
+	head.add_child(UIKit.label(Card.slot_name(Card.slot(w, ev, b)), "Caps"))
+	v.add_child(head)
+	if b.status == "marcada":
+		v.add_child(EventKit.thermometer(Hype.bout(w, b), "Hype da luta", "", false, 5))
+	var rows: Array = []
+	for fid: int in [b.a, b.b]:
+		var f := w.fighter(fid)
+		rows.append(UIKit.menu_row("user", f.display_name(), "%s · %s" % [w.rank_text(f), f.record_text()], func():
+			UIManager.close_modal()
+			UIManager.push("fighter", {"id": fid})))
+	v.add_child(UIKit.menu_group(rows))
+	UIManager.show_modal(v, true)

@@ -46,6 +46,7 @@ func refresh() -> void:
 	if not past.is_empty():
 		fin.add_child(UIKit.kv("Últimas %d noites" % mini(6, past.size()), Fmt.money(total), UIColors.GREEN if total >= 0.0 else UIColors.RED))
 	c.add_child(UIKit.card_panel(fin))
+	c.add_child(EventKit.tv_card(w, func(): UIManager.push("tv")))
 	if not past.is_empty():
 		c.add_child(UIKit.section_header("Últimas noites", "Todas", func(): UIManager.switch_area("events")))
 		for ev: FightEvent in past.slice(0, 3):

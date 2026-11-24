@@ -193,6 +193,21 @@ static func fill_text(ev: FightEvent, crowd: int) -> String:
 	return "Arena vazia: pega mal para a organização"
 
 
+## Contas da noite se ela fosse em outra cidade, arena ou faixa de preço (não muda nada).
+static func preview(w: GameWorld, ev: FightEvent, city: String, nation: String, type: String, level: int) -> Dictionary:
+	var keep := [ev.city, ev.nation, ev.venue, ev.ticket]
+	ev.city = city
+	ev.nation = nation
+	ev.venue = type
+	ev.ticket = level
+	var pr := Org.projection(w, ev)
+	ev.city = keep[0]
+	ev.nation = keep[1]
+	ev.venue = keep[2]
+	ev.ticket = keep[3]
+	return pr
+
+
 # --- Na mão do presidente -------------------------------------------------------------------
 
 static func set_city(w: GameWorld, ev: FightEvent, city: String, nation: String) -> String:

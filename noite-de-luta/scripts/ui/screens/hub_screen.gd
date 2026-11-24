@@ -152,6 +152,8 @@ func _offer_row(w: GameWorld, o: Dictionary) -> Control:
 	var opp := w.fighter(int(o["opp"]))
 	var ev := w.event(int(o["event"]))
 	var txt := "%s × %s (%s)" % [f.short_name(), opp.short_name(), w.rank_text(opp)]
+	if bool(o.get("title", false)) or bool(o.get("interim", false)):
+		txt = "%s × %s" % [f.short_name(), opp.short_name()]
 	var line := "%s · %s · bolsa %s + %s" % [ev.name if ev != null else "", w.weeks_from_now(int(o["week"])), Fmt.money(float(o["show"])), Fmt.money(float(o["win"]))]
 	var h := UIKit.hbox(UITokens.S2)
 	h.add_child(FightKit.portrait(w, f, 56))
@@ -166,9 +168,21 @@ func _offer_row(w: GameWorld, o: Dictionary) -> Control:
 	b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	v.add_child(b)
 	h.add_child(v)
+	var rv := UIKit.vbox(0)
+	rv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var tag: Label
+	if bool(o.get("title", false)):
+		tag = UIKit.colored("Cinturão", UIColors.GOLD, "Caps")
+	elif bool(o.get("interim", false)):
+		tag = UIKit.colored("Interino", UIColors.GOLD, "Caps")
+	else:
+		tag = EventKit.hype_tag(float(Hype.pair(w, f, opp, false, false, ev.nation if ev != null else "")["value"]))
+	tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	rv.add_child(tag)
 	var exp := UIKit.label("vence em %d sem." % maxi(0, int(o["expires"]) - w.week) if int(o["expires"]) > w.week else "última semana", "Caps")
-	exp.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	h.add_child(exp)
+	exp.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	rv.add_child(exp)
+	h.add_child(rv)
 	var row := UIKit.tap_row(h, func(): UIManager.push("offer", {"id": int(o["id"])}))
 	row.custom_minimum_size.y = UITokens.H_ROW
 	return row
@@ -182,7 +196,7 @@ func _news_row(w: GameWorld, n: Dictionary) -> Control:
 	var v := UIKit.vbox(2)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var kind := String(n.get("kind", ""))
-	var chapeu: String = {"cinturao": "Cinturão", "resultado": "Resultado", "equipe": "Sua academia", "aposentadoria": "Aposentadoria", "marco": "Marco", "olheiro": "Olheiro", "mercado": "Mercado"}.get(kind, "Notícia")
+	var chapeu: String = {"cinturao": "Cinturão", "resultado": "Resultado", "equipe": "Sua academia", "aposentadoria": "Aposentadoria", "marco": "Marco", "olheiro": "Olheiro", "mercado": "Mercado", "rivalidade": "Rivalidade"}.get(kind, "Notícia")
 	var cap := UIKit.label("%s · %s" % [chapeu, w.weeks_from_now(int(n["week"]))], "Caps")
 	if kind == "cinturao" or kind == "marco":
 		cap.add_theme_color_override(&"font_color", UIColors.GOLD)

@@ -39,9 +39,22 @@ func _division(w: GameWorld, div: String) -> Control:
 		var line := "%s · %s" % [champ.record_text(), "%d defesas" % champ.title_defenses if champ.title_defenses != 1 else "1 defesa"]
 		card.add_child(FightKit.fighter_row(w, champ, func(): UIManager.push("fighter", {"id": cid}), line, UIColors.GOLD, "Campeão"))
 		var b := w.bout(champ.bout_id)
+		var it := Titles.interim_of(w, div)
 		if b != null and b.status == "marcada" and b.title:
 			var ev := w.event(b.event_id)
-			card.add_child(UIKit.label("Defende contra %s na %s, %s." % [w.fighter(b.other(champ.id)).display_name(), ev.name if ev != null else "", w.weeks_from_now(b.week)], "Small", true))
+			var unify := it != null and b.has(it.id)
+			card.add_child(UIKit.label("%s %s na %s, %s." % ["Unifica o cinturão contra" if unify else "Defende contra", w.fighter(b.other(champ.id)).display_name(), ev.name if ev != null else "", w.weeks_from_now(b.week)], "Small", true))
+		var out := Titles.champion_out(w, div)
+		if out != "":
+			card.add_child(UIKit.colored("%s." % (out.substr(0, 1).to_upper() + out.substr(1)), UIColors.ORANGE, "Small", true))
+		if it != null:
+			var iid := it.id
+			card.add_child(FightKit.fighter_row(w, it, func(): UIManager.push("fighter", {"id": iid}), "%s · espera a unificação" % it.record_text(), UIColors.GOLD, "Interino"))
+		else:
+			var ib := Titles.booked(w, div)
+			if ib != null and ib.interim:
+				var iev := w.event(ib.event_id)
+				card.add_child(UIKit.colored("Cinturão interino em jogo: %s × %s na %s, %s." % [w.fighter(ib.a).short_name(), w.fighter(ib.b).short_name(), iev.name if iev != null else "", w.weeks_from_now(ib.week)], UIColors.GOLD, "Small", true))
 	var hist: Array = w.title_history.get(div, [])
 	if hist.size() > 1 or (hist.size() == 1 and champ == null):
 		card.add_child(UIKit.label("Linhagem", "Caps"))

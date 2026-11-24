@@ -71,11 +71,11 @@ static func pair(w: GameWorld, fa: Fighter, fb: Fighter, title: bool = false, in
 	var champ := int(w.champions.get(fa.division, -1))
 	if title:
 		if it >= 0 and (fa.id == it or fb.id == it) and (fa.id == champ or fb.id == champ):
-			rs.append(["Unificação: campeão contra o interino", 14.0])
+			rs.append(["Unificação: campeão contra o interino", 16.0])
 		else:
-			rs.append(["Vale o cinturão", 10.0])
+			rs.append(["Vale o cinturão", 12.0])
 	elif interim:
-		rs.append(["Vale o cinturão interino", 6.0])
+		rs.append(["Vale o cinturão interino", 7.0])
 	# Rivalidade e revanche.
 	var e := Rivalry.entry(w, fa.id, fb.id)
 	var heat := float(e.get("heat", 0.0))
