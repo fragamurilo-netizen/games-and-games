@@ -59,6 +59,8 @@ var season: Dictionary = {}
 var awards: Array = []
 ## Hall da Fama: [{id, name, year, div, nation, text, score}]
 var hall: Array = []
+## Olheiro: {jobs: [{id, left, total}] (observações em andamento), finds: [{id, week}] (indicações)}. Ver Scouting.
+var scouting: Dictionary = {}
 
 
 func new_id() -> int:
@@ -241,7 +243,7 @@ func to_dict() -> Dictionary:
 		"played": played_this_week, "ev_count": event_counters, "cal": calendar_weeks, "ch_block": challenge_block,
 		"sign_block": sign_block, "role": role, "followed": followed, "titles": title_history,
 		"delegate": delegate_cards, "bout_block": bout_block, "incidents": incidents,
-		"season": season, "awards": awards, "hall": hall}
+		"season": season, "awards": awards, "hall": hall, "scouting": scouting}
 
 
 static func from_dict(d: Dictionary) -> GameWorld:
@@ -295,6 +297,7 @@ static func from_dict(d: Dictionary) -> GameWorld:
 	w.season = d.get("season", {})
 	w.awards = d.get("awards", [])
 	w.hall = d.get("hall", [])
+	w.scouting = d.get("scouting", {})
 	for i: Dictionary in w.incidents:
 		i["refused"] = (i.get("refused", []) as Array).map(func(v): return int(v))
 	return w

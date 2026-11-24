@@ -29,8 +29,14 @@ static func week(w: GameWorld) -> void:
 		_recover(w, f, team)
 		var bout := w.bout(f.bout_id)
 		var fight_week := bout != null and bout.week == w.week
-		if f.injury.is_empty() and not fight_week:
-			_train(w, f, team, f.age(y, m))
+		var mine := w.is_user_fighter(f)
+		if mine:
+			Camp.week(w, f, team)
+		elif not f.camp.is_empty():
+			f.camp = {}
+		if f.injury.is_empty() and not fight_week and int(f.training.get("off", -1)) != w.week:
+			_train(w, f, team, f.age(y, m), 0.75 if mine and Camp.in_window(w, f) else 1.0)
+		Morale.week(w, f)
 		_age(w, f, f.age(y, m))
 		if w.week - f.last_fight_week > 26:
 			f.popularity = maxf(1.0, f.popularity - 0.15)
@@ -56,12 +62,12 @@ static func _recover(w: GameWorld, f: Fighter, team: Team) -> void:
 			f.injury["weeks"] = wk
 
 
-static func _train(w: GameWorld, f: Fighter, team: Team, age: int) -> void:
+static func _train(w: GameWorld, f: Fighter, team: Team, age: int, camp_k: float = 1.0) -> void:
 	var intensity := int(f.training.get("intensity", 1)) if w.is_user_fighter(f) else 1
 	var focus: Dictionary = (FOCUS.get(String(f.training.get("focus", "equilibrado")), FOCUS["equilibrado"]) as Dictionary)["w"]
 	var age_k := 1.5 if age < 21 else (1.25 if age < 25 else (1.0 if age < 29 else (0.55 if age < 32 else 0.2)))
 	var gap := clampf((f.potential - f.level()) / 8.0, 0.0, 1.6)
-	var base: float = 0.16 * age_k * gap * [0.6, 1.0, 1.4][intensity]
+	var base: float = 0.16 * age_k * gap * [0.6, 1.0, 1.4][intensity] * camp_k * Morale.train_k(w, f)
 	for k: String in Fighter.ATTRS:
 		var g := String(GROUP_OF[k])
 		if k in ["queixo", "coracao"]:
@@ -80,7 +86,7 @@ static func _train(w: GameWorld, f: Fighter, team: Team, age: int) -> void:
 	var risk: float = [0.0015, 0.004, 0.011][intensity] * (1.2 - physio / 150.0)
 	if w.rng.randf() < risk:
 		var inj: Array = INJURIES[[6, 7, 1, 3][w.rng.randi_range(0, 3)]]
-		_injure(w, f, String(inj[0]), w.rng.randi_range(int(inj[1]), int(inj[2])), "no treino")
+		injure(w, f, String(inj[0]), w.rng.randi_range(int(inj[1]), int(inj[2])), "no treino")
 
 
 static func _age(w: GameWorld, f: Fighter, age: int) -> void:
@@ -96,9 +102,10 @@ static func _age(w: GameWorld, f: Fighter, age: int) -> void:
 				f.attrs[k] = maxf(15.0, f.a(k) - 1.0)
 
 
-static func _injure(w: GameWorld, f: Fighter, name: String, weeks: int, where: String) -> void:
+static func injure(w: GameWorld, f: Fighter, name: String, weeks: int, where: String) -> void:
 	f.injury = {"name": name, "weeks": weeks}
 	f.condition = minf(f.condition, 70.0)
+	Morale.bump(w, f, -4.0, "Lesão %s" % where)
 	var b := w.bout(f.bout_id)
 	var ev := w.event(b.event_id) if b != null else null
 	if b != null and b.status == "marcada" and b.week - w.week < weeks + 1 and w.is_president() and ev != null and ev.tier == 2 and not ev.closed:

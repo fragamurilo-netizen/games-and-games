@@ -53,7 +53,7 @@ static func weigh_in(w: GameWorld, b: Bout) -> Dictionary:
 	var r := RandomNumberGenerator.new()
 	r.seed = hash([w.seed, b.id, "pesagem"])
 	var limit := float(DataDB.division(b.division).get("limit_kg", 70.0)) + (0.5 if not b.title else 0.0)
-	var res := {"kg": [], "missed": [], "mods": [{}, {}], "cut": []}
+	var res := {"kg": [], "missed": [], "mods": [{}, {}], "cut": [], "camp": []}
 	for i in 2:
 		var f := w.fighter(b.a if i == 0 else b.b)
 		var team := w.team(f.team_id)
@@ -62,14 +62,17 @@ static func weigh_in(w: GameWorld, b: Bout) -> Dictionary:
 		res["cut"].append(cut)
 		# Cerca de 3% erram o peso (no MMA real, perto de uma luta por card); corte grande, nutricionista
 		# fraco e pouca cabeça pesam.
-		var miss_p := clampf((0.03 + (cut - 0.08) * 0.6 - (nutri - 50.0) / 2000.0 - (f.a("qi") - 50.0) / 3000.0) * Persona.weight_k(f), 0.002, 0.4)
+		var o := w.fighter(b.b if i == 0 else b.a)
+		# Camp com foco no peso: a dieta começou cedo.
+		var relief := Camp.cut_relief(w, f, b)
+		var miss_p := clampf((0.03 + (cut - 0.08) * 0.6 - (nutri - 50.0) / 2000.0 - (f.a("qi") - 50.0) / 3000.0) * Persona.weight_k(f) * (1.0 - relief * 0.9), 0.002, 0.4)
 		var kg := limit - r.randf_range(0.0, 0.4)
 		if r.randf() < miss_p:
 			kg = limit + r.randf_range(0.3, 2.4)
 			res["missed"].append(f.id)
 		res["kg"].append(snappedf(kg, 0.1))
 		# Corte pesado: fôlego e queixo cobram na luta.
-		var harsh := maxf(0.0, cut - 0.1) * (1.0 - nutri / 200.0)
+		var harsh := maxf(0.0, cut - 0.1) * (1.0 - nutri / 200.0) * (1.0 - relief)
 		var m := {}
 		if harsh > 0.0:
 			m["cardio"] = -harsh * 90.0
@@ -83,6 +86,14 @@ static func weigh_in(w: GameWorld, b: Bout) -> Dictionary:
 		var pm := Persona.fight_mods(f, b.title or b.main_event)
 		for k: String in pm:
 			m[k] = float(m.get(k, 0.0)) + float(pm[k])
+		# Camp (o que ele treinou para esta luta) e moral.
+		var cm := Camp.mods(w, f, o, b)
+		for k: String in cm:
+			m[k] = float(m.get(k, 0.0)) + float(cm[k])
+		var mm := Morale.fight_mods(f)
+		for k: String in mm:
+			m[k] = float(m.get(k, 0.0)) + float(mm[k])
+		res["camp"].append({"pts": snappedf(Camp.points(w, f, b), 0.1), "focus": Camp.focus_of(w, f, b), "mods": cm})
 		res["mods"][i] = m
 	b.weigh = res
 	return res
@@ -156,10 +167,17 @@ static func resolve(w: GameWorld, b: Bout, res: Dictionary, e: FightEngine) -> v
 		var tot: Dictionary = st.get("total", {})
 		var grappled := float(tot.get("ctrl", 0.0)) + float(e.s[1 - i]["total"].get("ctrl", 0.0) if e != null else 0.0) > 120.0
 		FighterGenerator.battle_marks(f, w.rng, float(st.get("cut", 0.0)), res_code == "D" and method in ["KO", "TKO"], grappled)
+		Morale.after_fight(w, f, b, res_code, method, champ_before, ra if i == 0 else rb, rb if i == 0 else ra)
+		if (b.weigh.get("missed", []) as Array).has(f.id):
+			Morale.bump(w, f, -4.0, "Não bateu o peso")
+		f.camp = {}
 	_pay(w, b, winner_id)
 	_reputation(w, b, winner_id, ra, rb)
 	_news(w, b, winner_id, method, champ_before, ra, rb)
 	Legacy.on_bout(w, b, e)
+	CareerStats.on_bout(w, b, res, e)
+	CareerStats.check_marks(w, fa, b)
+	CareerStats.check_marks(w, fb, b)
 	if not w.played_this_week.has(b.id):
 		w.played_this_week.append(b.id)
 
@@ -289,8 +307,13 @@ static func advance_week(w: GameWorld, auto: bool = false) -> void:
 		Development.month(w)
 		StaffMarket.refresh(w)
 		Signing.cpu_signings(w)
+		Scouting.month(w)
+	Scouting.week(w)
 	_vacate_idle_champions(w)
 	Rankings.rebuild(w)
+	CareerStats.weekly_marks(w)
+	if w.week % CareerStats.SAMPLE_WEEKS == 0:
+		CareerStats.sample_all(w)
 	Calendar.ensure_events(w)
 	Matchmaker.book_cpu(w)
 	if w.is_president():

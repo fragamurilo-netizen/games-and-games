@@ -61,6 +61,10 @@ static func offer(w: GameWorld, f: Fighter, cut: float, fights: int, bonus: floa
 	f.team_id = t.id
 	f.contract = {"cut": cut, "fights": fights}
 	f.training = {"focus": "equilibrado", "intensity": 1}
+	f.known = maxf(f.known, 0.45)
+	if f.snaps.is_empty():
+		CareerStats.snapshot(w, f)
+	Morale.bump(w, f, 6.0 + minf(4.0, bonus / 10000.0), "Assinou com a equipe")
 	if bonus > 0.0:
 		t.add_money(w.week, "Luvas de %s" % f.display_name(), -bonus)
 	w.add_news("equipe", "%s assina com %s: %d lutas, %d%% das bolsas para a equipe." % [f.display_name(), t.name, fights, int(round(cut * 100.0))], [f.id], true)
@@ -69,11 +73,12 @@ static func offer(w: GameWorld, f: Fighter, cut: float, fights: int, bonus: floa
 
 static func renew(w: GameWorld, f: Fighter, cut: float, fights: int) -> Dictionary:
 	var t := w.user_team()
-	var p := chance(w, f, cut, fights, 0.0) + 0.2 + clampf(f.streak, -2, 4) * 0.02
+	var p := chance(w, f, cut, fights, 0.0) + 0.2 + clampf(f.streak, -2, 4) * 0.02 + Morale.renew_mod(f)
 	if w.rng.randf() >= clampf(p, 0.05, 0.97):
 		release(w, f, false)
 		return {"ok": false, "text": "%s não renovou e saiu da equipe." % f.display_name()}
 	f.contract = {"cut": cut, "fights": fights}
+	Morale.bump(w, f, 4.0, "Contrato renovado")
 	return {"ok": true, "text": "%s renovou com a %s." % [f.display_name(), t.name]}
 
 

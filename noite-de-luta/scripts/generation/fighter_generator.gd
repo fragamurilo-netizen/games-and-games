@@ -125,6 +125,8 @@ static func make(w: GameWorld, div: String, level: float, age_: int = 0, amateur
 	_marks(f, rng)
 	physique(f, rng, String(origin["c"]))
 	Persona.make(f, rng, String(origin["c"]))
+	# Moral de partida: perto do meio, fixa pelo rosto (não gasta o sorteio do mundo).
+	f.morale = 50.0 + float(absi(hash([f.face_seed, "moral"])) % 19)
 	return f
 
 

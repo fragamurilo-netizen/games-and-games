@@ -119,6 +119,18 @@ var curve_w0: int = 0
 var marks: Array = []
 ## Fotos dos atributos de meses atrás (só equipe do jogador e seguidos): [{w, a}].
 var snaps: Array = []
+## Moral (0–100): como ele está com a carreira e com a equipe. Ver Morale.
+var morale: float = 60.0
+## O que mexeu com a moral nas últimas semanas (só equipe do jogador e seguidos): [[semana, variação, motivo]].
+var mood_log: Array = []
+## Conversa com o lutador: semana da última, promessa em aberto {kind, until} e cobrança em curso (semana em que acaba).
+var talk_week: int = -999
+var promise: Dictionary = {}
+var push_until: int = -999
+## Quanto a equipe do jogador conhece dele (0–1): fecha a faixa do potencial. Ver Scouting.
+var known: float = 0.0
+## Camp para a luta marcada: {bout, focus, place, spar, weeks, pts, study, cost, log}. Ver Camp.
+var camp: Dictionary = {}
 
 
 func display_name() -> String:
@@ -232,6 +244,8 @@ func to_dict() -> Dictionary:
 		"inj": injury, "susp": suspension, "pop": popularity, "wear": wear, "ret": retired, "rw": retired_week, "titles": titles_won,
 		"defs": title_defenses, "train": training, "bout": bout_id, "ch_lock": challenge_lock, "prog": progress, "traits": traits,
 		"st": stats, "cv": curve, "cv0": curve_w0, "marks": marks, "snaps": snaps, "lk0": look0,
+		"mor": snappedf(morale, 0.1), "mlog": mood_log, "talk": talk_week, "prom": promise, "push": push_until,
+		"known": snappedf(known, 0.01), "camp": camp,
 	}
 
 
@@ -288,4 +302,11 @@ static func from_dict(d: Dictionary) -> Fighter:
 	f.curve_w0 = int(d.get("cv0", 0))
 	f.marks = d.get("marks", [])
 	f.snaps = d.get("snaps", [])
+	f.morale = float(d.get("mor", 60.0))
+	f.mood_log = d.get("mlog", [])
+	f.talk_week = int(d.get("talk", -999))
+	f.promise = d.get("prom", {})
+	f.push_until = int(d.get("push", -999))
+	f.known = float(d.get("known", 0.0))
+	f.camp = d.get("camp", {})
 	return f

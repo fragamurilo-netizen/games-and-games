@@ -268,6 +268,20 @@ static func sample(w: GameWorld, f: Fighter) -> void:
 		f.curve_w0 += cut * SAMPLE_WEEKS
 
 
+## A cada `SAMPLE_WEEKS`: marca o nível de quem já tem curva guardada (perfil já aberto), da
+## equipe do jogador e dos seguidos, e tira a foto dos atributos dos mais próximos. Os outros
+## não guardam curva: ela é refeita pela idade quando alguém abre o perfil (o save agradece).
+static func sample_all(w: GameWorld) -> void:
+	for f: Fighter in w.fighters.values():
+		if f.retired:
+			continue
+		var close := w.is_user_fighter(f) or w.is_followed(f)
+		if close or not f.curve.is_empty():
+			sample(w, f)
+		if close:
+			snapshot(w, f)
+
+
 ## Pontos da curva para o gráfico: [[idade, nível], ...], terminando no nível de agora.
 static func curve_points(w: GameWorld, f: Fighter) -> Array:
 	ensure_curve(w, f)
