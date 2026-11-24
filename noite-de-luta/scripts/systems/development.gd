@@ -85,7 +85,9 @@ static func _train(w: GameWorld, f: Fighter, team: Team, age: int, camp_k: float
 	var physio := team.staff_quality("fisio") if team != null else 30.0
 	var risk: float = [0.0015, 0.004, 0.011][intensity] * (1.2 - physio / 150.0)
 	if w.rng.randf() < risk:
-		var inj: Array = INJURIES[[6, 7, 1, 3][w.rng.randi_range(0, 3)]]
+		# Quase sempre é coisa pequena; uma em seis é séria (ombro ou joelho, meses fora).
+		var pool := [4, 5] if w.rng.randf() < 0.16 else [6, 7, 1, 3]
+		var inj: Array = INJURIES[pool[w.rng.randi_range(0, pool.size() - 1)]]
 		injure(w, f, String(inj[0]), w.rng.randi_range(int(inj[1]), int(inj[2])), "no treino")
 
 
@@ -127,6 +129,10 @@ static func after_fight(w: GameWorld, f: Fighter, head: float, body: float, legs
 	var p := clampf(dmg * 0.12 + (0.3 if cut > 0.6 else 0.0), 0.0, 0.6)
 	if w.rng.randf() < p:
 		var pool := [0, 1, 3, 2, 6] if cut <= 0.6 else [0, 0, 1]
+		# De vez em quando a luta cobra caro: ombro ou joelho, meses fora (é daí que nasce o
+		# cinturão interino quando o machucado é o campeão).
+		if cut <= 0.6 and w.rng.randf() < 0.24:
+			pool = [4, 5]
 		var inj: Array = INJURIES[pool[w.rng.randi_range(0, pool.size() - 1)]]
 		f.injury = {"name": inj[0], "weeks": w.rng.randi_range(int(inj[1]), int(inj[2]))}
 		if w.is_user_fighter(f):

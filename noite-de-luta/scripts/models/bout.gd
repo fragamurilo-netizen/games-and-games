@@ -11,6 +11,11 @@ var division: String = "M70"
 var rounds: int = 3
 var title: bool = false
 var main_event: bool = false
+## Vale o cinturão interino (campeão fora de combate). Ver Titles.
+var interim: bool = false
+## Lugar no card combinado na negociação: 0 = o matchmaker decide, 1 = card principal,
+## 2 = co-principal, 3 = luta principal. Ver Card.
+var billing: int = 0
 ## Campeão que perdeu o cinturão na balança: só este lutador pode ganhar o cinturão (-1 = qualquer um).
 var title_for: int = -1
 ## Bolsa de cada lado: {"show": valor por lutar, "win": bônus de vitória}.
@@ -40,8 +45,13 @@ func has(fid: int) -> bool:
 
 
 func to_dict() -> Dictionary:
-	return {"id": id, "ev": event_id, "week": week, "a": a, "b": b, "div": division, "rounds": rounds,
+	var d := {"id": id, "ev": event_id, "week": week, "a": a, "b": b, "div": division, "rounds": rounds,
 		"title": title, "main": main_event, "pa": purse_a, "pb": purse_b, "status": status, "res": result, "log": log, "weigh": weigh, "tf": title_for}
+	if interim:
+		d["int"] = true
+	if billing != 0:
+		d["bill"] = billing
+	return d
 
 
 static func from_dict(d: Dictionary) -> Bout:
@@ -62,4 +72,6 @@ static func from_dict(d: Dictionary) -> Bout:
 	x.log = d.get("log", [])
 	x.weigh = d.get("weigh", {})
 	x.title_for = int(d.get("tf", -1))
+	x.interim = bool(d.get("int", false))
+	x.billing = int(d.get("bill", 0))
 	return x

@@ -17,12 +17,6 @@ const BONUS := 50000.0
 ## Multiplicadores da bolsa que o presidente pode oferecer sobre a tabela.
 const PURSE_STEPS := [1.0, 1.25, 1.5, 2.0]
 const PURSE_NAMES := ["Tabela", "+25%", "+50%", "Dobro"]
-## Lugares nas arenas das cidades da liga (as que faltam usam CAP_DEFAULT).
-const CITY_CAP := {"Las Vegas": 19000, "Nova York": 19500, "Rio de Janeiro": 15000, "São Paulo": 14000,
-	"Londres": 17000, "Abu Dhabi": 12000, "Paris": 15500, "Toronto": 19000, "Sydney": 18000,
-	"Cidade do México": 20000, "Tóquio": 16000, "Seul": 12000, "Xangai": 15000, "Varsóvia": 15000,
-	"Moscou": 14000, "Dublin": 9500, "Houston": 17000, "Miami": 18000, "Chicago": 20000}
-const CAP_DEFAULT := 14000
 ## Semanas antes da noite em que o matchmaker completa as vagas.
 const DELEGATE_WEEKS := 3
 
@@ -48,6 +42,7 @@ static func new_career(org_name: String, short: String, nation: String, c1: Colo
 	w.teams[t.id] = t
 	w.user_team_id = t.id
 	t.ledger.append({"week": 0, "label": "Caixa inicial", "value": funds})
+	TVDeal.ensure(w)
 	# As noites já marcadas pela gestão anterior passam a ter o nome da organização.
 	for e: FightEvent in w.events.values():
 		if e.tier == 2:
@@ -77,8 +72,9 @@ static func event_name(w: GameWorld, wk: int) -> String:
 	return "%s Fight Night %d" % [short, m]
 
 
+## Lugares na arena padrão da cidade (a lotação de uma noite está em Venue.capacity).
 static func capacity(city: String) -> int:
-	return int(CITY_CAP.get(city, CAP_DEFAULT))
+	return Venue.arena_cap(city)
 
 
 # --- Elenco e regras do card ---------------------------------------------------------------
@@ -125,29 +121,20 @@ static func past_events(w: GameWorld) -> Array:
 
 
 static func event_bouts(w: GameWorld, ev: FightEvent) -> Array:
-	var out: Array = []
-	for bid: int in ev.bouts:
-		var b := w.bout(bid)
-		if b != null and b.status != "cancelada":
-			out.append(b)
-	return out
+	return Card.bouts(w, ev)
 
 
 static func has_main(w: GameWorld, ev: FightEvent) -> bool:
-	for b: Bout in event_bouts(w, ev):
-		if b.main_event:
-			return true
-	return false
+	return Card.has_main(w, ev)
 
 
+## Disputa de cinturão (ou de interino) já marcada na categoria.
 static func title_booked(w: GameWorld, div: String) -> Bout:
-	for b: Bout in w.bouts.values():
-		if b.title and b.division == div and b.status == "marcada":
-			return b
-	return null
+	return Titles.booked(w, div)
 
 
 ## Pode valer cinturão? Campeão contra um dos 15 primeiros, ou cinturão vago entre dois dos 10.
+## Com interino na categoria, a disputa do campeão é a unificação contra ele.
 static func title_reason(w: GameWorld, fa: Fighter, fb: Fighter) -> String:
 	var champ := int(w.champions.get(fa.division, -1))
 	if title_booked(w, fa.division) != null:
@@ -157,6 +144,11 @@ static func title_reason(w: GameWorld, fa: Fighter, fb: Fighter) -> String:
 	if champ >= 0:
 		if fa.id != champ and fb.id != champ:
 			return "Só vale cinturão com o campeão no octógono."
+		var it := Titles.interim_of(w, fa.division)
+		if it != null:
+			if fa.id != it.id and fb.id != it.id:
+				return "A categoria tem campeão interino: a próxima disputa é a unificação contra %s." % it.short_name()
+			return ""
 		var other := rb if fa.id == champ else ra
 		if other < 1 or other > 15:
 			return "O desafiante precisa estar entre os 15 primeiros."
@@ -185,9 +177,7 @@ static func book_reason(w: GameWorld, ev: FightEvent, fa: Fighter, fb: Fighter) 
 			return "%s está machucado ou suspenso." % f.display_name()
 		if not Matchmaker.ready_to_book(w, f, ev.week - w.week):
 			return "%s precisa de mais tempo de descanso até essa data." % f.display_name()
-	if not Matchmaker.can_face(w, fa, fb):
-		return "Essa luta não pode: mesma academia ou revanche imediata."
-	return ""
+	return Matchmaker.face_reason(w, fa, fb)
 
 
 ## Bolsa da tabela da liga para o lutador (antes do multiplicador do presidente).
@@ -229,6 +219,8 @@ static func acceptance(w: GameWorld, ev: FightEvent, f: Fighter, opp: Fighter, t
 		if why == "":
 			why = "%s é estrela; para enfrentar alguém desconhecido, quer uma bolsa maior." % f.short_name()
 	p += [0.0, 0.08, 0.14, 0.2][maxi(0, PURSE_STEPS.find(mult))]
+	# Rival ninguém recusa: os dois querem resolver.
+	p += Rivalry.heat(w, f, opp) / 100.0 * 0.3
 	p += Persona.accept_mod(f, gap, mult, notice < 3)
 	if why == "":
 		why = "A equipe de %s pediu mais dinheiro e um adversário melhor." % f.short_name()
@@ -236,7 +228,7 @@ static func acceptance(w: GameWorld, ev: FightEvent, f: Fighter, opp: Fighter, t
 
 
 ## Oferece a luta às duas academias. {ok, text, bout}
-static func offer_bout(w: GameWorld, ev: FightEvent, fa: Fighter, fb: Fighter, title: bool, main: bool, mult: float) -> Dictionary:
+static func offer_bout(w: GameWorld, ev: FightEvent, fa: Fighter, fb: Fighter, title: bool, main: bool, mult: float, interim: bool = false) -> Dictionary:
 	var why := book_reason(w, ev, fa, fb)
 	if why != "":
 		return {"ok": false, "text": why}
@@ -244,30 +236,42 @@ static func offer_bout(w: GameWorld, ev: FightEvent, fa: Fighter, fb: Fighter, t
 		why = title_reason(w, fa, fb)
 		if why != "":
 			return {"ok": false, "text": why}
+	elif interim:
+		why = Titles.interim_reason(w, fa, fb)
+		if why != "":
+			return {"ok": false, "text": why}
 	var key := "%d:%d" % [mini(fa.id, fb.id), maxi(fa.id, fb.id)]
 	var blk: Dictionary = w.bout_block.get(key, {})
 	if not blk.is_empty() and int(blk.get("until", -1)) > w.week and mult <= float(blk.get("mult", 1.0)):
 		return {"ok": false, "text": "As equipes já recusaram essa luta nesta semana. Só com uma bolsa maior."}
 	for pair: Array in [[fa, fb], [fb, fa]]:
-		var acc := acceptance(w, ev, pair[0], pair[1], title, mult)
+		var acc := acceptance(w, ev, pair[0], pair[1], title or interim, mult)
 		if w.rng.randf() >= float(acc[0]):
 			w.bout_block[key] = {"until": w.week + 1, "mult": mult}
 			return {"ok": false, "text": String(acc[1])}
-	var b := book(w, ev, fa, fb, title, main or title, mult)
-	return {"ok": true, "text": "Fechado: %s × %s na %s%s." % [fa.short_name(), fb.short_name(), ev.name, ", valendo o cinturão" if title else ""], "bout": b.id}
+	var b := book(w, ev, fa, fb, title, main or title or interim, mult)
+	if interim:
+		Titles.mark_interim(w, b)
+	return {"ok": true, "text": "Fechado: %s × %s na %s%s." % [fa.short_name(), fb.short_name(), ev.name, ", valendo o cinturão" if title else (", valendo o cinturão interino" if interim else "")], "bout": b.id}
 
 
 ## Marca a luta (já aceita) no card, com a bolsa da tabela vezes `mult`.
 static func book(w: GameWorld, ev: FightEvent, fa: Fighter, fb: Fighter, title: bool, main: bool, mult: float) -> Bout:
-	if main:
+	if main and not ev.manual:
 		# Uma luta principal por noite: a anterior vira co-principal.
 		for ob: Bout in event_bouts(w, ev):
-			if ob.main_event and not ob.title:
+			if ob.main_event and not ob.title and not ob.interim:
 				ob.main_event = false
 				ob.rounds = 3
 	var b := Matchmaker.make_bout(w, ev, fa, fb, title, main)
 	if main and not title:
 		b.rounds = 5
+	if ev.manual:
+		# Card arrumado à mão: a luta nova entra no topo se for a principal, senão abre a noite.
+		if main:
+			Card.set_main(w, ev, b)
+		else:
+			Card._fix_main(w, ev)
 	for side: Array in [[b.a, b.purse_a], [b.b, b.purse_b]]:
 		var p: Dictionary = side[1]
 		p["show"] = snappedf(float(p["show"]) * mult, 500.0)
@@ -280,20 +284,13 @@ static func book(w: GameWorld, ev: FightEvent, fa: Fighter, fb: Fighter, title: 
 	return b
 
 
-## Ordem do card: a principal por último, antes dela as de cinturão, depois por fama.
+## Ordem do card: a principal por último, antes dela as de cinturão, depois por peso (ver Card).
 static func _reorder(w: GameWorld, ev: FightEvent) -> void:
-	var lst := event_bouts(w, ev)
-	lst.sort_custom(func(x: Bout, y: Bout) -> bool: return _weight(w, x) < _weight(w, y))
-	ev.bouts = lst.map(func(b: Bout) -> int: return b.id)
+	Card.sort(w, ev)
 
 
 static func _weight(w: GameWorld, b: Bout) -> float:
-	var s := (w.fighter(b.a).popularity + w.fighter(b.b).popularity) * 0.5
-	if b.title:
-		s += 200.0
-	if b.main_event:
-		s += 400.0
-	return s
+	return Card.weight(w, b)
 
 
 ## Tira a luta do card (as equipes não gostam: a organização perde um pouco de reputação).
@@ -344,16 +341,7 @@ static func auto_fill(w: GameWorld, ev: FightEvent) -> int:
 
 ## Card sem luta principal: a mais vendável vira a principal (5 rounds).
 static func ensure_main(w: GameWorld, ev: FightEvent) -> void:
-	var lst := event_bouts(w, ev)
-	if lst.is_empty() or has_main(w, ev):
-		return
-	var best: Bout = lst[0]
-	for b: Bout in lst:
-		if _weight(w, b) > _weight(w, best):
-			best = b
-	best.main_event = true
-	best.rounds = 5
-	_reorder(w, ev)
+	Card.ensure_main(w, ev)
 
 
 ## Semana a semana: o matchmaker completa os cards que estão chegando (se o presidente deixou).
@@ -382,56 +370,40 @@ static func pending_bouts(w: GameWorld) -> Array:
 	return event_bouts(w, ev).filter(func(b: Bout) -> bool: return b.status == "marcada")
 
 
-## Apelo da noite (0–100): a fama da luta principal pesa mais, cinturão e co-principal somam.
+## Apelo da noite (0–100): o termômetro de hype (ver Hype.event, que também dá os motivos).
 static func draw(w: GameWorld, ev: FightEvent) -> float:
-	var lst := event_bouts(w, ev)
-	if lst.is_empty():
-		return 0.0
-	var main: Bout = lst.back()
-	var pa := w.fighter(main.a).popularity
-	var pb := w.fighter(main.b).popularity
-	var d := maxf(pa, pb) * 0.55 + minf(pa, pb) * 0.3
-	if lst.size() > 1:
-		var co: Bout = lst[lst.size() - 2]
-		d += (w.fighter(co.a).popularity + w.fighter(co.b).popularity) * 0.5 * 0.15
-	var belts := 0
-	for b: Bout in lst:
-		if b.title:
-			d += 8.0 if belts == 0 else 3.0
-			belts += 1
-	if ev.ppv:
-		d += 4.0
-	# Confusão na coletiva da semana (FightWeek) vende a noite.
-	d += ev.hype
-	d *= minf(1.0, 0.55 + lst.size() / float(maxi(1, ev.slots)) * 0.45)
-	return clampf(d, 0.0, 100.0)
+	return Hype.event_value(w, ev)
 
 
-## Projeção das contas da noite (usada antes, na tela do card, e no fechamento).
+## Projeção das contas da noite (usada antes, na tela do card, e no fechamento). A procura vem
+## do hype, da sede e do preço do ingresso (Venue); a TV paga o que está no contrato (TVDeal).
 static func projection(w: GameWorld, ev: FightEvent) -> Dictionary:
 	var t := w.user_team()
 	var rep := t.reputation if t != null else 50.0
 	var dr := draw(w, ev)
-	var cap := capacity(ev.city)
-	var fill := clampf(0.42 + dr / 130.0 + rep / 400.0, 0.3, 1.0)
-	var crowd := int(cap * fill)
-	var ticket := 95.0 + dr * 1.6
+	var cap := Venue.capacity(ev)
+	var wanted := Venue.demand(w, ev, dr)
+	var crowd := int(minf(float(cap), wanted))
+	var ticket := Venue.price(ev, dr)
 	var gate := crowd * ticket
 	var ppv_buys := 0
-	if ev.ppv:
+	var ppv_k := TVDeal.ppv_k(w)
+	if ev.ppv and ppv_k > 0.0:
 		ppv_buys = int(10000.0 + 300000.0 * pow(dr / 100.0, 3.0) * (0.5 + rep / 100.0 * 0.7))
-	var ppv := ppv_buys * 64.99 * 0.5
-	var tv := 1800000.0 * (0.6 + rep / 100.0 * 0.8)
-	var sponsors := 400000.0 * (0.5 + rep / 100.0)
+	var ppv := ppv_buys * 64.99 * 0.5 * ppv_k
+	var tvf := TVDeal.night_fee(w, ev, dr)
+	var tv := float(tvf["fee"]) + float(tvf["bonus"])
+	var sponsors := 400000.0 * (0.5 + rep / 100.0) * TVDeal.sponsor_k(w)
 	var purses := 0.0
 	for b: Bout in event_bouts(w, ev):
 		for p: Dictionary in [b.purse_a, b.purse_b]:
 			purses += float(p["show"])
 			# Projeção: metade dos bônus de vitória (um dos dois ganha).
 			purses += float(p["win"]) * 0.5
-	var production := (1000000.0 if ev.ppv else 650000.0) + cap * 18.0
-	return {"draw": dr, "crowd": crowd, "capacity": cap, "ticket": ticket, "gate": gate, "ppv_buys": ppv_buys, "ppv": ppv,
-		"tv": tv, "sponsors": sponsors, "purses": purses, "production": production, "bonuses": BONUS * 4.0,
+	var production := Venue.cost(ev)
+	return {"draw": dr, "crowd": crowd, "capacity": cap, "demand": int(wanted), "ticket": ticket, "gate": gate, "ppv_buys": ppv_buys, "ppv": ppv,
+		"tv": tv, "tv_bonus": float(tvf["bonus"]), "viewers": TVDeal.viewers(w, dr), "sponsors": sponsors, "purses": purses,
+		"production": production, "bonuses": BONUS * 4.0, "venue": ev.venue, "price_level": ev.ticket, "ppv_in_deal": ev.ppv and ppv_k <= 0.0,
 		"profit": gate + ppv + tv + sponsors - purses - production - BONUS * 4.0}
 
 
@@ -512,17 +484,19 @@ static func close_event(w: GameWorld, ev: FightEvent, bonuses: Dictionary) -> Di
 			t.add_money(w.week, "%s cancelada" % ev.name, -loss)
 			t.reputation = maxf(1.0, rep - 3.0)
 		ev.closed = true
+		var keep0 := ev.report
 		ev.report = {"crowd": 0, "capacity": pr["capacity"], "gate": 0.0, "ppv_buys": 0, "ppv": 0.0, "tv": 0.0, "sponsors": 0.0,
 			"purses": 0.0, "production": loss, "bonus": 0.0, "profit": -loss, "draw": 0.0, "finishes": 0, "fotn": -1, "potn": []}
+		_keep_week_notes(ev, keep0)
 		w.add_news("organizacao", "%s cancelada: sem lutas no card. A organização perde dinheiro e prestígio." % ev.name, [], true)
 		return ev.report
 	var income: float = float(pr["gate"]) + float(pr["ppv"]) + float(pr["tv"]) + float(pr["sponsors"])
 	var cost: float = purses + float(pr["production"]) + paid_bonus
 	if t != null:
 		t.add_money(w.week, "%s: bilheteria (%s pessoas)" % [ev.name, Fmt.thousands(int(pr["crowd"]))], float(pr["gate"]))
-		if ev.ppv:
+		if ev.ppv and float(pr["ppv"]) > 0.0:
 			t.add_money(w.week, "%s: pay-per-view (%s compras)" % [ev.name, Fmt.thousands(int(pr["ppv_buys"]))], float(pr["ppv"]))
-		t.add_money(w.week, "%s: direitos de TV" % ev.name, float(pr["tv"]))
+		t.add_money(w.week, "%s: direitos de TV%s" % [ev.name, " com bônus de audiência" if float(pr["tv_bonus"]) > 0.0 else ""], float(pr["tv"]))
 		t.add_money(w.week, "%s: patrocínio" % ev.name, float(pr["sponsors"]))
 		t.add_money(w.week, "%s: bolsas" % ev.name, -purses)
 		t.add_money(w.week, "%s: produção e arena" % ev.name, -float(pr["production"]))
@@ -532,11 +506,17 @@ static func close_event(w: GameWorld, ev: FightEvent, bonuses: Dictionary) -> Di
 		var n := event_bouts(w, ev).size()
 		var gain := (float(pr["draw"]) - 50.0) / 60.0 + finishes * 0.06 - maxf(0.0, ev.slots - n) * 0.25
 		gain *= 1.1 - rep / 110.0
+		# Casa cheia dá prestígio; arena vazia na transmissão tira.
+		gain += Venue.fill_rep(ev, int(pr["crowd"]))
 		t.reputation = clampf(rep + gain, 1.0, 100.0)
 	ev.closed = true
+	var keep := ev.report
 	ev.report = {"crowd": pr["crowd"], "capacity": pr["capacity"], "gate": pr["gate"], "ppv_buys": pr["ppv_buys"], "ppv": pr["ppv"],
 		"tv": pr["tv"], "sponsors": pr["sponsors"], "purses": purses, "production": pr["production"], "bonus": paid_bonus,
-		"profit": income - cost, "draw": pr["draw"], "finishes": finishes, "fotn": fotn, "potn": potn}
+		"profit": income - cost, "draw": pr["draw"], "finishes": finishes, "fotn": fotn, "potn": potn,
+		"ticket": pr["ticket"], "viewers": pr["viewers"], "tv_bonus": pr["tv_bonus"], "venue": ev.venue, "price_level": ev.ticket,
+		"ppv_in_deal": pr["ppv_in_deal"], "partner": String(w.tv.get("partner", ""))}
+	_keep_week_notes(ev, keep)
 	var txt := "%s em %s: %s pessoas" % [ev.name, ev.city, Fmt.thousands(int(pr["crowd"]))]
 	if ev.ppv:
 		txt += ", %s compras de pay-per-view" % Fmt.thousands(int(pr["ppv_buys"]))
@@ -545,6 +525,14 @@ static func close_event(w: GameWorld, ev: FightEvent, bonuses: Dictionary) -> Di
 		txt += " Bônus: " + ", ".join(names) + "."
 	w.add_news("organizacao", txt, [], true)
 	return ev.report
+
+
+## O relatório da noite é refeito no fechamento: as marcas da semana (coletiva já sorteada,
+## falas da coletiva) continuam nele.
+static func _keep_week_notes(ev: FightEvent, old: Dictionary) -> void:
+	for k: String in old:
+		if not ev.report.has(k):
+			ev.report[k] = old[k]
 
 
 ## Folha semanal da organização.

@@ -21,11 +21,24 @@ var closed: bool = false
 var report: Dictionary = {}
 ## Interesse extra criado na semana (briga na coletiva, provocação): soma no apelo da noite.
 var hype: float = 0.0
+## Presidente: tipo de arena ("ginasio", "arena" ou "estadio") e faixa de preço do ingresso
+## (0 popular a 4 luxo). Ver Venue.
+var venue: String = "arena"
+var ticket: int = 2
+## A ordem do card foi mexida à mão: o matchmaker não reordena mais (ver Card).
+var manual: bool = false
 
 
 func to_dict() -> Dictionary:
-	return {"id": id, "week": week, "tier": tier, "name": name, "city": city, "nation": nation, "bouts": bouts, "slots": slots, "done": done,
+	var d := {"id": id, "week": week, "tier": tier, "name": name, "city": city, "nation": nation, "bouts": bouts, "slots": slots, "done": done,
 		"ppv": ppv, "closed": closed, "report": report, "hype": hype}
+	if venue != "arena":
+		d["venue"] = venue
+	if ticket != 2:
+		d["ticket"] = ticket
+	if manual:
+		d["manual"] = true
+	return d
 
 
 static func from_dict(d: Dictionary) -> FightEvent:
@@ -43,4 +56,7 @@ static func from_dict(d: Dictionary) -> FightEvent:
 	e.hype = float(d.get("hype", 0.0))
 	e.closed = bool(d.get("closed", false))
 	e.report = d.get("report", {})
+	e.venue = String(d.get("venue", "arena"))
+	e.ticket = int(d.get("ticket", 2))
+	e.manual = bool(d.get("manual", false))
 	return e

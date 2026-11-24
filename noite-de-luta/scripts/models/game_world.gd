@@ -61,6 +61,15 @@ var awards: Array = []
 var hall: Array = []
 ## Olheiro: {jobs: [{id, left, total}] (observações em andamento), finds: [{id, week}] (indicações)}. Ver Scouting.
 var scouting: Dictionary = {}
+## Rivalidades: "id_menor:id_maior" → {heat (0 a 100), why, since, last}. Ver Rivalry.
+var rivalries: Dictionary = {}
+## Campeão interino de cada categoria (só existe a chave enquanto houver um). Ver Titles.
+var interim: Dictionary = {}
+## Categoria -> semana até a qual a liga espera a resposta do jogador para a disputa de interino.
+var belt_wait: Dictionary = {}
+## Presidente: contrato de TV em vigor e as propostas na mesa. Ver TVDeal.
+var tv: Dictionary = {}
+var tv_offers: Array = []
 
 
 func new_id() -> int:
@@ -158,10 +167,16 @@ func rank_of(f: Fighter) -> int:
 	return i + 1 if i >= 0 else -1
 
 
+func is_interim(f: Fighter) -> bool:
+	return f != null and int(interim.get(f.division, -1)) == f.id
+
+
 func rank_text(f: Fighter) -> String:
 	var r := rank_of(f)
 	if r == 0:
 		return "Campeão"
+	if is_interim(f):
+		return "Interino"
 	if r < 0:
 		return "Sem ranking"
 	return "#%d" % r
@@ -243,7 +258,8 @@ func to_dict() -> Dictionary:
 		"played": played_this_week, "ev_count": event_counters, "cal": calendar_weeks, "ch_block": challenge_block,
 		"sign_block": sign_block, "role": role, "followed": followed, "titles": title_history,
 		"delegate": delegate_cards, "bout_block": bout_block, "incidents": incidents,
-		"season": season, "awards": awards, "hall": hall, "scouting": scouting}
+		"season": season, "awards": awards, "hall": hall, "scouting": scouting,
+		"rival": rivalries, "interim": interim, "tv": tv, "tv_offers": tv_offers, "belt_wait": belt_wait}
 
 
 static func from_dict(d: Dictionary) -> GameWorld:
@@ -298,6 +314,12 @@ static func from_dict(d: Dictionary) -> GameWorld:
 	w.awards = d.get("awards", [])
 	w.hall = d.get("hall", [])
 	w.scouting = d.get("scouting", {})
+	w.rivalries = d.get("rival", {})
+	for k in (d.get("interim", {}) as Dictionary):
+		w.interim[String(k)] = int(d["interim"][k])
+	w.tv = d.get("tv", {})
+	w.tv_offers = d.get("tv_offers", [])
+	w.belt_wait = d.get("belt_wait", {})
 	for i: Dictionary in w.incidents:
 		i["refused"] = (i.get("refused", []) as Array).map(func(v): return int(v))
 	# Save de antes dos marcos de carreira: o passado de cada um entra sem data, de uma vez.

@@ -82,6 +82,8 @@ static func _presser_brawl(w: GameWorld, ev: FightEvent, b: Bout) -> void:
 	var other := fb if loud == fa else fa
 	var brawl := Persona.has(loud, "encrenqueiro") or hot == 2
 	ev.hype += 8.0 if brawl else 4.0
+	if Rivalry.add(w, loud, other, 28.0 if brawl else 14.0, "briga na coletiva" if brawl else "provocação na coletiva"):
+		Rivalry._announce(w, loud, other, "briga na coletiva" if brawl else "provocação na coletiva")
 	loud.popularity = minf(100.0, loud.popularity + 3.0)
 	other.popularity = minf(100.0, other.popularity + 1.5)
 	var txt := ""

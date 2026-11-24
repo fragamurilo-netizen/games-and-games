@@ -24,7 +24,8 @@ static func rebuild(w: GameWorld) -> void:
 			continue
 		if not by_div.has(f.division):
 			by_div[f.division] = []
-		by_div[f.division].append([score(w, f), f.id])
+		# O campeão interino é o primeiro da fila.
+		by_div[f.division].append([score(w, f) + (100000.0 if w.is_interim(f) else 0.0), f.id])
 	for d: Dictionary in DataDB.divisions():
 		var div := String(d["id"])
 		var lst: Array = by_div.get(div, [])
@@ -72,6 +73,7 @@ static func apply_result(w: GameWorld, b: Bout) -> void:
 			f.streak = f.streak + 1 if f.streak >= 0 else 1
 		else:
 			f.streak = f.streak - 1 if f.streak <= 0 else -1
+	var champ_was := int(w.champions.get(b.division, -1))
 	if b.title and win >= 0 and (b.title_for < 0 or b.title_for == win):
 		var champ_before := int(w.champions.get(b.division, -1))
 		w.champions[b.division] = win
@@ -85,3 +87,4 @@ static func apply_result(w: GameWorld, b: Bout) -> void:
 			var lf := w.fighter(b.other(win))
 			var how := ("venceu %s" % lf.display_name()) if champ_before == lf.id else ("cinturão vago, venceu %s" % lf.display_name() if champ_before < 0 else "venceu %s" % lf.display_name())
 			Org.record_title(w, b.division, wf, how, ev.name if ev != null else "")
+	Titles.on_result(w, b, win, champ_was)

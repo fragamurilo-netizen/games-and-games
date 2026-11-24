@@ -130,6 +130,13 @@ static func resolve(w: GameWorld, b: Bout, res: Dictionary, e: FightEngine) -> v
 	var champ_before := int(w.champions.get(b.division, -1))
 	var ra := w.rank_of(fa)
 	var rb := w.rank_of(fb)
+	# Lugar no card e rivalidade como estavam antes da luta.
+	var slot := Card.slot(w, ev, b)
+	var heat_before := Rivalry.heat(w, fa, fb)
+	var dethroned := false
+	if b.title and winner_id >= 0 and champ_before >= 0 and champ_before != winner_id and b.has(champ_before):
+		var old := w.fighter(champ_before)
+		dethroned = old != null and old.title_defenses >= 1
 	Rankings.apply_result(w, b)
 	for i in 2:
 		var f := fa if i == 0 else fb
@@ -152,6 +159,10 @@ static func resolve(w: GameWorld, b: Bout, res: Dictionary, e: FightEngine) -> v
 		f.history.append({"week": w.week, "opp": o.id, "opp_name": o.display_name(), "res": res_code, "method": method,
 			"detail": String(res.get("detail", "")), "round": int(res.get("round", b.rounds)), "time": float(res.get("time", 300.0)),
 			"event": ev.name if ev != null else "", "title": b.title, "tier": ev.tier if ev != null else 0, "bout": b.id})
+		if dethroned:
+			(f.history.back() as Dictionary)["dethroned"] = true
+		if b.interim:
+			(f.history.back() as Dictionary)["interim"] = true
 		f.last_fight_week = w.week
 		f.bout_id = -1
 		if f.contract.has("fights"):
@@ -159,9 +170,14 @@ static func resolve(w: GameWorld, b: Bout, res: Dictionary, e: FightEngine) -> v
 		# Fama: ganhar (e ganhar bonito) dá nome; perder tira um pouco.
 		var tier := ev.tier if ev != null else 0
 		if won:
-			f.popularity = minf(100.0, f.popularity + (1.5 + tier * 1.5 + (2.0 if method != "DEC" else 0.0) + (8.0 if b.title else 0.0)) * Persona.fame_k(f, method != "DEC"))
+			# Quem luta no alto do card (e em TV de alcance maior) fica famoso mais rápido.
+			var seen := Card.fame_k(slot) * (TVDeal.fame_k(w) if tier == 2 else 1.0)
+			# Quanto mais famoso, mais difícil crescer: sem isso todo mundo do topo vira estrela.
+			var room := clampf(1.25 - f.popularity / 100.0, 0.25, 1.0)
+			f.popularity = minf(100.0, f.popularity + (1.5 + tier * 1.5 + (2.0 if method != "DEC" else 0.0) + (8.0 if b.title else (4.0 if b.interim else 0.0))) * Persona.fame_k(f, method != "DEC") * seen * room)
 		elif res_code == "D":
-			f.popularity = maxf(1.0, f.popularity - 1.0)
+			# Derrota de nome grande pesa mais do que derrota de desconhecido.
+			f.popularity = maxf(1.0, f.popularity - (1.0 + f.popularity * 0.035))
 		var st: Dictionary = e.s[i] if e != null else {}
 		Development.after_fight(w, f, float(st.get("head", 0.5)), float(st.get("body", 0.2)), float(st.get("legs", 0.2)), float(st.get("cut", 0.0)), res_code == "D" and method in ["KO", "TKO"])
 		var tot: Dictionary = st.get("total", {})
@@ -170,10 +186,17 @@ static func resolve(w: GameWorld, b: Bout, res: Dictionary, e: FightEngine) -> v
 		Morale.after_fight(w, f, b, res_code, method, champ_before, ra if i == 0 else rb, rb if i == 0 else ra)
 		if (b.weigh.get("missed", []) as Array).has(f.id):
 			Morale.bump(w, f, -4.0, "Não bateu o peso")
+		# Rival: ganhar vale mais, perder dói mais. Nome grande nas preliminares fica contrariado.
+		if heat_before >= Rivalry.NAMED and res_code != "E":
+			Morale.bump(w, f, 3.0 if won else -3.0, "Venceu o rival" if won else "Perdeu para o rival")
+		var r_me := ra if i == 0 else rb
+		if slot == "prelim" and tier == 2 and r_me >= 0 and r_me <= 10:
+			Morale.bump(w, f, -3.0, "Lutou nas preliminares")
 		f.camp = {}
 	_pay(w, b, winner_id)
 	_reputation(w, b, winner_id, ra, rb)
 	_news(w, b, winner_id, method, champ_before, ra, rb)
+	Rivalry.after_fight(w, b, winner_id, champ_before, ra, rb)
 	Legacy.on_bout(w, b, e)
 	CareerStats.on_bout(w, b, res, e)
 	CareerStats.check_marks(w, fa, b)
@@ -314,6 +337,9 @@ static func advance_week(w: GameWorld, auto: bool = false) -> void:
 	Scouting.week(w)
 	_vacate_idle_champions(w)
 	Rankings.rebuild(w)
+	Rivalry.week(w)
+	Titles.week(w)
+	TVDeal.week(w)
 	CareerStats.weekly_marks(w)
 	if w.week % CareerStats.SAMPLE_WEEKS == 0:
 		CareerStats.sample_all(w)
