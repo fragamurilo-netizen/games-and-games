@@ -1,5 +1,41 @@
 # Noite de Luta — nota de passagem (24/11/2026)
 
+## Rodada 9 de 24/11/2026: retratos mais bonitos, realistas e variados (APK 0.2.3)
+
+Terceira entrega da ordem combinada na rodada 7. Arquivos: `scripts/ui/components/portrait_view.gd`,
+`face_shade.gd` e `scripts/generation/face_gen.gd`. Nada mudou no motor nem no mundo.
+
+- **Luz por relevo ligada para todos** (`PortraitView.mesh_light_default = true`). O `FaceShade`
+  já existia como teste: o rosto vira um mapa de altura (crânio, órbitas, nariz com dorso, ponta e
+  asas, maçãs, lábios, queixo) e dele saem a luz, a sombra projetada, a oclusão e o brilho. Antes
+  o rosto era iluminado por manchas pintadas, fracas demais (o nariz quase não aparecia).
+  Vale a partir de 50 px; abaixo disso segue a pele antiga (`_skin_px`).
+- **Acertos no `FaceShade`**: a borda do rosto não cai no preto (o traço escuro de "máscara" na
+  mandíbula sumiu: sem oclusão no contorno e piso de luz ali); luz mais de frente e sombra
+  projetada mais leve nas mulheres (`_soft`); borda antisserrilhada mais larga.
+- **Olhos** (`_eyes_finish`, por cima da luz): devolve luz ao branco, acende a metade de baixo
+  da íris, refaz o reflexo (dois nas mulheres e nos homens) e a linha dos cílios.
+- **Enquadramento de lutador mais perto** (`FIGHT_ZOOM` 1,2 e `FIGHT_EYE_Y` 0,385): a cabeça
+  ocupa metade do quadro; pescoço um pouco mais curto (`_body_setup`).
+- **Pele muito escura exposta mais alto** (`_setup`: sobe a luz de quem tem luminância < 0,24).
+- **Sete formatos de rosto** (`FaceGen._face_shape`, sorteio próprio pela semente: oval, comprido,
+  redondo, quadrado, coração, diamante, retangular). **Atenção**: o formato do rosto de quem já
+  existe num save muda; cabelo, pele, barba e traços continuam os mesmos.
+- **Sobrancelha**: cor própria (`brow_col`: embranquece bem depois da barba; nas mulheres não
+  embranquece) e mais cheia nos homens. Lábio dos homens mais perto do tom da pele, linha da
+  boca mais firme, narinas e asas do nariz mais marcadas.
+- **Corpo no retrato**: clavículas desenhadas por cima (`_clavicles`; na malha em colunas elas
+  viravam riscos na base do pescoço), trapézio, deltoide e peitoral com mais volume, sombra do
+  queixo mais funda, malha do tronco mais densa, orelhas no tom da borda do rosto.
+- **Custo**: a luz por relevo soma cerca de 10 ms por retrato pequeno e 125 ms por retrato grande
+  (420 px) na primeira vez; depois vem do cache de comandos. **Não medido em celular.**
+- **Verificado**: `check_scripts` 108 scripts, 0 erros; `fight_soak --n=100` igual; `world_sim
+  --weeks=156` nos dois papéis sem erro; `design_shots` nos dois papéis e `look_shots` sem erro;
+  folhas de 56, 72, 96, 128, 180 e 420 px conferidas. **Não testado em celular de verdade.**
+- **Próximo**: 0.3 (atletas de verdade; `career_stats.gd` já começado). Ideias que ficaram nos
+  retratos: barba por fazer menos granulada, cabelo com menos luz colorida de recorte no black
+  power, mais marcas de luta (cicatrizes, orelha) por tempo de carreira.
+
 ## Rodada 8 de 24/11/2026: salto grande na luta 2D (APK 0.2.2)
 
 Segunda entrega da ordem combinada na rodada 7 ("Vamos deixar o 3d de lado e evoluir de forma
@@ -347,7 +383,7 @@ Cinturões com linhagem.
 ## APK de teste
 
 - APKs novos (0.1.2+) ficam nos arquivos do projeto (`noite-de-luta/`), assinados com a chave de
-  teste guardada em `chave-teste/` lá; o atual é o 0.2.2.
+  teste guardada em `chave-teste/` lá; o atual é o 0.2.3.
 - `releases/NoiteDeLuta-0.1.1.apk` (release, arm64, Android 7+; instala por cima da 0.1.0). Assinado com uma chave de teste
   local: um APK novo assinado com outra chave pede desinstalar o antigo antes.
 - Para gerar de novo: modelos de exportação do Godot 4.7.2 (só `android_*.apk` e `version.txt` em

@@ -1866,7 +1866,8 @@ func _skin_torso_col(p: Vector2) -> Color:
 		var cy := _ynotch - s * 0.004 + (ax - s * 0.015) * 0.12 - s * 0.012 * sin(clampf(ax / (_sw * 0.8), 0.0, 1.0) * PI)
 		var dd := y - cy
 		var fade := smoothstep(_sw * 0.8, _sw * 0.55, ax)
-		lum += (0.11 * _g(dd, s * 0.008) - 0.14 * _g(dd - s * 0.017, s * 0.01)) * fade * (1.0 - fat * 0.6) * (0.7 if bool(f.get("fem", false)) else 1.0)
+		if not (fight_body and not suit):
+			lum += (0.07 * _g(dd, s * 0.008) - 0.08 * _g(dd - s * 0.017, s * 0.01)) * fade * (1.0 - fat * 0.6)
 	if fight_body and not suit:
 		lum *= 0.9
 	var c := _shade(_skin, lum * 0.97)
@@ -2589,18 +2590,50 @@ func _fight_body() -> void:
 	_fight_body_setup()
 	var big := s >= 90.0
 	var x_max := _tside[_tside.size() - 1].x - _hc.x
-	var m := _column_mesh(x_max, 40 if big else 18, 26 if big else 12, _torso_top_y, _bare_col)
+	# Linhas bastantes para as clavículas e a base do pescoço saírem iguais em todas as colunas
+	# (com poucas, as colunas do pescoço, mais compridas, desenhavam um retângulo no colo)
+	var m := _column_mesh(x_max, (52 if s >= 140.0 else 40) if big else 18, (48 if s >= 140.0 else 30) if big else 14, _torso_top_y, _bare_col)
 	var fem: bool = bool(_f.get("fem", false))
 	if not fem:
 		_chest_hair(m)
 	_aa_edge(_tside, _bare_col)
 	_aa_edge(_mirror(_tside, _hc.x), _bare_col)
+	_clavicles()
 	_neck_tattoo()
 	_body_tattoos()
 	if fem:
 		_sports_bra()
 	elif s >= 70.0:
 		_nipples()
+
+
+## Clavículas por cima da pele do tronco: o osso pega a luz de cima e faz sombra logo abaixo.
+## Somem com a gordura e ficam mais leves nas mulheres.
+func _clavicles() -> void:
+	var s := _s
+	if s < 70.0:
+		return
+	var bf: float = float(_f.get("body_fat", 0.15))
+	var k := clampf(1.0 - bf * 1.6, 0.15, 1.0) * (0.6 if bool(_f.get("fem", false)) else 1.0)
+	var lightc := _shade(_skin, 1.22)
+	var darkc := _shade(_skin, 0.42)
+	for sx: float in [-1.0, 1.0]:
+		var top := PackedVector2Array()
+		var mid := PackedVector2Array()
+		var bot := PackedVector2Array()
+		for i in 13:
+			var ax := lerpf(s * 0.02, _sw * 0.78, float(i) / 12.0)
+			var cy := _ynotch - s * 0.004 + (ax - s * 0.015) * 0.12 - s * 0.012 * sin(clampf(ax / (_sw * 0.8), 0.0, 1.0) * PI)
+			var x := _hc.x + sx * ax
+			top.append(Vector2(x, cy - s * 0.016))
+			mid.append(Vector2(x, cy + s * 0.012))
+			bot.append(Vector2(x, cy + s * 0.046))
+		# O lado da luz (esquerda do quadro) acende um pouco mais
+		var lit := 1.0 if sx < 0.0 else 0.75
+		_strip(top, mid, 4, func(_p: Vector2, t: float, w: float) -> Color:
+			return Color(lightc, 0.2 * k * lit * sin(PI * w) * smoothstep(0.0, 0.2, t) * (1.0 - smoothstep(0.55, 1.0, t))))
+		_strip(mid, bot, 4, func(_p: Vector2, t: float, w: float) -> Color:
+			return Color(darkc, 0.26 * k * sin(PI * w) * smoothstep(0.0, 0.2, t) * (1.0 - smoothstep(0.55, 1.0, t))))
 
 
 ## Pele do tronco sob a luz de cima: cilindro do tronco, trapézio voltado para cima, deltoides,
@@ -2614,7 +2647,8 @@ func _bare_col(p: Vector2) -> Color:
 	var sx := 1.0 if x >= 0.0 else -1.0
 	var y := p.y
 	var neck := _skin_torso_col(p)
-	var w_body := smoothstep(_ynb - s * 0.035, _ynb + s * 0.02, y)
+	# Passagem larga do pescoço para o colo (estreita, marcava uma faixa reta na base do pescoço)
+	var w_body := smoothstep(_ynb - s * 0.06, _ynb + s * 0.07, y)
 	if w_body <= 0.0:
 		return neck
 	var fem: bool = bool(f.get("fem", false))
@@ -2629,7 +2663,7 @@ func _bare_col(p: Vector2) -> Color:
 	var nx := clampf(X, -1.1, 1.1) * 0.7
 	var ny := 0.04
 	# Trapézio: rampa do pescoço até o ombro, voltada para cima
-	var trap := (1.0 - smoothstep(_ynb, _ysp + s * 0.035, y)) * smoothstep(_nwt * 0.9, _nwt * 1.25, ax) * (1.0 - smoothstep(_sw * 0.68, _sw * 0.9, ax))
+	var trap := (1.0 - smoothstep(_ynb - s * 0.02, _ysp + s * 0.05, y)) * smoothstep(_nwt * 0.55, _nwt * 1.7, ax) * (1.0 - smoothstep(_sw * 0.62, _sw * 0.92, ax))
 	ny -= (0.85 if not fem else 0.45) * trap * (0.7 + 0.3 * mus)
 	nx += sx * 0.18 * trap
 	# Deltoides
@@ -2664,7 +2698,9 @@ func _bare_col(p: Vector2) -> Color:
 		var cy := _ynotch - s * 0.004 + (ax - s * 0.015) * 0.12 - s * 0.012 * sin(clampf(ax / (_sw * 0.8), 0.0, 1.0) * PI)
 		var dd := y - cy
 		var fade := smoothstep(_sw * 0.8, _sw * 0.55, ax) * (1.0 - bf)
-		lum += (0.11 * _g(dd, s * 0.008) - 0.15 * _g(dd - s * 0.017, s * 0.01)) * fade * (0.7 if fem else 1.0)
+		# As clavículas do corpo de lutador são desenhadas por cima (_clavicles): na malha em colunas
+		# um traço fino virava riscos verticais na base do pescoço
+		lum += 0.0 * dd * fade
 	# Fúrcula
 	lum -= 0.12 * _g2(x / (s * 0.022), (y - _ynotch) / (s * 0.014), 1.0, 1.0)
 	if fem:
@@ -3533,7 +3569,7 @@ func _mouth() -> void:
 	var rr := sk.get_luminance() / maxf(0.05, red.get_luminance())
 	# Homens: lábio mais perto do tom da pele (rosa vivo em homem parece batom)
 	var lip := sk.lerp(Color(minf(1.0, red.r * rr), minf(1.0, red.g * rr), minf(1.0, red.b * rr)), (0.38 if bool(f.get("fem", false)) else 0.27) - darkness * 0.12).darkened(0.06 + darkness * 0.06)
-	var lip_up := lip.darkened(0.1 + darkness * 0.14)
+	var lip_up := lip.darkened((0.1 if bool(f.get("fem", false)) else 0.2) + darkness * 0.14)
 	# Em pele escura o lábio de baixo puxa para o rosado, mas no mesmo brilho do lábio (clarear
 	# demais parece boca aberta)
 	var rose := Color("#9A5A5E")
@@ -3658,7 +3694,7 @@ func _mouth() -> void:
 	var lc := PackedColorArray()
 	for i in line.size():
 		var t := float(i) / 14.0
-		lc.append(Color("#3A1C1B", 0.3 + 0.35 * sin(PI * t)))
+		lc.append(Color("#3A1C1B", 0.42 + 0.4 * sin(PI * t)))
 	if gap <= 0.5:
 		_r_polyline_colors(line, lc, lw, true)
 	var cl: float = float(f.get("corner_lines", 0.0))
