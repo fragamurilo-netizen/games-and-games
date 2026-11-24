@@ -207,7 +207,7 @@ static func bout_line(h: Dictionary) -> String:
 	var st: Array = h.get("st", [])
 	if st.size() < 8:
 		return ""
-	var parts: Array = ["%d de %d golpes" % [int(st[0]), int(st[1])]]
+	var parts: Array = ["%d de %d golpes" % [int(st[0]), int(st[1])] if int(st[1]) > 0 else "sem golpes"]
 	if int(st[3]) > 0:
 		parts.append("%d de %s" % [int(st[2]), Fmt.plural(int(st[3]), "queda", "quedas")])
 	if int(st[4]) > 0:

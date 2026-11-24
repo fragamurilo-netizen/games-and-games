@@ -108,6 +108,20 @@ func _run() -> void:
 	await _shot("a09_marcos")
 	await _scroll_to("Lutas no jogo", 20)
 	await _shot("a10_lutas")
+	# Quem mais juntou marcos com data no jogo (de qualquer equipe): o cartão com as medalhas.
+	var best: Fighter = null
+	var best_n := 0
+	for f: Fighter in w.fighters.values():
+		var n := f.marks.filter(func(mk: Array) -> bool: return int(mk[1]) >= 0).size()
+		if n > best_n and not f.retired:
+			best_n = n
+			best = f
+	if best != null:
+		UIManager.push("fighter", {"id": best.id, "tab": "carreira"})
+		await _scroll_to("Marcos da carreira")
+		await _shot("a20_marcos_datados")
+		UIManager.back()
+		await _frames(4)
 	UIManager.replace("fighter", {"id": star.id, "tab": "treino"})
 	await _shot("a11_camp")
 	await _scroll_to("Onde")

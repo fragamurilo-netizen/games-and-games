@@ -1,5 +1,72 @@
 # Noite de Luta — nota de passagem (24/11/2026)
 
+## Rodada 10 de 24/11/2026: atletas de verdade (APK 0.3.0)
+
+Primeira etapa da lista do dono rumo à 1.0. Seis coisas, todas ligadas à simulação e às telas, nos
+dois papéis. O motor da luta não mudou (`fight_soak --n=100` dá os mesmos totais).
+
+- **Moral e humor** (`scripts/systems/morale.gd`, `Fighter.morale` 0 a 100, `mood_log`). A moral
+  anda 7% por semana na direção de um alvo (`Morale.target`) feito de motivos com texto
+  (`Morale.factors`: sequência, último resultado, luta marcada, tempo parado, ranking, qualidade
+  da academia, contrato, lesão). Resultado de luta dá um tranco na hora (`after_fight`), pesado
+  pelo jeito do lutador (frio sente menos, nervoso mais). Efeitos: treino de 0,88 a 1,10
+  (`train_k`), coração e QI na luta (`fight_mods`), renovação (`renew_mod`); infeliz por muito
+  tempo avisa e pode ir embora. **Conversa** (`TalkSheet`, a cada 4 semanas): elogiar, cobrar,
+  prometer luta ou dar folga; cada traço reage de um jeito (`Morale.talk`). Cartão "Moral" na
+  ficha, etiqueta ao lado do nome na Equipe, seção "Pedem atenção" no Início.
+- **Potencial escondido e olheiro** (`scripts/systems/scouting.gd`, `Fighter.known` 0 a 1,
+  `GameWorld.scouting`). O teto nunca aparece como número: `Scouting.estimate` devolve uma faixa
+  (centro com erro fixo por lutador, largura pelo que falta conhecer) que vira estrelas com a
+  parte duvidosa apagada (`FightKit.potential_stars`) e frases (`report_lines`). O conhecimento
+  vem do olheiro contratado (até 40% de todo mundo), de mandar observar (2 a 4 semanas, custa a
+  viagem, fecha até o limite do olheiro, no máximo 2 ao mesmo tempo) e da casa (quem treina na
+  equipe é conhecido um pouco mais por semana). Todo mês o olheiro indica 1 ou 2 nomes livres
+  (`month`, seção "Indicações do olheiro" no Mercado). O presidente tem o departamento da
+  organização (qualidade pela reputação) e não recebe indicações.
+- **Campo de treino** (`scripts/systems/camp.gd`, `Fighter.camp`). Vale nas 8 semanas antes da
+  luta marcada: foco (estudar o adversário, afiar o ponto forte, fôlego, corte de peso), onde
+  (em casa ou fora, 2% da bolsa por semana) e sparring contratado (1,2% da bolsa por semana, 20%
+  mais forma, 0,6% de risco de corte por semana). Junta pontos de forma (`week_gain`, até 100) e
+  na pesagem vira ajuste de atributo (`mods_for`) ou alívio do corte de peso (`cut_relief`).
+  Durante o camp o treino normal rende 75%. As outras equipes fazem o camp sozinhas
+  (`auto_points`, sorteio fixo pela luta). Aparece na aba Treino, na proposta ("Tempo de camp"),
+  no plano de luta (cartão "Camp" dos dois) e no Início ("camp 42%").
+- **Estatísticas de carreira por luta** (`career_stats.gd`): cada luta do histórico guarda os
+  números dele (`h["st"]`: golpes certos e tentados, quedas, tentativas de finalização,
+  knockdowns) e o perfil mostra 11 medidas contra a média da categoria (verde ou vermelho quando
+  a diferença passa de 10%).
+- **Gráfico de evolução** (`scripts/ui/components/evolution_chart.gd`): nível pela idade, lutas do
+  jogo em cima da linha (vitória ponto cheio, derrota anel, cinturão losango), faixa do teto que
+  o olheiro enxerga e idade do auge. O trecho de antes do jogo é reconstruído pela idade e vem
+  apagado. A curva só é guardada para os lutadores do jogador, os seguidos e os perfis já
+  abertos (`sample_all`); os outros são reconstruídos quando o perfil abre.
+- **Marcos de carreira** (`CareerStats.check_marks`, `weekly_marks`, `Fighter.marks` com a
+  semana): vitórias, lutas, nocautes, finalizações, sequências, estreia, primeira luta principal,
+  disputa e cinturão, defesas, ranking. Viram notícia (chapéu "marco"), linha dourada no
+  resultado da luta e cartão no perfil com data e "A seguir". O que veio de antes do jogo entra
+  sem data, de uma vez (`ensure_all_marks`, na criação do mundo e ao carregar um save).
+- **Save**: campos novos em `Fighter.to_dict` (`mor`, `mlog`, `talk`, `prom`, `push`, `known`,
+  `camp`, só quando diferentes do padrão), números da carreira como lista de inteiros na ordem de
+  `Fighter.STAT_KEYS`, marcos antigos numa cadeia só (`mk0`) e `GameWorld.scouting`. Saves da
+  0.2.3 abrem nos dois papéis (`tools/save_dump.gd` gera, `tools/save_migrate.gd` abre, anda 20
+  semanas e salva de novo). O save de 3 anos ficou em 5,6 MB (era 5,3 MB).
+- **Acertos de tela na passagem**: pesagem mostra o limite com a tolerância de meio quilo e "no
+  peso"; placar de luta simulada mostra onde ela acabou (antes ficava em R1 5:00 com as barras
+  cheias); linhas do Início e da Equipe encurtadas para não cortar em celular estreito.
+- **Ferramentas novas**: `tools/athletes_shots_runner.gd` (20 telas da etapa, pelo
+  `design_shots.gd -- --runner=athletes_shots_runner`), `tools/athletes_probe.gd` (moral, camp e
+  olheiro em números), `tools/save_dump.gd` e `tools/save_migrate.gd`.
+- **Verificado**: `check_scripts` 117 scripts, 0 erros; `fight_soak --n=100` igual; `world_sim
+  --weeks=156` nos dois papéis sem erro (58 s contra 50 s antes); `design_shots` nos dois papéis, `look_shots` e o passeio da etapa sem erro; saves da
+  0.2.3 migrados nos dois papéis. **Não testado em celular de verdade.**
+- **Ficou para depois**: a folha de salários do staff completo afunda o caixa da academia em um
+  ano e o save cresce perto de 1 MB por ano (os dois para a etapa 0.9); lutas de saves antigos
+  não têm os números por luta; o equilíbrio fino de moral e camp só foi conferido por sonda
+  (`athletes_probe`: moral média perto de 60, camps de 41 a 100 pontos), não jogando.
+- **Próximo**: 0.4 (montagem dos eventos: card com principal, co-principal e preliminares, sede
+  e arena, ingresso, TV, termômetro de hype, rivalidades, revanches, cinturão interino e, no
+  papel de empresário, negociar bolsa e luta).
+
 ## Rodada 9 de 24/11/2026: retratos mais bonitos, realistas e variados (APK 0.2.3)
 
 Terceira entrega da ordem combinada na rodada 7. Arquivos: `scripts/ui/components/portrait_view.gd`,
@@ -383,7 +450,7 @@ Cinturões com linhagem.
 ## APK de teste
 
 - APKs novos (0.1.2+) ficam nos arquivos do projeto (`noite-de-luta/`), assinados com a chave de
-  teste guardada em `chave-teste/` lá; o atual é o 0.2.3.
+  teste guardada em `chave-teste/` lá; o atual é o 0.3.0.
 - `releases/NoiteDeLuta-0.1.1.apk` (release, arm64, Android 7+; instala por cima da 0.1.0). Assinado com uma chave de teste
   local: um APK novo assinado com outra chave pede desinstalar o antigo antes.
 - Para gerar de novo: modelos de exportação do Godot 4.7.2 (só `android_*.apk` e `version.txt` em
@@ -418,4 +485,8 @@ xvfb-run -a -s "-screen 0 1700x1000x24" godot --path . --resolution 1600x900 --s
 xvfb-run -a -s "-screen 0 1900x1500x24" godot --path . --resolution 1860x1080 --script res://tools/roster_sheet.gd -- --out=/tmp/elenco.png --fem --n=20 --cols=5 --size=240
 xvfb-run -a -s "-screen 0 1700x1500x24" godot --path . --resolution 1640x1440 --script res://tools/fem_lab.gd -- --out=/tmp/lab.png --key=bu --vals=0.1,0.5,0.9 [--body] [--look=mk:2,lp:5]
 xvfb-run -a -s "-screen 0 1900x1900x24" godot --path . --resolution 780x1688 --script res://tools/look_shots.gd -- --out=/tmp/editor
+xvfb-run -a -s "-screen 0 1900x1900x24" godot --path . --resolution 780x1688 --script res://tools/design_shots.gd -- --runner=athletes_shots_runner --out=/tmp/atletas
+godot --headless --path . --script res://tools/athletes_probe.gd -- --weeks=104
+godot --headless --path . --script res://tools/save_dump.gd -- --out=/tmp/save.json --weeks=60 [--role=presidente]
+godot --headless --path . --script res://tools/save_migrate.gd -- --in=/tmp/save.json [--weeks=20]
 ```

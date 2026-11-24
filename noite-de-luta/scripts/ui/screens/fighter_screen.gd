@@ -199,12 +199,13 @@ func _potential_card(w: GameWorld, f: Fighter) -> Control:
 		return UIKit.card_panel(card)
 	var job := Scouting.job_of(w, f)
 	if not job.is_empty():
-		card.add_child(UIKit.colored("Olheiro observando: relatório em %s." % Fmt.plural(int(job["left"]), "semana", "semanas"), UIColors.ACCENT, "Small", true))
-		card.add_child(UIKit.bar(float(int(job["total"]) - int(job["left"])), float(job["total"]), UIColors.ACCENT, 6))
+		card.add_child(UIKit.colored("Olheiro observando: relatório em %s." % Fmt.plural(int(job["left"]), "semana", "semanas"), UIColors.GOLD, "Small", true))
+		card.add_child(UIKit.bar(float(int(job["total"]) - int(job["left"])), float(job["total"]), UIColors.GOLD, 6))
 		return UIKit.card_panel(card)
 	var why := Scouting.block_reason(w, f)
 	if why == "":
-		card.add_child(UIKit.button("Mandar observar · %s · %s" % [Fmt.money(Scouting.cost_for(w, f)), Fmt.plural(Scouting.weeks_for(w, f), "semana", "semanas")], "GhostButton", func():
+		card.add_child(UIKit.label("A viagem do olheiro custa %s e o relatório chega em %s." % [Fmt.money(Scouting.cost_for(w, f)), Fmt.plural(Scouting.weeks_for(w, f), "semana", "semanas")], "Muted", true))
+		card.add_child(UIKit.button("Mandar observar", "GhostButton", func():
 			var err := Scouting.assign(w, f)
 			if err != "":
 				UIManager.toast(err, UIColors.RED)
@@ -295,15 +296,13 @@ func _carreira(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 		var how := String(hst.get("detail", ""))
 		if String(hst["method"]) != "DEC" and String(hst["method"]) != "EMP":
 			how += ", %dº round" % int(hst.get("round", 1))
-		var sub := UIKit.label("%s · %s · %s" % [how, String(hst.get("event", "")), GameWorld.fight_date_text(int(hst["week"]), true)], "Small")
-		sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		# Quebra em duas linhas quando não cabe: aqui o detalhe vale mais do que a altura da linha.
+		var sub := UIKit.label("%s · %s · %s" % [how, String(hst.get("event", "")), GameWorld.fight_date_text(int(hst["week"]), true).trim_prefix("sáb, ")], "Small", true)
 		v.add_child(sub)
 		# Os números dele naquela luta.
 		var nums := CareerStats.bout_line(hst)
 		if nums != "":
-			var nl := UIKit.label(nums, "Caps")
-			nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-			v.add_child(nl)
+			v.add_child(UIKit.label(nums, "Caps", true))
 		h.add_child(v)
 		var oid := int(hst["opp"])
 		c.add_child(UIKit.tap_row(h, func(): if w.fighter(oid) != null: UIManager.push("fighter", {"id": oid})))
@@ -378,7 +377,7 @@ func _numbers_card(w: GameWorld, f: Fighter) -> Control:
 		["slpm", "Golpes certos por minuto", "dec", 1], ["acc", "Precisão dos golpes", "pct", 1],
 		["sapm", "Golpes sofridos por minuto", "dec", -1], ["def", "Defesa de golpes", "pct", 1],
 		["td15", "Quedas a cada 15 min", "dec", 1], ["tdacc", "Precisão de quedas", "pct", 1],
-		["tddef", "Defesa de quedas", "pct", 1], ["sub15", "Finalizações tentadas a cada 15 min", "dec", 1],
+		["tddef", "Defesa de quedas", "pct", 1], ["sub15", "Finalizações tentadas/15 min", "dec", 1],
 		["kd", "Knockdowns por luta", "dec", 1], ["ctrl15", "Controle a cada 15 min", "time", 1],
 		["avg_t", "Tempo médio de luta", "time", 0],
 	]
@@ -439,6 +438,8 @@ func _marks_card(w: GameWorld, f: Fighter) -> Control:
 func _treino(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 	if Camp.bout_of(w, f) != null:
 		c.add_child(_camp_card(w, f))
+	else:
+		c.add_child(UIKit.label("Sem luta marcada. Quando houver, o camp para a luta aparece aqui: foco, onde treinar e sparring.", "Small", true))
 	c.add_child(UIKit.section_header("Foco do treino"))
 	var items: Array = []
 	for k: String in Development.FOCUS:

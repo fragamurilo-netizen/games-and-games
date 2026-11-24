@@ -85,7 +85,7 @@ static func status_text(w: GameWorld, f: Fighter) -> Array:
 
 ## Linha de lista: retrato, nome e segunda linha; à direita o ranking e o nível.
 ## `right_node` troca o ranking por outra coisa (as estrelas do olheiro, no mercado).
-static func fighter_row(w: GameWorld, f: Fighter, cb: Callable, line2: String = "", line2_color: Color = Color(0, 0, 0, 0), right: String = "", right_node: Control = null) -> PanelContainer:
+static func fighter_row(w: GameWorld, f: Fighter, cb: Callable, line2: String = "", line2_color: Color = Color(0, 0, 0, 0), right: String = "", right_node: Control = null, tag: String = "", tag_color: Color = Color(0, 0, 0, 0)) -> PanelContainer:
 	var h := UIKit.hbox(UITokens.S2)
 	h.add_child(portrait(w, f, 56))
 	var tv := UIKit.vbox(0)
@@ -97,6 +97,12 @@ static func fighter_row(w: GameWorld, f: Fighter, cb: Callable, line2: String = 
 	n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(n)
+	# Etiqueta curta ao lado do nome (o humor, por exemplo): não disputa espaço com a linha de baixo.
+	if tag != "":
+		var tg := UIKit.label(tag, "Caps")
+		if tag_color.a > 0.0:
+			tg.add_theme_color_override(&"font_color", UIColors.ink(tag_color))
+		top.add_child(tg)
 	tv.add_child(top)
 	var sub := UIKit.label(line2 if line2 != "" else "%s · %s" % [Matchmaker.division_short(f.division), f.record_text()], "Small")
 	sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS

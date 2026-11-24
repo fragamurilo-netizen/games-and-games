@@ -37,13 +37,16 @@ func refresh() -> void:
 	var wc := UIKit.card("Card", UITokens.S1)
 	wc.add_child(UIKit.label("Pesagem", "Section"))
 	var limit := float(DataDB.division(b.division).get("limit_kg", 70.0))
+	# Fora de disputa de cinturão vale meio quilo de tolerância (a mesma conta de Career.weigh_in).
+	if b.title:
+		wc.add_child(UIKit.label("Limite de %s. Disputa de cinturão não tem tolerância." % Fmt.kg(limit), "Muted", true))
+	else:
+		wc.add_child(UIKit.label("Limite de %s, com a tolerância de meio quilo." % Fmt.kg(limit + 0.5), "Muted", true))
 	for i in 2:
 		var f := w.fighter(b.a if i == 0 else b.b)
 		var missed: bool = (wi["missed"] as Array).has(f.id)
 		var cut := float((wi["cut"] as Array)[i])
-		var txt := "%s (limite %s)" % [Fmt.kg(float((wi["kg"] as Array)[i])), Fmt.kg(limit)]
-		if missed:
-			txt += " · errou o peso, perde 20% da bolsa"
+		var txt := "%s · %s" % [Fmt.kg(float((wi["kg"] as Array)[i])), "errou o peso, perde 20% da bolsa" if missed else "no peso"]
 		wc.add_child(UIKit.kv(f.short_name(), txt, UIColors.RED if missed else (UIColors.ORANGE if cut > 0.11 else UIColors.TEXT)))
 	var my_cut := float((wi["cut"] as Array)[_side])
 	if my_cut > 0.11:

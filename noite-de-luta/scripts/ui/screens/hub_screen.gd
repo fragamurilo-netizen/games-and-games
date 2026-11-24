@@ -55,12 +55,15 @@ func refresh() -> void:
 			var f: Fighter = it[1]
 			var o := w.fighter(b.other(f.id))
 			var camp := ""
+			# Curto de propósito: a linha leva adversário, prazo e camp num celular estreito.
+			var left := b.week - w.week
+			var when := "sábado" if left <= 0 else "em %d sem." % left
 			if Camp.in_window(w, f) or float(f.camp.get("pts", 0.0)) > 0.0:
 				camp = " · camp %d%%" % int(round(float(Camp.ensure(w, f).get("pts", 0.0))))
 			elif Camp.starts_in(w, f) > 0:
 				camp = " · camp em %d sem." % Camp.starts_in(w, f)
 			c.add_child(FightKit.fighter_row(w, f, func(): UIManager.push("fighter", {"id": f.id, "tab": "treino"}),
-				"contra %s · %s%s" % [o.short_name(), w.weeks_from_now(b.week), camp], UIColors.ACCENT if b.title else Color(0, 0, 0, 0), "Cinturão" if b.title else ""))
+				"contra %s · %s%s" % [o.short_name(), when, camp], UIColors.ACCENT if b.title else Color(0, 0, 0, 0), "Cinturão" if b.title else ""))
 	# Equipe sem luta: lembrete do que dá para fazer.
 	var idle := mine.filter(func(f: Fighter) -> bool: return f.bout_id < 0 and f.available() and Matchmaker.ready_to_book(w, f, 0))
 	if not idle.is_empty() and w.offers.is_empty():

@@ -22,6 +22,7 @@ var _clock_lbl: Label
 var _round_lbl: Label
 var _bars: Array = [] # [ProgressBar fôlego, ProgressBar dano] por lado
 var _pos_lbl: Label
+var _bars_box: HBoxContainer
 var _spectator := false
 ## Luta animada (lances do motor encenados) e onde ela está na lista de lances.
 var _stage: FightStage2D
@@ -51,6 +52,7 @@ func _ready() -> void:
 		_build_stage(w)
 	if _b.status == "feita":
 		_state = "done"
+		_board_done()
 		_show_result()
 		return
 	_plan = (params.get("plan", {}) as Dictionary).duplicate()
@@ -107,6 +109,7 @@ func _build_board(w: GameWorld) -> void:
 			top.add_child(mid)
 	v.add_child(top)
 	var bars := UIKit.hbox(UITokens.S3)
+	_bars_box = bars
 	for i in 2:
 		var bv := UIKit.vbox(3)
 		bv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -131,6 +134,17 @@ func _build_board(w: GameWorld) -> void:
 	var holder := UIKit.margin(_board, UITokens.GUTTER_DENSE, UITokens.S2, UITokens.GUTTER_DENSE, 0)
 	body.add_child(holder)
 	body.move_child(holder, 0)
+
+
+## Luta que já acabou sem passar na tela (simulada): o placar mostra onde ela terminou, sem as
+## barras de fôlego e dano de uma luta que ninguém viu.
+func _board_done() -> void:
+	var r := _b.result
+	var finish := not (String(r.get("method", "")) in ["DEC", "EMP"])
+	_round_lbl.text = "Fim · R%d" % (int(r.get("round", 1)) if finish else _b.rounds)
+	_clock_lbl.text = Fmt.clock(maxf(0.0, FightEngine.ROUND_S - float(r.get("time", 0.0)))) if finish else "0:00"
+	_bars_box.visible = false
+	_pos_lbl.text = "Luta encerrada"
 
 
 func _build_stage(w: GameWorld) -> void:
