@@ -101,7 +101,7 @@ func refresh() -> void:
 		Career.resolve(w, b, res, e)
 		FightScreen.keep_log(b, e)
 		GameManager.save_now()
-		UIManager.replace("fight", {"bout": b.id}))
+		UIManager.replace("fight", {"bout": b.id, "fresh": true}))
 	sim.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sim.size_flags_stretch_ratio = 0.6
 	row.add_child(sim)

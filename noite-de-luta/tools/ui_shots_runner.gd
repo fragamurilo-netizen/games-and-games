@@ -120,6 +120,10 @@ func _manager() -> void:
 	await _shot("u05_caixa_tudo")
 	UIManager.back()
 	await _wait(0.5)
+	_press("Avançar semana")
+	await _wait(0.3)
+	await _shot("u06_semana_virou")
+	await _wait(1.6)
 	print("[fim]")
 	get_tree().quit()
 

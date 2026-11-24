@@ -51,8 +51,19 @@ static func identity(w: GameWorld, t: Team, sub: String, rep_caption: String, ti
 	rep.add_child(UIKit.label(rc, "Caps"))
 	v.add_child(rep)
 	h.add_child(v)
-	card.add_child(h)
-	card.add_child(_cash(t, intro))
+	if UILayout.is_wide():
+		# Tela larga (celular deitado, tablet): a casa e o caixa dividem a mesma linha.
+		var top := UIKit.hbox(UITokens.S4)
+		h.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		h.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		top.add_child(h)
+		var cash := _cash(t, intro)
+		cash.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		top.add_child(cash)
+		card.add_child(top)
+	else:
+		card.add_child(h)
+		card.add_child(_cash(t, intro))
 	var stats := UIKit.hbox(0)
 	for it: Array in tiles:
 		stats.add_child(UIKit.stat_tile(String(it[0]), String(it[1]), it[2] if it.size() > 2 else Color(0, 0, 0, 0)))
@@ -77,9 +88,13 @@ static func _cash(t: Team, intro: bool) -> Control:
 	if n >= 2:
 		var weeks := mini(4, n - 1)
 		var ref := float(series[n - 1 - weeks]) * 1000.0
-		var d := t.balance - ref
-		var txt := "%s%s em %s" % ["+" if d >= 0.0 else "−", Fmt.money(absf(d)), Fmt.plural(weeks, "semana", "semanas")]
-		v.add_child(UIKit.colored(txt, UIColors.GREEN if d >= 0.0 else UIColors.RED, "Caps"))
+		# A série guarda milhares: a diferença também é em milhares, sem unidades de enfeite.
+		var d := float(now_k - int(series[n - 1 - weeks])) * 1000.0
+		if is_zero_approx(d):
+			v.add_child(UIKit.label("Estável em %s" % Fmt.plural(weeks, "semana", "semanas"), "Caps"))
+		else:
+			var txt := "%s%s em %s" % ["+" if d >= 0.0 else "−", Fmt.money(absf(d)), Fmt.plural(weeks, "semana", "semanas")]
+			v.add_child(UIKit.colored(txt, UIColors.GREEN if d >= 0.0 else UIColors.RED, "Caps"))
 		if intro:
 			Anim.count(val, ref, t.balance, func(x: float) -> String: return Fmt.money(x))
 	else:
@@ -244,3 +259,41 @@ static func _news_row(w: GameWorld, n: Dictionary, hats: Dictionary) -> PanelCon
 		var fid := int(ids[0])
 		cb = func(): UIManager.push("fighter", {"id": fid})
 	return UIKit.tap_row(h, cb)
+
+
+# --- Virada da semana ---------------------------------------------------------------------
+
+## As pendências abertas agora (para comparar depois de avançar a semana).
+static func open_keys(w: GameWorld) -> Array:
+	var out: Array = []
+	for m: Dictionary in Inbox.pending(w):
+		out.append(String(m.get("key", "")))
+	return out
+
+
+## A semana virou: o som, a faixa com a data nova e o que mudou (caixa e novidades na caixa de
+## entrada). `cash_before` e `open_before` são de antes de avançar.
+static func week_turn(w: GameWorld, cash_before: float, open_before: Array) -> void:
+	Sfx.play("week", -6.0)
+	var t := w.user_team()
+	var lines: Array = []
+	var d := (t.balance - cash_before) if t != null else 0.0
+	if absf(d) >= 1.0:
+		lines.append(["%s%s no caixa" % ["+" if d >= 0.0 else "−", Fmt.money(absf(d))], UIColors.GREEN if d >= 0.0 else UIColors.RED])
+	var fresh := 0
+	for m: Dictionary in Inbox.pending(w):
+		if not open_before.has(String(m.get("key", ""))):
+			fresh += 1
+	if fresh > 0:
+		lines.append([Fmt.plural(fresh, "novidade para resolver", "novidades para resolver"), UIColors.GOLD])
+		later(0.5, "mail", -9.0)
+	UIManager.banner("Semana de " + GameWorld.week_text(w.week), lines)
+
+
+## Um som daqui a pouco (para não empilhar tudo no mesmo instante).
+static func later(delay: float, sound: String, db: float = 0.0) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree == null:
+		return
+	tree.create_timer(delay).timeout.connect(func(): Sfx.play(sound, db))
+

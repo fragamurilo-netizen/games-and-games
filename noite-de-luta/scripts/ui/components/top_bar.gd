@@ -12,6 +12,8 @@ var subtitle_lbl: Label
 var money_lbl: Label
 var mail_btn: Button
 var _mail_badge: CountBadge
+var _cash := 0.0
+var _cash_team := -1
 
 const TITLE_MAX := 31
 const TITLE_MIN := 24
@@ -89,8 +91,22 @@ func set_state(title: String, subtitle: String, show_back: bool, team: Team) -> 
 	money_lbl.visible = team != null
 	if team != null:
 		badge.team = team
-		money_lbl.text = Fmt.money(team.balance)
-		money_lbl.add_theme_color_override(&"font_color", UIColors.TEXT if team.balance >= 0 else UIColors.RED)
+		var base := UIColors.TEXT if team.balance >= 0 else UIColors.RED
+		money_lbl.add_theme_color_override(&"font_color", base)
+		# O saldo mudou com a barra à vista (mesma equipe): o número conta até o valor novo e
+		# pisca verde ou vermelho. Entrar dinheiro tem som; sair, não.
+		if _cash_team == team.id and absf(team.balance - _cash) >= 1.0 and is_visible_in_tree() and Anim.on():
+			var up := team.balance > _cash
+			Anim.count(money_lbl, _cash, team.balance, func(v: float) -> String: return Fmt.money(v), 0.6)
+			Anim.flash(money_lbl, UIColors.GREEN if up else UIColors.RED, base, 1.0)
+			if up:
+				DashKit.later(0.25, "cash", -11.0)
+		else:
+			money_lbl.text = Fmt.money(team.balance)
+		_cash = team.balance
+		_cash_team = team.id
+	else:
+		_cash_team = -1
 
 
 ## Título longo no celular: a letra encolhe até 24 px antes de cortar com reticências.
@@ -108,6 +124,9 @@ func _fit_title() -> void:
 ## Envelope da caixa de entrada, com o número de mensagens não lidas.
 func set_mail(shown: bool, count: int) -> void:
 	mail_btn.visible = shown
+	# Chegou pendência nova com o envelope à vista: ele dá um pulso.
+	if shown and count > _mail_badge.count and mail_btn.is_visible_in_tree():
+		Anim.pulse(mail_btn, 1.18, 0.4)
 	_mail_badge.count = count
 
 

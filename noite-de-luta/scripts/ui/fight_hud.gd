@@ -303,8 +303,10 @@ class Pips:
 ## acontecer ficam com um traço. Devolve o VBox; as linhas ficam em meta "rows" para revelar.
 static func cards_table(names: Array, per_row: Array, rounds: int, pending_round: int = -1) -> VBoxContainer:
 	var v := UIKit.vbox(2)
-	var cw := 62 if rounds <= 3 else 50
-	var tw := 82 if rounds <= 3 else 72
+	# Cinco rounds: células mais estreitas e letra menor, para caber na coluna do celular deitado.
+	var tight := rounds > 3
+	var cw := 50 if tight else 62
+	var tw := 70 if tight else 82
 	var head := UIKit.hbox(0)
 	var hn := UIKit.label("", "Caps")
 	hn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -326,7 +328,7 @@ static func cards_table(names: Array, per_row: Array, rounds: int, pending_round
 		p.theme_type_variation = "CardFlat"
 		var row := UIKit.hbox(0)
 		row.custom_minimum_size.y = 36
-		var nm := UIKit.label(String(names[j]), "Small")
+		var nm := UIKit.label(String(names[j]), "Meta" if tight else "Small")
 		nm.add_theme_color_override(&"font_color", UIColors.TEXT)
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -337,6 +339,8 @@ static func cards_table(names: Array, per_row: Array, rounds: int, pending_round
 			cell.custom_minimum_size.x = cw
 			cell.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			cell.add_theme_font_override(&"font", DataTable.tabular_font())
+			if tight:
+				cell.add_theme_font_size_override(&"font_size", UITokens.F_CAPTION)
 			if r < cards.size():
 				var c: Array = cards[r]
 				var ca := int(c[0])

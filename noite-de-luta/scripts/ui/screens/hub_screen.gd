@@ -216,8 +216,10 @@ func _advance() -> void:
 	var t := w.user_team()
 	if t.balance < 0.0 and mine == 0:
 		UIManager.toast("Caixa negativo e ninguém para lutar. Corte custos na Academia.", UIColors.RED)
+	var cash := t.balance
+	var keys := DashKit.open_keys(w)
 	GameManager.advance_week()
-	Sfx.play("tab", -4.0)
+	DashKit.week_turn(world(), cash, keys)
 	intro_pending = true
 	refresh()
 	play_intro()

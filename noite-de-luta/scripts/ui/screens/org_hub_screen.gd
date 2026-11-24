@@ -155,8 +155,11 @@ func _champions_strip(w: GameWorld) -> Control:
 
 
 func _advance() -> void:
+	var w := world()
+	var cash := w.user_team().balance
+	var keys := DashKit.open_keys(w)
 	GameManager.advance_week()
-	Sfx.play("tab", -4.0)
+	DashKit.week_turn(world(), cash, keys)
 	intro_pending = true
 	refresh()
 	play_intro()

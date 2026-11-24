@@ -90,7 +90,8 @@ func _ready() -> void:
 	if _b.status == "feita":
 		_state = "done"
 		_board_done()
-		_show_result()
+		# `fresh`: a luta acabou de ser simulada a pedido (o resultado ainda é novidade).
+		_show_result(bool(params.get("fresh", false)))
 		return
 	_plan = (params.get("plan", {}) as Dictionary).duplicate()
 	_e = Career.engine_for(w, _b, true)
@@ -152,7 +153,7 @@ func _layout() -> void:
 		else:
 			_fit_content_width()
 	if _side_col != null:
-		_side_col.custom_minimum_size.x = clampf(UILayout.viewport.x * 0.46, 440.0, 640.0)
+		_side_col.custom_minimum_size.x = clampf(UILayout.viewport.x * 0.5, 440.0, 680.0)
 	if _stage_holder != null:
 		_stage_holder.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_stage_holder.size_flags_vertical = Control.SIZE_EXPAND_FILL if _land else Control.SIZE_FILL
@@ -342,7 +343,8 @@ func _toggle_view() -> void:
 	AppSettings.save_settings()
 	if _stage != null:
 		_mount_view()
-	_controls()
+	if _state == "round":
+		_controls()
 
 
 func _update_board(ev: Dictionary) -> void:
@@ -746,14 +748,16 @@ func _show_result(fresh: bool = false) -> void:
 	scroll().scroll_vertical = 0
 	var done := func():
 		_reveal_nodes = []
-		if me == null:
-			Sfx.play("applause", -6.0)
-		elif wid == me.id:
-			Sfx.play("win", -4.0)
-		elif wid >= 0:
-			Sfx.play("lose", -6.0)
-		Anim.pulse(hl, 1.06, 0.4)
-		_show_headline(result_panel)
+		# Som e destaque só na hora em que a luta acaba; rever uma luta antiga é em silêncio.
+		if fresh:
+			if me == null:
+				Sfx.play("applause", -6.0)
+			elif wid == me.id:
+				Sfx.play("win", -4.0)
+			elif wid >= 0:
+				Sfx.play("lose", -6.0)
+			Anim.pulse(hl, 1.06, 0.4)
+			_show_headline(result_panel)
 		var foot := footer()
 		UIKit.clear(foot)
 		foot.add_child(UIKit.button("Continuar", "PrimaryButton", func():

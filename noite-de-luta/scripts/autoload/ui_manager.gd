@@ -166,7 +166,9 @@ func _hide_top() -> void:
 	var cur := current()
 	if cur != null:
 		_remember_scroll(cur)
+		_stop_nav_tween(cur)
 		cur.visible = false
+		cur.position.x = 0.0
 		cur.on_hide()
 		# Telas de outras áreas ficam guardadas, paradas.
 		cur.process_mode = Node.PROCESS_MODE_DISABLED
@@ -185,8 +187,8 @@ func push(name: String, params: Dictionary = {}) -> void:
 	var cur := current()
 	if cur != null:
 		_remember_scroll(cur)
-		cur.visible = false
 		cur.on_hide()
+		_animate_out(cur, -32.0, false)
 	_show(_instance(name, params), 56.0)
 
 
@@ -207,7 +209,11 @@ func back() -> bool:
 	if stack.size() <= 1:
 		return false
 	var cur: BaseScreen = stack.pop_back()
-	cur.queue_free()
+	cur.on_hide()
+	# A tela que sai vai para baixo da que volta: o toque já é da tela de trás.
+	if cur.get_parent() != null:
+		cur.get_parent().move_child(cur, 0)
+	_animate_out(cur, 40.0, true)
 	var prev := current()
 	prev.visible = true
 	prev.process_mode = Node.PROCESS_MODE_INHERIT
@@ -230,14 +236,47 @@ func _show(screen: BaseScreen, from_x: float) -> void:
 ## Transição curta: a tela entra deslizando do lado de onde veio (avançar = da direita,
 ## voltar = da esquerda) enquanto aparece. Trocar de aba é só um fade rápido.
 func _animate_in(screen: Control, from_x: float) -> void:
+	_stop_nav_tween(screen)
 	screen.modulate.a = 0.0
 	if AppSettings.reduce_motion:
 		from_x = 0.0
 	screen.position.x = from_x
 	var tw := screen.create_tween().set_parallel()
+	screen.set_meta(&"nav_tw", tw)
 	tw.tween_property(screen, "modulate:a", 1.0, 0.16 if from_x != 0.0 else 0.12)
 	if from_x != 0.0:
 		tw.tween_property(screen, "position:x", 0.0, 0.22).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+
+## A tela que sai some deslizando para o lado contrário de quem entra. Com `free_after` ela é
+## descartada no fim (voltar); sem, fica guardada e escondida (empilhar outra por cima).
+func _animate_out(screen: Control, to_x: float, free_after: bool) -> void:
+	_stop_nav_tween(screen)
+	if AppSettings.reduce_motion or not screen.is_inside_tree() or DisplayServer.get_name() == "headless":
+		if free_after:
+			screen.queue_free()
+		else:
+			screen.visible = false
+		return
+	var tw := screen.create_tween().set_parallel()
+	screen.set_meta(&"nav_tw", tw)
+	tw.tween_property(screen, "modulate:a", 0.0, 0.12)
+	tw.tween_property(screen, "position:x", to_x, 0.16).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.chain().tween_callback(func():
+		if free_after:
+			screen.queue_free()
+		else:
+			screen.visible = false
+			screen.position.x = 0.0
+			screen.modulate.a = 1.0)
+
+
+func _stop_nav_tween(screen: Control) -> void:
+	if screen.has_meta(&"nav_tw"):
+		var old: Tween = screen.get_meta(&"nav_tw")
+		if old != null and old.is_valid():
+			old.kill()
+		screen.remove_meta(&"nav_tw")
 
 
 func _apply_chrome(screen: BaseScreen) -> void:
@@ -351,6 +390,8 @@ func show_modal(content: Control, as_sheet: bool = false, dismissable: bool = tr
 			if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
 				close_modal())
 	_modals.append(dim)
+	if as_sheet:
+		Sfx.play("sheet", -9.0)
 	# Entrada: o fundo escurece e o painel sobe um pouco (a folha inferior vem de baixo).
 	dim.modulate.a = 0.0
 	holder.position.y = 90.0 if as_sheet else 24.0
@@ -445,7 +486,21 @@ func close_modal() -> void:
 	if _modals.is_empty():
 		return
 	var m: Control = _modals.pop_back()
-	m.queue_free()
+	if AppSettings.reduce_motion or not m.is_inside_tree() or DisplayServer.get_name() == "headless":
+		m.queue_free()
+		return
+	# Saída: o painel desce um pouco enquanto o fundo clareia. Um escudo por cima engole os
+	# toques até o modal sumir (um segundo toque no mesmo botão não repete a ação).
+	var shield := Control.new()
+	shield.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	shield.mouse_filter = Control.MOUSE_FILTER_STOP
+	m.add_child(shield)
+	var holder := m.get_child(0) as Control
+	var tw := m.create_tween().set_parallel()
+	tw.tween_property(m, "modulate:a", 0.0, 0.12)
+	if holder != null:
+		tw.tween_property(holder, "position:y", holder.position.y + 28.0, 0.12).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	tw.chain().tween_callback(m.queue_free)
 
 
 func close_all_modals() -> void:
@@ -526,9 +581,61 @@ func toast(text: String, color: Color = UIColors.TEXT) -> void:
 	p.modulate.a = 0.0
 	var tw := p.create_tween()
 	tw.tween_property(p, "modulate:a", 1.0, 0.15)
+	if not AppSettings.reduce_motion:
+		# Chega assentando (o contêiner cuida da posição; a escala dá o movimento).
+		p.scale = Vector2(0.94, 0.94)
+		(func():
+			if is_instance_valid(p):
+				p.pivot_offset = p.size * 0.5).call_deferred()
+		tw.parallel().tween_property(p, "scale", Vector2.ONE, 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tw.tween_interval(2.4)
 	tw.tween_property(p, "modulate:a", 0.0, 0.3)
 	tw.tween_callback(p.queue_free)
+
+
+## Faixa que passa no meio da tela e some sozinha (a semana que começou, com o que mudou).
+## Não segura o toque: quem avança várias semanas seguidas não espera por ela.
+var _banner: Control
+
+
+func banner(title: String, lines: Array = []) -> void:
+	if main == null or AppSettings.reduce_motion or DisplayServer.get_name() == "headless":
+		return
+	if is_instance_valid(_banner):
+		_banner.queue_free()
+	var layer: Control = main.modal_host
+	var holder := CenterContainer.new()
+	holder.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var p := PanelContainer.new()
+	p.theme_type_variation = "Popover"
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var v := UIKit.vbox(4)
+	v.custom_minimum_size.x = 380
+	var t := UIKit.label(title, "Section")
+	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(t)
+	for ln: Array in lines:
+		var l := UIKit.label(String(ln[0]), "Small")
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		if ln.size() > 1 and (ln[1] as Color).a > 0.0:
+			l.add_theme_color_override(&"font_color", ln[1])
+		v.add_child(l)
+	p.add_child(v)
+	holder.add_child(p)
+	layer.add_child(holder)
+	_banner = holder
+	holder.modulate.a = 0.0
+	p.scale = Vector2(0.9, 0.9)
+	(func():
+		if is_instance_valid(p):
+			p.pivot_offset = p.size * 0.5).call_deferred()
+	var tw := holder.create_tween()
+	tw.tween_property(holder, "modulate:a", 1.0, 0.12)
+	tw.parallel().tween_property(p, "scale", Vector2.ONE, 0.24).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_interval(0.85)
+	tw.tween_property(holder, "modulate:a", 0.0, 0.25)
+	tw.tween_callback(holder.queue_free)
 
 
 var _toast_sfx_at := -10.0

@@ -1,5 +1,73 @@
 # Noite de Luta — nota de passagem (24/11/2026)
 
+## Rodada 12 de 24/11/2026: UI e HUD profissionais (APK 0.5.0)
+
+Terceira etapa da lista do dono rumo à 1.0. O motor da luta só ganhou dados para a tela (não
+gasta sorteio: `fight_soak --n=100` dá os mesmos totais).
+
+- **Caixa de entrada com ações** (`scripts/systems/inbox.gd`, `scripts/ui/inbox_kit.gd`, tela
+  "inbox"). `Inbox.scan(w)` roda no fim de `Career.advance_week` e ao abrir o Início ou a caixa:
+  calcula as condições vivas do papel (`_manager` ou `_president`), fecha a mensagem cuja chave
+  sumiu, atualiza título, texto e prioridade das que continuam e cria as novas. Mensagem:
+  `{id, wk, key, cat, from, t, x, f, act, arg, pri, pend, st, rd}`. Pendência (`pend`) pede
+  decisão e some sozinha quando a causa acaba; informação é notícia importada do mundo
+  (`_import_news`, sem repetir, lida sozinha depois de uma semana). Empresário: noite de luta,
+  proposta, equipe vazia, moral, contrato, camp, vaga de cinturão sinalizada, lutador parado,
+  caixa. Presidente: incidente da semana, noite, TV, card incompleto, sede, cinturão vago,
+  interino, unificação, caixa. `InboxKit.run` leva à tela da ação e `InboxKit.buttons` resolve
+  ali mesmo o que dá (aceitar ou recusar proposta, renovar por 5 lutas, completar o card,
+  conversar). O envelope da barra superior mostra quantas pendências estão abertas.
+- **Painel inicial novo** nos dois papéis (`hub_screen.gd`, `org_hub_screen.gd`, peças em
+  `scripts/ui/dash_kit.gd`): cartão da casa (selo, estrelas com "subindo" ou "caindo", caixa com
+  a diferença em 4 semanas e linha de tendência `Sparkline`, três números), a noite desta
+  semana ou a próxima luta com a contagem e o camp, "Para resolver" (as 4 pendências de maior
+  prioridade), agenda das próximas semanas, faixa da equipe (ou dos campeões) que rola para o
+  lado e as notícias. `Team.cash_log` e `rep_log` guardam 26 semanas (`Team.log_week`). Em tela
+  larga a casa e o caixa dividem a mesma linha.
+- **HUD da luta** (`fight_screen.gd` refeita, peças em `scripts/ui/fight_hud.gd`). Placar de
+  transmissão: nome, ranking e cartel, round com as marcas dos rounds, relógio, fôlego e dano
+  com o rótulo no meio e a linha de números da luta inteira (golpes, quedas, controle). Embaixo
+  do palco, três abas: **Lances** (a narração), **Números** (comparação completa, da luta
+  inteira ou do round, com barra dividida vermelho e azul) e **Placar** (o placar não oficial
+  da transmissão round a round, feito com `FightHud.broadcast_round`, e quem leva o round de
+  agora). O motor manda em cada lance narrado os números do round até ali (`ev["ls"]`, só com
+  `narrate`), e o resultado guarda os cartões round a round (`result["rcards"]`, 3 juízes).
+  **Ficha dos juízes**: na decisão a tabela juiz por round aparece um juiz por vez (som
+  `score`, botão "Ver o resultado" corta a espera) e só depois vem o anúncio; depois de nocaute
+  ou finalização entra "Como estava nos cartões". O resultado ainda ganhou "Números da luta".
+  Juízes têm nome fictício fixo por luta (`FightHud.judge_names`). Luta antiga (save da 0.4.0)
+  não tem `rcards` e mostra os totais como antes.
+- **Celular deitado e tablet**. A luta deitada põe placar e palco à esquerda e abas, conteúdo e
+  rodapé numa coluna à direita (`FightScreen._layout`, chamada de novo quando o aparelho gira;
+  `BaseScreen` agora guarda as peças do esqueleto por referência e tem `fit_content`). O palco
+  limita a escala pela largura (`_U = min(h / 9,6, w / 12,5)`) e fica mais alto em tela alta
+  (teto de 560). Em pé, o palco encolhe para 66% quando a luta acaba, para o resultado caber.
+- **Transições e animações** (`scripts/ui/anim.gd`: `stagger`, `count`, `grow`, `pulse`,
+  `flash`, tudo desligado por "Menos animação" e sem tela). Cartões entram em sequência na
+  primeira vez e depois de avançar a semana (`BaseScreen.play_intro`); a tela que sai desliza e
+  some (`UIManager._animate_out`); a janela desce ao fechar, com um escudo que engole toque
+  repetido; o aviso chega assentando; avançar a semana mostra uma faixa com a data nova, a
+  diferença do caixa e as novidades (`UIManager.banner`, `DashKit.week_turn`); o saldo da barra
+  superior conta até o valor novo e pisca verde ou vermelho; o envelope pulsa quando chega
+  pendência. `UIManager.back` agora chama `on_hide` da tela que sai.
+- **Sons de interface** sintetizados em `tools/gera_sons.py`: `week` (semana que vira), `score`
+  (cartão de juiz), `cash` (dinheiro entrando), `mail` (novidade para resolver) e `sheet` (folha
+  que abre). Os sons da luta saem idênticos do mesmo script.
+- **Save**: `GameWorld.inbox`, `inbox_seq`, `inbox_nw`; `Team.clog` e `rlog`; `rcards` dentro do
+  resultado da luta. Save antigo abre com a caixa vazia e sem importar notícia velha.
+- **Ferramenta nova**: `tools/ui_shots_runner.gd` (painel e caixa de entrada do empresário; com
+  `--part=presidente` os do presidente; com `--part=luta` o HUD numa luta que vai à decisão e
+  noutra que acaba antes). `--prefix=`, `--tablet` e a resolução dão as versões deitada e tablet.
+- **Verificado**: `check_scripts` 138 scripts, 0 erros; `fight_soak --n=100` igual; `world_sim
+  --weeks=156` nos dois papéis sem erro; saves da 0.4.0 migrados nos dois papéis; `design_shots`
+  nos dois papéis em pé e deitado, passeio dos atletas, dos eventos, `look_shots` e os três
+  passeios da etapa em pé, deitado (1688×780) e tablet (1280×800 e 800×1280) sem erro.
+  **Não testado em celular de verdade** (os sons novos também não foram ouvidos em aparelho).
+- **Ficou para depois**: no tablet em pé sobra espaço embaixo dos lances (dá para pôr lances e
+  números lado a lado); som de torcida de fundo na luta; a economia do presidente (0.9).
+- **Próximo**: 0.6 (viciar: metas da temporada, conquistas, pressão dos sócios ou da cidade,
+  cerimônia de fim de ano, tutorial guiado nas primeiras semanas).
+
 ## Rodada 11 de 24/11/2026: montagem dos eventos (APK 0.4.0)
 
 Segunda etapa da lista do dono rumo à 1.0. Sete sistemas novos em `scripts/systems/`, com as
@@ -539,7 +607,7 @@ Cinturões com linhagem.
 ## APK de teste
 
 - APKs novos (0.1.2+) ficam nos arquivos do projeto (`noite-de-luta/`), assinados com a chave de
-  teste guardada em `chave-teste/` lá; o atual é o 0.4.0.
+  teste guardada em `chave-teste/` lá; o atual é o 0.5.0.
 - `releases/NoiteDeLuta-0.1.1.apk` (release, arm64, Android 7+; instala por cima da 0.1.0). Assinado com uma chave de teste
   local: um APK novo assinado com outra chave pede desinstalar o antigo antes.
 - Para gerar de novo: modelos de exportação do Godot 4.7.2 (só `android_*.apk` e `version.txt` em
@@ -568,7 +636,7 @@ xvfb-run -a -s "-screen 0 1600x1600x24" godot --path . --resolution 1400x1300 --
 xvfb-run -a -s "-screen 0 1400x1400x24" godot --path . --resolution 390x844 --script res://tools/design_shots.gd -- --out=/tmp/telas [--role=presidente]
 xvfb-run -a -s "-screen 0 2100x3200x24" godot --path . --resolution 2020x3110 --script res://tools/stage_sheet.gd -- --out=/tmp/palco.png [--3d]
 xvfb-run -a -s "-screen 0 700x520x24" godot --path . --resolution 600x420 --script res://tools/fight_strip.gd -- --out=/tmp/tira.png --case=troca [--every=5] [--at=30,90] [--cols=6] [--scale=0.5] [--tail=1.2] [--fem]   # intro, troca, clinch, chao, intervalo, ko
-python3 tools/gera_sons.py assets/audio/efeitos   # refaz os sons da luta (precisa de numpy)
+python3 tools/gera_sons.py assets/audio/efeitos   # refaz os sons da luta e da interface (precisa de numpy)
 xvfb-run -a -s "-screen 0 1700x1300x24" godot --path . --resolution 1600x1230 --script res://tools/looks_sheet.gd -- --out=/tmp/visuais.png [--3d] [--seed=9]
 xvfb-run -a -s "-screen 0 1700x1000x24" godot --path . --resolution 1600x900 --script res://tools/rig2d_sheet.gd -- --out=/tmp/bonecos.png [--fem]
 xvfb-run -a -s "-screen 0 1900x1500x24" godot --path . --resolution 1860x1080 --script res://tools/roster_sheet.gd -- --out=/tmp/elenco.png --fem --n=20 --cols=5 --size=240
@@ -580,4 +648,5 @@ godot --headless --path . --script res://tools/save_dump.gd -- --out=/tmp/save.j
 godot --headless --path . --script res://tools/save_migrate.gd -- --in=/tmp/save.json [--weeks=20]
 xvfb-run -a -s "-screen 0 1900x1900x24" godot --path . --resolution 780x1688 --script res://tools/design_shots.gd -- --runner=events_shots_runner --out=/tmp/eventos [--part=empresario]
 godot --headless --path . --script res://tools/events_probe.gd -- --weeks=104 [--role=presidente]
+xvfb-run -a -s "-screen 0 1900x1900x24" godot --path . --resolution 780x1688 --script res://tools/design_shots.gd -- --runner=ui_shots_runner --out=/tmp/ui [--part=presidente|luta] [--prefix=l_] [--tablet]   # deitado: --resolution 1688x780; tablet: 1280x800 com --tablet
 ```

@@ -189,7 +189,7 @@ func setup(w: GameWorld, fa: Fighter, fb: Fighter, org_color: Color = Color("#C8
 
 ## Altura do palco: maior nas telas altas, para os lutadores aparecerem grandes.
 static func stage_height() -> float:
-	return clampf(UILayout.viewport.y * 0.36, 300.0, 440.0)
+	return clampf(UILayout.viewport.y * 0.36, 300.0, 560.0)
 
 
 ## Um lance do motor, na ordem. A fila acumulada demais (velocidade alta, "Pular") é resumida:
