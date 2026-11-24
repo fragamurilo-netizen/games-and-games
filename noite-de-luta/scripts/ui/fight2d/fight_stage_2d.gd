@@ -765,7 +765,8 @@ func _camera(delta: float, snap: bool = false) -> void:
 	if down:
 		# Alguém na lona: o chão fica no quadro (quem caiu não pode sair pela borda de baixo).
 		drop = 0.0
-		slack = 0.02
+		# No fim o quadro desce um pouco mais: cabem as luvas de quem comemora e quem está deitado.
+		slack = 0.06 if (_ended and replay.is_empty()) else 0.02
 	var z := minf(float(shot[0]), (w / u0) / maxf(4.0, x1 - x0 + 3.4))
 	z = clampf(minf(z, (0.84 + drop) * 9.6 / maxf(1.0, top)), 1.0, 1.6)
 	if AppSettings.reduce_motion:

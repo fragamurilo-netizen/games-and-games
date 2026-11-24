@@ -1,4 +1,49 @@
-# Noite de Luta — nota de passagem (23/11/2026)
+# Noite de Luta — nota de passagem (24/11/2026)
+
+## Rodada 8 de 24/11/2026: salto grande na luta 2D (APK 0.2.2)
+
+Segunda entrega da ordem combinada na rodada 7 ("Vamos deixar o 3d de lado e evoluir de forma
+ABSURDA o 2d"). Tudo em `scripts/ui/fight2d/fight_stage_2d.gd` (o "cérebro" que o 3D também usa),
+`rig2d.gd` e `fight_screen.gd`. **Nada mudou no motor da luta**: o `fight_soak` dá os mesmos números.
+
+- **Câmera**: o desenho inteiro passa por `_view()` (transformação do canvas: zoom em volta do
+  centro da linha do chão, quadro descendo `_vy`, tremor). `_shot()` devolve `[zoom máximo, quanto
+  o chão pode descer]` por momento (em pé por distância, clinch, chão, finalização encaixada,
+  queda, replay, intervalo, fim) e `_camera()` enquadra a caixa de quem está em cena, sem cortar
+  cabeça nem quem está na lona (`down`). O zoom nunca fica abaixo de 1 (a arena só cobre [0, w]).
+  Fecha devagar (2/s) e abre depressa (6/s). `AppSettings.reduce_motion` trava o zoom em 1.
+- **Palco maior**: `FightStage2D.stage_height()` = 36% da altura lógica (300 a 440).
+- **Impacto** (`_impact`): parada no golpe (`_hitstop`), tranco de zoom (`_punch`), clarão
+  (`_flash`), faísca com pontas, onda (`ring`), suor (`sweat`), faísca de bloqueio (`block`),
+  protetor bucal voando (`mouth`), rastro do golpe na cor do canto (`_trail`), quadro de impacto
+  com linhas de velocidade para dano ≥ 1,3 (`_slam`), torcida reagindo (`_hype`, flashes).
+  A parada só entra com `time_scale < 2` e fila curta, para não atrasar a luta rápida.
+- **Marcas de dano no boneco**: `Rig2D.leg_dmg` (coxa da frente) e `body_dmg` (costelas).
+- **Apresentação do round 1** (só no 2D, `INTRO_S` 4,4 s): cada lutador no seu canto com placa
+  (canto, apelido, nome, cartel, país, estilo), árbitro chama, toque de luvas, "ROUND 1".
+  `holding()` segura o relógio da tela da luta enquanto isso.
+- **Intervalo no canto** (só no 2D, `_corner_on()`): banquinho, treinador (um `Rig2D.referee` com
+  a camisa da equipe e `hand` cor de pele), cortes de câmera entre os cantos a cada 3,8 s e placa
+  com os números do round (`_stat`: golpes certos e quedas).
+- **Legendas**: faixa presa no alto (`_draw_caption`), com entrada grande no meio só para
+  KNOCKDOWN!, ENCAIXOU! e as de fim de luta. Placas no terço de baixo (`_plate`).
+- **Lona com o nome do evento**: `FightStage2D.logo` (a tela da luta passa o nome sem o número).
+- **Sons** (`assets/audio/efeitos/`: soco, soco_forte, chute, bloqueio, queda, gongo): feitos por
+  código em `tools/gera_sons.py` (numpy). **Ninguém ouviu ainda**: só conferi duração, pico e
+  espectro. `_sound()` só toca com o palco visível e limita a repetição.
+- **No 3D** o cérebro é filho escondido (`is_visible_in_tree()` falso): câmera 2D, apresentação,
+  intervalo no canto e sons 2D ficam desligados; o 3D continua como estava.
+- **Ferramenta nova**: `tools/fight_strip.gd` (tira de quadros da luta em movimento, por caso:
+  intro, troca, clinch, chao, intervalo, ko; `--at=` escolhe quadros exatos). `stage_sheet` agora
+  usa células de 500×384.
+- **Verificado**: `check_scripts` 108 scripts, 0 erros; `fight_soak --n=100` igual (KO 10,8% TKO
+  10,6% FIN 23,6% DEC 53,6% EMP 1,5%); `world_sim --weeks=156` nos dois papéis sem erro;
+  `design_shots` nos dois papéis sem erro (23 e 30 telas); `fight_strip` de todos os casos e
+  `stage_sheet` (2D e 3D) conferidos. **Não testado em celular de verdade** (desempenho da câmera
+  e volume dos sons são as dúvidas).
+- **Próximo**: 0.2.3, retratos mais bonitos, realistas e variados para todo mundo. Ideias que
+  ficaram para a luta 2D: entrada dos lutadores andando até o cage, árbitro levantando o braço
+  do vencedor na decisão, replay com outro ângulo de zoom, narração curta por cima.
 
 ## Rodada 7 de 23/11/2026: lutadoras mais bonitas e editor de visual (APK 0.2.1)
 
@@ -302,7 +347,7 @@ Cinturões com linhagem.
 ## APK de teste
 
 - APKs novos (0.1.2+) ficam nos arquivos do projeto (`noite-de-luta/`), assinados com a chave de
-  teste guardada em `chave-teste/` lá; o atual é o 0.2.0.
+  teste guardada em `chave-teste/` lá; o atual é o 0.2.2.
 - `releases/NoiteDeLuta-0.1.1.apk` (release, arm64, Android 7+; instala por cima da 0.1.0). Assinado com uma chave de teste
   local: um APK novo assinado com outra chave pede desinstalar o antigo antes.
 - Para gerar de novo: modelos de exportação do Godot 4.7.2 (só `android_*.apk` e `version.txt` em
@@ -329,7 +374,9 @@ godot --headless --path . --script res://tools/fight_soak.gd -- --n=300 --seed=7
 godot --headless --path . --script res://tools/style_lab.gd -- --a=wrestling --b=muay_thai --log=1   # ou --world
 xvfb-run -a -s "-screen 0 1600x1600x24" godot --path . --resolution 1400x1300 --script res://tools/face_sheet.gd -- --out=/tmp/rostos.png --nations=RUS,KAZ,GEO
 xvfb-run -a -s "-screen 0 1400x1400x24" godot --path . --resolution 390x844 --script res://tools/design_shots.gd -- --out=/tmp/telas [--role=presidente]
-xvfb-run -a -s "-screen 0 1700x2600x24" godot --path . --resolution 1600x2460 --script res://tools/stage_sheet.gd -- --out=/tmp/palco.png [--3d]
+xvfb-run -a -s "-screen 0 2100x3200x24" godot --path . --resolution 2020x3110 --script res://tools/stage_sheet.gd -- --out=/tmp/palco.png [--3d]
+xvfb-run -a -s "-screen 0 700x520x24" godot --path . --resolution 600x420 --script res://tools/fight_strip.gd -- --out=/tmp/tira.png --case=troca [--every=5] [--at=30,90] [--cols=6] [--scale=0.5] [--tail=1.2] [--fem]   # intro, troca, clinch, chao, intervalo, ko
+python3 tools/gera_sons.py assets/audio/efeitos   # refaz os sons da luta (precisa de numpy)
 xvfb-run -a -s "-screen 0 1700x1300x24" godot --path . --resolution 1600x1230 --script res://tools/looks_sheet.gd -- --out=/tmp/visuais.png [--3d] [--seed=9]
 xvfb-run -a -s "-screen 0 1700x1000x24" godot --path . --resolution 1600x900 --script res://tools/rig2d_sheet.gd -- --out=/tmp/bonecos.png [--fem]
 xvfb-run -a -s "-screen 0 1900x1500x24" godot --path . --resolution 1860x1080 --script res://tools/roster_sheet.gd -- --out=/tmp/elenco.png --fem --n=20 --cols=5 --size=240
