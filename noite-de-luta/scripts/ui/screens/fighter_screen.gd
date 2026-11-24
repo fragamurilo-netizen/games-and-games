@@ -109,31 +109,113 @@ func _ficha(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 	var cut := maxf(0.0, (f.natural_kg - limit) / f.natural_kg)
 	body.add_child(UIKit.kv("Peso fora de luta", "%s (corte de %d%%)" % [Fmt.kg(f.natural_kg), int(round(cut * 100.0))], UIColors.ORANGE if cut > 0.11 else UIColors.TEXT))
 	body.add_child(UIKit.kv("Condição física", "%d%%" % int(f.condition), UIColors.GREEN if f.condition >= 90.0 else (UIColors.ORANGE if f.condition >= 70.0 else UIColors.RED)))
-	var pot := UIKit.hbox(8)
-	pot.custom_minimum_size.y = 44
-	var pl := UIKit.label("Potencial", "Muted")
-	pl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	pot.add_child(pl)
-	var team := w.user_team()
-	var scout := team.staff_quality("olheiro") if team != null else 0.0
-	if w.is_user_fighter(f) or scout > 0.0:
-		var stv := StarsView.new()
-		stv.star_size = 18
-		# O olheiro erra mais quanto pior ele é (o erro é fixo por lutador, não muda a cada olhada).
-		var err := 0.0 if w.is_user_fighter(f) else (100.0 - scout) / 25.0
-		var est := f.potential + (float(abs(hash([f.id, "olheiro"])) % 100) / 50.0 - 1.0) * err * 2.0
-		stv.stars = StarsView.from_value(est - err * 3.0)
-		stv.upper_stars = StarsView.from_value(est + err * 3.0) if err > 0.0 else -1.0
-		stv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		pot.add_child(stv)
-	else:
-		pot.add_child(UIKit.label("Contrate um olheiro", "Small"))
-	body.add_child(pot)
 	var cards: Array = [UIKit.card_panel(body), _persona_card(f), _style_card(f)]
+	if not f.retired:
+		# Na equipe do jogador a moral vem primeiro (é onde ele age); nos outros, depois do físico.
+		cards.insert(0 if w.is_user_fighter(f) else 1, _moral_card(w, f))
+		cards.insert(2, _potential_card(w, f))
 	cards.append_array(FightKit.attr_blocks(f))
 	for x: Control in cards:
 		c.add_child(x)
 	columnize(c, 2, 2)
+
+
+## Moral: o humor de hoje, o que pesa, o que mexeu nas últimas semanas e, na equipe do jogador,
+## a conversa.
+func _moral_card(w: GameWorld, f: Fighter) -> Control:
+	var card := UIKit.card("Card", UITokens.S1)
+	var mine := w.is_user_fighter(f)
+	var col: Color = [UIColors.RED, UIColors.ORANGE, UIColors.MUTED, UIColors.GREEN, UIColors.GREEN][Morale.tone(f) + 2]
+	var head := UIKit.hbox(8)
+	var t := UIKit.label("Moral", "Section")
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(t)
+	head.add_child(UIKit.pill(Morale.label(f), col, 20))
+	card.add_child(head)
+	card.add_child(UIKit.bar(f.morale, 100.0, col, 10))
+	var tr := Morale.trend(w, f)
+	card.add_child(UIKit.label(Morale.effect_text(f) + (" Está subindo." if tr > 0 else (" Está caindo." if tr < 0 else "")), "Small", true))
+	var fs := Morale.factors(w, f)
+	if not fs.is_empty():
+		card.add_child(UIKit.label("O que pesa", "Caps"))
+		for it: Array in fs:
+			var v := int(round(float(it[1])))
+			if v != 0:
+				card.add_child(UIKit.kv(String(it[0]), Fmt.signed(v), UIColors.GREEN if v > 0 else UIColors.RED))
+	if not f.mood_log.is_empty():
+		card.add_child(UIKit.label("Últimas semanas", "Caps"))
+		for i in range(f.mood_log.size() - 1, maxi(-1, f.mood_log.size() - 4), -1):
+			var e: Array = f.mood_log[i]
+			card.add_child(UIKit.kv("%s, %s" % [String(e[2]), w.weeks_from_now(int(e[0]))], Fmt.signed(int(e[1])), UIColors.GREEN if int(e[1]) > 0 else UIColors.RED))
+	if mine:
+		if not f.promise.is_empty():
+			card.add_child(UIKit.label("Promessa em aberto: luta marcada em até %s." % Fmt.plural(maxi(0, int(f.promise.get("until", w.week)) - w.week), "semana", "semanas"), "Small", true))
+		if w.week < f.push_until:
+			card.add_child(UIKit.label("Cobrança em curso: treina mais forte por %s." % Fmt.plural(f.push_until - w.week, "semana", "semanas"), "Small", true))
+		var wait := Morale.talk_wait(w, f)
+		if wait > 0:
+			card.add_child(UIKit.label("Nova conversa em %s." % Fmt.plural(wait, "semana", "semanas"), "Muted"))
+		else:
+			card.add_child(UIKit.button("Conversar", "GhostButton", func(): TalkSheet.open(w, f, func(): refresh()), "chat"))
+	return UIKit.card_panel(card)
+
+
+## Potencial: a faixa de estrelas que a equipe enxerga, o relatório em frases e o olheiro.
+func _potential_card(w: GameWorld, f: Fighter) -> Control:
+	var card := UIKit.card("Card", UITokens.S1)
+	var mine := w.is_user_fighter(f)
+	var est := Scouting.estimate(w, f)
+	var head := UIKit.hbox(8)
+	var t := UIKit.label("Potencial", "Section")
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(t)
+	if not bool(est.get("none", false)):
+		var stv := StarsView.new()
+		stv.star_size = 22
+		stv.stars = StarsView.from_value(float(est["lo"]))
+		var up := StarsView.from_value(float(est["hi"]))
+		stv.upper_stars = up if up > stv.stars else -1.0
+		stv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		head.add_child(stv)
+	card.add_child(head)
+	if bool(est.get("none", false)):
+		card.add_child(UIKit.label("Sem olheiro, o teto de quem não treina com você é um mistério.", "Small", true))
+		if not w.is_president():
+			card.add_child(UIKit.button("Contratar um olheiro", "GhostButton", func(): UIManager.switch_area("market"), "search"))
+		return UIKit.card_panel(card)
+	var k := float(est["known"])
+	var kr := UIKit.hbox(8)
+	var kl := UIKit.label("O quanto %s conhece" % ("a casa" if mine else "o olheiro"), "Muted")
+	kl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	kr.add_child(kl)
+	kr.add_child(UIKit.label(Fmt.percent(k)))
+	card.add_child(kr)
+	card.add_child(UIKit.bar(k * 100.0, 100.0, UIColors.GOLD, 6))
+	for line: String in Scouting.report_lines(w, f):
+		card.add_child(UIKit.label(line, "Small", true))
+	if float(est["hi"]) - float(est["lo"]) >= 4.0:
+		card.add_child(UIKit.label("As estrelas apagadas são a dúvida: a faixa fecha quando se conhece mais.", "Muted", true))
+	if mine:
+		return UIKit.card_panel(card)
+	var job := Scouting.job_of(w, f)
+	if not job.is_empty():
+		card.add_child(UIKit.colored("Olheiro observando: relatório em %s." % Fmt.plural(int(job["left"]), "semana", "semanas"), UIColors.ACCENT, "Small", true))
+		card.add_child(UIKit.bar(float(int(job["total"]) - int(job["left"])), float(job["total"]), UIColors.ACCENT, 6))
+		return UIKit.card_panel(card)
+	var why := Scouting.block_reason(w, f)
+	if why == "":
+		card.add_child(UIKit.button("Mandar observar · %s · %s" % [Fmt.money(Scouting.cost_for(w, f)), Fmt.plural(Scouting.weeks_for(w, f), "semana", "semanas")], "GhostButton", func():
+			var err := Scouting.assign(w, f)
+			if err != "":
+				UIManager.toast(err, UIColors.RED)
+			else:
+				UIManager.toast("O olheiro viaja para ver %s. O relatório chega em %s." % [f.short_name(), Fmt.plural(Scouting.weeks_for(w, f), "semana", "semanas")], UIColors.GREEN)
+				GameManager.save_now()
+			UIManager.refresh_chrome()
+			refresh(), "search"))
+	elif not f.retired:
+		card.add_child(UIKit.label(why, "Muted", true))
+	return UIKit.card_panel(card)
 
 
 ## Personalidade: os dois traços e o que cada um faz no jogo.
@@ -189,6 +271,10 @@ func _carreira(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 		var hl := UIKit.colored(hn, UIColors.GOLD, "Small", true)
 		sum.add_child(UIKit.tap_row(hl, func(): UIManager.push("legacy", {"tab": "hall" if hn.begins_with("Hall") else "premios"})))
 	c.add_child(UIKit.card_panel(sum))
+	c.add_child(_evolution_card(w, f))
+	if f.is_pro():
+		c.add_child(_numbers_card(w, f))
+		c.add_child(_marks_card(w, f))
 	c.add_child(UIKit.section_header("Lutas no jogo"))
 	if f.history.is_empty():
 		c.add_child(UIKit.label("O cartel acima vem de antes do início da carreira. As lutas a partir de agora aparecem aqui.", "Muted", true))
@@ -212,12 +298,147 @@ func _carreira(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 		var sub := UIKit.label("%s · %s · %s" % [how, String(hst.get("event", "")), GameWorld.fight_date_text(int(hst["week"]), true)], "Small")
 		sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		v.add_child(sub)
+		# Os números dele naquela luta.
+		var nums := CareerStats.bout_line(hst)
+		if nums != "":
+			var nl := UIKit.label(nums, "Caps")
+			nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			v.add_child(nl)
 		h.add_child(v)
 		var oid := int(hst["opp"])
 		c.add_child(UIKit.tap_row(h, func(): if w.fighter(oid) != null: UIManager.push("fighter", {"id": oid})))
 
 
+## Evolução: o nível pela idade, com as lutas do jogo, o auge e o teto que o olheiro enxerga, e
+## o que subiu e caiu nos últimos meses.
+func _evolution_card(w: GameWorld, f: Fighter) -> Control:
+	var card := UIKit.card("Card", UITokens.S1)
+	card.add_child(UIKit.label("Evolução", "Section"))
+	card.add_child(UIKit.label("Nível geral pela idade.", "Small"))
+	var pts := CareerStats.curve_points(w, f)
+	var est := Scouting.estimate(w, f)
+	var pk := Scouting.peak_guess(w, f)
+	var age := w.age_of(f)
+	var band := Vector2(-1.0, -1.0)
+	if not f.retired and not bool(est.get("none", false)) and age <= (pk if pk > 0 else 29):
+		band = Vector2(float(est["lo"]), float(est["hi"]))
+	var chart := EvolutionChart.new()
+	chart.setup(pts, CareerStats.fight_points(w, f), band, float(pk) if pk > 0 else 0.0)
+	card.add_child(chart)
+	if not f.history.is_empty():
+		card.add_child(EvolutionChart.legend())
+	# O melhor momento e o de hoje.
+	var best := 0.0
+	var best_age := 0.0
+	for p: Array in pts:
+		if float(p[1]) > best:
+			best = float(p[1])
+			best_age = float(p[0])
+	if best > float(f.level()) + 0.5:
+		card.add_child(UIKit.kv("Melhor fase", "nível %d, aos %d anos" % [int(best), int(best_age)]))
+	if not pts.is_empty() and int((pts[0] as Array)[2]) < 0:
+		card.add_child(UIKit.label("A parte apagada da linha é de antes do jogo, estimada pela idade.", "Muted", true))
+	var tr := CareerStats.trend(f)
+	if not tr.is_empty():
+		var months := maxi(1, int(round(float(CareerStats.trend_weeks(w, f)) / 4.35)))
+		card.add_child(UIKit.label("Nos últimos %s" % Fmt.plural(months, "mês", "meses"), "Caps"))
+		var keys := tr.keys()
+		keys.sort_custom(func(a: String, b: String) -> bool: return int(tr[a]) > int(tr[b]))
+		# Os que mais subiram e os que mais caíram (a lista inteira vira parede de texto).
+		var ups: Array = keys.filter(func(k: String) -> bool: return int(tr[k]) > 0).slice(0, 5)
+		var downs: Array = keys.filter(func(k: String) -> bool: return int(tr[k]) < 0)
+		downs = downs.slice(maxi(0, downs.size() - 4))
+		var fl := UIKit.flow(8)
+		for k: String in ups + downs:
+			var d := int(tr[k])
+			fl.add_child(UIKit.pill("%s %s" % [String(Fighter.ATTR_NAMES.get(k, k)), Fmt.signed(d)], UIColors.GREEN if d > 0 else UIColors.RED, 19))
+		card.add_child(fl)
+		var rest := keys.size() - ups.size() - downs.size()
+		if rest > 0:
+			card.add_child(UIKit.label("e mais %s com mudança menor." % Fmt.plural(rest, "atributo", "atributos"), "Muted"))
+	elif w.is_user_fighter(f) or w.is_followed(f):
+		card.add_child(UIKit.label("O que subiu e caiu aparece aqui a cada três meses.", "Muted", true))
+	else:
+		card.add_child(UIKit.label("Toque em Seguir para acompanhar o que sobe e cai nos atributos.", "Muted", true))
+	return UIKit.card_panel(card)
+
+
+## Números da carreira, no padrão das estatísticas do MMA, ao lado da média da categoria.
+func _numbers_card(w: GameWorld, f: Fighter) -> Control:
+	var card := UIKit.card("Card", UITokens.S1)
+	card.add_child(UIKit.label("Números da carreira", "Section"))
+	var r := CareerStats.rates(f)
+	if int(r["n"]) <= 0:
+		card.add_child(UIKit.label("Sem lutas contadas ainda.", "Muted", true))
+		return UIKit.card_panel(card)
+	var d := CareerStats.division_rates(w, f.division)
+	card.add_child(UIKit.label("Em %s. Ao lado, a média dos %s." % [Fmt.plural(int(r["n"]), "luta", "lutas"), Matchmaker.division_name(f.division, true)], "Small", true))
+	# [chave, rótulo, formato, sentido] (sentido: 1 = mais é melhor, -1 = menos é melhor, 0 = neutro)
+	var rows := [
+		["slpm", "Golpes certos por minuto", "dec", 1], ["acc", "Precisão dos golpes", "pct", 1],
+		["sapm", "Golpes sofridos por minuto", "dec", -1], ["def", "Defesa de golpes", "pct", 1],
+		["td15", "Quedas a cada 15 min", "dec", 1], ["tdacc", "Precisão de quedas", "pct", 1],
+		["tddef", "Defesa de quedas", "pct", 1], ["sub15", "Finalizações tentadas a cada 15 min", "dec", 1],
+		["kd", "Knockdowns por luta", "dec", 1], ["ctrl15", "Controle a cada 15 min", "time", 1],
+		["avg_t", "Tempo médio de luta", "time", 0],
+	]
+	var fmt := func(v: float, kind: String) -> String:
+		if kind == "pct":
+			return Fmt.percent(v)
+		if kind == "time":
+			return Fmt.elapsed(v)
+		return Fmt.dec(v, 2)
+	for it: Array in rows:
+		var k := String(it[0])
+		var mine := float(r[k])
+		var avg := float(d.get(k, mine))
+		var col := UIColors.TEXT
+		var rel := (mine - avg) / maxf(0.05, absf(avg))
+		if int(it[3]) != 0 and absf(rel) >= 0.1:
+			col = UIColors.GREEN if rel * int(it[3]) > 0.0 else UIColors.RED
+		card.add_child(UIKit.kv(String(it[1]), "%s · média %s" % [fmt.call(mine, String(it[2])), fmt.call(avg, String(it[2]))], col))
+	return UIKit.card_panel(card)
+
+
+## Marcos: os que chegaram no jogo (com data), o que ele já trazia e os próximos ao alcance.
+func _marks_card(w: GameWorld, f: Fighter) -> Control:
+	CareerStats.ensure_marks(w, f)
+	var card := UIKit.card("Card", UITokens.S1)
+	card.add_child(UIKit.label("Marcos da carreira", "Section"))
+	var dated: Array = f.marks.filter(func(m: Array) -> bool: return int(m[1]) >= 0)
+	dated.sort_custom(func(a: Array, b: Array) -> bool: return int(a[1]) > int(b[1]))
+	for m: Array in dated.slice(0, 8):
+		var row := UIKit.hbox(8)
+		row.custom_minimum_size.y = 44
+		row.add_child(UIKit.icon_rect("medal", 22, UIColors.GOLD))
+		var nm := UIKit.label(CareerStats.mark_name(String(m[0])), "", true)
+		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(nm)
+		var d := GameWorld.date_of(int(m[1]), 5)
+		row.add_child(UIKit.label("%s %d" % [Fmt.MONTHS[int(d["month"]) - 1], int(d["year"])], "Caps"))
+		card.add_child(row)
+	if dated.size() > 8:
+		card.add_child(UIKit.label("e mais %d." % (dated.size() - 8), "Muted"))
+	var past := CareerStats.past_summary(f)
+	if not past.is_empty():
+		card.add_child(UIKit.label("Antes do jogo", "Caps"))
+		card.add_child(UIKit.label(" · ".join(past), "Small", true))
+	if dated.is_empty() and past.is_empty():
+		card.add_child(UIKit.label("Os marcos aparecem aqui conforme a carreira anda.", "Muted", true))
+	if f.retired:
+		return UIKit.card_panel(card)
+	var nxt := CareerStats.next_marks(f)
+	if not nxt.is_empty():
+		card.add_child(UIKit.label("A seguir", "Caps"))
+		for it: Array in nxt:
+			card.add_child(UIKit.kv(String(it[0]), "%d de %d" % [int(it[1]), int(it[2])]))
+			card.add_child(UIKit.bar(float(it[1]), float(it[2]), UIColors.GOLD, 6))
+	return UIKit.card_panel(card)
+
+
 func _treino(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
+	if Camp.bout_of(w, f) != null:
+		c.add_child(_camp_card(w, f))
 	c.add_child(UIKit.section_header("Foco do treino"))
 	var items: Array = []
 	for k: String in Development.FOCUS:
@@ -238,13 +459,72 @@ func _treino(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 	for role: String in ["striking", "wrestling", "jiujitsu", "fisico"]:
 		var s := t.staff_of(role)
 		staff.add_child(UIKit.kv(StaffMarket.role_name(role), String(s["name"]) + " (%d)" % int(s["quality"]) if not s.is_empty() else "ninguém", UIColors.TEXT if not s.is_empty() else UIColors.ORANGE))
+	var mk := Morale.train_k(w, f)
+	staff.add_child(UIKit.kv("Moral no treino", "%s (%s%d%%)" % [Morale.label(f).to_lower(), "+" if mk >= 1.0 else "", int(round((mk - 1.0) * 100.0))], UIColors.GREEN if mk >= 1.03 else (UIColors.RED if mk <= 0.97 else UIColors.TEXT)))
 	c.add_child(UIKit.card_panel(staff))
-	var gap := f.potential - f.level()
+	# O que a casa enxerga do futuro dele (pela faixa do potencial, não pelo número escondido).
+	var est := Scouting.estimate(w, f)
+	var gap := float(est.get("mid", f.level())) - float(f.level())
 	var age := w.age_of(f)
+	var pk := Scouting.peak_guess(w, f)
 	var outlook := "Ainda tem bastante para crescer." if gap > 8 and age < 28 else ("Perto do auge: treino mantém mais do que melhora." if age >= 29 else "Cresce aos poucos.")
-	if age > f.peak_age + 1:
+	if pk > 0 and age > pk + 1:
 		outlook = "Passou do auge: velocidade, fôlego e queixo começam a cair."
 	c.add_child(UIKit.label(outlook, "Muted", true))
+
+
+## Camp: as semanas antes da luta marcada. Foco, onde treinar, sparring e o que isso rende na noite.
+func _camp_card(w: GameWorld, f: Fighter) -> Control:
+	var b := Camp.bout_of(w, f)
+	var o := w.fighter(b.other(f.id))
+	var ev := w.event(b.event_id)
+	var cp := Camp.ensure(w, f)
+	var team := w.user_team()
+	var card := UIKit.card("CardHighlight", UITokens.S2)
+	card.add_child(UIKit.label("Camp para a luta", "Section"))
+	card.add_child(UIKit.label("Contra %s · %s · %s" % [o.display_name(), ev.name if ev != null else "", w.weeks_from_now(b.week)], "Small", true))
+	var pts := float(cp.get("pts", 0.0))
+	var left := Camp.weeks_left(w, f)
+	var gain := Camp.week_gain(w, f, team)
+	var proj := minf(100.0, pts + gain * left)
+	var wait := Camp.starts_in(w, f)
+	if wait > 0:
+		card.add_child(UIKit.label("O camp começa em %s (oito antes da luta). Deixe tudo escolhido desde já." % Fmt.plural(wait, "semana", "semanas"), "Small", true))
+	card.add_child(UIKit.kv("Forma até aqui", "%d%%" % int(round(pts))))
+	card.add_child(UIKit.bar(pts, 100.0, UIColors.GOLD, 10))
+	if left > 0:
+		card.add_child(UIKit.kv("Na noite da luta, neste ritmo", "%d%% · %s" % [int(round(proj)), Camp.label(proj)], UIColors.GREEN if proj >= 65.0 else (UIColors.ORANGE if proj < 45.0 else UIColors.TEXT)))
+	else:
+		card.add_child(UIKit.label("Semana da luta: o camp acabou, agora é a pesagem.", "Small", true))
+	card.add_child(UIKit.label("Foco", "Caps"))
+	var items: Array = []
+	for k: String in Camp.FOCUS_ORDER:
+		items.append([k, String(Camp.FOCUS[k]["name"]), String(Camp.FOCUS[k]["help"])])
+	card.add_child(UIKit.option_grid(items, String(cp.get("focus", "plano")), func(k: String):
+		cp["focus"] = k
+		refresh(), 1))
+	card.add_child(UIKit.label("Onde", "Caps"))
+	card.add_child(UIKit.segment([["casa", "Em casa"], ["fora", "Fora · %s/sem" % Fmt.money(Camp.away_cost(w, f))]], String(cp.get("place", "casa")), func(k: String):
+		cp["place"] = k
+		refresh()))
+	var home_q := int(round(Morale.gym_quality(w, team)))
+	card.add_child(UIKit.label("Numa academia grande, técnicos de nível %d cuidam do camp." % int(Camp.AWAY_QUALITY) if String(cp.get("place", "casa")) == "fora" else "Os técnicos da casa tocam o camp (média %d). Técnico melhor junta forma mais rápido." % home_q, "Small", true))
+	card.add_child(UIKit.label("Sparring", "Caps"))
+	card.add_child(UIKit.segment([["0", "Só os da casa"], ["1", "Contratado · %s/sem" % Fmt.money(Camp.spar_cost(w, f))]], "1" if bool(cp.get("spar", false)) else "0", func(k: String):
+		cp["spar"] = k == "1"
+		refresh()))
+	card.add_child(UIKit.label("Parceiros pagos para imitar %s: a forma sobe 20%% mais rápido e o estudo do adversário rende mais. Há um risco pequeno de lesão." % o.short_name(), "Small", true))
+	# O que isso rende na noite.
+	var focus := String(cp.get("focus", "plano"))
+	var lines := Camp.gain_lines(Camp.mods_for(proj if left > 0 else pts, focus, f, o, b, bool(cp.get("spar", false))))
+	if focus == "peso":
+		lines.insert(0, "corte de peso %d%% mais leve" % int(round(clampf((proj if left > 0 else pts) / 100.0, 0.0, 1.0) * 80.0)))
+	card.add_child(UIKit.label("O que rende na noite", "Caps"))
+	card.add_child(UIKit.label(", ".join(lines) + "." if not lines.is_empty() else "Quase nada: o camp está curto demais.", "", true))
+	if float(cp.get("cost", 0.0)) > 0.0:
+		card.add_child(UIKit.kv("Gasto até aqui", Fmt.money(float(cp["cost"]))))
+	card.add_child(UIKit.label("A intensidade é a do treino, logo abaixo. Pesado junta forma mais rápido e derruba a condição física (hoje %d%%): chegue à semana da luta perto de 100%%, com treino leve no fim." % int(f.condition), "Small", true))
+	return UIKit.card_panel(card)
 
 
 func _contrato(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:

@@ -300,4 +300,6 @@ static func from_dict(d: Dictionary) -> GameWorld:
 	w.scouting = d.get("scouting", {})
 	for i: Dictionary in w.incidents:
 		i["refused"] = (i.get("refused", []) as Array).map(func(v): return int(v))
+	# Save de antes dos marcos de carreira: o passado de cada um entra sem data, de uma vez.
+	CareerStats.ensure_all_marks(w)
 	return w

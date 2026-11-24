@@ -28,6 +28,19 @@ func refresh() -> void:
 		c.add_child(UIKit.section_header("Propostas (%d)" % w.offers.size()))
 		for o: Dictionary in w.offers:
 			c.add_child(_offer_row(w, o))
+	# Quem pede atenção: moral em baixa na equipe.
+	var low := mine.filter(func(f: Fighter) -> bool: return Morale.tone(f) < 0)
+	if not low.is_empty():
+		c.add_child(UIKit.section_header("Pedem atenção"))
+		for f: Fighter in low:
+			var why := ""
+			var worst := 0.0
+			for it: Array in Morale.factors(w, f):
+				if float(it[1]) < worst:
+					worst = float(it[1])
+					why = String(it[0])
+			var line := "Moral: %s" % Morale.label(f).to_lower() + (" · " + why.substr(0, 1).to_lower() + why.substr(1) if why != "" else "")
+			c.add_child(FightKit.fighter_row(w, f, func(): UIManager.push("fighter", {"id": f.id}), line, UIColors.RED if Morale.tone(f) <= -2 else UIColors.ORANGE))
 	# Próximas lutas
 	var booked: Array = []
 	for f: Fighter in mine:
@@ -41,9 +54,13 @@ func refresh() -> void:
 			var b: Bout = it[0]
 			var f: Fighter = it[1]
 			var o := w.fighter(b.other(f.id))
-			var ev := w.event(b.event_id)
-			c.add_child(FightKit.fighter_row(w, f, func(): UIManager.push("event", {"id": b.event_id}),
-				"contra %s · %s, %s" % [o.short_name(), ev.name, w.weeks_from_now(b.week)], UIColors.ACCENT if b.title else Color(0, 0, 0, 0), "Cinturão" if b.title else ""))
+			var camp := ""
+			if Camp.in_window(w, f) or float(f.camp.get("pts", 0.0)) > 0.0:
+				camp = " · camp %d%%" % int(round(float(Camp.ensure(w, f).get("pts", 0.0))))
+			elif Camp.starts_in(w, f) > 0:
+				camp = " · camp em %d sem." % Camp.starts_in(w, f)
+			c.add_child(FightKit.fighter_row(w, f, func(): UIManager.push("fighter", {"id": f.id, "tab": "treino"}),
+				"contra %s · %s%s" % [o.short_name(), w.weeks_from_now(b.week), camp], UIColors.ACCENT if b.title else Color(0, 0, 0, 0), "Cinturão" if b.title else ""))
 	# Equipe sem luta: lembrete do que dá para fazer.
 	var idle := mine.filter(func(f: Fighter) -> bool: return f.bout_id < 0 and f.available() and Matchmaker.ready_to_book(w, f, 0))
 	if not idle.is_empty() and w.offers.is_empty():
@@ -162,9 +179,9 @@ func _news_row(w: GameWorld, n: Dictionary) -> Control:
 	var v := UIKit.vbox(2)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var kind := String(n.get("kind", ""))
-	var chapeu: String = {"cinturao": "Cinturão", "resultado": "Resultado", "equipe": "Sua academia", "aposentadoria": "Aposentadoria"}.get(kind, "Notícia")
+	var chapeu: String = {"cinturao": "Cinturão", "resultado": "Resultado", "equipe": "Sua academia", "aposentadoria": "Aposentadoria", "marco": "Marco", "olheiro": "Olheiro", "mercado": "Mercado"}.get(kind, "Notícia")
 	var cap := UIKit.label("%s · %s" % [chapeu, w.weeks_from_now(int(n["week"]))], "Caps")
-	if kind == "cinturao":
+	if kind == "cinturao" or kind == "marco":
 		cap.add_theme_color_override(&"font_color", UIColors.GOLD)
 	elif kind == "equipe":
 		cap.add_theme_color_override(&"font_color", UIColors.ACCENT)

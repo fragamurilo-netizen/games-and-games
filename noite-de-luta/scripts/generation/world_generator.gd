@@ -33,6 +33,7 @@ static func generate(seed_v: int) -> GameWorld:
 	Calendar.ensure_events(w)
 	for _i in 2:
 		Matchmaker.book_cpu(w)
+	CareerStats.ensure_all_marks(w)
 	return w
 
 

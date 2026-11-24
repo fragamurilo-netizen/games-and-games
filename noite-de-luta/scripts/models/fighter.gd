@@ -234,8 +234,24 @@ func style_label() -> String:
 	return "Finalizador"
 
 
+## Ordem dos números da carreira no save (lista em vez de dicionário: o save agradece).
+const STAT_KEYS := ["n", "t", "sl", "sa", "ab", "oa", "td", "ta", "otd", "ota", "sub", "kd", "kdt", "ctrl"]
+
+
 func to_dict() -> Dictionary:
-	return {
+	# Marcos de antes do jogo (sem data) vão juntos numa linha só; os do jogo, com a semana.
+	var old_marks: Array = []
+	var new_marks: Array = []
+	for mk: Array in marks:
+		if int(mk[1]) <= -9000:
+			old_marks.append(String(mk[0]))
+		else:
+			new_marks.append(mk)
+	var st: Array = []
+	if not stats.is_empty():
+		for k: String in STAT_KEYS:
+			st.append(int(round(float(stats.get(k, 0)))))
+	var d := {
 		"id": id, "first": first, "last": last, "nick": nickname, "ff": family_first, "sex": sex, "nation": nation, "city": city,
 		"eth": eth, "face": face_seed, "look": look, "by": birth_year, "bm": birth_month, "h": height_cm,
 		"r": reach_cm, "sp": southpaw, "nat_kg": natural_kg, "div": division, "base": base, "base2": base2, "attrs": attrs,
@@ -243,10 +259,23 @@ func to_dict() -> Dictionary:
 		"hist": history, "rating": rating, "streak": streak, "last_fw": last_fight_week, "cond": condition,
 		"inj": injury, "susp": suspension, "pop": popularity, "wear": wear, "ret": retired, "rw": retired_week, "titles": titles_won,
 		"defs": title_defenses, "train": training, "bout": bout_id, "ch_lock": challenge_lock, "prog": progress, "traits": traits,
-		"st": stats, "cv": curve, "cv0": curve_w0, "marks": marks, "snaps": snaps, "lk0": look0,
-		"mor": snappedf(morale, 0.1), "mlog": mood_log, "talk": talk_week, "prom": promise, "push": push_until,
-		"known": snappedf(known, 0.01), "camp": camp,
+		"st": st, "cv": curve, "cv0": curve_w0, "marks": new_marks, "mk0": ",".join(old_marks), "snaps": snaps, "lk0": look0,
+		"mor": snappedf(morale, 0.1),
 	}
+	# O que quase ninguém tem só entra no save quando existe.
+	if not mood_log.is_empty():
+		d["mlog"] = mood_log
+	if talk_week > -900:
+		d["talk"] = talk_week
+	if not promise.is_empty():
+		d["prom"] = promise
+	if push_until > -900:
+		d["push"] = push_until
+	if known > 0.0:
+		d["known"] = snappedf(known, 0.01)
+	if not camp.is_empty():
+		d["camp"] = camp
+	return d
 
 
 static func from_dict(d: Dictionary) -> Fighter:
@@ -297,10 +326,20 @@ static func from_dict(d: Dictionary) -> Fighter:
 	f.challenge_lock = int(d.get("ch_lock", -999))
 	f.progress = d.get("prog", {})
 	f.traits = d.get("traits", [])
-	f.stats = d.get("st", {})
+	var st: Variant = d.get("st", {})
+	if st is Array:
+		if (st as Array).size() >= STAT_KEYS.size():
+			for i in STAT_KEYS.size():
+				f.stats[STAT_KEYS[i]] = float(st[i]) if STAT_KEYS[i] in ["t", "ctrl"] else int(st[i])
+	else:
+		f.stats = st
 	f.curve = (d.get("cv", []) as Array).map(func(v): return int(v))
 	f.curve_w0 = int(d.get("cv0", 0))
-	f.marks = d.get("marks", [])
+	f.marks = []
+	for k: String in String(d.get("mk0", "")).split(",", false):
+		f.marks.append([k, -9999])
+	for mk: Array in d.get("marks", []):
+		f.marks.append([String(mk[0]), int(mk[1])])
 	f.snaps = d.get("snaps", [])
 	f.morale = float(d.get("mor", 60.0))
 	f.mood_log = d.get("mlog", [])

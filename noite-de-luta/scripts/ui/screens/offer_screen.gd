@@ -39,6 +39,11 @@ func refresh() -> void:
 	money.add_child(UIKit.kv("Para a academia (%d%%)" % int(round(cut * 100.0)), "%s a %s" % [Fmt.money(float(o["show"]) * cut), Fmt.money((float(o["show"]) + float(o["win"])) * cut)], UIColors.GREEN))
 	money.add_child(UIKit.kv("Rounds", "3 de 5 minutos"))
 	money.add_child(UIKit.kv("Responder até", w.weeks_from_now(int(o["expires"]))))
+	# Quanto de camp dá para fazer até lá (o camp completo são oito semanas).
+	var camp_w := clampi(int(o["week"]) - w.week, 0, Camp.WEEKS)
+	money.add_child(UIKit.kv("Tempo de camp", "%s de %d" % [Fmt.plural(camp_w, "semana", "semanas"), Camp.WEEKS], UIColors.ORANGE if camp_w <= 3 else UIColors.TEXT))
+	if camp_w <= 3:
+		money.add_child(UIKit.label("Luta em cima da hora: %s chega com pouco camp." % f.short_name(), "Small", true))
 	c.add_child(UIKit.card_panel(money))
 	var tape := UIKit.card("Card", UITokens.S1)
 	tape.add_child(UIKit.label("Ficha", "Section"))

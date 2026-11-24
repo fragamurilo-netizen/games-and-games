@@ -59,22 +59,25 @@ static func effect_text(f: Fighter) -> String:
 static func gym_quality(w: GameWorld, team: Team) -> float:
 	if team == null:
 		return 0.0
+	if not team.is_user:
+		return team.staff_quality("striking")
 	var s := 0.0
 	for role: String in ["striking", "wrestling", "jiujitsu", "fisico"]:
 		s += team.staff_quality(role)
 	return s / 4.0
 
 
-## O que pesa hoje na moral: [[texto, pontos], ...] (positivo puxa para cima).
-static func factors(w: GameWorld, f: Fighter) -> Array:
+## O que pesa hoje na moral: [[texto, pontos], ...] (positivo puxa para cima). `texts` = false
+## pula a montagem das frases (a conta semanal de todo mundo só quer os pontos).
+static func factors(w: GameWorld, f: Fighter, texts: bool = true) -> Array:
 	var out: Array = []
 	var fem := f.is_female()
 	var mine := w.is_user_fighter(f)
 	# Fase.
 	if f.streak >= 2:
-		out.append(["Vem de %d vitórias seguidas" % f.streak, minf(12.0, 3.0 * f.streak)])
+		out.append(["Vem de %d vitórias seguidas" % f.streak if texts else "", minf(12.0, 3.0 * f.streak)])
 	elif f.streak <= -2:
-		out.append(["Vem de %d derrotas seguidas" % -f.streak, -minf(16.0, 4.0 * -f.streak)])
+		out.append(["Vem de %d derrotas seguidas" % -f.streak if texts else "", -minf(16.0, 4.0 * -f.streak)])
 	elif not f.history.is_empty() and w.week - f.last_fight_week <= 26:
 		var res := String((f.history.back() as Dictionary).get("res", ""))
 		if res == "V":
@@ -94,8 +97,11 @@ static func factors(w: GameWorld, f: Fighter) -> Array:
 		var idle := w.week - f.last_fight_week - Matchmaker.rest_weeks(f) - 10
 		if idle > 0:
 			var k := 1.5 if Persona.has(f, "guerreiro") else (0.5 if Persona.has(f, "preguicoso") else 1.0)
-			var months := maxi(1, int(round(float(w.week - f.last_fight_week) / 4.35)))
-			out.append(["%s há %s sem luta marcada" % ["Parada" if fem else "Parado", Fmt.plural(months, "mês", "meses")], -minf(15.0, idle * 0.5 * k)])
+			var txt := ""
+			if texts:
+				var months := maxi(1, int(round(float(w.week - f.last_fight_week) / 4.35)))
+				txt = "%s há %s sem luta marcada" % ["Parada" if fem else "Parado", Fmt.plural(months, "mês", "meses")]
+			out.append([txt, -minf(15.0, idle * 0.5 * k)])
 	# Lugar no ranking.
 	var r := w.rank_of(f)
 	if r == 0:
@@ -134,7 +140,7 @@ static func factors(w: GameWorld, f: Fighter) -> Array:
 
 static func target(w: GameWorld, f: Fighter) -> float:
 	var t := BASE
-	for it: Array in factors(w, f):
+	for it: Array in factors(w, f, false):
 		t += float(it[1])
 	return clampf(t, 5.0, 98.0)
 
@@ -345,7 +351,7 @@ static func talk(w: GameWorld, f: Fighter, key: String) -> Dictionary:
 				text = "%s ouviu, concordou e foi treinar." % nm
 			if last_res == "D":
 				d += 2.0
-			elif f.streak >= 3:
+			elif f.streak >= 3 and d <= 0.0:
 				d -= 3.0
 				text += " Vindo de %d vitórias, achou a cobrança injusta." % f.streak
 		"prometer":

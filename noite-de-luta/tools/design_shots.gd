@@ -14,6 +14,8 @@ func _start() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a == "--role=presidente":
 			path = "res://tools/president_shots_runner.gd"
+		if a.begins_with("--runner="):
+			path = "res://tools/%s.gd" % a.substr(9)
 	var runner: Node = load(path).new()
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--out="):

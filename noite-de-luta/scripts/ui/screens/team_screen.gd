@@ -20,4 +20,11 @@ func refresh() -> void:
 	for f: Fighter in mine:
 		var st := FightKit.status_text(w, f)
 		var div := Matchmaker.division_short(f.division)
-		c.add_child(FightKit.fighter_row(w, f, func(): UIManager.push("fighter", {"id": f.id}), "%s · %s · %s" % [div, f.record_text() if f.is_pro() else "estreante", String(st[0])], st[1]))
+		var mood := ""
+		var col: Color = st[1]
+		if Morale.tone(f) < 0:
+			mood = " · moral: %s" % Morale.label(f).to_lower()
+			col = UIColors.RED if Morale.tone(f) <= -2 else UIColors.ORANGE
+		elif Morale.tone(f) >= 2:
+			mood = " · %s" % Morale.label(f).to_lower()
+		c.add_child(FightKit.fighter_row(w, f, func(): UIManager.push("fighter", {"id": f.id}), "%s · %s · %s%s" % [div, f.record_text() if f.is_pro() else "estreante", String(st[0]), mood], col))

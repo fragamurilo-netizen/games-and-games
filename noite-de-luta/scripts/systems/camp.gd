@@ -78,21 +78,26 @@ static func in_window(w: GameWorld, f: Fighter) -> bool:
 
 # --- Custos -------------------------------------------------------------------------------
 
-static func spar_cost(w: GameWorld, f: Fighter) -> float:
+## Os custos acompanham o tamanho da luta (a bolsa garantida): camp completo fora de casa, com
+## sparring, por oito semanas custa perto de um quarto da bolsa.
+static func _show(w: GameWorld, f: Fighter) -> float:
 	var b := bout_of(w, f)
-	var o := w.fighter(b.other(f.id)) if b != null else null
-	return snappedf(350.0 + (o.level() if o != null else 50) * 22.0, 50.0)
+	return float(b.purse_of(f.id).get("show", 2500.0)) if b != null else 2500.0
 
 
-static func away_cost(f: Fighter) -> float:
-	return snappedf(1200.0 + f.level() * 35.0, 50.0)
+static func spar_cost(w: GameWorld, f: Fighter) -> float:
+	return maxf(60.0, snappedf(_show(w, f) * 0.012, 10.0))
+
+
+static func away_cost(w: GameWorld, f: Fighter) -> float:
+	return maxf(100.0, snappedf(_show(w, f) * 0.02, 10.0))
 
 
 static func weekly_cost(w: GameWorld, f: Fighter) -> float:
 	var c := f.camp
 	if c.is_empty():
 		return 0.0
-	return (away_cost(f) if String(c.get("place", "casa")) == "fora" else 0.0) + (spar_cost(w, f) if bool(c.get("spar", false)) else 0.0)
+	return (away_cost(w, f) if String(c.get("place", "casa")) == "fora" else 0.0) + (spar_cost(w, f) if bool(c.get("spar", false)) else 0.0)
 
 
 # --- Semana -------------------------------------------------------------------------------
@@ -110,7 +115,7 @@ static func week_gain(w: GameWorld, f: Fighter, team: Team) -> float:
 	if not f.injury.is_empty() or int(f.training.get("off", -1)) == w.week:
 		return 0.0
 	var intensity := clampi(int(f.training.get("intensity", 1)), 0, 2)
-	var g: float = (4.0 + coach_quality(w, f, team) * 0.13) * [0.72, 1.0, 1.22][intensity]
+	var g: float = (3.0 + coach_quality(w, f, team) * 0.1) * [0.72, 1.0, 1.22][intensity]
 	if f.condition < 70.0:
 		g *= 0.75
 	if bool(f.camp.get("spar", false)):
@@ -147,7 +152,7 @@ static func auto_points(w: GameWorld, f: Fighter, b: Bout) -> float:
 	r.seed = hash([w.seed, b.id, f.id, "camp"])
 	var team := w.team(f.team_id)
 	var q := team.staff_quality("striking") if team != null else 22.0
-	return clampf((4.0 + q * 0.13) * 5.5 * Persona.train_k(f) * lerpf(0.9, 1.08, f.morale / 100.0) * r.randf_range(0.75, 1.2), 8.0, 100.0)
+	return clampf((3.0 + q * 0.1) * 6.5 * Persona.train_k(f) * lerpf(0.9, 1.08, f.morale / 100.0) * r.randf_range(0.75, 1.2), 8.0, 100.0)
 
 
 static func auto_focus(f: Fighter, b: Bout) -> String:

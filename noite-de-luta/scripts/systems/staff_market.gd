@@ -10,7 +10,7 @@ const ROLES := {
 	"fisico": {"name": "Preparador físico", "help": "Força, velocidade e cardio. Condição física volta mais rápido."},
 	"fisio": {"name": "Fisioterapeuta", "help": "Lesões saram mais rápido e acontecem menos no treino."},
 	"nutri": {"name": "Nutricionista", "help": "Corte de peso mais seguro: menos chance de errar o peso e menos fôlego perdido."},
-	"olheiro": {"name": "Olheiro", "help": "Mostra o potencial dos lutadores fora da sua equipe."},
+	"olheiro": {"name": "Olheiro", "help": "Dá a faixa do potencial de quem está fora da equipe, viaja para observar de perto e indica nomes do mercado todo mês."},
 }
 const ORDER := ["striking", "wrestling", "jiujitsu", "fisico", "fisio", "nutri", "olheiro"]
 

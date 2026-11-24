@@ -114,7 +114,7 @@ func _news_row(w: GameWorld, n: Dictionary) -> Control:
 	var v := UIKit.vbox(2)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var kind := String(n.get("kind", ""))
-	var chapeu: String = {"cinturao": "Cinturão", "resultado": "Resultado", "organizacao": "Sua organização", "aposentadoria": "Aposentadoria"}.get(kind, "Notícia")
+	var chapeu: String = {"cinturao": "Cinturão", "resultado": "Resultado", "organizacao": "Sua organização", "aposentadoria": "Aposentadoria", "marco": "Marco", "olheiro": "Olheiros", "mercado": "Mercado"}.get(kind, "Notícia")
 	var cap := UIKit.label("%s · %s" % [chapeu, w.weeks_from_now(int(n["week"]))], "Caps")
 	if kind == "cinturao":
 		cap.add_theme_color_override(&"font_color", UIColors.GOLD)

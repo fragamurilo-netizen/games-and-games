@@ -473,6 +473,21 @@ func _show_result() -> void:
 	card.add_child(UIKit.kv("Para a academia", Fmt.money(earned), UIColors.GREEN))
 	card.add_child(UIKit.kv("Cartel de %s" % me.short_name(), me.record_text()))
 	card.add_child(UIKit.kv("Ranking", w.rank_text(me)))
+	# Marcos que chegaram com esta luta e como ficou a moral.
+	for mk: Array in me.marks:
+		if int(mk[1]) == w.week and String(mk[0]) != "estreia":
+			var mrow := UIKit.hbox(8)
+			mrow.add_child(UIKit.icon_rect("medal", 24, UIColors.GOLD))
+			mrow.add_child(UIKit.colored("Marco: %s" % CareerStats.mark_sentence(String(mk[0])), UIColors.GOLD, "H3", true))
+			card.add_child(mrow)
+	var mood_d := 0
+	for e: Array in me.mood_log:
+		if int(e[0]) == w.week:
+			mood_d += int(e[1])
+	card.add_child(UIKit.kv("Moral", "%s (%s)" % [Morale.label(me).to_lower(), Fmt.signed(mood_d)] if mood_d != 0 else Morale.label(me).to_lower(), UIColors.GREEN if mood_d > 0 else (UIColors.RED if mood_d < 0 else UIColors.TEXT)))
+	var nums := CareerStats.bout_line(me.history.back()) if not me.history.is_empty() else ""
+	if nums != "":
+		card.add_child(UIKit.label("Números de %s: %s." % [me.short_name(), nums], "Small", true))
 	if not me.injury.is_empty():
 		card.add_child(UIKit.colored("%s saiu com %s (%d semanas)." % [me.short_name(), String(me.injury["name"]).to_lower(), int(me.injury["weeks"])], UIColors.RED, "Small", true))
 	c.add_child(UIKit.card_panel(card))

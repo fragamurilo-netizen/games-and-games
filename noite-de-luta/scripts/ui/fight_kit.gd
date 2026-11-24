@@ -84,7 +84,8 @@ static func status_text(w: GameWorld, f: Fighter) -> Array:
 
 
 ## Linha de lista: retrato, nome e segunda linha; à direita o ranking e o nível.
-static func fighter_row(w: GameWorld, f: Fighter, cb: Callable, line2: String = "", line2_color: Color = Color(0, 0, 0, 0), right: String = "") -> PanelContainer:
+## `right_node` troca o ranking por outra coisa (as estrelas do olheiro, no mercado).
+static func fighter_row(w: GameWorld, f: Fighter, cb: Callable, line2: String = "", line2_color: Color = Color(0, 0, 0, 0), right: String = "", right_node: Control = null) -> PanelContainer:
 	var h := UIKit.hbox(UITokens.S2)
 	h.add_child(portrait(w, f, 56))
 	var tv := UIKit.vbox(0)
@@ -105,11 +106,15 @@ static func fighter_row(w: GameWorld, f: Fighter, cb: Callable, line2: String = 
 	h.add_child(tv)
 	var rv := UIKit.vbox(0)
 	rv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var rk := UIKit.label(right if right != "" else w.rank_text(f), "Caps")
-	rk.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	if w.rank_of(f) == 0:
-		rk.add_theme_color_override(&"font_color", UIColors.GOLD)
-	rv.add_child(rk)
+	if right_node != null:
+		right_node.size_flags_horizontal = Control.SIZE_SHRINK_END
+		rv.add_child(right_node)
+	else:
+		var rk := UIKit.label(right if right != "" else w.rank_text(f), "Caps")
+		rk.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		if w.rank_of(f) == 0:
+			rk.add_theme_color_override(&"font_color", UIColors.GOLD)
+		rv.add_child(rk)
 	var lv := level_label(f.level())
 	lv.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	rv.add_child(lv)
@@ -117,6 +122,19 @@ static func fighter_row(w: GameWorld, f: Fighter, cb: Callable, line2: String = 
 	var row := UIKit.tap_row(h, cb)
 	row.custom_minimum_size.y = UITokens.H_ROW
 	return row
+
+
+## Estrelas do potencial como a equipe enxerga (faixa quando há dúvida). Null sem olheiro.
+static func potential_stars(w: GameWorld, f: Fighter, px: float = 15.0) -> StarsView:
+	var est := Scouting.estimate(w, f)
+	if bool(est.get("none", false)):
+		return null
+	var sv := StarsView.new()
+	sv.star_size = px
+	sv.stars = StarsView.from_value(float(est["lo"]))
+	var up := StarsView.from_value(float(est["hi"]))
+	sv.upper_stars = up if up > sv.stars else -1.0
+	return sv
 
 
 ## Atributo: nome, número e uma barra fina na cor da escala.

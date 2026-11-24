@@ -93,7 +93,7 @@ static func weigh_in(w: GameWorld, b: Bout) -> Dictionary:
 		var mm := Morale.fight_mods(f)
 		for k: String in mm:
 			m[k] = float(m.get(k, 0.0)) + float(mm[k])
-		res["camp"].append({"pts": snappedf(Camp.points(w, f, b), 0.1), "focus": Camp.focus_of(w, f, b), "mods": cm})
+		res["camp"].append({"pts": snappedf(Camp.points(w, f, b), 0.1), "focus": Camp.focus_of(w, f, b), "spar": Camp.has_own(w, f, b) and bool(f.camp.get("spar", false))})
 		res["mods"][i] = m
 	b.weigh = res
 	return res
@@ -106,7 +106,7 @@ static func engine_for(w: GameWorld, b: Bout, narrate: bool) -> FightEngine:
 	var e := FightEngine.new()
 	var r := RandomNumberGenerator.new()
 	r.seed = hash([w.seed, b.id, "luta"])
-	e.setup(w.fighter(b.a), w.fighter(b.b), b.rounds, b.title, r, {"narrate": narrate, "mods": wi["mods"], "ko": float(DataDB.division(b.division).get("ko", 1.0))})
+	e.setup(w.fighter(b.a), w.fighter(b.b), b.rounds, b.title, r, {"narrate": narrate, "mods": wi.get("mods", [{}, {}]), "ko": float(DataDB.division(b.division).get("ko", 1.0))})
 	return e
 
 
@@ -178,6 +178,9 @@ static func resolve(w: GameWorld, b: Bout, res: Dictionary, e: FightEngine) -> v
 	CareerStats.on_bout(w, b, res, e)
 	CareerStats.check_marks(w, fa, b)
 	CareerStats.check_marks(w, fb, b)
+	# Luta feita: os ajustes da noite não servem mais (só quem errou o peso fica guardado).
+	b.weigh.erase("mods")
+	b.weigh.erase("camp")
 	if not w.played_this_week.has(b.id):
 		w.played_this_week.append(b.id)
 

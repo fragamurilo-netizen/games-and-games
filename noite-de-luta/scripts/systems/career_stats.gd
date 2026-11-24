@@ -282,18 +282,27 @@ static func sample_all(w: GameWorld) -> void:
 			snapshot(w, f)
 
 
-## Pontos da curva para o gráfico: [[idade, nível], ...], terminando no nível de agora.
+## Pontos da curva para o gráfico: [[idade, nível, semana], ...], terminando no nível de agora.
 static func curve_points(w: GameWorld, f: Fighter) -> Array:
 	ensure_curve(w, f)
 	var out: Array = []
 	for i in f.curve.size():
-		out.append([_age_at(w, f, f.curve_w0 + i * SAMPLE_WEEKS), float(f.curve[i])])
+		var wk := f.curve_w0 + i * SAMPLE_WEEKS
+		out.append([_age_at(w, f, wk), float(f.curve[i]), wk])
 	if not f.retired:
 		var a := _age_at(w, f, w.week)
 		if out.is_empty() or a > float((out.back() as Array)[0]) + 0.01:
-			out.append([a, float(f.level())])
+			out.append([a, float(f.level()), w.week])
 		else:
 			(out.back() as Array)[1] = float(f.level())
+	return out
+
+
+## As lutas do jogo para marcar em cima da curva: [{age, res, title}].
+static func fight_points(w: GameWorld, f: Fighter) -> Array:
+	var out: Array = []
+	for h: Dictionary in f.history:
+		out.append({"age": _age_at(w, f, int(h["week"])), "res": String(h.get("res", "")), "title": bool(h.get("title", false))})
 	return out
 
 
@@ -333,12 +342,30 @@ static func has_mark(f: Fighter, key: String) -> bool:
 	return false
 
 
-## Marcos que o cartel de antes do jogo já garante (sem data).
-static func ensure_marks(f: Fighter) -> void:
-	if not f.marks.is_empty() or not f.is_pro():
+## Marcos que o lutador já tinha antes de o jogo olhar para ele (sem data): o que o cartel
+## garante e também o ranking e a sequência do momento. Quem estreou dentro do jogo não ganha
+## nada aqui: os marcos dele chegam com data, um a um.
+static func ensure_marks(w: GameWorld, f: Fighter) -> void:
+	if not f.marks.is_empty() or not f.is_pro() or f.fights() <= f.history.size():
 		return
-	for key: String in _reached(f, true):
+	var keys := _reached(f, true)
+	for key: String in _reached(f, false):
+		if not keys.has(key):
+			keys.append(key)
+	var r := w.rank_of(f) if w != null else -1
+	if r >= 0 and r <= 15 and not keys.has("top15"):
+		keys.append("top15")
+	if r >= 0 and r <= 5 and not keys.has("top5"):
+		keys.append("top5")
+	for key: String in keys:
 		f.marks.append([key, -9999])
+
+
+## No começo da carreira (e ao abrir um save antigo): todo mundo já sai com os marcos do passado,
+## para a primeira semana não virar uma enxurrada de notícias.
+static func ensure_all_marks(w: GameWorld) -> void:
+	for f: Fighter in w.fighters.values():
+		ensure_marks(w, f)
 
 
 static func _value(f: Fighter, prefix: String) -> int:
@@ -384,7 +411,7 @@ static func _reached(f: Fighter, past: bool) -> Array:
 
 ## Depois de cada luta: marca o que o lutador acabou de alcançar e avisa.
 static func check_marks(w: GameWorld, f: Fighter, b: Bout = null) -> void:
-	ensure_marks(f)
+	ensure_marks(w, f)
 	var keys := _reached(f, false)
 	if b != null:
 		var ev := w.event(b.event_id)
@@ -429,6 +456,31 @@ static func weekly_marks(w: GameWorld) -> void:
 				continue
 			if not has_mark(f, "top15") or (i < 5 and not has_mark(f, "top5")):
 				check_marks(w, f)
+
+
+## O que ele já trazia de antes do jogo, em poucas palavras: o degrau mais alto de cada escada
+## e os feitos de ranking e cinturão.
+static func past_summary(f: Fighter) -> Array:
+	var had := {}
+	for m: Array in f.marks:
+		if int(m[1]) < 0:
+			had[String(m[0])] = true
+	var out: Array = []
+	for lad: Array in LADDERS:
+		var p := String(lad[0])
+		var steps: Array = lad[1]
+		for i in range(steps.size() - 1, -1, -1):
+			var key := "%s%d" % [p, int(steps[i])]
+			if had.has(key):
+				out.append(mark_name(key))
+				break
+	if had.has("cinturao1"):
+		out.append(mark_name("cinturao1"))
+	elif had.has("top5"):
+		out.append(mark_name("top5"))
+	elif had.has("top15"):
+		out.append(mark_name("top15"))
+	return out
 
 
 ## Próximos marcos ao alcance: [[texto, feito, alvo], ...] (os três mais perto).

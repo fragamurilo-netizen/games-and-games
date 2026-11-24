@@ -51,6 +51,25 @@ func refresh() -> void:
 	if me.condition < 90.0:
 		wc.add_child(UIKit.label("%s está com %d%% da condição física." % [me.short_name(), int(me.condition)], "Small", true))
 	c.add_child(UIKit.card_panel(wc))
+	# Camp: como cada um chegou.
+	var camps: Array = wi.get("camp", [])
+	if camps.size() >= 2:
+		var cc := UIKit.card("Card", UITokens.S1)
+		cc.add_child(UIKit.label("Camp", "Section"))
+		for i in 2:
+			var f := w.fighter(b.a if i == 0 else b.b)
+			var o := w.fighter(b.b if i == 0 else b.a)
+			var cd: Dictionary = camps[i]
+			var pts := float(cd.get("pts", 0.0))
+			cc.add_child(UIKit.kv(f.short_name(), "%s (%d%%)" % [Camp.label(pts), int(round(pts))], UIColors.GREEN if pts >= 65.0 else (UIColors.ORANGE if pts < 45.0 else UIColors.TEXT)))
+			var focus := String(cd.get("focus", "plano"))
+			var lines := Camp.gain_lines(Camp.mods_for(pts, focus, f, o, b, bool(cd.get("spar", false))))
+			var what := String(Camp.FOCUS[focus]["name"]).to_lower() if Camp.FOCUS.has(focus) else focus
+			cc.add_child(UIKit.label("Foco: %s. %s" % [what, (", ".join(lines) + ".") if i == _side and not lines.is_empty() else ""], "Small", true))
+		var mm := Morale.fight_mods(me)
+		if not mm.is_empty():
+			cc.add_child(UIKit.label("%s entra %s: %s." % [me.short_name(), Morale.label(me).to_lower(), ", ".join(Camp.gain_lines(mm))], "Small", true))
+		c.add_child(UIKit.card_panel(cc))
 	var read := UIKit.card("Card", UITokens.S1)
 	read.add_child(UIKit.label("Leitura do técnico", "Section"))
 	read.add_child(UIKit.label(PlanEditor.coach_read(me, opp), "", true))

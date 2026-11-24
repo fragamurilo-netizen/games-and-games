@@ -21,6 +21,7 @@ func refresh() -> void:
 	if _tab == "staff":
 		_staff(w, c)
 		return
+	_scout_finds(w, c)
 	c.add_child(UIKit.segment([["amador", "Amadores"], ["profissional", "Profissionais"], ["veterano", "Veteranos"]], _stage, func(k: String):
 		_stage = k
 		refresh()))
@@ -40,13 +41,40 @@ func refresh() -> void:
 	if lst.is_empty():
 		c.add_child(UIKit.state_block("empty", "Ninguém livre aqui agora", "Contratos acabam e novos amadores aparecem todo mês."))
 		return
+	if Scouting.quality(w) > 0.0:
+		c.add_child(UIKit.label("As estrelas são o potencial como o seu olheiro enxerga: as apagadas são a dúvida.", "Small", true))
 	var hint := {"amador": "Baratos e dispostos. Alguns viram campeões; quase todos precisam de anos.", "profissional": "Já lutam e rendem bolsas, mas olham a reputação da academia.", "veterano": "Experiência e cartel, pouco tempo de carreira pela frente."}
 	c.add_child(UIKit.label(String(hint[_stage]), "Small", true))
 	for i in mini(lst.size(), 80):
 		var f: Fighter = lst[i]
 		var p := Signing.chance(w, f, 0.2, 5, 0.0)
 		var line := "%s · %d anos · %s · aceitaria: %s" % [Matchmaker.division_short(f.division), w.age_of(f), FightKit.record_detail(f).split(" · ")[0], Signing.chance_label(p).to_lower()]
-		c.add_child(FightKit.fighter_row(w, f, func(): UIManager.push("fighter", {"id": f.id}), line, UIColors.GREEN if p >= 0.5 else Color(0, 0, 0, 0)))
+		c.add_child(FightKit.fighter_row(w, f, func(): UIManager.push("fighter", {"id": f.id}), line, UIColors.GREEN if p >= 0.5 else Color(0, 0, 0, 0), "", FightKit.potential_stars(w, f)))
+
+
+## Indicações do olheiro: os nomes que ele trouxe do mercado nos últimos meses, com a faixa do
+## teto que ele enxerga em cada um.
+func _scout_finds(w: GameWorld, c: VBoxContainer) -> void:
+	if Scouting.quality(w) <= 0.0:
+		c.add_child(UIKit.label("Sem olheiro, o potencial de quem está no mercado é um mistério. Há candidatos na aba Staff.", "Small", true))
+		return
+	var finds := Scouting.finds(w)
+	var jobs := Scouting.jobs(w)
+	if finds.is_empty() and jobs.is_empty():
+		c.add_child(UIKit.label("%s traz indicações todo mês. Para saber mais de alguém, abra o perfil e mande observar." % Scouting.scout_name(w), "Small", true))
+		return
+	if not finds.is_empty():
+		c.add_child(UIKit.section_header("Indicações do olheiro"))
+		finds.reverse()
+		for it: Array in finds.slice(0, 5):
+			var f: Fighter = it[0]
+			var line := "%s · %d anos · %s" % [Matchmaker.division_short(f.division), w.age_of(f), FightKit.record_detail(f).split(" · ")[0]]
+			c.add_child(FightKit.fighter_row(w, f, func(): UIManager.push("fighter", {"id": f.id}), line, UIColors.GOLD, "", FightKit.potential_stars(w, f)))
+	for j: Dictionary in jobs:
+		var jf := w.fighter(int(j["id"]))
+		if jf != null:
+			c.add_child(UIKit.colored("Olheiro observando %s: relatório em %s." % [jf.display_name(), Fmt.plural(int(j["left"]), "semana", "semanas")], UIColors.ACCENT, "Small", true))
+	c.add_child(UIKit.section_header("Lutadores livres"))
 
 
 func _staff(w: GameWorld, c: VBoxContainer) -> void:
