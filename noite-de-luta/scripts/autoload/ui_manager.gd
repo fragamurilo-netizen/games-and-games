@@ -18,6 +18,8 @@ const SCREENS := {
 	"fight": "res://scripts/ui/screens/fight_screen.gd",
 	"event": "res://scripts/ui/screens/event_screen.gd",
 	"settings": "res://scripts/ui/screens/settings_screen.gd",
+	"credits": "res://scripts/ui/screens/credits_screen.gd",
+	"licenses": "res://scripts/ui/screens/licenses_screen.gd",
 	# Os dois papéis (acompanhar o mundo como fã)
 	"titles": "res://scripts/ui/screens/titles_screen.gd",
 	"results": "res://scripts/ui/screens/results_screen.gd",

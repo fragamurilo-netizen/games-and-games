@@ -70,9 +70,22 @@ static func has_save() -> bool:
 	return FileAccess.file_exists(SAVE_PATH)
 
 
-## Resumo do save para o menu: {team, week, balance}.
-static func save_summary() -> Dictionary:
-	var f := FileAccess.open(SAVE_PATH, FileAccess.READ)
+static func has_backup() -> bool:
+	return FileAccess.file_exists(BACKUP_PATH)
+
+
+## Põe a cópia de antes da atualização no lugar do save (Opções, no menu). A cópia continua
+## guardada.
+func restore_backup() -> bool:
+	if world != null or not has_backup():
+		return false
+	_dirty = false
+	return DirAccess.copy_absolute(ProjectSettings.globalize_path(BACKUP_PATH), ProjectSettings.globalize_path(SAVE_PATH)) == OK
+
+
+## Resumo do save para o menu: {team, week, balance, date, app}.
+static func save_summary(path: String = SAVE_PATH) -> Dictionary:
+	var f := FileAccess.open(path, FileAccess.READ)
 	if f == null:
 		return {}
 	var meta: Variant = JSON.parse_string(f.get_line())

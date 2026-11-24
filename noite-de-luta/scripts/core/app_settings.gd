@@ -17,6 +17,8 @@ const FIGHT_VIEW_NAMES: Array[String] = ["2D", "3D", "Texto"]
 static var fight_view: String = "2d"
 ## Transições mais curtas.
 static var reduce_motion: bool = false
+## A abertura animada ao abrir o app (ferramentas e passeios de telas desligam; não é salvo).
+static var intro: bool = true
 static var _loaded := false
 
 

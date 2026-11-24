@@ -12,6 +12,8 @@ func _initialize() -> void:
 
 func _start() -> void:
 	OS.low_processor_usage_mode = false
+	# A abertura animada fica desligada (--abertura liga, para quem quer capturá-la).
+	AppSettings.intro = "--abertura" in OS.get_cmdline_user_args()
 	var runner: Node = load("res://tools/save_flow_test_runner.gd").new()
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--out="):

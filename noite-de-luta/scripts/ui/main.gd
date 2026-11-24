@@ -57,6 +57,7 @@ func _ready() -> void:
 	top_bar.mail_pressed.connect(func(): UIManager.push("inbox"))
 	bottom_nav.tab_selected.connect(_on_tab)
 	GameManager.world_changed.connect(func(): UIManager.refresh_chrome())
+	UIKit.install_switches()
 	UIManager.goto("menu")
 
 

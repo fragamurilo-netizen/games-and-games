@@ -1,5 +1,80 @@
 # Noite de Luta — nota de passagem (24/11/2026)
 
+## Rodada 15 de 24/11/2026: lançamento (APK 1.0.0)
+
+Última etapa do roteiro: ícone, abertura, créditos, configurações finais e build. Nenhum
+sistema do jogo mudou: é marca, interface e um caminho novo no `GameManager` (voltar à cópia
+de antes da atualização).
+
+- **Marca** (`tools/gera_marca.py`, Pillow e numpy; sai em `assets/brand/`). O emblema é o
+  octógono com o anel metade vermelho e metade azul (os dois cantos), a lona escura e a lua
+  dourada da "noite". Peças: `emblema.png` (768 px, usado no jogo; o `.import` dele tem
+  `mipmaps/generate=true`), `icone.png` (512, `config/icon`), `icone_192.png`,
+  `icone_frente_432.png`, `icone_fundo_432.png` e `icone_mono_432.png` (os quatro
+  `launcher_icons/*` do preset: ícone antigo, adaptável e de uma cor), `abertura.png` (1024,
+  `boot_splash/image`: o emblema ocupa 40% do lado) e `facho.png` (o facho de luz). Com uma
+  segunda pasta o script gera também as peças da loja (`icone_loja_512.png` sem cantos e
+  `destaque_1024x500.png`). O `icon.svg` antigo saiu do projeto.
+- **Abertura** (`scripts/ui/brand/`). `BrandBackdrop` desenha o clarão e os dois fachos
+  (`beam` de 0 a 1). `BrandLogo` põe emblema, "NOITE DE", "LUTA", filete e chamada à mão,
+  medindo pela tinta da fonte (`ASCENT` e `CAP`), com `mix` (0 = só o emblema no meio) e
+  `bar_grow` para animar e `side_by_side` para o celular deitado. `IntroOverlay` começa igual
+  à imagem de abertura da engine (mesma cor, mesmo tamanho), traz os fachos, toca o gongo com
+  vibração, pulso e eco do emblema, abre espaço para o nome e sai sozinho em 2,25 s (um toque
+  pula). Toca uma vez por vez que o app abre (`MenuScreen.opened`); não toca com "Menos
+  animação", sem tela, nem com `AppSettings.intro = false` (as ferramentas `design_shots`,
+  `look_shots`, `save_flow_test` e `screens_perf` desligam; `--abertura` liga).
+- **Tela inicial** (`menu_screen.gd`): a marca em cima, os três rostos no meio, os botões
+  embaixo (o conteúdo tem a altura da tela como mínimo e dois espaçadores), "Opções" e
+  "Créditos" lado a lado e a versão no rodapé. Deitado vira duas colunas. Os tamanhos mudam
+  com a altura (`tall` a partir de 1200) e no tablet (`big`).
+- **Créditos e licenças** (`credits_screen.gd` e `licenses_screen.gd`, telas `credits` e
+  `licenses`): versão, o que é o jogo, a assinatura lida de `data/credits.json` (linha com
+  nome vazio não aparece, e **hoje está vazia: o dono ainda não disse como quer assinar**),
+  "Feito com" (Godot com o texto da licença MIT de `Engine.get_license_text()`; fonte Saira
+  com `assets/fonts/OFL-Saira.txt`; os 102 componentes de `Engine.get_copyright_info()`, cada
+  um com seus avisos e o texto das licenças de `Engine.get_license_info()`), universo fictício
+  e privacidade (sem internet, sem anúncios, sem coleta de dados). `_reflow` desfaz as quebras
+  de 80 colunas dos textos.
+- **Opções** (`settings_screen.gd`): cartões de Som (efeitos, volume Baixo, Médio ou Alto =
+  30, 60 ou 100, vibração), Luta ao vivo (velocidade e 2D, 3D ou texto), Tela (menos
+  animação), com a carreira aberta a ajuda e "Sair para o menu", ou, no menu, "Carreira salva"
+  (voltar à cópia de antes da atualização, com `GameManager.restore_backup()`, e apagar a
+  carreira) e Sobre. As chaves
+  de ligar e desligar ganharam desenho próprio (`UIKit.install_switches`, chamado em
+  `main.gd`): a desligada do Godot quase sumia no fundo dos cartões.
+- **Build**: versão 1.0.0, código 17. `armeabi-v7a` ligado: o APK serve também em celular de
+  32 bits (passou de 35 para 61 MB). Descrição do projeto atualizada.
+- **O AAB da loja não foi gerado.** O build com Gradle baixa o plugin do Android do Maven do
+  Google (`dl.google.com`), que a rede deste ambiente não alcança, e montar o AAB por fora
+  (bundletool) foi barrado pelas regras da sessão. Com o dono liberando o endereço (um
+  ambiente da nuvem próprio para este repositório, com `dl.google.com` permitido) ou fazendo o
+  build no PC dele, o que falta é: Android SDK com plataforma e build-tools, o modelo de build
+  do Godot (`Projeto > Instalar modelo de build do Android`, ou `android_source.zip` dos
+  modelos de exportação em `android/build`), e no preset `gradle_build/use_gradle_build=true`
+  com `gradle_build/export_format=1`.
+- **Antes de publicar** (tudo depende do dono): decidir se publica; chave de envio dele (a de
+  teste tem senha fraca e está anotada); de onde vieram os sons herdados do Mais Uma Rodada,
+  que não têm licença registrada aqui (`achievement`, `applause`, `boo`, `lose`, `title` e
+  `win` em `.ogg`; `back`, `click`, `tab`, `toggle_on`, `toggle_off`, `notify`, `notify_good`,
+  `notify_bad` e `sign` em `.wav`; os outros saem de `tools/gera_sons.py`); a assinatura dos
+  créditos; a ficha da loja (capturas em 16:9, textos, classificação indicativa, política de
+  privacidade). O nome do pacote, `com.noitedeluta.mma`, não pode mudar depois de publicado.
+- **Verificado**: `check_scripts` (161 scripts, 0 com erro); os 20 passeios de telas da rodada
+  14 de novo (dois papéis, atletas, eventos, `look_shots`, `ui_shots` e temporada, em pé,
+  deitado e tablet) com as mesmas contagens e sem erro de script; o passeio novo
+  `brand_shots_runner` com a abertura ligada em pé, deitado e tablet (21 telas cada) e sem ela
+  em tela curta (720×1280) e tablet em pé, que também aperta de verdade "Sair para o menu",
+  "Voltar à cópia" e "Apagar a carreira" e confere o resultado; `save_flow_test` com todas as
+  conferências verdadeiras; ícones e imagem de abertura conferidos dentro do APK (as quatro
+  peças em cada densidade e `assets/brand/abertura.png`). `fight_soak` e `world_sim` não foram
+  rodados de novo: nenhum arquivo de `scripts/systems`, `scripts/models` ou do motor mudou
+  desde a 0.9.0. **Não testado em celular de verdade** (a passagem da imagem
+  de abertura do Android para a do jogo, o som do gongo e a vibração só dá para conferir no
+  aparelho).
+- **Ficou para depois**: música; levar o save de um aparelho para outro (exportar e importar);
+  o que já estava na lista da rodada 14.
+
 ## Rodada 14 de 24/11/2026: equilíbrio e polimento (APK 0.9.0)
 
 Quinta etapa da lista do dono rumo à 1.0: economia nos dois papéis em 10 anos ou mais,
@@ -817,7 +892,7 @@ Cinturões com linhagem.
 ## APK de teste
 
 - APKs novos (0.1.2+) ficam nos arquivos do projeto (`noite-de-luta/`), assinados com a chave de
-  teste guardada em `chave-teste/` lá; o atual é o 0.9.0.
+  teste guardada em `chave-teste/` lá; o atual é o 1.0.0 (arm64 e armeabi-v7a).
 - `releases/NoiteDeLuta-0.1.1.apk` (release, arm64, Android 7+; instala por cima da 0.1.0). Assinado com uma chave de teste
   local: um APK novo assinado com outra chave pede desinstalar o antigo antes.
 - Para gerar de novo: modelos de exportação do Godot 4.7.2 (só `android_*.apk` e `version.txt` em
@@ -865,4 +940,6 @@ godot --headless --path . --script res://tools/economy_probe.gd -- --years=12 [-
 godot --headless --path . --script res://tools/perf_probe.gd -- --weeks=104 [--role=presidente] [--seed=2027] [--save=ARQ]
 xvfb-run -a -s "-screen 0 1900x1900x24" godot --path . --resolution 780x1688 --script res://tools/screens_perf.gd -- --in=SAVE.json
 xvfb-run -a -s "-screen 0 1900x1900x24" godot --path . --resolution 780x1688 --script res://tools/save_flow_test.gd -- --out=/tmp/fluxo
+python3 tools/gera_marca.py assets/brand [PASTA_DA_LOJA]   # refaz emblema, ícones e abertura (Pillow e numpy); depois, --import
+xvfb-run -a -s "-screen 0 1900x1900x24" godot --path . --resolution 780x1688 --script res://tools/design_shots.gd -- --runner=brand_shots_runner --out=/tmp/marca --abertura [--tablet] [--prefix=l_]
 ```

@@ -202,6 +202,43 @@ static func shrink_button(b: Button) -> void:
 		b.tooltip_text = b.text
 
 
+static var _switches_done := false
+
+
+## Chaves de ligar e desligar (CheckButton) com desenho próprio: a desligada do Godot quase some
+## no fundo escuro dos cartões. As texturas são feitas uma vez, com o triplo do tamanho, e
+## entram no tema do projeto.
+static func install_switches() -> void:
+	if _switches_done:
+		return
+	_switches_done = true
+	var th := ThemeDB.get_project_theme()
+	if th == null:
+		return
+	for dis: bool in [false, true]:
+		var suffix := "_disabled" if dis else ""
+		var on := _switch_texture(true, dis)
+		var off := _switch_texture(false, dis)
+		for mirrored: String in ["", "_mirrored"]:
+			th.set_icon("checked" + suffix + mirrored, "CheckButton", on)
+			th.set_icon("unchecked" + suffix + mirrored, "CheckButton", off)
+
+
+static func _switch_texture(on: bool, disabled: bool) -> Texture2D:
+	var a := "0.45" if disabled else "1"
+	var svg := ""
+	if on:
+		svg = "<svg xmlns='http://www.w3.org/2000/svg' width='60' height='34' viewBox='0 0 60 34' opacity='%s'><rect x='0' y='0' width='60' height='34' rx='17' fill='#F1F0EC'/><circle cx='43' cy='17' r='12' fill='#1A1D20'/></svg>" % a
+	else:
+		svg = "<svg xmlns='http://www.w3.org/2000/svg' width='60' height='34' viewBox='0 0 60 34' opacity='%s'><rect x='1.5' y='1.5' width='57' height='31' rx='15.5' fill='#2F3439' stroke='#6B747D' stroke-width='3'/><circle cx='17' cy='17' r='10' fill='#B7BCC2'/></svg>" % a
+	var img := Image.new()
+	if img.load_svg_from_string(svg, 3.0) != OK:
+		return null
+	var tex := ImageTexture.create_from_image(img)
+	tex.set_size_override(Vector2i(60, 34))
+	return tex
+
+
 static func hbox(sep: int = 12) -> HBoxContainer:
 	var h := HBoxContainer.new()
 	h.add_theme_constant_override(&"separation", sep)
