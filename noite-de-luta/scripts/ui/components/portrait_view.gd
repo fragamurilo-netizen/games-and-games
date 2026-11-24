@@ -494,6 +494,61 @@ func set_face(seed_value: int, eth_: int, age_: int, look_: Dictionary = {}) -> 
 	queue_redraw()
 
 
+## Retratos sendo montados em outra thread por `set_face_async` (as capturas esperam zerar).
+static var async_pending := 0
+var _async_want := 0
+## Não desenha nada (o retrato ainda não tem rosto: o primeiro vem por `set_face_async`).
+var blank := false:
+	set(v):
+		blank = v
+		queue_redraw()
+
+
+## Troca o rosto sem travar a tela: as camadas são montadas em outra thread, num retrato solto
+## igual a este, e só então o rosto novo aparece (até lá fica o anterior). É o que o editor de
+## visual usa: cada ajuste custava a montagem inteira na thread principal.
+func set_face_async(seed_value: int, eth_: int, age_: int, look_: Dictionary = {}) -> void:
+	# Antes do primeiro quadro o tamanho ainda não chegou: vale o mínimo pedido (é o que o
+	# retrato sem expansão recebe). Se o tamanho final for outro, o `_draw` monta de novo.
+	var sz := size
+	if minf(sz.x, sz.y) <= 4.0:
+		sz = custom_minimum_size
+	if minf(sz.x, sz.y) <= 4.0 or photo != null:
+		blank = false
+		set_face(seed_value, eth_, age_, look_)
+		return
+	var want := hash([seed_value, eth_, age_, look_, sz])
+	if want == _async_want:
+		return
+	_async_want = want
+	var twin := PortraitView.new()
+	for prop: StringName in [&"shirt_color", &"trim_color", &"bg_color", &"suit", &"kit_collar", &"kit_pattern", &"kit", &"crest",
+			&"cutout", &"layers", &"head_only", &"fight_body", &"gear_color", &"gear_trim", &"stage", &"framing", &"mesh_light"]:
+		twin.set(prop, get(prop))
+	twin.size = sz
+	twin.set_face(seed_value, eth_, age_, look_.duplicate(true))
+	var id := get_instance_id()
+	var face: Array = [seed_value, eth_, age_, look_]
+	# O número da tarefa vai numa caixa: quem recebe o resultado precisa dele para encerrá-la.
+	var task: Array = [-1]
+	async_pending += 1
+	task[0] = WorkerThreadPool.add_task(func() -> void:
+		var out := twin.build_layers()
+		PortraitView._async_done.call_deferred(id, want, out, twin, task, face), false, "retrato do editor")
+
+
+static func _async_done(id: int, want: int, pairs: Array, twin: PortraitView, task: Array, face: Array) -> void:
+	if int(task[0]) >= 0:
+		WorkerThreadPool.wait_for_task_completion(int(task[0]))
+	async_pending = maxi(0, async_pending - 1)
+	cache_store(pairs)
+	twin.free()
+	var pv := instance_from_id(id) as PortraitView
+	if pv != null and is_instance_valid(pv) and pv._async_want == want:
+		pv.blank = false
+		pv.set_face(int(face[0]), int(face[1]), int(face[2]), face[3])
+
+
 ## Dirigente, técnico ou cornerman de terno (o presidente da organização usa este).
 func set_person(seed_value: int, eth_: int, age_: int, accent: Color, look_: Dictionary = {}) -> void:
 	face_seed = seed_value
@@ -553,10 +608,22 @@ func build_layers() -> Array:
 	return out
 
 
+## Guarda camadas montadas por `build_layers()` (em outra thread) no cache de comandos, para o
+## próximo `_draw` de um retrato igual só repetir. Chamar na thread principal.
+static func cache_store(pairs: Array) -> void:
+	for p: Array in pairs:
+		var key: int = p[0]
+		if not _cmd_cache.has(key):
+			_cmd_cache_order.append(key)
+		_cmd_cache[key] = p[1]
+	while _cmd_cache_order.size() > CMD_CACHE_MAX:
+		_cmd_cache.erase(_cmd_cache_order.pop_front())
+
+
 func _paint(collect: bool) -> Array:
 	var out: Array = []
 	var s := minf(size.x, size.y)
-	if s <= 4.0:
+	if s <= 4.0 or (blank and not collect):
 		return out
 	var o := Vector2((size.x - s) * 0.5, (size.y - s) * 0.5)
 	var c := o + Vector2(s * 0.5, s * 0.5)

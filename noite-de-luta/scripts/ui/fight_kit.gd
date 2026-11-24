@@ -308,6 +308,7 @@ static func tape(w: GameWorld, fa: Fighter, fb: Fighter) -> VBoxContainer:
 ## Corpo inteiro do lutador (pesagem): `ref_cm` igual nos dois lados compara a altura de verdade.
 static func body(w: GameWorld, f: Fighter, h: int, ref_cm: int = 0) -> BodyView:
 	var b := BodyView.new()
+	b.live = false
 	b.set_fighter(w, f)
 	b.ref_cm = ref_cm if ref_cm > 0 else f.height_cm + 4
 	b.custom_minimum_size = Vector2(h * 0.48, h)

@@ -326,8 +326,13 @@ static func needs_player(w: GameWorld, open_before: Array, cash_before: float) -
 	if w.is_president():
 		if Org.night_this_week(w) != null:
 			return true
-	elif not Career.pending_user_bouts(w).is_empty():
-		return true
+	else:
+		if not Career.pending_user_bouts(w).is_empty():
+			return true
+		# Proposta de luta na última semana de validade: para aqui, para ela não vencer sozinha.
+		for o: Dictionary in w.offers:
+			if int(o.get("expires", w.week + 99)) <= w.week:
+				return true
 	if not Season.event(w).is_empty() or Season.gala_pending(w):
 		return true
 	var t := w.user_team()

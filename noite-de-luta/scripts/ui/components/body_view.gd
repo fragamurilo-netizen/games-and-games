@@ -20,9 +20,19 @@ var shorts: Color = Color("#16161A")
 var trim: Color = Color("#C8102E")
 var glove: Color = Color("#141416")
 
+## Verdadeiro (o padrão: editor de visual e folhas de teste): a cabeça é refeita na hora a cada
+## mudança. Falso (a ficha do lutador, por `FightKit.body`): a cabeça é montada em outra thread e
+## aparece quando fica pronta, para a tela abrir sem esperar por ela.
+var live := true
+## Cabeças sendo montadas em outra thread agora (as capturas de tela esperam chegar a zero).
+static var pending := 0
+
 var _f: Dictionary = {}
 var _head: PortraitView = null
 var _hair_back: PortraitView = null
+## A cabeça cujas camadas já estão no cache de comandos (rosto, visual e tamanho).
+var _heads_for := 0
+var _warming := 0
 var _skin := Color.WHITE
 var _key := 0
 
@@ -170,18 +180,22 @@ func _draw() -> void:
 	draw_polygon(neck, ncols)
 	# Sombra do queixo no pescoço
 	_soft(Vector2(cx, chin + U * 0.06), nw * 0.95, U * 0.1, Color(_skin.darkened(0.55), 0.35))
-	# Cabeça
+	# Cabeça. Montar as camadas custa caro (dezenas de milissegundos): fora do editor, isso roda
+	# em outra thread e, até ficar pronto, aparece uma cabeça lisa no tom da pele.
+	var hk := hash([face_seed, eth, age, look, snappedf(s, 0.01)])
+	if not live and _heads_for != hk:
+		# Enquanto a cabeça nova não chega fica a anterior (um ajuste no editor não pisca); na
+		# primeira vez, uma cabeça lisa.
+		if _head == null:
+			_blob(hc + Vector2(0, fh_px * 0.42), fh_px * 0.36, fh_px * 0.5, _skin, 0.6)
+		if _warming != hk:
+			_warm(hk, s)
+		return
 	if _head == null:
 		# Duas camadas do mesmo retrato: o cabelo de trás fica atrás do corpo (cabelo comprido cai
 		# pelas costas, não por cima do pescoço como uma barba) e a cabeça por cima de tudo.
 		for back: bool in [true, false]:
-			var pv := PortraitView.new()
-			pv.head_only = true
-			pv.cutout = true
-			pv.stage = false
-			pv.framing = PortraitView.FRAME_CLASSIC
-			pv.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			pv.layers = 1 if back else 6
+			var pv := _head_view(back)
 			pv.show_behind_parent = back
 			add_child(pv)
 			if back:
@@ -194,6 +208,54 @@ func _draw() -> void:
 		if pv.face_seed != face_seed or pv.eth != eth or pv.age != age or pv.look != look:
 			pv.set_face(face_seed, eth, age, look)
 		pv.queue_redraw()
+
+
+static func _head_view(back: bool) -> PortraitView:
+	var pv := PortraitView.new()
+	pv.head_only = true
+	pv.cutout = true
+	pv.stage = false
+	pv.framing = PortraitView.FRAME_CLASSIC
+	pv.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pv.layers = 1 if back else 6
+	return pv
+
+
+## Monta as duas camadas da cabeça fora da thread principal, em retratos soltos iguais aos que
+## vão para a tela, e guarda o resultado no cache de comandos do PortraitView.
+func _warm(hk: int, s: float) -> void:
+	_warming = hk
+	pending += 1
+	var pvs: Array = []
+	for back: bool in [true, false]:
+		var pv := _head_view(back)
+		pv.size = Vector2(s, s)
+		pv.set_face(face_seed, eth, age, look.duplicate(true))
+		pvs.append(pv)
+	var id := get_instance_id()
+	# O número da tarefa vai numa caixa: quem recebe o resultado precisa dele para encerrá-la.
+	var task: Array = [-1]
+	task[0] = WorkerThreadPool.add_task(func() -> void:
+		var out: Array = []
+		for pv: PortraitView in pvs:
+			out.append_array(pv.build_layers())
+		BodyView._warm_done.call_deferred(id, hk, out, pvs, task), false, "cabeça do corpo")
+
+
+static func _warm_done(id: int, hk: int, pairs: Array, pvs: Array, task: Array) -> void:
+	# Toda tarefa do WorkerThreadPool precisa ser encerrada (sem isso o jogo aborta ao fechar).
+	if int(task[0]) >= 0:
+		WorkerThreadPool.wait_for_task_completion(int(task[0]))
+	pending = maxi(0, pending - 1)
+	PortraitView.cache_store(pairs)
+	for pv: PortraitView in pvs:
+		pv.free()
+	var b := instance_from_id(id) as BodyView
+	if b != null and is_instance_valid(b):
+		if b._warming == hk:
+			b._warming = 0
+		b._heads_for = hk
+		b.queue_redraw()
 
 
 ## Luz de cilindro: `x` de -1 (lado esquerdo, aceso) a 1, `y` desce a luz (0 em cima).

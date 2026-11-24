@@ -161,7 +161,7 @@ func _run() -> void:
 	var b2: Bout = pend[0]
 	UIManager.switch_area("hub")
 	UIManager.push("fight_plan", {"bout": b2.id})
-	await _scroll_to("Pesagem")
+	await _scroll_to("Como chegam")
 	await _shot("a17_plano_camp")
 	var e := Career.engine_for(w, b2, true)
 	var res := e.run_all()

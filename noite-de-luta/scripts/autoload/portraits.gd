@@ -31,6 +31,8 @@ class Job:
 	var image: Image
 	var save := false
 	var path := ""
+	## Retrato de passagem (as miniaturas do editor de visual): não vai para o disco.
+	var temp := false
 
 var _mem: Dictionary = {} # chave -> [textura, bytes]
 var _order: Array = [] # chaves, da menos para a mais recente
@@ -140,6 +142,7 @@ func want(spec: Dictionary, px: int, who: Object = null) -> int:
 	_seq += 1
 	job.seq = _seq
 	job.path = "%s/%d.webp" % [DIR, key]
+	job.temp = bool(spec.get("temp", false))
 	job.pv = _view(spec, int(SIZES[bucket][0]))
 	_jobs[key] = job
 	_queue.append(job)
@@ -170,8 +173,9 @@ func prewarm(w: GameWorld, fighters: Array, px: int = 72) -> void:
 			want(spec_of(w, f), px)
 
 
+## Retratos (e cabeças das figuras de corpo inteiro) ainda sendo feitos em segundo plano.
 func pending() -> int:
-	return _jobs.size()
+	return _jobs.size() + BodyView.pending + PortraitView.async_pending
 
 
 func _view(spec: Dictionary, logical: int) -> PortraitView:
@@ -358,7 +362,7 @@ func _finish(job: Job, img: Image, fresh: bool) -> void:
 		for who in lst:
 			if is_instance_valid(who):
 				who.call(&"_on_texture", tex)
-	if fresh and _disk_ok:
+	if fresh and _disk_ok and not job.temp:
 		var s := Job.new()
 		s.save = true
 		s.image = img

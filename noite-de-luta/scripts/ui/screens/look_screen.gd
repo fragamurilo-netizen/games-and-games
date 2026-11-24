@@ -109,6 +109,7 @@ func _build_preview() -> void:
 	var row := UIKit.hbox(8)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	_portrait = PortraitView.new()
+	_portrait.blank = true
 	_portrait.custom_minimum_size = Vector2(232, 232)
 	_portrait.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -249,7 +250,10 @@ func _update_preview() -> void:
 	var t := w.team(_f.team_id)
 	if t != null:
 		_portrait.gear_trim = t.color1
-	_portrait.set_face(_f.face_seed, _f.eth, w.age_of(_f), _f.look.duplicate())
+	# O retrato e a cabeça da figura são montados fora da thread principal: o ajuste responde na
+	# hora e a imagem troca quando fica pronta.
+	_portrait.set_face_async(_f.face_seed, _f.eth, w.age_of(_f), _f.look.duplicate())
+	_body.live = false
 	_body.set_fighter(w, _f)
 	_body.look = _f.look.duplicate()
 	_body.ref_cm = _f.height_cm + 4
@@ -510,21 +514,25 @@ func _pick(key: String, id: int, name: String) -> void:
 func _process(_dt: float) -> void:
 	var n := 0
 	var w := world()
-	while not _pending.is_empty() and n < 2:
+	var t := w.team(_f.team_id)
+	while not _pending.is_empty() and n < 8:
 		var it: Array = _pending.pop_front()
 		var holder := it[0] as Control
 		if not is_instance_valid(holder):
 			continue
-		var p := PortraitView.new()
-		p.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		p.stage = false
+		# Miniatura em imagem (feita fora da tela e guardada na memória): trinta retratos vivos,
+		# redesenhados a cada quadro, deixavam o editor pesado.
+		var p := Portrait.new()
+		p.cutout = true
 		# Retrato maior que o quadro, cortado em volta do que importa: cabelo e ombros no penteado,
 		# do nariz ao queixo na barba.
 		var beard := _tile_key == "bd"
 		var z := 1.9 if beard else 1.45
+		p.setup({"seed": _f.face_seed, "eth": _f.eth, "age": w.age_of(_f), "look": it[1],
+			"trim": t.color1 if t != null else Color("#C8102E"), "temp": true}, 220 if beard else 150)
+		p.custom_minimum_size = Vector2.ZERO
 		p.size = holder.size * z
 		p.position = Vector2(-(z - 1.0) * 0.5 * holder.size.x, -holder.size.y * z * (0.15 if beard else 0.03))
-		p.set_face(_f.face_seed, _f.eth, w.age_of(_f), it[1])
 		holder.add_child(p)
 		n += 1
 	if _pending.is_empty():

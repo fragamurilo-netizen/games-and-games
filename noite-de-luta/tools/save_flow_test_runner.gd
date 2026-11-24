@@ -73,6 +73,22 @@ func _run() -> void:
 			await get_tree().process_frame
 		await _frames(5)
 		print("semana ", w.week, " · pendente: ", GameManager.get("_dirty"), " · esperando: ", GameManager.get("_weeks_pending"))
+	# Adiantar: fecha semanas até aparecer algo para decidir e grava uma vez só, no fim.
+	btn = _button("Adiantar")
+	print("botão Adiantar: ", btn != null)
+	if btn != null:
+		var wk0 := w.week
+		var open0 := DashKit.open_keys(w)
+		var cash0 := w.user_team().balance
+		btn.pressed.emit()
+		await _frames(3)
+		await _shot("skip_busy")
+		while DashKit.closing or GameManager.turning:
+			await get_tree().process_frame
+		await _frames(5)
+		print("adiantou ", w.week - wk0, " semanas · há o que decidir: ", DashKit.needs_player(w, open0, cash0), " · pendências novas: ",
+			DashKit.open_keys(w).filter(func(k: String) -> bool: return not open0.has(k)).size(), " · aviso na tela: ", is_instance_valid(UIManager.get("_busy")))
+		await _shot("skip_after")
 	# Sair de cena grava o que estiver pendente.
 	GameManager.save_now()
 	print("marcado: ", GameManager.get("_dirty"))

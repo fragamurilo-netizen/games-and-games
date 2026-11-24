@@ -1,5 +1,104 @@
 # Noite de Luta — nota de passagem (24/11/2026)
 
+## Rodada 16 de 24/11/2026: interface 2.0 (APK 1.1.0)
+
+Pedido do dono logo depois do 1.0.0, nas palavras dele: "Eu acho toda a UI lenta, feia e
+demorada. UX também péssimo, repense toda ela e refaça". A rodada refaz a base da interface
+(velocidade), o visual (tema) e os caminhos (menos toques e menos leitura). Nenhuma regra do
+jogo mudou: `fight_soak` dá os mesmos números e os saves antigos abrem igual.
+
+**O que estava lento (medido no servidor; celular fraco é 6 a 8 vezes mais):**
+
+- Cada retrato era uma malha de ~30 mil triângulos, refeita em 90 a 180 ms e redesenhada em
+  todo quadro. Doze retratos na tela custavam ~100 ms por quadro no desenho por software.
+- Toda tela remontava todos os nós a cada vez que aparecia (30 a 70 ms já com tudo em cache).
+- A virada da semana (~350 ms) rodava na linha principal, com a tela parada.
+- Dicas grandes e avisos empilhados cobriam o conteúdo.
+
+**Velocidade:**
+
+- **Retratos em imagem** (`scripts/autoload/portraits.gd`, autoload `Portraits`, e
+  `scripts/ui/components/portrait.gd`, classe `Portrait`). O `PortraitView` continua sendo quem
+  desenha, mas uma vez só: as camadas são montadas numa linha de trabalho (`build_layers()`),
+  fotografadas num `SubViewport` e guardadas como textura, na memória (até 80 MB, sai a menos
+  usada) e no disco (`user://cache/retratos`, WebP, até 4000 arquivos). A tela mostra uma
+  silhueta até a imagem chegar. Três tamanhos guardados (`SIZES`); `VERSION` entra na chave:
+  **aumente quando o desenho do retrato mudar**, senão o disco devolve o retrato antigo.
+  `FightKit.portrait`, `cutout` e `staff_portrait` já devolvem `Portrait`; `Portraits.prewarm`
+  adianta a equipe e os campeões. Um `spec` com `"temp": true` não vai para o disco (miniaturas
+  do editor de visual). Quem ainda usa `PortraitView` vivo: o retrato grande do editor de
+  visual e as três caras do menu.
+- **Telas em cache** (`BaseScreen.on_show`): a tela só é remontada se o carimbo mudou
+  (`GameManager.rev`, a semana, o formato da janela, menos animação). `rev` sobe quando o mundo
+  muda (`save_now`, virada de semana, abrir ou começar carreira) e a cada toque que não trocou
+  de tela (`main.gd`, `_after_tap`): quem muda o mundo sem salvar precisa subir `rev`.
+- **Virada de semana fora da tela** (`GameManager.advance_week_async`, `WorkerThreadPool`), com
+  o aviso animado (`UIManager.busy`). Sem tela (`--headless`) roda direto. O fluxo inteiro dos
+  dois Inícios está em `DashKit.close_week(screen, many)`.
+- **Figura de corpo inteiro e editor de visual**: a cabeça do `BodyView` é montada em outra
+  thread quando `live = false` (é assim em `FightKit.body`, o da ficha; o padrão `true` segue
+  na hora, para as folhas de teste). No editor, o retrato grande troca por
+  `PortraitView.set_face_async` (monta num retrato solto, guarda com `cache_store` e só então
+  mostra) e as miniaturas são `Portrait` em imagem. **Toda tarefa do `WorkerThreadPool` precisa
+  de `wait_for_task_completion`**: sem isso o jogo aborta ao fechar (aconteceu no teste).
+- Scripts das telas carregados em segundo plano na abertura; transições de 0,07 a 0,14 s;
+  entrada dos cartões mais curta (`Anim`); um aviso por vez, no alto, por cima da barra.
+
+**Visual ("noite de arena"):** paleta nova em `UIColors` (azul quase preto, dourado da marca
+como única cor de ação, estados vivos, cantos vermelho e azul), raios e fios em `UITokens` e o
+tema inteiro refeito em `tools/build_theme_runner.gd` (**rodar `build_theme.gd` depois de
+mexer nele**): cartões arredondados com fio, botão principal dourado com "lábio", fichas em
+cápsula, abas com filete, rótulos `Kicker`. Fundo com brilho no alto e os dois cantos
+(`main.gd`, `_add_night`), caixa numa cápsula na barra do topo, cápsula dourada no item ativo
+da navegação. A cor da equipe saiu dos botões: fica no escudo e no fundo do retrato
+(`FightKit.tone_of`). Peças novas no `UIKit`: `kicker`, `badge`, `pill` em cápsula.
+
+**Caminhos:**
+
+- **Início** (os dois papéis) na ordem do que a semana pede: a luta de hoje ou a próxima, o
+  passo do guia, o que espera decisão; depois a casa, a equipe, a temporada, a agenda e as
+  notícias. Com luta da casa na semana, o rodapé tem **Simular** e **Ir para a luta** (não há
+  mais botão travado).
+- **Adiantar** (ao lado de Avançar semana): fecha semanas até aparecer algo que peça o jogador
+  (luta da casa ou noite da liga, novidade na caixa de entrada, gala, sócios, caixa no
+  vermelho), no máximo 12, e para com um toque (`DashKit.needs_player`). O arquivo é gravado
+  uma vez, no fim (`GameManager.batch`).
+- **Ficha do lutador**: os 18 atributos num cartão só, em duas colunas, na primeira dobra
+  (`FightKit.attr_card`); depois potencial e moral (o "o que pesa" abre com um toque), rivais,
+  físico, estilo e personalidade. O mesmo cartão de atributos serve a proposta e o plano.
+- **Plano de luta**: o plano e a leitura do técnico vêm logo abaixo do confronto; pesagem e
+  camp viraram um cartão ("Como chegam").
+- **Mercado**, **Equipe** e **Academia** com menos texto: uma linha no lugar de cada
+  parágrafo, finanças em três números e cinco lançamentos, atalho para o Mercado na Equipe.
+- **Dicas** em faixa de duas linhas (um toque abre, outro fecha); guia dos primeiros passos
+  compacto; a faixa da semana virou o aviso do alto.
+- **Editor de visual**: as miniaturas de cabelo e barba são imagens (eram trinta retratos
+  vivos na tela).
+
+**Ferramenta nova:** `tools/page_shots_runner.gd` abre um save e captura cada tela do topo ao
+fim da rolagem (comando no fim desta nota). As rotas de captura que apertam "Avançar semana"
+esperam a virada terminar (`DashKit.closing`, `GameManager.turning`).
+
+**Verificação:**
+
+- `check_scripts`: 164 scripts, 0 erros. `fight_soak --n=100`: KO 10,8%, TKO 10,6%, FIN 23,6%,
+  DEC 53,6%, EMP 1,5% (igual à 1.0.0). `world_sim` de 52 semanas nos dois papéis, sem erro.
+- As 23 rotas de captura (em pé, deitado e tablet), 0 erros de script. A gala deitada ganhou
+  uma dobra (24 e 20 telas em `l_sea` e `l_seap`): as linhas com retrato ficaram mais altas.
+- `screens_perf` no save de 60 semanas, tempo até a tela estar desenhada (dois quadros, desenho
+  por software, cache de retratos vazio), 1.0.0 → 1.1.0: Início 2092 → 336 ms, Rankings 3900 →
+  274, Mercado 1526 → 226, Resultados 3282 → 230, Cinturões 994 → 217, ficha de campeão 710 →
+  289, ficha de lutador da casa 566 → 251, Equipe 254 → 181. A montagem do editor de visual
+  caiu de 802 para 19 ms (o retrato grande chega depois, sem travar). O piso desse teste é de
+  ~160 ms (a tela de opções), que é o custo de dois quadros no desenho por software.
+- `save_flow_test`: virada pelo botão, Adiantar e Continuar (ver a saída do teste).
+
+**Não testado em celular de verdade**; a velocidade em aparelho fraco continua estimativa.
+
+**Em aberto:** o primeiro desenho de cada retrato ainda custa (a silhueta aparece antes); as
+telas do presidente herdaram o tema e a ordem nova do Início, mas não foram redesenhadas uma
+a uma; o dono ainda não disse qual celular usa.
+
 ## Rodada 15 de 24/11/2026: lançamento (APK 1.0.0)
 
 Última etapa do roteiro: ícone, abertura, créditos, configurações finais e build. Nenhum
@@ -942,4 +1041,6 @@ xvfb-run -a -s "-screen 0 1900x1900x24" godot --path . --resolution 780x1688 --s
 xvfb-run -a -s "-screen 0 1900x1900x24" godot --path . --resolution 780x1688 --script res://tools/save_flow_test.gd -- --out=/tmp/fluxo
 python3 tools/gera_marca.py assets/brand [PASTA_DA_LOJA]   # refaz emblema, ícones e abertura (Pillow e numpy); depois, --import
 xvfb-run -a -s "-screen 0 1900x1900x24" godot --path . --resolution 780x1688 --script res://tools/design_shots.gd -- --runner=brand_shots_runner --out=/tmp/marca --abertura [--tablet] [--prefix=l_]
+xvfb-run -a -s "-screen 0 1900x1900x24" godot --path . --resolution 780x1688 --script res://tools/design_shots.gd -- --runner=page_shots_runner --out=/tmp/paginas --in=SAVE.json [--only=hub,team]   # cada tela do topo ao fim da rolagem
+godot --headless --path . --script res://tools/build_theme.gd   # refaz assets/theme/main_theme.tres
 ```
