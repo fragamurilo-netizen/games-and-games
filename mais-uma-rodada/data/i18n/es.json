@@ -13102,5 +13102,11 @@
 	"Folha": "Salarios",
 	"%s, mostrando %d": "%s, mostrando %d",
 	"Idade média": "Edad media",
-	"Rendimento": "Rendimiento"
+	"Rendimento": "Rendimiento",
+	"Calor %s": "Calor %s",
+	"Para fora": "Fuera",
+	"%s ataca para a direita": "%s ataca hacia la derecha",
+	"%s ataca para a esquerda": "%s ataca hacia la izquierda",
+	"MELHORES MOMENTOS": "MEJORES MOMENTOS",
+	"Mapa do jogo": "Mapa del partido"
 }

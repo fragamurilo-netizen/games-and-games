@@ -226,6 +226,10 @@ func _buttons(th: Theme) -> void:
 	_button_colors(th, "SegmentButton", UIColors.MUTED, UIColors.ON_ACCENT)
 	th.set_font(&"font", "SegmentButton", f_semi)
 	th.set_font_size(&"font_size", "SegmentButton", UITokens.F_BODY_SMALL)
+	# Segmento com cinco opções ou mais: a mesma peça na fonte condensada, para caber no celular.
+	th.add_type("SegmentButtonDense")
+	th.set_type_variation("SegmentButtonDense", "SegmentButton")
+	th.set_font(&"font", "SegmentButtonDense", f_cond)
 	# Navegação inferior (o indicador da aba ativa é desenhado pela BottomNav)
 	th.add_type("NavButton")
 	th.set_type_variation("NavButton", "Button")

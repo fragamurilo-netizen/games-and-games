@@ -7,9 +7,11 @@ const SPEED_INSTANT := 0
 const SPEED_FAST := 1
 const SPEED_NORMAL := 2
 const SPEED_TURBO := 3
-const SPEED_NAMES: Array[String] = ["Instantâneo", "Rápido", "Normal", "Turbo"]
+## Melhores momentos: os minutos sem perigo passam voando e o jogo para nos lances que valem.
+const SPEED_HIGHLIGHTS := 4
+const SPEED_NAMES: Array[String] = ["Instantâneo", "Rápido", "Normal", "Turbo", "Momentos"]
 ## Ordem nas opções: do mais lento ao resultado direto.
-const SPEED_ORDER: Array[int] = [SPEED_NORMAL, SPEED_FAST, SPEED_TURBO, SPEED_INSTANT]
+const SPEED_ORDER: Array[int] = [SPEED_NORMAL, SPEED_FAST, SPEED_HIGHLIGHTS, SPEED_TURBO, SPEED_INSTANT]
 
 static var sound: bool = true
 static var vibration: bool = true
@@ -80,7 +82,7 @@ static func load_settings() -> void:
 		return
 	sound = cfg.get_value("audio", "sound", true)
 	vibration = cfg.get_value("audio", "vibration", true)
-	match_speed = clampi(int(cfg.get_value("game", "match_speed", SPEED_FAST)), SPEED_INSTANT, SPEED_TURBO)
+	match_speed = clampi(int(cfg.get_value("game", "match_speed", SPEED_FAST)), SPEED_INSTANT, SPEED_HIGHLIGHTS)
 	tutorial_done = cfg.get_value("game", "tutorial_done", false)
 	language = cfg.get_value("game", "language", I18n.system_language())
 	currency = clampi(int(cfg.get_value("game", "currency", CURRENCY_EUR)), CURRENCY_EUR, CURRENCY_USD)

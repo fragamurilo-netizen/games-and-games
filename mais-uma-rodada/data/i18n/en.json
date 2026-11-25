@@ -13112,5 +13112,11 @@
 	"Folha": "Wages",
 	"%s, mostrando %d": "%s, showing %d",
 	"Idade média": "Average age",
-	"Rendimento": "Output"
+	"Rendimento": "Output",
+	"Calor %s": "%s heat",
+	"Para fora": "Off target",
+	"%s ataca para a direita": "%s attack to the right",
+	"%s ataca para a esquerda": "%s attack to the left",
+	"MELHORES MOMENTOS": "KEY MOMENTS",
+	"Mapa do jogo": "Match map"
 }

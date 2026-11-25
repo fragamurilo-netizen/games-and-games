@@ -697,7 +697,7 @@ static func segment(items: Array, selected: String, cb: Callable) -> PanelContai
 	var g := ButtonGroup.new()
 	for it: Array in items:
 		var b := Button.new()
-		b.theme_type_variation = "SegmentButton"
+		b.theme_type_variation = "SegmentButtonDense" if items.size() >= 5 else "SegmentButton"
 		b.text = String(it[1])
 		b.toggle_mode = true
 		b.button_group = g
@@ -708,7 +708,13 @@ static func segment(items: Array, selected: String, cb: Callable) -> PanelContai
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		# Rótulo bem mais longo que os outros ganha um pouco mais de largura ("Instantâneo" cortava
 		# no tablet em duas colunas); os curtos continuam do mesmo tamanho entre si.
-		b.size_flags_stretch_ratio = maxf(7.0, I18n.t(b.text).length()) / 7.0
+		# Com cinco opções ou mais não sobra folga no celular: a largura segue o tamanho do texto
+		# e a fonte é a condensada (SegmentButtonDense).
+		var chars := 0.0
+		for ch in I18n.t(b.text):
+			var lc := ch.to_lower()
+			chars += 1.5 if lc in ["m", "w"] else (0.6 if lc in ["i", "l", "t", "r", "f", "j", "1"] else 1.0)
+		b.size_flags_stretch_ratio = (chars + 2.5) / 9.5 if items.size() >= 5 else maxf(7.0, chars) / 7.0
 		b.clip_text = true
 		var key: String = it[0]
 		b.pressed.connect(func():

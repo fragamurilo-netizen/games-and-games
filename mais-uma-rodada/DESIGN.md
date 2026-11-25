@@ -301,6 +301,9 @@ estado alternável.
   títulos de seção das telas (não os títulos dentro de cartões).
 - **Controle selecionado** (`SegmentButton`, `ChipButton`): o escolhido veste a cor do clube,
   com o texto na cor que lê por cima dela. Os outros ficam apagados.
+  Segmento com cinco opções ou mais (`SegmentButtonDense`, escolhido sozinho pelo
+  `UIKit.segment`): mesma peça na condensada, com a largura de cada opção seguindo o texto,
+  para caber no celular sem cortar palavra.
 - **Ícones** (`assets/icons/`): sólidos, 24 px de desenho. Para coisa de futebol, objeto de
   futebol: cone (treino), chuteira (base), apito (comissão), trave (estatísticas), bandeira
   (torcida), estádio (história), pódio (ranking), campo (tática). Ícone genérico só para ação
@@ -353,6 +356,19 @@ estado alternável.
   clube entra pelo `ClubGradient`. Sem brilho nem sombra. Uma peça por lugar (embaixo, meio, alto),
   some sozinha e some ao toque; o jogo não para por elas (só a faixa do gol segura a partida).
   Opções › Partidas: desligado, só os gols ou completo.
+- **Melhores momentos** (velocidade `Momentos`, no pré-jogo, nas opções e no botão de ritmo da
+  partida): o jogo corre no ritmo do Turbo e desce sozinho para o ritmo Rápido, com o lance
+  encenado no campo, quando o minuto tem perigo (gol, bola na trave, pênalti, expulsão, VAR,
+  chance clara). No lugar de "ao vivo", o selo da transmissão diz "MELHORES MOMENTOS" em
+  `warning`. Nada de tela de transição entre um lance e outro: quem avisa é o relógio.
+- **Mapa da partida** (`MatchMapView`, com dados de `MatchMaps`; no intervalo, na aba de números
+  e no resumo final): um cartão "Mapa do jogo" com seletor (Finalizações, calor de cada time)
+  sobre o campo deitado, no mesmo gramado do resto (`Grass`). O mandante ataca para a direita.
+  Finalização: ponto na cor do time (time verde ou muito escuro clareia para não sumir na
+  grama), tamanho pela qualidade da chance; gol é um alvo (miolo, aro grosso de contraste, aro
+  fino), no gol é ponto cheio, para fora, na trave ou bloqueada é só o aro. Calor: amarelo, laranja,
+  vermelho (as cores do placar), nunca azul nem arco-íris. A legenda fica embaixo do campo, uma
+  linha só.
 - **Acontecendo agora** (`LiveTicker`, no Início): o noticiário do mundo passando sozinho, uma
   manchete por vez (escudo de quem está na notícia, chapéu da editoria, título em até duas linhas)
   e uma barra fina na cor do clube marcando a próxima. Tocar abre a matéria. Para fora da tela.

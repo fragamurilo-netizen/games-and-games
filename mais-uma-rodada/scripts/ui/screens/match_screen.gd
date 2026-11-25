@@ -5,6 +5,10 @@ extends BaseScreen
 
 const PACE: Array[float] = [1.25, 0.32, 0.08] # segundos por minuto de jogo
 const PACE_NAMES: Array[String] = ["Normal", "Rápido", "Turbo"]
+## Ritmos do botão de tempo, na ordem em que ele gira: os três de PACE e os melhores momentos.
+const MODE_NAMES: Array[String] = ["Normal", "Rápido", "Momentos", "Turbo"]
+const MODE_SPEEDS: Array[int] = [AppSettings.SPEED_NORMAL, AppSettings.SPEED_FAST, AppSettings.SPEED_HIGHLIGHTS, AppSettings.SPEED_TURBO]
+const MODE_HL := 2
 const FEED_MAX := 70
 const PITCH_COMPACT := 0.23 # fração da altura do campo (deitado) quando os lances estão em destaque
 const FEED_FS := 24 # corpo da narração
@@ -20,6 +24,13 @@ var _entries: Array = []
 var _div_entries: Array = []
 var _user_side := 0
 var _pace := 1
+## Melhores momentos: os minutos sem perigo correm no turbo e o lance perigoso é encenado no
+## ritmo normal (com câmera lenta, replay do gol e grafismo). `_pace` muda sozinho a cada minuto.
+var _hl := false
+var _hl_hot := false
+## Mapa aberto no bloco de mapas (finalizações ou calor de um time): a aba de números se refaz a
+## cada minuto e não pode voltar sozinha para o primeiro.
+var _map_mode := "shots"
 var _paused := false
 var _halftime := false
 var _pending_halftime := false
@@ -276,7 +287,8 @@ func _build() -> void:
 		elif f.is_league() and user_nation != "" and w.league(f.comp) != null and w.league(f.comp).nation == user_nation:
 			_day_entries.append(e)
 	_user_side = 0 if _fx.home == w.user_club_id else 1
-	_pace = {AppSettings.SPEED_NORMAL: 0, AppSettings.SPEED_TURBO: 2}.get(AppSettings.match_speed, 1)
+	_pace = {AppSettings.SPEED_NORMAL: 0, AppSettings.SPEED_TURBO: 2, AppSettings.SPEED_HIGHLIGHTS: 2}.get(AppSettings.match_speed, 1)
+	_hl = AppSettings.match_speed == AppSettings.SPEED_HIGHLIGHTS
 	var home: Club = _sim.teams[0].club
 	var away: Club = _sim.teams[1].club
 	_colors = _team_colors(home, away)
@@ -529,6 +541,8 @@ func _build_scoreboard(home: Club, away: Club) -> Control:
 	_away_scorers = _board.away_scorers
 	_ticker = _board.ticker
 	_bug = _board.bug
+	if _hl:
+		_live_bug()
 	return _board
 
 
@@ -575,7 +589,7 @@ func _build_controls() -> void:
 		return
 	# As três decisões do jogo em destaque; tempo e o resto, compactos (DESIGN.md › Partida).
 	_play_btn = _ctl_btn("Pausar", "pause", _toggle_play)
-	_speed_btn = _ctl_btn(PACE_NAMES[_pace], "fast", _cycle_speed)
+	_speed_btn = _ctl_btn(MODE_NAMES[_mode()], "fast", _cycle_speed)
 	for b in [_play_btn, _speed_btn]:
 		_compact(b)
 	_tac_btn = _ctl_btn("Tática", "tactics", _open_tactics)
@@ -855,10 +869,54 @@ func _process(delta: float) -> void:
 
 func _advance() -> void:
 	_sim.step()
+	if _hl:
+		_hl_pace(_hot_minute(_sim.last_events))
 	# Primeiro o campo monta o lance; a narração de cada parte sai quando a bola chega nela.
 	_script_play()
 	_drain(false)
 	_after_step()
+
+
+## Lance que vale parar para ver: gol, bola na trave, pênalti, expulsão, gol anulado, defesaça e
+## chance clara (o mesmo corte dos "lances do jogo" do intervalo, um pouco mais aberto).
+func _hot_minute(evs: Array) -> bool:
+	for e: Dictionary in evs:
+		var t := int(e["t"])
+		var x: Dictionary = e.get("x", {})
+		if t in [MatchSimulation.EV_GOAL, MatchSimulation.EV_OWN_GOAL, MatchSimulation.EV_POST, MatchSimulation.EV_RED,
+				MatchSimulation.EV_PENALTY_AWARDED, MatchSimulation.EV_PEN_SAVE, MatchSimulation.EV_PEN_MISS, MatchSimulation.EV_VAR]:
+			return true
+		if t == MatchSimulation.EV_OFFSIDE and bool(x.get("goal", false)):
+			return true
+		if CHANCE_RES.has(t):
+			if float(x.get("xg", 0.0)) >= 0.22 or x.has("line") or String(x.get("fin", "")) in ["double", "fingertip", "one_on_one", "var_off"]:
+				return true
+	return false
+
+
+## Nos melhores momentos o ritmo é escolhido minuto a minuto, antes de o campo montar a jogada.
+func _hl_pace(hot: bool) -> void:
+	_hl_hot = hot
+	var want := 0 if hot else 2
+	if want != _pace:
+		_pace = want
+		_pitch.motion.tempo = TEMPO[_pace]
+	_clock = PACE[_pace]
+
+
+func _mode() -> int:
+	if _hl:
+		return MODE_HL
+	return [0, 1, 3][_pace]
+
+
+## Selo do canto do campo: ao vivo, ou "melhores momentos" quando o jogo está pulando os minutos
+## sem perigo.
+func _live_bug() -> void:
+	if _hl:
+		_set_bug("MELHORES MOMENTOS", Color("#FFC940"))
+	else:
+		_set_bug("● AO VIVO", Color("#FF4B4B"))
 
 
 func _after_step() -> void:
@@ -1999,6 +2057,7 @@ func _render_stats_tab() -> void:
 	fm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	card.add_child(fm)
 	_tab_box.add_child(UIKit.card_panel(card))
+	_tab_box.add_child(_maps_card(99))
 	# Notas ao vivo e fôlego do seu time
 	var rc := UIKit.card("Card", 4)
 	rc.add_child(UIKit.section("Seu time em campo"))
@@ -2240,7 +2299,7 @@ func _toggle_play() -> void:
 
 
 func _start_second_half() -> void:
-	_set_bug("● AO VIVO", Color("#FF4B4B"))
+	_live_bug()
 	Sfx.crowd_event("resume", 0)
 	Sfx.crowd_event("second", 0)
 	_halftime = false
@@ -2251,14 +2310,19 @@ func _start_second_half() -> void:
 
 
 func _cycle_speed() -> void:
-	_pace = (_pace + 1) % PACE.size()
-	_speed_btn.tooltip_text = PACE_NAMES[_pace]
+	var m := (_mode() + 1) % MODE_NAMES.size()
+	_hl = m == MODE_HL
+	_hl_hot = false
+	_pace = [0, 1, 2, 2][m]
+	_speed_btn.tooltip_text = MODE_NAMES[m]
 	if not _speed_btn.has_meta(&"compact"):
-		_speed_btn.text = PACE_NAMES[_pace]
+		_speed_btn.text = MODE_NAMES[m]
 	_clock = minf(_clock, PACE[_pace])
 	_pitch.motion.tempo = TEMPO[_pace]
+	if not (_halftime or _done):
+		_live_bug()
 	# A preferência padrão acompanha a escolha: o próximo jogo começa no mesmo ritmo.
-	AppSettings.match_speed = [AppSettings.SPEED_NORMAL, AppSettings.SPEED_FAST, AppSettings.SPEED_TURBO][_pace]
+	AppSettings.match_speed = MODE_SPEEDS[m]
 	AppSettings.save_settings()
 
 
@@ -2320,6 +2384,7 @@ func _show_halftime() -> void:
 	var km := _key_moments(3 if et else 1)
 	if km != null:
 		v.add_child(km)
+	v.add_child(_maps_card(3 if et else 1))
 	if AppSettings.tv_graphics >= 1:
 		var tb := _tv_table_piece()
 		if tb != null:
@@ -2348,6 +2413,16 @@ func _show_halftime() -> void:
 	row.add_child(UIKit.button("INICIAR PRORROGAÇÃO" if et else "INICIAR 2º TEMPO", "PrimaryButton", _start_second_half, "whistle"))
 	v.add_child(row)
 	UIManager.show_modal(v, false, false)
+
+
+## Mapas do jogo até o fim do tempo `max_half`: de onde saíram as finalizações e onde cada time
+## jogou. Um bloco só, com seletor (DESIGN.md › Mapa da partida).
+func _maps_card(max_half: int) -> Control:
+	var card := UIKit.card("Card", UITokens.S2)
+	card.add_child(UIKit.section("Mapa do jogo"))
+	card.add_child(MatchMapView.panel(_sim, max_half, [_side_color(0), _side_color(1)], _map_mode, func(k: String) -> void:
+		_map_mode = k))
+	return UIKit.card_panel(card)
 
 
 ## Lances que marcaram o jogo até o intervalo: gols, bolas na trave, defesaças, gols anulados,
@@ -2981,6 +3056,7 @@ func _build_summary() -> void:
 	if not any:
 		goals.add_child(UIKit.label("Nenhum gol.", "Muted"))
 	_feed.add_child(UIKit.card_panel(goals))
+	_feed.add_child(_maps_card(99))
 	# Craque
 	var motm := _sim.man_of_the_match()
 	if motm != null and AppSettings.tv_graphics >= 1:

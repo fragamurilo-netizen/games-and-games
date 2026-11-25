@@ -276,6 +276,12 @@ func _only_pass() -> void:
 		if spec == "!promo":
 			await _promo_match()
 			continue
+		if spec.begins_with("!pace="):
+			await _pace_time(int(spec.substr(6)))
+			continue
+		if spec == "!maps":
+			await _maps_match()
+			continue
 		if spec == "!taps":
 			await _tap_check(w)
 			continue
@@ -353,6 +359,139 @@ func _only_pass() -> void:
 				break
 			sc.scroll_vertical = int(sc.size.y * 0.85 * pg)
 			await _shot(shot_name + "_" + "bcdefghij"[pg - 1])
+
+
+## Quanto tempo uma partida inteira leva num ritmo (AppSettings.SPEED_*), sem capturas no meio.
+func _pace_time(speed: int) -> void:
+	AppSettings.match_speed = speed
+	GameManager.begin_match()
+	UIManager.goto("match")
+	await _frames(12)
+	UIManager.close_all_modals()
+	var screen := _screen()
+	var sim: MatchSimulation = screen.get("_sim")
+	screen.call("_drain", false)
+	var t0 := Time.get_ticks_msec()
+	var frames := 0
+	var hot := 0
+	var last := -1
+	while not bool(screen.get("_done")) and Time.get_ticks_msec() < t0 + 600000:
+		await get_tree().process_frame
+		frames += 1
+		var key := sim.half * 1000 + sim.minute
+		if key != last:
+			last = key
+			if bool(screen.get("_hl_hot")):
+				hot += 1
+		if bool(screen.get("_halftime")):
+			UIManager.close_all_modals()
+			screen.call("_start_second_half")
+		elif UIManager.has_modal():
+			UIManager.close_all_modals() # ordem dos pênaltis numa copa: segue com a automática
+	var secs := float(Time.get_ticks_msec() - t0) / 1000.0
+	if OS.has_environment("MAPS_DEBUG"):
+		for ev: Dictionary in sim.events:
+			if int(ev["t"]) in MatchMaps.SHOT_EVENTS:
+				print("[ev] ", ev)
+		for sh: Dictionary in MatchMaps.shots(sim.events, 99):
+			print("[chute] ", sh)
+	print("[ritmo] %s: %.1f s, %d quadros (%.0f por segundo), %d minutos encenados, placar %d x %d" % [
+		AppSettings.SPEED_NAMES[speed], secs, frames, frames / maxf(0.1, secs), hot, sim.score[0], sim.score[1]])
+	UIManager.close_all_modals()
+	UIManager.goto("hub")
+	await _frames(6)
+	GameManager.play_instant()
+	await _frames(4)
+
+
+## Partida nos melhores momentos: um lance perigoso encenado, o intervalo com o mapa do jogo, a
+## aba de números (finalizações e calor) e o resumo. Imprime quanto tempo o jogo levou, quantos
+## minutos pararam para um lance e confere o mapa de finalizações contra as estatísticas.
+func _maps_match() -> void:
+	AppSettings.match_speed = AppSettings.SPEED_HIGHLIGHTS
+	GameManager.begin_match()
+	UIManager.goto("match")
+	await _frames(12)
+	UIManager.close_all_modals()
+	var screen := _screen()
+	var sim: MatchSimulation = screen.get("_sim")
+	screen.call("_drain", false)
+	var t0 := Time.get_ticks_msec()
+	var deadline := t0 + 420000
+	var hot_shot := false
+	var half_shot := false
+	var stats_shot := false
+	var hot_minutes := 0
+	var last_min := -1
+	while not bool(screen.get("_done")) and Time.get_ticks_msec() < deadline:
+		await get_tree().process_frame
+		var key := sim.half * 1000 + sim.minute
+		if key != last_min:
+			last_min = key
+			if bool(screen.get("_hl_hot")):
+				hot_minutes += 1
+		if not hot_shot and bool(screen.get("_hl_hot")) and int(screen.get("_pace")) == 0:
+			hot_shot = true
+			var t := Time.get_ticks_msec() + 1600
+			while Time.get_ticks_msec() < t:
+				await get_tree().process_frame
+			await _shot(prefix + "maps_01_lance")
+		if bool(screen.get("_halftime")):
+			if not half_shot:
+				half_shot = true
+				await _shot(prefix + "maps_02_intervalo")
+				var modal: Control = UIManager.main.modal_host
+				for sc in modal.find_children("*", "ScrollContainer", true, false):
+					(sc as ScrollContainer).scroll_vertical = 520
+				await _shot(prefix + "maps_03_intervalo_mapa")
+			UIManager.close_all_modals()
+			screen.call("_start_second_half")
+		elif UIManager.has_modal():
+			UIManager.close_all_modals()
+		if sim.half == 2 and sim.minute >= 70 and not stats_shot:
+			stats_shot = true
+			screen.call("_set_tab", "stats")
+			await _frames(4)
+			await _shot(prefix + "maps_04_numeros")
+			var tsc: ScrollContainer = screen.get("_tab_scroll")
+			if tsc != null:
+				tsc.scroll_vertical = 430
+			await _shot(prefix + "maps_05_finalizacoes")
+			screen.set("_map_mode", "heat%d" % int(screen.get("_user_side")))
+			screen.call("_set_tab", "feed")
+			screen.call("_set_tab", "stats")
+			await _frames(4)
+			if tsc != null:
+				tsc.scroll_vertical = 430
+			await _shot(prefix + "maps_06_calor")
+			screen.set("_map_mode", "shots")
+			screen.call("_set_tab", "feed")
+	var secs := float(Time.get_ticks_msec() - t0) / 1000.0
+	print("[mapas] partida em %.1f s, %d minutos com lance encenado" % [secs, hot_minutes])
+	var list := MatchMaps.shots(sim.events, 99)
+	var per := [0, 0]
+	var goals := [0, 0]
+	for sh: Dictionary in list:
+		if OS.has_environment("MAPS_DEBUG"):
+			print("[chute] ", sh)
+		per[int(sh["s"])] += 1
+		if String(sh["res"]) == "goal":
+			goals[int(sh["s"])] += 1
+	print("[mapas] finalizações no mapa %d x %d, nas estatísticas %d x %d; gols no mapa %d x %d, placar %d x %d" % [
+		per[0], per[1], sim.teams[0].shots, sim.teams[1].shots, goals[0], goals[1], sim.score[0], sim.score[1]])
+	if not bool(screen.get("_done")):
+		push_error("A partida não terminou no prazo da captura")
+		get_tree().quit(1)
+		return
+	UIManager.close_all_modals()
+	await _frames(6)
+	await _shot(prefix + "maps_07_resumo")
+	var fsc: ScrollContainer = screen.get("_feed_scroll")
+	if fsc != null:
+		fsc.scroll_vertical = 500
+	await _shot(prefix + "maps_08_resumo_mapa")
+	UIManager.goto("hub")
+	await _frames(6)
 
 
 ## Formação personalizada (padrão: o caso dos prints, LD virou MD e o centroavante virou PD):
