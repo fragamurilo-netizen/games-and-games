@@ -42,6 +42,7 @@ func refresh() -> void:
 			c.add_child(UIKit.state_block("empty", "Nada esperando decisão", "O que precisar de você aparece aqui: propostas, contratos, imprevistos. Os avisos ficam em Tudo.", "Ver tudo", func():
 				_view = "tudo"
 				refresh()))
+		_bulk(c, w, pend)
 		for m: Dictionary in pend:
 			c.add_child(InboxKit.card(w, m, refresh))
 			_shown.append(m)
@@ -95,3 +96,34 @@ func refresh() -> void:
 
 static func _cap(t: String) -> String:
 	return t.substr(0, 1).to_upper() + t.substr(1)
+
+
+## Um toque para o que é rotina: o matchmaker fecha cards e cinturões vagos (presidente) e o
+## técnico toca os camps como estão (manager). O que pede escolha de verdade continua na lista.
+func _bulk(c: Control, w: GameWorld, pend: Array) -> void:
+	if w.is_president():
+		var n := pend.filter(func(m: Dictionary) -> bool:
+			return String(m["act"]) == "org_event" or String(m.get("key", "")).begins_with("vago:")).size()
+		if n < 2:
+			return
+		c.add_child(UIKit.button("Deixar %d com o matchmaker" % n, "GhostButton", func():
+			var res := Org.matchmaker_now(w, Inbox.CARD_WEEKS)
+			GameManager.save_now()
+			var fights := int(res["fights"])
+			var belts := int(res["belts"])
+			if fights + belts == 0:
+				UIManager.toast("Ninguém livre para fechar agora.")
+			else:
+				Sfx.play("sign", -4.0)
+				UIManager.toast("Matchmaker: %s e %s." % [Fmt.plural(fights, "luta fechada", "lutas fechadas"), Fmt.plural(belts, "disputa de cinturão", "disputas de cinturão")], UIColors.GREEN)
+			refresh(), "bolt"))
+	else:
+		var camps := pend.filter(func(m: Dictionary) -> bool: return String(m["act"]) == "camp")
+		if camps.size() < 2:
+			return
+		c.add_child(UIKit.button("Deixar %d camps com o técnico" % camps.size(), "GhostButton", func():
+			for m: Dictionary in camps:
+				Inbox.handle(m)
+			GameManager.save_now()
+			UIManager.toast("O técnico toca os camps como estão.", UIColors.GREEN)
+			refresh(), "bolt"))

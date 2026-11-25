@@ -21,6 +21,13 @@ func _cases() -> Dictionary:
 	var S := "solto"
 	return {
 		"parado": [{"wait": 30.0}],
+		"pos": [
+			_b("queda", 0, "chao:guarda:0", {"td": "duas_pernas", "ok": true}), {"wait": 2.0},
+			_b("passa", 0, "chao:meia:0"), {"wait": 2.0},
+			_b("passa", 0, "chao:lateral:0"), {"wait": 2.0},
+			_b("passa", 0, "chao:montada:0"), {"wait": 2.0},
+			_b("passa", 0, "chao:costas:0"), {"wait": 2.0},
+		],
 		"intro": [_b("round", -1, S, {"n": 1}), _b("estudo", 0, S, {"t": 1.0}), _b("golpe", 0, S, {"k": "jab", "z": "head", "hit": true, "dmg": 0.4})],
 		"troca": [
 			_b("estudo", 0, S, {"t": 2.0, "dist": 0}),

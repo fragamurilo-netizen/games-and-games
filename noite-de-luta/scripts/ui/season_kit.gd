@@ -149,9 +149,9 @@ static func goal_row(w: GameWorld, g: Dictionary, detailed: bool = false, intro:
 		if final:
 			note = "Cumprida %s. Recebido: %s." % [w.weeks_from_now(int(g["done"])), Season.reward_text(w, g)]
 		elif hold:
-			note = "Vale como o ano terminar. Recompensa: %s." % Season.reward_text(w, g)
+			note = "Fecha no fim do ano. Prêmio: %s." % Season.reward_text(w, g)
 		else:
-			note = "Paga na hora em que for batida: %s." % Season.reward_text(w, g)
+			note = "Prêmio: %s." % Season.reward_text(w, g)
 		var nl := UIKit.label(note, "Caps", true)
 		if final:
 			nl.add_theme_color_override(&"font_color", UIColors.GREEN)
