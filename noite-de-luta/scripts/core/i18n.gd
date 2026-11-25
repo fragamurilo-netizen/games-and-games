@@ -54,6 +54,14 @@ static func apply(code: String) -> void:
 	TranslationServer.set_locale(_LOCALES[code])
 
 
+## Antes de o jogo fechar: tira as tabelas do TranslationServer e solta as referências.
+## Sem isso a tabela (um objeto de script) sobrevive ao próprio script e o Godot aborta na saída.
+static func shutdown() -> void:
+	for code in _tables:
+		TranslationServer.remove_translation(_tables[code])
+	_tables.clear()
+
+
 ## Traduz um texto que não vai para um Control (desenhado à mão, comparado, cortado).
 static func t(text: String) -> String:
 	if lang == DEFAULT or text == "":

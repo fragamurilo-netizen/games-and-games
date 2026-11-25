@@ -46,6 +46,8 @@ func _process(_delta: float) -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_EXIT_TREE:
 		flush()
+	if what == NOTIFICATION_PREDELETE:
+		I18n.shutdown()
 
 
 static func app_version() -> String:
