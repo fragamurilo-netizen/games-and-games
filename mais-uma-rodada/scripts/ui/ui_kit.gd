@@ -53,8 +53,11 @@ static func button(text: String, variation: String = "", cb: Callable = Callable
 		b.expand_icon = false # largura limitada por icon_max_width do tema
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	if cb.is_valid():
+		var primary := variation == "PrimaryButton"
 		b.pressed.connect(func():
 			Sfx.click()
+			if primary:
+				Sfx.vibrate(12) # a ação principal responde no dedo (Opções › vibração)
 			cb.call())
 	b.custom_minimum_size.y = 72 if variation != "ChipButton" else 52
 	b.focus_mode = Control.FOCUS_ALL
@@ -714,6 +717,52 @@ static func menu_row(icon_name: String, title: String, subtitle: String, cb: Cal
 	var row := tap_row(h, cb)
 	row.custom_minimum_size.y = UITokens.H_ROW
 	return row
+
+
+## Ladrilho de destino (menu ☰, áreas do clube): ícone, nome em até duas linhas e, embaixo,
+## a informação viva daquele lugar ("20 garotos", "2º, 14 pontos"). Botão secundário
+## (surface-raised) do tamanho de uma linha de lista; o lugar atual fica marcado.
+static func link_tile(icon_name: String, title: String, info: String, cb: Callable, here: bool = false, badge: int = 0) -> PanelContainer:
+	var h := hbox(UITokens.S2)
+	var tint := UIColors.ink(UIColors.ACCENT) if here else UIColors.TEXT
+	var ic := icon_rect(icon_name, 28, tint)
+	ic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	h.add_child(ic)
+	var col := vbox(-2)
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	col.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var l := label(title, "", true)
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD
+	l.max_lines_visible = 1 if info != "" else 2
+	l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	if here:
+		l.add_theme_color_override(&"font_color", tint)
+	col.add_child(l)
+	if info != "":
+		var s := label(info, "Small")
+		s.add_theme_color_override(&"font_color", UIColors.MUTED)
+		s.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		col.add_child(s)
+	h.add_child(col)
+	if badge > 0:
+		var b := colored(str(badge) if badge < 100 else "99+", UIColors.RED, "Caps")
+		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		h.add_child(b)
+	var tile := tap_row(h, cb, "CardFlat")
+	tile.custom_minimum_size.y = UITokens.H_ROW
+	tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return tile
+
+
+## Grade de ladrilhos de destino, com colunas de mesma largura.
+static func link_grid(tiles: Array, cols: int = 2) -> GridContainer:
+	var g := GridContainer.new()
+	g.columns = cols
+	g.add_theme_constant_override(&"h_separation", UITokens.S1)
+	g.add_theme_constant_override(&"v_separation", UITokens.S1)
+	for t: Control in tiles:
+		g.add_child(t)
+	return g
 
 
 ## Grupo de linhas de menu dentro de um único cartão, separadas por filetes.

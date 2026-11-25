@@ -51,16 +51,15 @@ func refresh() -> void:
 			columnize(c, start, 2, 0)
 
 
-## Resumo em frase: o que o time está treinando e quanto o treino rende.
+## O que o treino entrega, em dois números com barra. Foco, intensidade e preparação já são
+## as linhas do plano logo abaixo: não se repetem em frase.
 func _header(w: GameWorld, club: Club) -> Control:
-	var f := TrainingManager.focus_of(club)
-	var it := TrainingManager.intensity_of(club)
-	var pr := TrainingManager.prep_of(club)
 	var q := int(round(TrainingManager.quality(w, club) * 100.0))
-	var prep := "sem preparação específica" if String(club.training.get("prep", "")) == "" else "preparação: %s" % String(pr["name"]).to_lower()
-	var txt := "Foco %s, intensidade %s, %s. O treino rende %d de 100 e o entrosamento está em %d." % [
-		String(f["name"]).to_lower(), String(it["name"]).to_lower(), prep, q, int(club.cohesion)]
-	return UIKit.label(txt, "Muted", true)
+	var co := int(club.cohesion)
+	return StatStrip.make([
+		["Rendimento", str(q), UIColors.TEXT, q / 100.0, Fmt.rating_color(q)],
+		["Entrosamento", str(co), UIColors.TEXT, co / 100.0, Fmt.rating_color(co)],
+	])
 
 
 func _pct(v: Variant) -> int:

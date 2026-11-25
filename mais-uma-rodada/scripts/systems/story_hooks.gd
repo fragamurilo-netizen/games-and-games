@@ -105,7 +105,7 @@ static func _cup_hook(world: GameWorld, f: Fixture, user: Club, opp: Club) -> Di
 		var pos := order.find(user.id) + 1
 		if f.round >= 4:
 			return {"text": "%s: %dº no grupo %s, faltam %d jogos" % [cup.short_name, pos, g["n"], 6 - f.round], "kind": "season", "priority": 88}
-		return {"text": "%s · fase de grupos (grupo %s)" % [cup.name, g["n"]], "kind": "season", "priority": 72}
+		return {"text": "%s · fase de grupos (grupo %s)" % [cup.name, g["n"]], "kind": "season", "priority": 72, "plain": true}
 	var stage: String = cup.round_names[f.round]
 	if cup.id == CupManager.CWC and stage == "Final":
 		return {"text": "FINAL DO MUNDIAL: o título do planeta em jogo", "kind": "season", "priority": 110}

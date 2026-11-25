@@ -274,6 +274,17 @@ estado alternável.
 - **Linha de dados / DataTable**: sem fundo, `divider` embaixo, altura 84. Cabeçalho
   pequeno que ordena. Coluna do nome fixa. Poucas colunas em retrato, com **visão**
   (Geral · Forma · Temporada · Contrato) que troca as colunas.
+- **Faixa de números** (`StatStrip`): a tela abre com números, não com uma frase. Valor em
+  cima, rótulo embaixo, filete entre eles, direto no fundo (nunca um card por métrica). Quando
+  o número tem teto (folha contra o limite, vagas, elenco), uma barra fina embaixo do rótulo
+  mostra o quanto já foi usado: verde, laranja perto do teto, vermelha estourada
+  (`StatStrip.load_color`). No máximo quatro valores. Frase só aparece quando algo estourou.
+- **Ladrilho de destino** (`UIKit.link_tile` em `UIKit.link_grid`): ícone, nome e, embaixo, a
+  informação viva do lugar ("20 garotos", "2º, 14 pontos"). `surface-raised`, raio `sm`, altura
+  de linha (84). Duas colunas no celular, três ou quatro em tela larga. Usado no menu ☰ e nas
+  áreas do Clube no lugar das listas de texto com seta.
+- **Resposta ao toque**: apertar encolhe o alvo (`UIKit.press_fx`); a ação principal e a troca
+  de aba vibram de leve (8–12 ms, respeitando Opções › vibração). Nada além disso vibra.
 - **Cabeçalho de identidade** (`IdentityBand` → `ClubGradient`): degradê na cor do clube, funda
   atrás do escudo ou do retrato e sumindo na superfície antes do texto, com uma luz fraca da
   segunda cor no canto oposto e pontilhado fino (sem degraus). Cor clara demais (branco, amarelo)

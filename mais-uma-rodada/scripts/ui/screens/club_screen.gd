@@ -139,29 +139,28 @@ func _club_home(w: GameWorld, club: Club, c: VBoxContainer) -> void:
 	if nf != null:
 		var opp := w.club(nf.opponent_of(club.id))
 		next_txt = "%s, %s %s" % [w.season.date_label(nf.slot, false), "contra o" if nf.home == club.id else "no", opp.short_name]
-	var yl_pos := YouthManager.sorted_table(w).find(w.user_club_id) + 1
 	_group(right, "Futebol", [
 		["Elenco", "%d jogadores" % club.player_ids.size(), func(): UIManager.switch_area("squad")],
-		["Base", "%d garotos%s" % [w.academy.size(), (", %dº na liga sub-20" % yl_pos) if yl_pos > 0 and YouthManager.has_league(w) and int(w.youth_league["table"][w.user_club_id]["pl"]) > 0 else ""], func(): UIManager.push("academy")],
+		["Base", "%d garotos" % w.academy.size(), func(): UIManager.push("academy")],
 		["Treino", String(TrainingManager.focus_of(club)["name"]), func(): UIManager.push("training")],
 		["Comissão técnica", "", func(): UIManager.push("relations", {"tab": "staff"})],
 	])
 	_group(right, "Competição", [
-		["Confrontos", "Retrospecto por adversário", func(): UIManager.push("rivalry", {"a": club.id})],
-		["Calendário", ("Próximo: " + next_txt) if next_txt != "" else "Temporada encerrada", func(): UIManager.push("club", {"tab": "calendar"})],
-		["Classificação", "%s no %s" % [pos_txt, w.league_name(club.league_id)] if played else w.league_name(club.league_id), func(): UIManager.push("table")],
+		["Confrontos", "", func(): UIManager.push("rivalry", {"a": club.id})],
+		["Calendário", next_txt if next_txt != "" else "Temporada encerrada", func(): UIManager.push("club", {"tab": "calendar"})],
+		["Classificação", pos_txt if played else w.league_short(club.league_id), func(): UIManager.push("table")],
 		["Seleções", "", func(): UIManager.push("national")],
 		["Ranking de clubes", "", func(): UIManager.push("table", {"rank": ""})],
 	])
 	_group(right, "Gestão", [
-		["Finanças", "Caixa de %s, %s" % [Fmt.money(club.balance), FinanceManager.health_label(w, club).to_lower()], func(): UIManager.push("club", {"tab": "manage"})],
-		["Diretoria e torcida", "Confiança %s" % BoardManager.label(club.board_confidence).to_lower(), func(): UIManager.push("club", {"tab": "manage"})],
+		["Finanças", Fmt.money(club.balance), func(): UIManager.push("club", {"tab": "manage"})],
+		["Diretoria e torcida", BoardManager.label(club.board_confidence), func(): UIManager.push("club", {"tab": "manage"})],
 		["Estatísticas", "", func(): UIManager.push("club", {"tab": "stats"})],
 		["Uniformes e patrocínio", "", func(): UIManager.push("kit")],
 	])
 	var cid := club.id
 	_group(right, "Instituição", [
-		["História do clube", "Títulos, ídolos e recordes", func(): UIManager.push("club", {"tab": "history"})],
+		["História do clube", "", func(): UIManager.push("club", {"tab": "history"})],
 		["Elencos anteriores", "", func(): UIManager.push("past_squads", {"id": cid})],
 		["Revelados pela base", "", func(): UIManager.push("graduates", {"id": cid})],
 		["Sua carreira", "", func(): UIManager.push("club", {"tab": "career"})],
@@ -231,14 +230,25 @@ func _kits_row(club: Club) -> Control:
 	return panel
 
 
-## Grupo de áreas do clube: título de seção e as linhas (nome, informação viva, toque abre).
+## Ícone de cada área do clube (os mesmos do menu ☰).
+const AREA_ICONS := {
+	"Elenco": "shirt", "Base": "ball", "Treino": "whistle", "Comissão técnica": "users",
+	"Confrontos": "swap", "Calendário": "clock", "Classificação": "table", "Seleções": "globe",
+	"Ranking de clubes": "medal", "Finanças": "money", "Diretoria e torcida": "heart",
+	"Estatísticas": "bolt", "Uniformes e patrocínio": "palette", "História do clube": "book",
+	"Elencos anteriores": "list", "Revelados pela base": "up", "Sua carreira": "user",
+	"História do futebol": "trophy",
+}
+
+
+## Grupo de áreas do clube: título de seção e os ladrilhos (ícone, nome, informação viva).
 func _group(parent: VBoxContainer, title: String, rows: Array) -> void:
 	var v := UIKit.vbox(UITokens.S1)
 	v.add_child(UIKit.label(title, "Section"))
-	var list: Array = []
+	var tiles: Array = []
 	for r in rows:
-		list.append(UIKit.menu_row("", String(r[0]), String(r[1]), r[2]))
-	v.add_child(UIKit.menu_group(list))
+		tiles.append(UIKit.link_tile(String(AREA_ICONS.get(String(r[0]), "forward")), String(r[0]), String(r[1]), r[2]))
+	v.add_child(UIKit.link_grid(tiles, 2))
 	parent.add_child(v)
 
 

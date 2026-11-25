@@ -110,9 +110,7 @@ func _date_line(w: GameWorld, club: Club) -> Control:
 		where = "%dº no %s, %d pontos" % [CompetitionManager.position_of(league, club.id), w.league_name(club.league_id), int(league.table[club.id]["pts"])]
 	var sub := UIKit.label(where, "Muted", true)
 	v.add_child(sub)
-	var goal: Array = SeasonManager.goal_of(w, club.id)
-	if not goal.is_empty():
-		v.add_child(UIKit.label("Meta da diretoria: %s" % String(goal[0]).to_lower(), "Muted", true))
+	# A meta da diretoria mora no cabeçalho do Clube; aqui a manchete é a data e a posição.
 	return v
 
 
@@ -124,13 +122,13 @@ func _attention(w: GameWorld, club: Club) -> Control:
 		var d := EventManager.describe(w, ev)
 		var left := maxi(1, int(ev["exp"]) - w.current_turn())
 		var e: Dictionary = ev
-		rows.append([EventDialog.color_of(ev), String(d["title"]), "Responder em até %d jogo(s)" % left, func(): EventDialog.open(e, func(): refresh())])
+		rows.append([EventDialog.color_of(ev), String(d["title"]), "Responder em até %d jogo(s)" % left, func(): EventDialog.open(e, func(): refresh()), "bolt"])
 	var old := _alerts_items(w, club)
 	for it in old:
-		rows.append([it[1], String(it[2]), "", it[3]])
+		rows.append([it[1], String(it[2]), "", it[3], String(it[0])])
 	var unread := InboxManager.unread_count(w)
 	if unread > 0:
-		rows.append([UIColors.MUTED, Fmt.plural(unread, "mensagem não lida", "mensagens não lidas"), "", func(): UIManager.push("inbox")])
+		rows.append([UIColors.MUTED, Fmt.plural(unread, "mensagem não lida", "mensagens não lidas"), "", func(): UIManager.push("inbox"), "mail"])
 	if rows.is_empty():
 		return null
 	var out := UIKit.vbox(UITokens.S2)
@@ -138,9 +136,8 @@ func _attention(w: GameWorld, club: Club) -> Control:
 	var v := UIKit.card("Card", 0)
 	for r in rows:
 		var h := UIKit.hbox(14)
-		var mark := ColorRect.new()
-		mark.color = r[0]
-		mark.custom_minimum_size = Vector2(4, 36)
+		# O ícone diz o assunto e a cor diz a urgência (antes era só um filete colorido).
+		var mark := UIKit.icon_rect(String(r[4]) if r.size() > 4 else "info", 28, UIColors.ink(r[0]))
 		mark.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		h.add_child(mark)
 		var col := UIKit.vbox(0)
@@ -254,9 +251,13 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 		d.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		d.add_theme_color_override(&"font_color", UIColors.RED)
 		body.add_child(d)
+	var hooks := 0
 	for hk in StoryHooks.for_next_match(w):
-		if hk["kind"] == "derby":
+		# O que está em jogo, em no máximo duas linhas. Mercado e propostas já estão em "Precisa
+		# da sua atenção"; competição e fase já estão na faixa do alto do cartão.
+		if hk["kind"] in ["derby", "market"] or bool(hk.get("plain", false)) or hooks >= 2:
 			continue
+		hooks += 1
 		var line := UIKit.hbox(10)
 		line.add_child(UIKit.icon_rect(HOOK_ICONS.get(hk["kind"], "info"), 24, _hook_color(String(hk["kind"]))))
 		line.add_child(UIKit.label(hk["text"], "", true))

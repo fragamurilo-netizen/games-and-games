@@ -37,6 +37,7 @@ func _ready() -> void:
 		var tab: String = t[0]
 		b.pressed.connect(func():
 			Sfx.play("tab", -6.0)
+			Sfx.vibrate(8)
 			tab_selected.emit(tab))
 		row.add_child(b)
 		_buttons[tab] = b

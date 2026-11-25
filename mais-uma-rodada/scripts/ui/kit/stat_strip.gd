@@ -3,7 +3,9 @@ extends RefCounted
 ## Faixa de números como no grafismo de transmissão: valor em cima (condensada), rótulo
 ## embaixo, separados por um filete vertical. Não é um card por métrica (DESIGN.md): é uma
 ## linha só, que cabe dentro de um objeto (cabeçalho de jogador, bloco de jogo).
-## items: [[rótulo, valor, cor do valor], ...]
+## items: [[rótulo, valor, cor do valor, proporção, cor da barra], ...]. Com a proporção (0 a 1,
+## opcional), uma barra fina embaixo do rótulo mostra o quanto do limite está usado (folha,
+## vagas, elenco): o número diz quanto, a barra diz se está perto do teto.
 
 
 static func make(items: Array) -> HBoxContainer:
@@ -35,5 +37,21 @@ static func make(items: Array) -> HBoxContainer:
 		cap.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		cap.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		v.add_child(cap)
+		if it.size() > 3 and float(it[3]) >= 0.0:
+			var gap := Control.new()
+			gap.custom_minimum_size.y = 10
+			gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			v.add_child(gap)
+			var bar := UIKit.bar(clampf(float(it[3]), 0.0, 1.0), 1.0, it[4] if it.size() > 4 else UIColors.TEXT, 6)
+			bar.custom_minimum_size.x = 72
+			bar.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+			v.add_child(bar)
 		h.add_child(v)
 	return h
+
+
+## Cor da barra de um limite: tranquila, perto do teto, estourada.
+static func load_color(ratio: float) -> Color:
+	if ratio > 1.0:
+		return UIColors.RED
+	return UIColors.ORANGE if ratio > 0.9 else UIColors.GREEN

@@ -111,41 +111,12 @@ static func _restore_colors() -> void:
 static func _group(w: GameWorld, title: String, items: Array, cols: int) -> Control:
 	var g := UIKit.vbox(UITokens.S1)
 	g.add_child(UIKit.section_header(title))
-	var grid := GridContainer.new()
-	grid.columns = cols
-	grid.add_theme_constant_override(&"h_separation", UITokens.S1)
-	grid.add_theme_constant_override(&"v_separation", UITokens.S1)
+	var tiles: Array = []
 	for it in items:
 		var screen := String(it[1])
-		grid.add_child(_tile(String(it[0]), String(it[2]), _go.bind(screen, _params(w, screen)), _here(screen), _badge(w, screen)))
-	g.add_child(grid)
+		tiles.append(UIKit.link_tile(String(it[2]), String(it[0]), "", _go.bind(screen, _params(w, screen)), _here(screen), _badge(w, screen)))
+	g.add_child(UIKit.link_grid(tiles, cols))
 	return g
-
-
-## Ladrilho do menu: ícone, nome (até duas linhas) e o contador de não lidos. É um botão
-## secundário (surface-raised), do tamanho de uma linha de lista; a tela atual fica marcada.
-static func _tile(title: String, icon: String, cb: Callable, here: bool, badge: int) -> PanelContainer:
-	var h := UIKit.hbox(UITokens.S2)
-	var tint := UIColors.ink(UIColors.ACCENT) if here else UIColors.TEXT
-	var ic := UIKit.icon_rect(icon, 28, tint)
-	ic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	h.add_child(ic)
-	var l := UIKit.label(title, "", true)
-	l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD
-	l.max_lines_visible = 2
-	l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	if here:
-		l.add_theme_color_override(&"font_color", tint)
-	h.add_child(l)
-	if badge > 0:
-		var b := UIKit.colored(str(badge) if badge < 100 else "99+", UIColors.RED, "Caps")
-		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		h.add_child(b)
-	var tile := UIKit.tap_row(h, cb, "CardFlat")
-	tile.custom_minimum_size.y = UITokens.H_ROW
-	tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	return tile
 
 
 ## Ações do jogo numa fileira: ícone com o nome embaixo, cada uma com alvo de toque inteiro.

@@ -191,8 +191,15 @@ func _banner(w: GameWorld, club: Club) -> Control:
 	var fin := FinanceManager.summary(w, club)
 	var over: bool = fin["wage_bill"] > fin["wage_budget"]
 	var rules := DatabaseManager.squad_rules()
-	out.add_child(UIKit.label("Verba de %s para contratar. Folha de %s por mês, limite de %s. Elenco com %d (de %d a %d)." % [
-		Fmt.money(club.transfer_budget), Fmt.money(fin["wage_bill"]), Fmt.money(fin["wage_budget"]), club.player_ids.size(), int(rules["min_players"]), int(rules["max_players"])], "Muted", true))
+	var used := float(fin["wage_bill"]) / maxf(1.0, float(fin["wage_budget"]))
+	var n := club.player_ids.size()
+	var max_n := int(rules["max_players"])
+	out.add_child(UIKit.gap(UITokens.S1))
+	out.add_child(StatStrip.make([
+		["Verba", Fmt.money(club.transfer_budget), UIColors.TEXT],
+		["Folha", Fmt.money(fin["wage_bill"]), UIColors.RED if over else UIColors.TEXT, used, StatStrip.load_color(used)],
+		["Elenco", "%d/%d" % [n, max_n], UIColors.RED if n < int(rules["min_players"]) else UIColors.TEXT, float(n) / maxf(1.0, max_n), UIColors.ORANGE if n >= max_n or n < int(rules["min_players"]) else UIColors.GREEN],
+	]))
 	if over:
 		out.add_child(UIKit.colored("A folha passou do limite: salário novo depende de vender alguém.", UIColors.RED, "Small", true))
 	return out
@@ -420,9 +427,9 @@ func _fill_search(results: VBoxContainer, w: GameWorld, club: Club) -> void:
 			list = _top(list, func(e: Array) -> float: return float(e[3]), true)
 			list.sort_custom(func(a, b): return float(a[3]) > float(b[3]))
 	var shown := mini(MAX_ROWS, list.size())
-	var head := "%s" % Fmt.plural(total, "jogador encontrado", "jogadores encontrados")
+	var head := "%s" % Fmt.plural(total, "jogador", "jogadores")
 	if total > shown:
-		head += " · os %d primeiros %s" % [shown, "mais relevantes" if _sort == "rel" else "pela coluna escolhida"]
+		head = I18n.t("%s, mostrando %d") % [head, shown]
 	results.add_child(UIKit.label(head, "Muted", true))
 	if list.is_empty():
 		results.add_child(UIKit.state_block("empty", "Ninguém com esse perfil.", "Tente outro nome ou menos filtros.", "Limpar filtros" if _active_filters() > 0 else "", func():

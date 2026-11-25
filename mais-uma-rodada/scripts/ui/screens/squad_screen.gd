@@ -27,30 +27,30 @@ func _init() -> void:
 	max_content_width = 1700.0
 
 
-## Resumo em uma frase (sem painel de indicadores): tamanho, idade, time titular e folha.
-## A regra de estrangeiros só aparece quando estourada.
+## Resumo do elenco na faixa de números da transmissão: tamanho, idade média e a folha com a
+## barra do limite da diretoria. Frase só quando algo estourou (folha, regra de estrangeiros).
 func _summary(w: GameWorld, club: Club, squad: Array) -> Control:
-	var v := UIKit.vbox(2)
+	var v := UIKit.vbox(UITokens.S1)
 	var ages := 0.0
 	for p: Player in squad:
 		ages += p.age(w.year)
-	var xi := 0.0
-	if club.sheet != null:
-		xi = ClubAI.lineup_strength(w, club.sheet.formation, club.sheet.starters) / 11.0
 	var fin := FinanceManager.summary(w, club)
 	var over: bool = fin["wage_bill"] > fin["wage_budget"]
-	var txt := "%d jogadores, idade média de %s anos. Folha de %s por mês, limite de %s." % [
-		squad.size(), Fmt._decimal(ages / maxf(1.0, squad.size()), 1), Fmt.money(fin["wage_bill"]), Fmt.money(fin["wage_budget"])]
-	v.add_child(UIKit.label(txt, "Muted", true))
+	var used := float(fin["wage_bill"]) / maxf(1.0, float(fin["wage_budget"]))
+	v.add_child(StatStrip.make([
+		["Jogadores", str(squad.size()), UIColors.TEXT],
+		["Idade média", Fmt._decimal(ages / maxf(1.0, squad.size()), 1), UIColors.TEXT],
+		["Folha", Fmt.money(fin["wage_bill"]), UIColors.RED if over else UIColors.TEXT, used, StatStrip.load_color(used)],
+	]))
 	if over:
 		v.add_child(UIKit.colored("A folha passou do limite da diretoria.", UIColors.RED, "Small", true))
 	var rule := SquadRules.describe(club)
 	if rule != "":
 		# Com regra de estrangeiros na liga: quantos estão entre os relacionados, do limite.
-		var used := SquadRules.count(w, club, (club.sheet.starters + club.sheet.bench) if club.sheet != null else [])
+		var n := SquadRules.count(w, club, (club.sheet.starters + club.sheet.bench) if club.sheet != null else [])
 		var lim := int(SquadRules.limit(club)["max"])
-		if used > lim:
-			v.add_child(UIKit.colored("%s: %d de %d." % [rule, used, lim], UIColors.ORANGE, "Small", true))
+		if n > lim:
+			v.add_child(UIKit.colored("%s: %d de %d." % [rule, n, lim], UIColors.ORANGE, "Small", true))
 	return v
 
 

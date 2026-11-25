@@ -13105,5 +13105,12 @@
 	"MVP da J1 League": "J1 League MVP",
 	"Os detalhes deste save não estão disponíveis. Você ainda pode tentar abrir a carreira.": "Details for this save are unavailable. You can still try to load the career.",
 	"Não foi possível salvar a carreira. Verifique o espaço livre e tente novamente.": "Could not save the career. Check your free storage space and try again.",
-	"Para o elenco do %s": "For the squad at %s"
+	"Para o elenco do %s": "For the squad at %s",
+	"Usados há pouco": "Recently used",
+	"Estrutura %s": "%s facilities",
+	"%d garotos": "%d youngsters",
+	"Folha": "Wages",
+	"%s, mostrando %d": "%s, showing %d",
+	"Idade média": "Average age",
+	"Rendimento": "Output"
 }

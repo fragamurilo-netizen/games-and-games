@@ -82,21 +82,20 @@ func refresh() -> void:
 	columnize(c, start)
 
 
-## A base numa frase: vagas, estrutura e campanha nas ligas (sem painel de indicadores).
+## A base na faixa de números: vagas e estrutura com barra, e a posição nas ligas de base.
 func _header(w: GameWorld, club: Club) -> Control:
-	var v := UIKit.vbox(2)
-	var bits: Array = ["%d de %d vagas ocupadas." % [w.academy.size(), YouthManager.MAX_SIZE],
-		"Estrutura %s, %d de 100." % [YouthAcademy.tier_name(club).to_lower(), club.youth_level]]
-	var camp: Array = []
-	for key in [["u20", "sub-20"], ["u17", "sub-17"]]:
+	var n := w.academy.size()
+	var items: Array = [
+		["Vagas", "%d/%d" % [n, YouthManager.MAX_SIZE], UIColors.TEXT, float(n) / YouthManager.MAX_SIZE, UIColors.ORANGE if n >= YouthManager.MAX_SIZE else UIColors.GREEN],
+		["Estrutura", str(club.youth_level), UIColors.TEXT, club.youth_level / 100.0, UIColors.TEXT],
+	]
+	for key in [["u20", "Sub-20"], ["u17", "Sub-17"]]:
 		var t := _pos_text(w, String(key[0]))
 		if t != "—":
-			camp.append(I18n.t("%s na liga %s" % [t, key[1]]))
-	bits = bits.map(func(text): return I18n.t(String(text)))
-	if not camp.is_empty():
-		bits.append(", ".join(camp).capitalize().substr(0, 1) + ", ".join(camp).substr(1) + ".")
-	v.add_child(UIKit.label(" ".join(bits), "Muted", true))
-	return v
+			items.append([key[1], t, UIColors.TEXT])
+	var strip := StatStrip.make(items)
+	strip.tooltip_text = "Estrutura %s" % YouthAcademy.tier_name(club).to_lower()
+	return strip
 
 
 func _pos_text(w: GameWorld, key: String) -> String:
