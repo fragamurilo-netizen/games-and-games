@@ -1,14 +1,14 @@
 # Trilha sintetizada do trailer: 100 BPM, lá menor, percussão pesada. Saída WAV estéreo 44,1 kHz.
-import sys, wave
+import os, sys, wave
 import numpy as np
 
 SR = 44100
 BPM = 100.0
 BEAT = 60.0 / BPM
 DUR = float(sys.argv[2]) if len(sys.argv) > 2 else 54.0
-DROP = 4.8          # bateria entra aqui
-SWITCH = 24.6       # virada para o modo presidente
-END = 48.0          # cartela final
+DROP = float(os.environ.get("TR_DROP", "4.8"))        # bateria entra aqui
+SWITCH = float(os.environ.get("TR_SWITCH", "24.6"))   # virada para o modo presidente
+END = float(os.environ.get("TR_END", "48.0"))        # cartela final
 N = int(SR * DUR)
 L = np.zeros(N); R = np.zeros(N)
 rng = np.random.default_rng(7)

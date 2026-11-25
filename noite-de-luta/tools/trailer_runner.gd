@@ -128,7 +128,14 @@ func _run_manager() -> void:
 	fs.set("_speed", 0)
 	await _settle()
 	_begin("luta")
-	await _frames(420)
+	await _frames(200)
+	# Um grito do corner no meio do round (o botão acende no rodapé).
+	for b2: Node in fs.find_children("*", "Button", true, false):
+		if (b2 as Button).text == "Pra cima!" and (b2 as Button).is_visible_in_tree():
+			(b2 as Button).button_pressed = true
+			(b2 as Button).pressed.emit()
+			break
+	await _frames(220)
 	_end("luta")
 	fs.set("_speed", 1)
 	_begin("luta_rapida")
