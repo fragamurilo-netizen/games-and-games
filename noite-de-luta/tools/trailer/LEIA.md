@@ -6,4 +6,4 @@
 
 ## Versão do Reddit (4:5, 1080x1350, 31 s)
 
-Depois de gravar as duas partes como acima, numa pasta com `hd/`: `python3 cartelas_reddit.py PASTA/cart`, `TR_DROP=1.2 TR_SWITCH=17.4 TR_END=27.6 python3 trilha.py PASTA/trilha.wav 31.4`, `python3 monta_reddit.py PASTA saida.mp4`. Os cortes e enquadramentos estão na lista `SEG` de `monta_reddit.py`.
+Depois de gravar as duas partes como acima, numa pasta com `hd/`: `python3 cartelas_reddit.py PASTA/cart` (`TR_LANG=en` para os letreiros em inglês), `TR_DROP=1.2 TR_SWITCH=17.4 TR_END=27.6 python3 trilha.py PASTA/trilha.wav 31.4`, `python3 monta_reddit.py PASTA saida.mp4`. Os cortes e enquadramentos estão na lista `SEG` de `monta_reddit.py`.
