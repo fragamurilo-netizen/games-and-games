@@ -80,7 +80,6 @@ func refresh() -> void:
 	c.add_child(UIKit.card_panel(tape))
 	c.add_child(UIKit.section_header("Atributos de %s" % opp.short_name()))
 	c.add_child(FightKit.attr_card(opp, f))
-	c.add_child(UIKit.label("Os números verdes e vermelhos são a diferença para %s." % f.short_name(), "Small", true))
 	columnize(c, 1, 2, 1)
 	var foot := footer()
 	var row := UIKit.hbox(UITokens.S1)
@@ -138,7 +137,7 @@ func _negotiate(w: GameWorld, o: Dictionary) -> void:
 	for r: Array in lev["reasons"]:
 		rs.append([String(r[0]), float(r[1]) * 100.0])
 	EventKit.reasons(v, rs)
-	v.add_child(UIKit.label("Cada pedido recusado gasta a paciência da organização. No zero, ou num dia ruim, ela retira a proposta e chama outro lutador. Cada assunto só pode ser pedido uma vez.", "Small", true))
+	v.add_child(UIKit.label("Cada recusa gasta a paciência da organização. Um pedido por assunto.", "Small", true))
 	var rows: Array = []
 	for key: String in Negotiation.ORDER:
 		var a: Dictionary = Negotiation.ASKS[key]

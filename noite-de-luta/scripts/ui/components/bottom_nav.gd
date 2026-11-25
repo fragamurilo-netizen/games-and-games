@@ -111,15 +111,10 @@ func select(tab: String) -> void:
 	queue_redraw()
 
 
-## Aba ativa: uma cápsula dourada translúcida atrás do ícone (o ícone e o nome ficam dourados).
+## Aba ativa: uma barra amarela grossa no alto da aba (o ícone e o nome ficam amarelos).
 func _draw() -> void:
 	if not _buttons.has(_active):
 		return
 	var b: Button = _buttons[_active]
 	var r := Rect2(b.position + (get_node("Row") as Control).position, b.size)
-	var w := minf(76.0, r.size.x - 12.0)
-	var box := StyleBoxFlat.new()
-	box.bg_color = Color(UIColors.GOLD, 0.15)
-	box.set_corner_radius_all(UITokens.R_PILL)
-	box.anti_aliasing = true
-	draw_style_box(box, Rect2(r.get_center().x - w * 0.5, r.position.y + 10.0, w, 40.0))
+	draw_rect(Rect2(r.position.x + 6.0, r.position.y, r.size.x - 12.0, 5.0), UIColors.GOLD)

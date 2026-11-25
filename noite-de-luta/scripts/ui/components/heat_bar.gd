@@ -32,10 +32,8 @@ func _draw() -> void:
 	var col := EventKit.tone_color(value)
 	var back := StyleBoxFlat.new()
 	back.bg_color = UIColors.SURFACE_3
-	back.set_corner_radius_all(3)
 	var fill := StyleBoxFlat.new()
 	fill.bg_color = col
-	fill.set_corner_radius_all(3)
 	for i in 5:
 		var x0 := w * float(BOUNDS[i]) / 100.0 + (gap * 0.5 if i > 0 else 0.0)
 		var x1 := w * float(BOUNDS[i + 1]) / 100.0 - (gap * 0.5 if i < 4 else 0.0)

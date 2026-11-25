@@ -21,8 +21,8 @@ static func hub_card(w: GameWorld, on_change: Callable) -> Control:
 	el.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	el.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	head.add_child(el)
-	var skip := UIKit.button("Pular o guia", "TextButton", func():
-		UIManager.confirm("Pular os primeiros passos?", "As dicas das telas continuam aparecendo na primeira vez. Dá para rever tudo jogando.", "Pular", func():
+	var skip := UIKit.button("Pular", "TextButton", func():
+		UIManager.confirm("Pular os primeiros passos?", "", "Pular", func():
 			Tutorial.skip(w)
 			GameManager.save_now()
 			on_change.call()))
@@ -43,8 +43,7 @@ static func hub_card(w: GameWorld, on_change: Callable) -> Control:
 	var tv := UIKit.vbox(2)
 	tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	tv.add_child(UIKit.label(String(cur[1]), "H3", true))
-	tv.add_child(UIKit.label(String(cur[2]), "Small", true))
+	tv.add_child(UIKit.label(String(cur[1]), "Section", true))
 	body.add_child(tv)
 	var dest := String(cur[4])
 	if dest != "":
@@ -54,7 +53,7 @@ static func hub_card(w: GameWorld, on_change: Callable) -> Control:
 		body.add_child(go)
 	card.add_child(body)
 	if dest == "":
-		card.add_child(UIKit.colored("Acontece na semana da luta. Avance as semanas até lá.", UIColors.MUTED, "Caps", true))
+		card.add_child(UIKit.colored("Na semana da luta.", UIColors.MUTED, "Caps", true))
 	return UIKit.card_panel(card)
 
 

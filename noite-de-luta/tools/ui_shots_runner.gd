@@ -180,7 +180,7 @@ func _press(text: String) -> bool:
 	var s := UIManager.current()
 	for n: Node in s.find_children("*", "Button", true, false):
 		var b := n as Button
-		if b.text == text and b.is_visible_in_tree() and not b.is_queued_for_deletion():
+		if b.text.to_lower() == text.to_lower() and b.is_visible_in_tree() and not b.is_queued_for_deletion():
 			if b.toggle_mode:
 				b.button_pressed = true
 			b.pressed.emit()
@@ -226,7 +226,7 @@ func _skip_round(fs: BaseScreen) -> void:
 func _next_round(fs: BaseScreen) -> void:
 	var foot: VBoxContainer = fs.footer()
 	for n: Node in foot.find_children("*", "Button", true, false):
-		if not n.is_queued_for_deletion() and (n as Button).text.begins_with("Começar"):
+		if not n.is_queued_for_deletion() and (n as Button).text.to_lower().begins_with("começar"):
 			(n as Button).pressed.emit()
 			return
 

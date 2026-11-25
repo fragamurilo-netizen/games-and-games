@@ -491,7 +491,8 @@ func _thumbs(c: VBoxContainer, key: String, ids: Array, names: Array, cur: int) 
 func _tile_style(b: Button, on: bool) -> void:
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = UIColors.SURFACE_2 if on else UIColors.SURFACE
-	sb.set_corner_radius_all(10)
+	sb.set_corner_radius_all(UITokens.CUT)
+	sb.corner_detail = 1
 	sb.set_border_width_all(2)
 	sb.border_color = UIColors.ACCENT if on else UIColors.LINE
 	for st: StringName in [&"normal", &"hover", &"pressed", &"focus"]:

@@ -31,7 +31,7 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var top := UIKit.card("CardHighlight", UITokens.S2)
 	top.add_child(UIKit.label("%s · %d rounds%s" % [Matchmaker.division_short(b.division), b.rounds, " · valendo o cinturão" if b.title else ""], "Caps"))
-	top.add_child(FightKit.faceoff(w, w.fighter(b.a), w.fighter(b.b), 130))
+	top.add_child(FightKit.faceoff(w, w.fighter(b.a), w.fighter(b.b), 220))
 	c.add_child(UIKit.card_panel(top))
 	# A noite da luta cabe numa tela: os dois frente a frente, o que o técnico viu e o botão de
 	# lutar. O plano inteiro, a pesagem e os números ficam a um toque para quem quiser.

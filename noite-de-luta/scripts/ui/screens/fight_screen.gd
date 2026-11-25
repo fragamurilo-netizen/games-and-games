@@ -489,7 +489,7 @@ func _build_score(c: Container) -> void:
 	_score_box.add_child(_lean_lbl)
 	_lean_bar = FightHud.DuelBar.new(8)
 	_score_box.add_child(_lean_bar)
-	_score_box.add_child(UIKit.label("Placar não oficial, pelos números da transmissão. Os cartões dos juízes só saem no fim.", "Meta", true))
+	_score_box.add_child(UIKit.label("Placar não oficial.", "Meta", true))
 	c.add_child(_score_box)
 
 
@@ -657,7 +657,7 @@ func _interval_cards(c: Container) -> VBoxContainer:
 	sc.add_child(UIKit.label("Placar da transmissão", "Section"))
 	sc.add_child(FightHud.legend(w.fighter(_b.a).short_name(), w.fighter(_b.b).short_name()))
 	sc.add_child(FightHud.cards_table(["Transmissão"], [FightHud.broadcast_cards(_e.round_stats, _e.round_no)], _e.rounds))
-	sc.add_child(UIKit.label("Não oficial: os cartões dos juízes só saem no fim.", "Meta", true))
+	sc.add_child(UIKit.label("Placar não oficial.", "Meta", true))
 	c.add_child(UIKit.card_panel(sc))
 	return card
 

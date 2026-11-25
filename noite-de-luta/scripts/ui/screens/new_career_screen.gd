@@ -118,15 +118,15 @@ func refresh() -> void:
 	if pres:
 		c.add_child(UIKit.segment([["0", "US$ 6 mi"], ["1", "US$ 12 mi"], ["2", "US$ 25 mi"]], str(_funds), func(k: String):
 			_funds = int(k)))
-		c.add_child(UIKit.label("Uma noite fraca dá prejuízo; um pay-per-view com estrelas paga meses de folha. US$ 12 mi é o padrão.", "Small", true))
+		c.add_child(UIKit.label("Padrão: US$ 12 mi.", "Small", true))
 	else:
 		c.add_child(UIKit.segment([["0", "US$ 100 mil"], ["1", "US$ 250 mil"], ["2", "US$ 500 mil"]], str(_funds), func(k: String):
 			_funds = int(k)))
-		c.add_child(UIKit.label("Com menos dinheiro, cada contratação e cada técnico pesam mais. US$ 250 mil é o padrão.", "Small", true))
-	c.add_child(UIKit.section_header("Tutorial guiado"))
+		c.add_child(UIKit.label("Padrão: US$ 250 mil.", "Small", true))
+	c.add_child(UIKit.section_header("Primeiros passos"))
 	c.add_child(UIKit.segment([["1", "Ligado"], ["0", "Desligado"]], "1" if _tutorial else "0", func(k: String):
 		_tutorial = k == "1"))
-	c.add_child(UIKit.label("Primeiros passos no Início e uma dica na primeira vez em cada tela. Dá para pular quando quiser.", "Small", true))
+	c.add_child(UIKit.label("Seis passos no Início. Dá para pular.", "Small", true))
 	var f := footer()
 	UIKit.clear(f)
 	f.add_child(UIKit.button("Fundar a academia" if not pres else "Assumir a organização", "PrimaryButton", _start))

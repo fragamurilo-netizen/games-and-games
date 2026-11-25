@@ -1,21 +1,21 @@
 class_name UIColors
 extends RefCounted
-## Paleta do jogo: noite de arena. Fundo preto azulado em degraus, texto de giz, dourado da marca
-## para o que é ação e destaque, e os estados em cores vivas (verde, vermelho, laranja, azul).
+## Paleta do jogo: cartaz de luta. Preto neutro em degraus (sem azul), texto cor de papel, o
+## amarelo de cartaz para o que é ação e destaque, e os estados em cores vivas.
 ## Vermelho e azul dos corners (CORNER_RED / CORNER_BLUE) marcam os dois lados de uma luta. As
 ## cores da equipe do jogador aparecem no escudo e nos retratos da casa. Telas não escrevem cor
 ## solta.
 
-const D_BG := Color("#0B0D12")
-const D_SURFACE := Color("#151A23")
-const D_SURFACE_2 := Color("#1E2531")
-const D_SURFACE_3 := Color("#2B3443")
-const D_LINE := Color("#313B4B")
-const D_TEXT := Color("#F4F3EF")
-const D_MUTED := Color("#AEB6C2")
-const D_DIM := Color("#808B9B")
-const D_GOLD := Color("#F2C14E")
-const D_GOLD_DARK := Color("#B88A2A")
+const D_BG := Color("#0A0A0A")
+const D_SURFACE := Color("#161514")
+const D_SURFACE_2 := Color("#211F1D")
+const D_SURFACE_3 := Color("#2F2C29")
+const D_LINE := Color("#3D3935")
+const D_TEXT := Color("#F3EEE4")
+const D_MUTED := Color("#B9B2A6")
+const D_DIM := Color("#8A837A")
+const D_GOLD := Color("#FFCF0D")
+const D_GOLD_DARK := Color("#C99B00")
 const D_GREEN := Color("#3FC380")
 const D_RED := Color("#F0555D")
 const D_BLUE := Color("#5B9BF0")
@@ -31,13 +31,13 @@ static var MUTED := D_MUTED
 static var DIM := D_DIM
 static var GOLD := D_GOLD
 static var GOLD_DARK := D_GOLD_DARK
-const ON_GOLD := Color("#17120A")
+const ON_GOLD := Color("#0A0A0A")
 static var GREEN := D_GREEN
 static var RED := D_RED
 static var BLUE := D_BLUE
 static var ORANGE := D_ORANGE
 ## Fundo neutro dos retratos (o quadro em degradê do Portrait).
-static var PORTRAIT := Color("#3A4558")
+static var PORTRAIT := Color("#4A4641")
 ## Modo claro ainda não existe neste jogo; o nome fica para o código portado do MUR.
 static var light := false
 

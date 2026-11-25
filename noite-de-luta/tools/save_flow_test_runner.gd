@@ -24,7 +24,7 @@ func _shot(name: String) -> void:
 
 func _button(text: String) -> Button:
 	for b: Button in get_tree().root.find_children("*", "Button", true, false):
-		if b.text == text and b.is_visible_in_tree():
+		if b.text.to_lower() == text.to_lower() and b.is_visible_in_tree():
 			return b
 	return null
 

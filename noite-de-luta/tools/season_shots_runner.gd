@@ -279,7 +279,7 @@ func _season_president() -> void:
 func _press_modal(text: String) -> bool:
 	for n: Node in UIManager.main.find_children("*", "Button", true, false):
 		var b := n as Button
-		if b.text == text and b.is_visible_in_tree() and not b.is_queued_for_deletion():
+		if b.text.to_lower() == text.to_lower() and b.is_visible_in_tree() and not b.is_queued_for_deletion():
 			b.pressed.emit()
 			return true
 	print("sem botão no modal: ", text)

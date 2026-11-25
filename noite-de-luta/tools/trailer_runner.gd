@@ -60,7 +60,7 @@ func _quiet(w: GameWorld) -> void:
 
 func _press(screen: Node, text: String) -> bool:
 	for b: Node in screen.find_children("*", "Button", true, false):
-		if (b as Button).text == text and (b as Button).is_visible_in_tree():
+		if (b as Button).text.to_lower() == text.to_lower() and (b as Button).is_visible_in_tree():
 			(b as Button).pressed.emit()
 			return true
 	return false

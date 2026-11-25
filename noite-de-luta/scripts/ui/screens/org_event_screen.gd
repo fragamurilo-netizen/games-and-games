@@ -75,7 +75,7 @@ func refresh() -> void:
 		foot.add_child(UIKit.button("Voltar", "GhostButton", func(): UIManager.back()))
 		return
 	if ev.week == w.week:
-		foot.add_child(UIKit.button("Ir para a noite de luta", "PrimaryButton", func(): UIManager.push("night", {"id": ev.id})))
+		foot.add_child(UIKit.button("Ir para a noite", "PrimaryButton", func(): UIManager.push("night", {"id": ev.id})))
 		return
 	var row := UIKit.hbox(UITokens.S2)
 	var full := lst.size() >= ev.slots

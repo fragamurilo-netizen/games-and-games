@@ -84,9 +84,9 @@ func _add_night() -> void:
 			var red := maxf(0.0, 1.0 - Vector2(u * 1.7, v * 3.4).length())
 			var blue := maxf(0.0, 1.0 - Vector2((1.0 - u) * 1.7, v * 3.4).length())
 			var c := bg
-			c = c.lerp(Color("#22324F"), top * top * 0.55)
-			c = c.lerp(UIColors.CORNER_RED, red * red * 0.2)
-			c = c.lerp(UIColors.CORNER_BLUE, blue * blue * 0.24)
+			c = c.lerp(Color("#2A2724"), top * top * 0.5)
+			c = c.lerp(UIColors.CORNER_RED, red * red * 0.1)
+			c = c.lerp(UIColors.CORNER_BLUE, blue * blue * 0.1)
 			img.set_pixel(x, y, c)
 	var r := TextureRect.new()
 	r.name = "Night"

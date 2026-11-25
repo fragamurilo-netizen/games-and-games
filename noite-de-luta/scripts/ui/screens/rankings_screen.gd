@@ -57,7 +57,7 @@ func refresh() -> void:
 		fl.add_child(UIKit.flag(champ.nation, 30))
 		fl.add_child(UIKit.label(FightKit.record_detail(champ), "Small"))
 		v.add_child(fl)
-		v.add_child(UIKit.label("%d defesas · %s" % [champ.title_defenses, w.team(champ.team_id).name if w.team(champ.team_id) != null else "sem equipe"], "Small"))
+		v.add_child(UIKit.label("%s · %s" % [Fmt.plural(champ.title_defenses, "defesa", "defesas"), w.team(champ.team_id).name if w.team(champ.team_id) != null else "sem equipe"], "Small"))
 		h.add_child(v)
 		card.add_child(h)
 		c.add_child(UIKit.tap_row(card, func(): _open(w, champ, challenger), "CardHighlight"))

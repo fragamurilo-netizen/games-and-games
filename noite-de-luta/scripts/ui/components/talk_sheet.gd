@@ -17,7 +17,7 @@ static func open(w: GameWorld, f: Fighter, done: Callable) -> void:
 	hv.add_child(UIKit.label("Moral: %s" % Morale.label(f).to_lower(), "Caps"))
 	head.add_child(hv)
 	v.add_child(head)
-	v.add_child(UIKit.label("Cada um reage do seu jeito: leia a personalidade antes de falar. Depois da conversa, a próxima só em %d semanas." % Morale.TALK_GAP, "Small", true))
+	v.add_child(UIKit.label("Próxima conversa só em %d semanas." % Morale.TALK_GAP, "Small", true))
 	for o: Dictionary in Morale.talk_options(w, f):
 		var key := String(o["key"])
 		var h := UIKit.hbox(UITokens.S2)

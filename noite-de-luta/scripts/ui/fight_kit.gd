@@ -362,40 +362,92 @@ static func physique_text(f: Fighter) -> String:
 	return t.substr(0, 1).to_upper() + t.substr(1) + "."
 
 
-## Frente a frente: os dois retratos em quadros na cor dos corners (vermelho à esquerda, azul à
-## direita), o "VS" no meio e, embaixo de cada um, nome, apelido, bandeira e cartel.
-## `corners` falso: antes de a luta ser marcada ainda não há corner (quadros neutros).
-static func faceoff(w: GameWorld, fa: Fighter, fb: Fighter, px: int = 150, corners: bool = true) -> HBoxContainer:
-	var h := UIKit.hbox(UITokens.S1)
+## Frente a frente em forma de cartaz: os dois recortados sobre o campo do seu corner (vermelho à
+## esquerda, azul à direita, cortados em diagonal), o "VS" no meio e, embaixo, o sobrenome em
+## letra de cartaz, o apelido ou o primeiro nome, a bandeira e o cartel. `px` é a altura do palco.
+## `corners` falso: antes de a luta ser marcada ainda não há corner (campos neutros).
+static func faceoff(w: GameWorld, fa: Fighter, fb: Fighter, px: int = 150, corners: bool = true) -> VBoxContainer:
+	var big := px >= 100
+	var box := UIKit.vbox(6)
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var stage := Control.new()
+	stage.custom_minimum_size = Vector2(0, px)
+	stage.clip_contents = true
+	stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var ca := UIColors.CORNER_RED if corners else UIColors.SURFACE_3
+	var cb := UIColors.CORNER_BLUE if corners else UIColors.SURFACE_3
+	stage.draw.connect(func(): _poster_fields(stage, ca, cb))
+	var side := roundi(px * 1.08)
+	var pair: Array = []
+	for i in 2:
+		var p := cutout(w, fa if i == 0 else fb, side, i == 1)
+		p.size = Vector2(side, side)
+		stage.add_child(p)
+		pair.append(p)
+	# Os dois ficam perto do meio mesmo em tela larga (deitado, tablet): frente a frente.
+	var place := func():
+		var off := minf(stage.size.x * 0.25, px * 1.15)
+		for i in 2:
+			(pair[i] as Control).position = Vector2(stage.size.x * 0.5 + (-off if i == 0 else off) - side * 0.5, stage.size.y - side + px * 0.04)
+	stage.resized.connect(place)
+	place.call()
+	var vs := UIKit.label("VS", "Section" if not big else "Title")
+	vs.add_theme_color_override(&"font_color", UIColors.GOLD)
+	vs.add_theme_color_override(&"font_outline_color", UIColors.BG)
+	vs.add_theme_constant_override(&"outline_size", 10)
+	vs.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vs.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	vs.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	stage.add_child(vs)
+	box.add_child(stage)
+	var names := UIKit.hbox(UITokens.S2)
 	for i in 2:
 		var f := fa if i == 0 else fb
-		var v := UIKit.vbox(4)
+		var al := HORIZONTAL_ALIGNMENT_LEFT if i == 0 else HORIZONTAL_ALIGNMENT_RIGHT
+		var v := UIKit.vbox(0)
 		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var tone := (UIColors.CORNER_RED if i == 0 else UIColors.CORNER_BLUE) if corners else Color(0, 0, 0, 0)
-		var p := portrait(w, f, px, tone)
-		v.add_child(p)
-		var n := UIKit.label(f.display_name(), "H3")
-		n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		n.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		if big:
+			var first := UIKit.label(f.nickname if f.nickname != "" else f.first, "Caps")
+			first.uppercase = true
+			first.horizontal_alignment = al
+			first.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			if f.nickname != "":
+				first.add_theme_color_override(&"font_color", UIColors.GOLD)
+			v.add_child(first)
+		var n := UIKit.label(f.short_name(), "Title" if px >= 126 else "Section")
+		n.horizontal_alignment = al
+		n.clip_text = true
+		n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		v.add_child(n)
-		if f.nickname != "" and px >= 96:
-			var nk := UIKit.colored("“%s”" % f.nickname, UIColors.GOLD, "Small")
-			nk.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			nk.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-			v.add_child(nk)
 		var fl := UIKit.hbox(6)
-		fl.alignment = BoxContainer.ALIGNMENT_CENTER
+		fl.alignment = BoxContainer.ALIGNMENT_BEGIN if i == 0 else BoxContainer.ALIGNMENT_END
 		var fg := UIKit.flag(f.nation, 28)
 		fg.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		fl.add_child(fg)
-		fl.add_child(UIKit.label(f.record_text() if f.is_pro() else "Estreia", "Small"))
-		v.add_child(fl)
-		h.add_child(v)
+		var rec := UIKit.label(f.record_text() if f.is_pro() else "Estreia", "Small")
 		if i == 0:
-			var vs := UIKit.label("VS", "Section" if px < 110 else "Title")
-			vs.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-			vs.custom_minimum_size.y = px
-			vs.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-			vs.add_theme_color_override(&"font_color", UIColors.GOLD)
-			h.add_child(vs)
-	return h
+			fl.add_child(fg)
+			fl.add_child(rec)
+		else:
+			fl.add_child(rec)
+			fl.add_child(fg)
+		v.add_child(fl)
+		names.add_child(v)
+	box.add_child(names)
+	return box
+
+
+## Fundo do cartaz: o campo de cada corner, cortado em diagonal no meio, escurecendo para baixo.
+static func _poster_fields(c: Control, ca: Color, cb: Color) -> void:
+	var sz := c.size
+	var mid := sz.x * 0.5
+	var k := sz.y * 0.16
+	var dark := UIColors.BG
+	var a_top := ca.lerp(dark, 0.1)
+	var a_bot := ca.lerp(dark, 0.72)
+	var b_top := cb.lerp(dark, 0.1)
+	var b_bot := cb.lerp(dark, 0.72)
+	c.draw_polygon(PackedVector2Array([Vector2(0, 0), Vector2(mid + k, 0), Vector2(mid - k, sz.y), Vector2(0, sz.y)]),
+		PackedColorArray([a_top, a_top, a_bot, a_bot]))
+	c.draw_polygon(PackedVector2Array([Vector2(mid + k, 0), Vector2(sz.x, 0), Vector2(sz.x, sz.y), Vector2(mid - k, sz.y)]),
+		PackedColorArray([b_top, b_top, b_bot, b_bot]))
+	c.draw_line(Vector2(mid + k, 0), Vector2(mid - k, sz.y), dark, 5.0, true)

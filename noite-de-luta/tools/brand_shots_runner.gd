@@ -42,7 +42,7 @@ func _press(text: String) -> bool:
 	await _frames(3)
 	for b: Node in get_tree().root.find_children("*", "BaseButton", true, false):
 		var bb := b as BaseButton
-		if bb is Button and (bb as Button).text == text and bb.is_visible_in_tree() and not bb.disabled:
+		if bb is Button and (bb as Button).text.to_lower() == text.to_lower() and bb.is_visible_in_tree() and not bb.disabled:
 			bb.pressed.emit()
 			await _frames(4)
 			return true

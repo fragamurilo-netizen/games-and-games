@@ -45,14 +45,48 @@ func refresh() -> void:
 
 
 func _header(w: GameWorld, f: Fighter) -> Control:
+	# Cartaz do lutador: ele recortado sobre o campo da sua cor, o sobrenome em letra de cartaz.
 	var card := UIKit.card("Card", UITokens.S2)
-	var h := UIKit.hbox(UITokens.S3)
-	h.add_child(FightKit.portrait(w, f, 150))
-	var v := UIKit.vbox(4)
-	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	if f.nickname != "":
-		v.add_child(UIKit.label("“%s”" % f.nickname, "Accent"))
-	var nm := UIKit.label(f.display_name(), "Section", true)
+	var stage := Control.new()
+	stage.custom_minimum_size = Vector2(0, 264)
+	stage.clip_contents = true
+	stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var tone := FightKit.tone_of(w, f)
+	if tone.a <= 0.0:
+		tone = UIColors.SURFACE_3
+	stage.draw.connect(func():
+		var sz := stage.size
+		var x0 := sz.x * 0.5
+		var k := sz.y * 0.16
+		var top := tone.lerp(UIColors.BG, 0.05)
+		var bot := tone.lerp(UIColors.BG, 0.7)
+		stage.draw_polygon(PackedVector2Array([Vector2(x0 + k, 0), Vector2(sz.x, 0), Vector2(sz.x, sz.y), Vector2(x0 - k, sz.y)]),
+			PackedColorArray([top, top, bot, bot])))
+	var cut := FightKit.cutout(w, f, 280)
+	cut.anchor_left = 0.76
+	cut.anchor_right = 0.76
+	cut.anchor_top = 1.0
+	cut.anchor_bottom = 1.0
+	cut.offset_left = -140
+	cut.offset_right = 140
+	cut.offset_top = -270
+	cut.offset_bottom = 10
+	stage.add_child(cut)
+	var v := UIKit.vbox(2)
+	v.alignment = BoxContainer.ALIGNMENT_END
+	v.anchor_right = 0.6
+	v.anchor_bottom = 1.0
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var over := UIKit.label(f.nickname if f.nickname != "" else f.first, "Kicker")
+	over.uppercase = true
+	over.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	if f.nickname == "":
+		over.add_theme_color_override(&"font_color", UIColors.MUTED)
+	v.add_child(over)
+	var nm := UIKit.label(f.short_name(), "Big")
+	nm.uppercase = true
+	nm.clip_text = true
+	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	v.add_child(nm)
 	var nat := UIKit.hbox(8)
 	nat.add_child(UIKit.flag(f.nation, 34))
@@ -61,20 +95,30 @@ func _header(w: GameWorld, f: Fighter) -> Control:
 	home.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	nat.add_child(home)
 	v.add_child(nat)
-	v.add_child(UIKit.label(FightKit.record_detail(f), "H3"))
+	var rec := UIKit.label(FightKit.record_detail(f), "H3")
+	rec.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	v.add_child(rec)
 	var t := w.team(f.team_id)
-	v.add_child(UIKit.label(t.name if t != null else "Sem equipe", "Small"))
+	var tl := UIKit.label(t.name if t != null else "Sem equipe", "Small")
+	tl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	v.add_child(tl)
+	for n in [over, nm, home, rec, tl]:
+		(n as Label).add_theme_color_override(&"font_outline_color", UIColors.SURFACE)
+		(n as Label).add_theme_constant_override(&"outline_size", 8)
+	stage.add_child(v)
+	card.add_child(stage)
 	var rk := UIKit.hbox(12)
-	var r := UIKit.label(w.rank_text(f) + " · " + Matchmaker.division_short(f.division), "Caps")
+	var r := UIKit.label(w.rank_text(f) + " · " + Matchmaker.division_short(f.division), "Eyebrow")
+	r.uppercase = true
 	if w.rank_of(f) == 0:
 		r.add_theme_color_override(&"font_color", UIColors.GOLD)
 	rk.add_child(r)
 	rk.add_child(UIKit.spacer())
-	rk.add_child(UIKit.label("Nível", "Caps"))
+	var nl := UIKit.label("Nível", "Eyebrow")
+	nl.uppercase = true
+	rk.add_child(nl)
 	rk.add_child(FightKit.level_label(f.level(), "Stat"))
-	v.add_child(rk)
-	h.add_child(v)
-	card.add_child(h)
+	card.add_child(rk)
 	var st := FightKit.status_text(w, f)
 	var srow := UIKit.hbox(8)
 	var sl := UIKit.colored(String(st[0]), st[1], "Small", true)
@@ -222,8 +266,6 @@ func _rivals_card(w: GameWorld, f: Fighter) -> Control:
 		var h2h := Rivalry.h2h_text(f, o.id)
 		var line := "%s · %s" % [Rivalry.label(heat), String(e.get("why", "eles têm história"))]
 		card.add_child(FightKit.fighter_row(w, o, func(): UIManager.push("fighter", {"id": oid}), line, UIColors.ORANGE if heat >= Rivalry.NAMED else Color(0, 0, 0, 0), h2h))
-	if not rivals.is_empty():
-		card.add_child(UIKit.label("Luta contra rival vende mais, a equipe dele aceita mais fácil e ganhar (ou perder) mexe mais com a moral.", "Small", true))
 	return UIKit.card_panel(card)
 
 
@@ -543,9 +585,9 @@ func _evolution_card(w: GameWorld, f: Fighter) -> Control:
 		if rest > 0:
 			card.add_child(UIKit.label("e mais %s com mudança menor." % Fmt.plural(rest, "atributo", "atributos"), "Muted"))
 	elif w.is_user_fighter(f) or w.is_followed(f):
-		card.add_child(UIKit.label("O que subiu e caiu aparece aqui a cada três meses.", "Muted", true))
+		card.add_child(UIKit.label("Sem mudança nos últimos três meses.", "Muted", true))
 	else:
-		card.add_child(UIKit.label("Toque em Seguir para acompanhar o que sobe e cai nos atributos.", "Muted", true))
+		card.add_child(UIKit.label("Só para quem você segue.", "Muted", true))
 	return UIKit.card_panel(card)
 
 
@@ -626,7 +668,7 @@ func _treino(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 	if Camp.bout_of(w, f) != null:
 		c.add_child(_camp_card(w, f))
 	else:
-		c.add_child(UIKit.label("Sem luta marcada. Quando houver, o camp para a luta aparece aqui: foco, onde treinar e sparring.", "Small", true))
+		c.add_child(UIKit.label("Sem luta marcada.", "Small", true))
 	c.add_child(UIKit.section_header("Foco do treino"))
 	var items: Array = []
 	for k: String in Development.FOCUS:
@@ -679,13 +721,13 @@ func _camp_card(w: GameWorld, f: Fighter) -> Control:
 	var proj := minf(100.0, pts + gain * left)
 	var wait := Camp.starts_in(w, f)
 	if wait > 0:
-		card.add_child(UIKit.label("O camp começa em %s (oito antes da luta). Deixe tudo escolhido desde já." % Fmt.plural(wait, "semana", "semanas"), "Small", true))
+		card.add_child(UIKit.label("O camp começa em %s." % Fmt.plural(wait, "semana", "semanas"), "Small", true))
 	card.add_child(UIKit.kv("Forma até aqui", "%d%%" % int(round(pts))))
 	card.add_child(UIKit.bar(pts, 100.0, UIColors.GOLD, 10))
 	if left > 0:
 		card.add_child(UIKit.kv("Na noite da luta, neste ritmo", "%d%% · %s" % [int(round(proj)), Camp.label(proj)], UIColors.GREEN if proj >= 65.0 else (UIColors.ORANGE if proj < 45.0 else UIColors.TEXT)))
 	else:
-		card.add_child(UIKit.label("Semana da luta: o camp acabou, agora é a pesagem.", "Small", true))
+		card.add_child(UIKit.label("Semana da luta.", "Small", true))
 	card.add_child(UIKit.label("Foco", "Caps"))
 	var items: Array = []
 	for k: String in Camp.FOCUS_ORDER:
@@ -698,12 +740,12 @@ func _camp_card(w: GameWorld, f: Fighter) -> Control:
 		cp["place"] = k
 		refresh()))
 	var home_q := int(round(Morale.gym_quality(w, team)))
-	card.add_child(UIKit.label("Numa academia grande, técnicos de nível %d cuidam do camp." % int(Camp.AWAY_QUALITY) if String(cp.get("place", "casa")) == "fora" else "Os técnicos da casa tocam o camp (média %d). Técnico melhor junta forma mais rápido." % home_q, "Small", true))
+	card.add_child(UIKit.label("Técnicos de nível %d." % int(Camp.AWAY_QUALITY) if String(cp.get("place", "casa")) == "fora" else "Técnicos da casa, nível %d." % home_q, "Small", true))
 	card.add_child(UIKit.label("Sparring", "Caps"))
 	card.add_child(UIKit.segment([["0", "Só os da casa"], ["1", "Contratado · %s/sem" % Fmt.money(Camp.spar_cost(w, f))]], "1" if bool(cp.get("spar", false)) else "0", func(k: String):
 		cp["spar"] = k == "1"
 		refresh()))
-	card.add_child(UIKit.label("Parceiros pagos para imitar %s: a forma sobe 20%% mais rápido e o estudo do adversário rende mais. Há um risco pequeno de lesão." % o.short_name(), "Small", true))
+	card.add_child(UIKit.label("Imitam %s: forma 20%% mais rápida, pequeno risco de lesão." % o.short_name(), "Small", true))
 	# O que isso rende na noite.
 	var focus := String(cp.get("focus", "plano"))
 	var lines := Camp.gain_lines(Camp.mods_for(proj if left > 0 else pts, focus, f, o, b, bool(cp.get("spar", false))))
@@ -713,7 +755,7 @@ func _camp_card(w: GameWorld, f: Fighter) -> Control:
 	card.add_child(UIKit.label(", ".join(lines) + "." if not lines.is_empty() else "Quase nada: o camp está curto demais.", "", true))
 	if float(cp.get("cost", 0.0)) > 0.0:
 		card.add_child(UIKit.kv("Gasto até aqui", Fmt.money(float(cp["cost"]))))
-	card.add_child(UIKit.label("A intensidade é a do treino, logo abaixo. Pesado junta forma mais rápido e derruba a condição física (hoje %d%%): chegue à semana da luta perto de 100%%, com treino leve no fim." % int(f.condition), "Small", true))
+	card.add_child(UIKit.label("Condição física hoje: %d%%." % int(f.condition), "Small", true))
 	return UIKit.card_panel(card)
 
 
@@ -726,7 +768,7 @@ func _contrato(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 	card.add_child(UIKit.kv("Lutas restantes", str(maxi(0, left)), UIColors.RED if left <= 0 else UIColors.TEXT))
 	c.add_child(UIKit.card_panel(card))
 	if left <= 1:
-		c.add_child(UIKit.label("Renove antes que acabe: com o contrato vencido, ele pode sair a qualquer semana.", "Small", true))
+		c.add_child(UIKit.label("Contrato no fim: pode sair a qualquer semana.", "Small", true))
 		c.add_child(UIKit.button("Renovar por 5 lutas (20%)", "GhostButton", func():
 			var r := Signing.renew(w, f, 0.2, 5)
 			UIManager.toast(String(r["text"]), UIColors.GREEN if bool(r["ok"]) else UIColors.RED)
@@ -755,7 +797,7 @@ func _actions(w: GameWorld, f: Fighter) -> void:
 			hide_footer()
 		return
 	if f.team_id < 0 and not f.retired:
-		foot.add_child(UIKit.button("Fazer proposta de contrato", "PrimaryButton", func(): ContractSheet.open(w, f, func(): refresh())))
+		foot.add_child(UIKit.button("Fazer proposta", "PrimaryButton", func(): ContractSheet.open(w, f, func(): refresh())))
 		return
 	var mine := w.user_fighters().filter(func(m: Fighter) -> bool: return m.division == f.division)
 	if not mine.is_empty() and not f.retired:

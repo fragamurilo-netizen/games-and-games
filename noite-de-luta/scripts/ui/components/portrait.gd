@@ -11,7 +11,7 @@ extends Control
 ## chega pelo vértice): o alfa é a opacidade do conjunto, como em qualquer outro item.
 const SHADER_TILE := "
 shader_type canvas_item;
-uniform float radius = 0.17;
+uniform float radius = 0.13;
 uniform float empty = 0.0;
 varying vec4 tint;
 void vertex() {
@@ -34,8 +34,9 @@ void fragment() {
 		bg = mix(bg, bg * 0.62, max(head, body));
 	}
 	vec3 rgb = bg * (1.0 - t.a) + t.rgb;
-	vec2 q = abs(UV - 0.5) - (0.5 - radius);
-	float d = length(max(q, 0.0)) - radius;
+	// Cantos cortados em diagonal (o octógono), não arredondados.
+	vec2 q = abs(UV - 0.5);
+	float d = max(max(q.x, q.y) - 0.5, (q.x + q.y - (1.0 - radius)) * 0.7071);
 	float aa = fwidth(d) + 0.0005;
 	COLOR = vec4(rgb, (1.0 - smoothstep(-aa, aa, d)) * tint.a);
 }

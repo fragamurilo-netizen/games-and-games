@@ -76,10 +76,10 @@ func refresh() -> void:
 	var urgent := FightWeek.pending(w, night) if night != null else []
 	if not urgent.is_empty():
 		var first: Dictionary = urgent[0]
-		foot.add_child(UIKit.button("Resolver problemas da noite (%d)" % urgent.size(), "PrimaryButton", func(): WeekKit.open_incident(w, first, refresh)))
+		foot.add_child(UIKit.button("Resolver problemas (%d)" % urgent.size(), "PrimaryButton", func(): WeekKit.open_incident(w, first, refresh)))
 	elif night != null:
 		var nid := night.id
-		foot.add_child(UIKit.button("Ir para a noite de luta", "PrimaryButton", func(): UIManager.push("night", {"id": nid})))
+		foot.add_child(UIKit.button("Ir para a noite", "PrimaryButton", func(): UIManager.push("night", {"id": nid})))
 	else:
 		var adv := UIKit.button("Avançar semana", "PrimaryButton", func(): DashKit.close_week(self, false), "fast")
 		if guide != null:

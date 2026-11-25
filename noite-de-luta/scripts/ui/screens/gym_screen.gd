@@ -61,11 +61,9 @@ func refresh() -> void:
 	var want := Career.student_demand(w)
 	var room := Career.student_capacity(w)
 	if want > room:
-		fin.add_child(UIKit.colored("%d pessoas querem treinar aqui, mas a casa só atende %d. Cada profissional do staff abre mais turmas." % [want, room], UIColors.ORANGE, "Small", true))
+		fin.add_child(UIKit.colored("%d querem treinar aqui, a casa atende %d. Falta staff." % [want, room], UIColors.ORANGE, "Small", true))
 	elif room - want >= 40 and net < 0.0 and not t.staff.is_empty():
-		fin.add_child(UIKit.colored("A casa atende %d alunos, mas hoje só %d querem treinar aqui. Staff com turma vazia pesa na folha: vitórias e apoio da cidade trazem mais gente." % [room, want], UIColors.ORANGE, "Small", true))
-	else:
-		fin.add_child(UIKit.label("Os alunos vêm com a reputação da casa e com o apoio da cidade (a casa atende até %d). A academia também fica com a fatia combinada de cada bolsa dos seus lutadores." % room, "Small", true))
+		fin.add_child(UIKit.colored("A casa atende %d, só %d querem treinar aqui. Sobra staff." % [room, want], UIColors.ORANGE, "Small", true))
 	if t.balance < 0.0:
 		var lim := Career.debt_limit(w)
 		fin.add_child(UIKit.colored("Caixa negativo paga juros toda semana. Passando de %s de dívida, os salários atrasam e o staff começa a sair." % Fmt.money(lim), UIColors.RED if -t.balance >= lim * 0.6 else UIColors.ORANGE, "Small", true))
@@ -95,8 +93,8 @@ func refresh() -> void:
 		sc.add_child(UIKit.label(StaffMarket.role_name(String(s["role"])), "Caps"))
 	c.add_child(UIKit.card_panel(sc))
 	var menu := UIKit.menu_group([
-		UIKit.menu_row("gear", "Opções", "Som, velocidade da luta", func(): UIManager.push("settings")),
-		UIKit.menu_row("save", "Salvar e sair", "Volta ao menu inicial", func():
+		UIKit.menu_row("gear", "Opções", "", func(): UIManager.push("settings")),
+		UIKit.menu_row("save", "Salvar e sair", "", func():
 			GameManager.close_career()
 			UIManager.goto("menu")),
 	])

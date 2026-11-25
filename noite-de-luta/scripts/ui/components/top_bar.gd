@@ -67,10 +67,9 @@ func _ready() -> void:
 	# O caixa numa cápsula, com a moeda dourada.
 	_money_box = PanelContainer.new()
 	var mb := StyleBoxFlat.new()
-	mb.bg_color = UIColors.SURFACE_2
-	mb.border_color = UIColors.LINE
-	mb.set_border_width_all(1)
-	mb.set_corner_radius_all(UITokens.R_PILL)
+	mb.bg_color = UIColors.SURFACE_3
+	mb.set_corner_radius_all(UITokens.CUT_SM + 2)
+	mb.corner_detail = 1
 	mb.content_margin_left = 12
 	mb.content_margin_right = 16
 	mb.content_margin_top = 6
@@ -167,7 +166,8 @@ class CountBadge extends Control:
 		sb.bg_color = UIColors.RED
 		sb.border_color = UIColors.BG
 		sb.set_border_width_all(2)
-		sb.set_corner_radius_all(12)
+		sb.set_corner_radius_all(6)
+		sb.corner_detail = 1
 		sb.anti_aliasing = true
 		draw_style_box(sb, r)
 		draw_string(font, Vector2(r.position.x + (w - tw) * 0.5, r.position.y + 18.0), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color.WHITE)

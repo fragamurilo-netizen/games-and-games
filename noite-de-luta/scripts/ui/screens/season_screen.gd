@@ -67,8 +67,6 @@ func _goals(w: GameWorld, c: VBoxContainer) -> void:
 	hh.add_child(UIKit.stat_tile(str(SeasonKit.weeks_left(w)), "Semanas restantes"))
 	hh.add_child(UIKit.stat_tile(str(int(round(Season.value_of(w)))), Season.meter_short(w), SupportBar.tone(Season.value_of(w))))
 	head.add_child(hh)
-	head.add_child(UIKit.label("Meta batida paga na hora: dinheiro, %s e %s. Meta perdida custa %d de %s na virada do ano. As três cumpridas valem um bônus." % [
-		"prestígio" if pres else "reputação", "confiança dos sócios" if pres else "apoio da cidade", int(Season.sup_loss(w)), "confiança" if pres else "apoio"], "Small", true))
 	c.add_child(UIKit.card_panel(head))
 	for g: Dictionary in items:
 		var card := UIKit.card("Card", UITokens.S1)

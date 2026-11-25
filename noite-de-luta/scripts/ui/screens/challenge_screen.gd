@@ -65,7 +65,7 @@ func refresh() -> void:
 		var k := float((Matchmaker.CHALLENGE_ASKS[_ask] as Array)[1]) * (Titles.PURSE_K if interim else 1.0)
 		info.add_child(UIKit.kv("Bolsa de %s" % mine.short_name(), "%s + %s" % [Fmt.money(snappedf(float(pr["show"]) * k, 100.0)), Fmt.money(snappedf(float(pr["win"]) * k, 100.0))]))
 		info.add_child(UIKit.kv("Chance de aceitar", Signing.chance_label(p), UIColors.GREEN if p >= 0.5 else UIColors.ORANGE))
-		info.add_child(UIKit.label("Pedir mais derruba a chance: o evento precisa bancar. Recusou, só dá para chamar de novo daqui a seis semanas. Perder uma luta trava os desafios para cima por oito.", "Small", true))
+		info.add_child(UIKit.label("Recusou, só em seis semanas. Derrota trava desafios para cima por oito.", "Small", true))
 	c.add_child(UIKit.card_panel(info))
 	if why == "":
 		c.add_child(EventKit.thermometer(Hype.pair(w, mine, target, title, interim), "Hype da luta", "", true, 5))

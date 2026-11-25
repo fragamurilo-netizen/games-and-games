@@ -66,9 +66,9 @@ func refresh() -> void:
 	OrgKit.awards_banner(w, c)
 	OrgKit.followed_section(w, c)
 	c.add_child(UIKit.menu_group([
-		UIKit.menu_row("belt", "Cinturões", "Os campeões e a linhagem de cada categoria", func(): UIManager.push("titles")),
-		UIKit.menu_row("list", "Resultados da semana", "Todas as noites, da Liga Global ao regional", func(): UIManager.push("results")),
-		UIKit.menu_row("trophy", "Legado", "Prêmios do ano, Hall da Fama e recordes", func(): UIManager.push("legacy")),
+		UIKit.menu_row("belt", "Cinturões", "", func(): UIManager.push("titles")),
+		UIKit.menu_row("list", "Resultados da semana", "", func(): UIManager.push("results")),
+		UIKit.menu_row("trophy", "Legado", "", func(): UIManager.push("legacy")),
 	]))
 	var nb := UIKit.vbox(UITokens.S1)
 	DashKit.news(w, nb, HATS)
@@ -147,7 +147,7 @@ func _fight_night(w: GameWorld, b: Bout) -> Control:
 	card.add_child(t)
 	card.add_child(UIKit.label("%s · %s · %s" % [GameWorld.fight_date_text(b.week), ev.city, Matchmaker.division_short(b.division)], "Small"))
 	card.add_child(UIKit.gap(4))
-	card.add_child(FightKit.faceoff(w, w.fighter(b.a), w.fighter(b.b), 140))
+	card.add_child(FightKit.faceoff(w, w.fighter(b.a), w.fighter(b.b), 210))
 	return UIKit.card_panel(card)
 
 
@@ -177,7 +177,7 @@ func _next_fight(w: GameWorld, mine: Array) -> Control:
 	info.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	card.add_child(info)
 	card.add_child(UIKit.gap(2))
-	card.add_child(FightKit.faceoff(w, w.fighter(best.a), w.fighter(best.b), 108))
+	card.add_child(FightKit.faceoff(w, w.fighter(best.a), w.fighter(best.b), 130))
 	if Camp.in_window(w, who) or float(who.camp.get("pts", 0.0)) > 0.0:
 		var pts := float(Camp.ensure(w, who).get("pts", 0.0))
 		var row := UIKit.hbox(UITokens.S2)

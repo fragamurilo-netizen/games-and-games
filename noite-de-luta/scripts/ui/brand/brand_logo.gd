@@ -41,7 +41,7 @@ static func font(weight: float, width: float, spacing: int = 0) -> FontVariation
 	return f
 
 
-func _init(p_emblem := 200.0, p_big := 118, p_side := false, with_tagline := true) -> void:
+func _init(p_emblem := 200.0, p_big := 118, p_side := false, with_tagline := false) -> void:
 	emblem_px = p_emblem
 	big_px = p_big
 	side_by_side = p_side

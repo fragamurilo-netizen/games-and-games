@@ -46,7 +46,6 @@ static func open(w: GameWorld, f: Fighter, done: Callable) -> void:
 		var p := Signing.chance(w, f, float(state["cut"]), int(state["fights"]), float(state["bonus"]))
 		var pc := UIColors.GREEN if p >= 0.5 else (UIColors.ORANGE if p >= 0.25 else UIColors.RED)
 		v.add_child(UIKit.kv("Chance de aceitar", Signing.chance_label(p), pc))
-		v.add_child(UIKit.label("Academia com mais reputação convence mais. Pedir menos da bolsa ou pagar luvas também ajuda.", "Small", true))
 		v.add_child(UIKit.button("Enviar proposta", "PrimaryButton", func():
 			var r := Signing.offer(w, f, float(state["cut"]), int(state["fights"]), float(state["bonus"]))
 			UIManager.close_modal()

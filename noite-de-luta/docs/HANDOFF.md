@@ -1,5 +1,18 @@
 # Noite de Luta — nota de passagem (24/11/2026)
 
+## Rodada 18 de 25/11/2026: cara de cartaz de luta (APK 1.3.0)
+
+O dono, ao receber o 1.2.0: "deixar ui e UX com menos cara de ia por favor". Leitura: azul-escuro com dourado, cartões arredondados com filete empilhados, cápsulas, frases de apoio e slogan em três tempos são o que dá cara de coisa gerada. Resposta: identidade própria de cartaz e transmissão de luta. Nenhuma regra do jogo mudou.
+
+- **Cor** (`UIColors`): preto neutro em degraus (sem azul), texto cor de papel, amarelo de cartaz `#FFCF0D` no lugar do dourado. `UITokens.HAIRLINE` e `BAR` acompanham.
+- **Forma** (`UITokens`, `tools/build_theme_runner.gd`): nada arredondado. `R_*` valem zero; botões, etiquetas, destaques e retratos levam o corte em diagonal nos quatro cantos (`CUT_SM`, `CUT`, `CUT_LG`, feito com `corner_detail = 1`), que é o octógono do emblema. `sb(bg, cut, ...)` agora recebe o corte. Cartão é chapa lisa sem contorno; destaque é moldura amarela de 3 px. O retrato (`Portrait.SHADER_TILE`) corta os cantos no shader.
+- **Letra**: títulos (`UIKit.HEADLINES`: Title, Screen, Section, H2, Display) em Saira comprimida pesada e caixa alta, com entrelinha fechada; botão primário e abas em caixa alta; etiquetas (`UIKit.pill`) em caixa alta; `UIKit.badge` é só o número grande, sem quadrinho.
+- **Peças**: `UIKit.section_header` é título de cartaz sobre um fio grosso (sem a marquinha colorida); segmento escolhido é chapa clara; a aba ativa da navegação é uma barra amarela no alto (sem cápsula); fundo das telas quase liso (`main.gd › _add_night`).
+- **Cartaz** (`FightKit.faceoff`): os dois lutadores recortados sobre o campo do corner, cortado em diagonal, "VS" no meio, sobrenome em letra de cartaz. Vale para Início, Noite de luta, propostas, card, gala. O cabeçalho da ficha (`FighterScreen._header`) segue a mesma ideia com um lutador só.
+- **Texto**: slogan do menu desligado (`BrandLogo` com `with_tagline` falso por padrão); o guia do Início ficou só com o passo e o botão; frases que explicavam regra saíram ou viraram uma linha de dado na ficha, academia, camp, propostas, desafio, noite; subtítulos das linhas de menu do Início e da Equipe saíram; botões primários mais curtos.
+
+**Não feito nesta rodada**: telas do presidente só passaram pela troca de tema e pela revisão visual, os textos de apoio delas (TV, sede, organização, temporada) continuam longos; ícones são os mesmos; a tela de visual (`look_screen`) não foi redesenhada.
+
 ## Rodada 17 de 25/11/2026: luta viva e vida dos lutadores (APK 1.2.0)
 
 O dono, depois do 1.1.0: "ta rapido o jogo ta perfeito, mas nao é divertido, nem intuitivo, nem facil de jogar", "numeros e telas demais, clique demais", "animações absurdas", "mais personalidade, mais historico dos lutadores, mais vida deles", "sem microcopy", "chechenos e russos", "todos que refletem a vida real", "estilos diferentes, coisas raras".

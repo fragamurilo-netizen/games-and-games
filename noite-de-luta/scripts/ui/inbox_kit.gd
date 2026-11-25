@@ -280,7 +280,7 @@ static func todo_block(w: GameWorld, on_change: Callable, limit: int = 4) -> Con
 	if pend.is_empty():
 		var ok := UIKit.hbox(UITokens.S2)
 		ok.add_child(UIKit.icon_rect("check", 24, UIColors.GREEN))
-		var l := UIKit.label("Nada esperando decisão. Pode avançar a semana.", "Small", true)
+		var l := UIKit.label("Nada esperando decisão.", "Small", true)
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		ok.add_child(l)
 		v.add_child(ok)

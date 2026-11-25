@@ -12,11 +12,16 @@ static func icon(name: String) -> Texture2D:
 	return _icons[name]
 
 
+## Variações de título: sempre em caixa alta (letra de cartaz).
+const HEADLINES := ["Title", "Screen", "Section", "H2", "Display"]
+
+
 static func label(text: String, variation: String = "", wrap: bool = false) -> Label:
 	var l := Label.new()
 	l.text = text
 	if variation != "":
 		l.theme_type_variation = variation
+		l.uppercase = variation in HEADLINES
 	if wrap:
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -42,7 +47,7 @@ static func button(text: String, variation: String = "", cb: Callable = Callable
 	var b := Button.new()
 	b.text = text
 	if variation == "PrimaryButton":
-		b.text = soften(text)
+		b.text = text.to_upper()
 		b.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	if variation != "":
 		b.theme_type_variation = variation
@@ -319,11 +324,9 @@ static func bar(value: float, max_value: float, color: Color, h: int = 10) -> Pr
 	pb.custom_minimum_size = Vector2(0, h)
 	var fill := StyleBoxFlat.new()
 	fill.bg_color = color
-	fill.set_corner_radius_all(h / 2)
 	pb.add_theme_stylebox_override(&"fill", fill)
 	var bg := StyleBoxFlat.new()
 	bg.bg_color = UIColors.SURFACE_3
-	bg.set_corner_radius_all(h / 2)
 	pb.add_theme_stylebox_override(&"background", bg)
 	pb.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return pb
@@ -473,19 +476,21 @@ static func pill(text: String, color: Color, font_size: int = 18) -> PanelContai
 	var key := color.to_html(false)
 	if not _pill_boxes.has(key):
 		var box := StyleBoxFlat.new()
-		box.bg_color = Color(color, 0.16)
-		box.set_corner_radius_all(UITokens.R_PILL)
-		box.content_margin_left = 12
-		box.content_margin_right = 12
-		box.content_margin_top = 2
-		box.content_margin_bottom = 2
+		box.bg_color = Color(color, 0.2)
+		box.set_corner_radius_all(UITokens.CUT_SM)
+		box.corner_detail = 1
+		box.content_margin_left = 10
+		box.content_margin_right = 10
+		box.content_margin_top = 1
+		box.content_margin_bottom = 1
 		box.anti_aliasing = true
 		_pill_boxes[key] = box
 	p.add_theme_stylebox_override(&"panel", _pill_boxes[key])
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	p.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var l := label(soften(text), "Chip")
+	var l := label(text, "Chip")
+	l.uppercase = true
 	l.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	l.add_theme_color_override(&"font_color", UIColors.readable_on(color, [UIColors.SURFACE_2], 4.5))
 	l.add_theme_font_size_override(&"font_size", maxi(font_size, 17))
@@ -499,8 +504,7 @@ static func badge(text: String, color: Color, font_size: int = 24, min_w: int = 
 	var key := "b" + color.to_html(false)
 	if not _pill_boxes.has(key):
 		var box := StyleBoxFlat.new()
-		box.bg_color = Color(color, 0.17)
-		box.set_corner_radius_all(UITokens.R_SM)
+		box.bg_color = Color(color, 0.0)
 		box.content_margin_left = 8
 		box.content_margin_right = 8
 		box.content_margin_top = 2
@@ -513,9 +517,9 @@ static func badge(text: String, color: Color, font_size: int = 24, min_w: int = 
 	p.size_flags_horizontal = Control.SIZE_SHRINK_END
 	p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var l := label(text, "Stat")
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	l.add_theme_color_override(&"font_color", UIColors.readable_on(color, [UIColors.SURFACE_2], 4.5))
-	l.add_theme_font_size_override(&"font_size", font_size)
+	l.add_theme_font_size_override(&"font_size", roundi(font_size * 1.3))
 	p.add_child(l)
 	return p
 
@@ -555,19 +559,15 @@ static func kicker(text: String, color: Color = Color(0, 0, 0, 0)) -> Label:
 	return l
 
 
-## Cabeçalho de seção: marca dourada, título em caixa alta e, opcional, um link à direita.
+## Cabeçalho de seção: título de cartaz em caixa alta sobre um fio grosso que cruza a tela e,
+## opcional, um link à direita.
 static func section_header(text: String, action: String = "", cb: Callable = Callable()) -> HBoxContainer:
 	var h := hbox(10)
 	h.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var mark := ColorRect.new()
-	mark.color = UIColors.ACCENT
-	mark.custom_minimum_size = Vector2(5, 22)
-	mark.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	mark.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	h.add_child(mark)
-	var l := label(text, "Eyebrow")
-	l.uppercase = true
-	l.add_theme_color_override(&"font_color", UIColors.TEXT)
+	h.custom_minimum_size.y = 46
+	h.draw.connect(func(): h.draw_rect(Rect2(0.0, h.size.y - 3.0, h.size.x, 3.0), UIColors.TEXT))
+	var l := label(text, "Section")
+	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	h.add_child(l)
@@ -592,7 +592,7 @@ static func tabs(items: Array, selected: String, cb: Callable) -> HBoxContainer:
 	for it: Array in items:
 		var b := Button.new()
 		b.theme_type_variation = "TabButton"
-		b.text = String(it[1])
+		b.text = String(it[1]).to_upper()
 		b.toggle_mode = true
 		b.button_group = g
 		b.button_pressed = String(it[0]) == selected
@@ -727,7 +727,7 @@ static func scroll_tabs(items: Array, selected: String, cb: Callable) -> ScrollC
 	for it: Array in items:
 		var b := Button.new()
 		b.theme_type_variation = "TabButton"
-		b.text = String(it[1])
+		b.text = String(it[1]).to_upper()
 		b.toggle_mode = true
 		b.button_group = g
 		b.button_pressed = String(it[0]) == selected

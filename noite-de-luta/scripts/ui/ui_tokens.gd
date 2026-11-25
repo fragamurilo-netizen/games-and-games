@@ -19,14 +19,18 @@ const S8 := 48
 const GUTTER := 20
 const GUTTER_DENSE := 16
 
-## Raios: 10 (etiquetas, segmentos), 14 (botões, campos, retratos), 20 (cartões, folhas,
-## diálogos). Cápsulas (chips) usam R_PILL. R_XS fica como apelido para o código antigo.
+## Cantos: tudo reto. O que é botão, etiqueta ou destaque leva o corte em diagonal nos quatro
+## cantos (o octógono da marca), com os tamanhos CUT_*. Os nomes R_* ficam para o código antigo e
+## valem zero.
 const R_NONE := 0
-const R_XS := 10
-const R_SM := 10
-const R_MD := 14
-const R_LG := 20
-const R_PILL := 999
+const R_XS := 0
+const R_SM := 0
+const R_MD := 0
+const R_LG := 0
+const R_PILL := 0
+const CUT_SM := 5
+const CUT := 9
+const CUT_LG := 14
 
 ## Tipografia (DESIGN.md › Typography).
 const F_SCORE := 60
@@ -55,6 +59,6 @@ const H_ROW := 84
 const H_NAV := 96
 
 ## Divisor fino dentro de superfícies (mapeado no modo claro em UIColors.LIGHT_EXTRA).
-const HAIRLINE := Color("#232B38")
+const HAIRLINE := Color("#2A2725")
 ## Fundo das barras (superior, navegação, rodapés).
-const BAR := Color("#0E1218")
+const BAR := Color("#050505")

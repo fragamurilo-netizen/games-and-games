@@ -37,7 +37,6 @@ func refresh() -> void:
 		foot.add_child(UIKit.button("Resolver", "PrimaryButton", func(): WeekKit.open_incident(w, FightWeek.pending(w, ev)[0], refresh)))
 		return
 	var pending := lst.filter(func(b: Bout) -> bool: return b.status == "marcada")
-	c.add_child(UIKit.label("O card na ordem das lutas: das preliminares à principal.", "Muted", true))
 	for i in lst.size():
 		var b: Bout = lst[i]
 		var box := UIKit.vbox(UITokens.S1)
@@ -62,13 +61,13 @@ func refresh() -> void:
 		var next: Bout = pending[0]
 		var nid := next.id
 		var row2 := UIKit.hbox(UITokens.S2)
-		var rest := UIKit.button("Simular as que faltam", "GhostButton", func():
+		var rest := UIKit.button("Simular o resto", "GhostButton", func():
 			for b: Bout in pending:
 				if b.status == "marcada":
 					Career.simulate(w, b)
 			GameManager.save_now()
 			refresh())
-		var go := UIKit.button("Assistir a próxima", "PrimaryButton", func(): UIManager.push("fight", {"bout": nid, "spectator": true}))
+		var go := UIKit.button("Assistir", "PrimaryButton", func(): UIManager.push("fight", {"bout": nid, "spectator": true}))
 		go.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row2.add_child(rest)
 		row2.add_child(go)
