@@ -1577,9 +1577,32 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	_anatomy_details(f, seed_value)
 	_eth_traits(f)
 	_individuality(f, seed_value)
+	_apply_youth(f, age)
 	_pleasant(f)
 	_proportion_floor(f)
 	return f
+
+
+## Rosto de garoto (16–21): ainda não terminou de crescer. Olhos maiores para o rosto, nariz e queixo
+## menores, mandíbula e arco da sobrancelha mais suaves, bochecha mais cheia e rosto um pouco mais
+## curto. Some aos poucos até os 22; antes o garoto de 16 tinha a mesma cara do adulto de 28.
+static func _apply_youth(f: Dictionary, age: int) -> void:
+	var y := clampf((22.0 - age) / 6.0, 0.0, 1.0)
+	if y <= 0.0:
+		return
+	f["eye_h"] = float(f["eye_h"]) * (1.0 + 0.12 * y)
+	f["eye_w"] = float(f["eye_w"]) * (1.0 + 0.04 * y)
+	f["nose_len"] = float(f["nose_len"]) * (1.0 - 0.1 * y)
+	f["nose_w"] = float(f["nose_w"]) * (1.0 - 0.05 * y)
+	f["bridge"] = float(f["bridge"]) * (1.0 - 0.2 * y)
+	f["chin_len"] = float(f.get("chin_len", 0.0)) - 0.03 * y
+	f["jaw"] = float(f["jaw"]) - 0.03 * y
+	f["chin_sq"] = maxf(1.05, float(f["chin_sq"]) * (1.0 - 0.15 * y))
+	f["fat"] = float(f["fat"]) + 0.09 * y
+	f["cheekbone"] = float(f["cheekbone"]) * (1.0 - 0.15 * y)
+	f["ridge"] = float(f["ridge"]) * (1.0 - 0.3 * y)
+	f["brow_t"] = float(f["brow_t"]) * (1.0 - 0.12 * y)
+	f["fh"] = float(f["fh"]) * (1.0 - 0.035 * y)
 
 
 ## Proporções agradáveis para todo mundo (pedido do dono em 08/10: "mais bonitinhos, alguns não
@@ -1788,7 +1811,9 @@ static func _apply_aging(f: Dictionary, seed_value: int, age: int) -> void:
 	f["temple"] = clampf((age - 44.0) / 24.0, 0.0, 1.0) * (1.0 - float(f["fat"]) * 0.6)
 	f["age_spots"] = clampf((age - 44.0) / 20.0, 0.0, 1.0) * (0.3 + sun * 0.7)
 	f["spot_seed"] = r.randi()
-	var old := clampf((age - 40.0) / 30.0, 0.0, 1.0)
+	# O rosto começa a "descer" já nos 30 e poucos (antes só depois dos 40: o veterano de 36
+	# tinha a cara do garoto de 25, só com cabelo grisalho).
+	var old := clampf((age - 33.0) / 35.0, 0.0, 1.0)
 	f["nose_len"] = float(f["nose_len"]) * (1.0 + old * 0.1)
 	f["nose_w"] = float(f["nose_w"]) * (1.0 + old * 0.06)
 	f["lip_u"] = float(f["lip_u"]) * (1.0 - old * 0.35)

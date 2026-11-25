@@ -594,7 +594,7 @@ func _light_pass() -> void:
 		var d := (p - key) / (_s * 0.9)
 		var fall := clampf(d.length(), 0.0, 1.3)
 		var warm := Color(1.0, 0.92, 0.8, 0.1 * (1.0 - smoothstep(0.0, 0.65, fall)))
-		var shade := 0.12 * smoothstep(0.55, 1.35, fall)
+		var shade := 0.2 * smoothstep(0.5, 1.3, fall)
 		if shade > warm.a:
 			return Color(0.04, 0.06, 0.12, shade)
 		return warm
