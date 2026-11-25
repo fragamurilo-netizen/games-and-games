@@ -158,7 +158,7 @@ static func role_nation(rng: RandomNumberGenerator, role: String, club: Club) ->
 		"capitao":
 			return club.nation if rng.randf() < 0.7 else ""
 		"astro":
-			var nat := PlayerGenerator.pick_import(rng, club.nation)
+			var nat := PlayerGenerator.pick_import(rng, club.nation, 1.0)
 			return nat if nat != club.nation else String(RngUtil.pick(rng, ["BRA", "FRA", "POR", "ESP", "ARG", "ENG", "BEL", "NED", "CRO", "ALG", "MAR", "SEN"]))
 	return ""
 
