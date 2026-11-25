@@ -1,0 +1,7 @@
+<pt-BR>
+Menus mais rápidos: as telas principais abrem sem espera na primeira vez, voltar a uma aba devolve a tela como você deixou, e o Mercado não refaz a busca de jogadores a cada visita. Notícias carregam em páginas menores. Novo menu ☰ em grade com ícones, os itens usados há pouco no alto e as ações do jogo (salvar, carregar, editor, opções, sair) numa fileira só.
+</pt-BR>
+
+<en-US>
+Faster menus: the main screens open without waiting the first time, returning to a tab brings the screen back as you left it, and the Transfer market no longer redoes the player search on every visit. News loads in smaller pages. New ☰ menu as an icon grid, with recently used items on top and the game actions (save, load, editor, options, quit) in a single row.
+</en-US>

@@ -72,6 +72,32 @@ func register_main(m: Node) -> void:
 	main = m
 	if not GameManager.busy_changed.is_connected(_on_busy):
 		GameManager.busy_changed.connect(_on_busy)
+	if not GameManager.world_changed.is_connected(mark_dirty):
+		GameManager.world_changed.connect(mark_dirty)
+		Store.changed.connect(mark_dirty)
+
+
+# ---------------------------------------------------------------------------
+# Revisão: o que pode ter mudado desde que cada tela foi montada
+# ---------------------------------------------------------------------------
+
+## Sobe a cada coisa que pode mudar o mundo ou o que as telas mostram (toque dentro da tela,
+## diálogo, empilhar/voltar, rodada, compra). Trocar de aba sem nada disso no meio devolve a
+## tela já montada, sem reconstruir (era o maior custo de ir e voltar entre as abas).
+var rev := 0
+
+
+func mark_dirty() -> void:
+	rev += 1
+
+
+func _stamp(s: BaseScreen) -> void:
+	if is_instance_valid(s):
+		s.set_meta(&"rev", rev)
+
+
+func _fresh(s: BaseScreen) -> bool:
+	return int(s.get_meta(&"rev", -1)) == rev
 
 
 # ---------------------------------------------------------------------------
@@ -98,6 +124,7 @@ func _on_busy(on: bool) -> void:
 			b.text = GameManager.work_label
 			_busy_modal = show_modal(b, false, false)
 		return
+	mark_dirty()
 	if is_instance_valid(_busy_modal):
 		_modals.erase(_busy_modal)
 		_busy_modal.queue_free()
@@ -125,7 +152,9 @@ func refresh_current() -> bool:
 	if GameManager.is_busy():
 		_stale = true
 		return false
+	mark_dirty()
 	cur.refresh()
+	_stamp(cur)
 	return true
 
 
@@ -150,12 +179,38 @@ func forget_career_views() -> void:
 	_stale = false
 
 
+## Telas carregadas numa thread enquanto o jogador está no menu: abrir pela primeira vez não
+## espera a leitura das cenas e scripts (era mais de 1 s no Início).
+const PREFETCH := ["hub", "squad", "tactics", "market", "club", "player", "news", "inbox",
+	"table", "prematch", "match", "results", "academy", "training", "contracts", "history",
+	"settings", "load", "new_career"]
+var _prefetching: Dictionary = {} # caminho -> true
+
+
+func prefetch_screens() -> void:
+	for name in PREFETCH:
+		var path: String = SCREENS[name]
+		if _prefetching.has(path) or ResourceLoader.has_cached(path):
+			continue
+		if ResourceLoader.load_threaded_request(path, "PackedScene", false) == OK:
+			_prefetching[path] = true
+
+
+func _load_scene(path: String) -> PackedScene:
+	if _prefetching.has(path):
+		_prefetching.erase(path)
+		var res := ResourceLoader.load_threaded_get(path) as PackedScene
+		if res != null:
+			return res
+	return load(path)
+
+
 func _instance(name: String, params: Dictionary) -> BaseScreen:
 	if name in GATED and Store.locked(GameManager.world):
 		name = "paywall"
 		params = {}
 	if not _scene_cache.has(name):
-		_scene_cache[name] = load(SCREENS[name])
+		_scene_cache[name] = _load_scene(SCREENS[name])
 	var node: BaseScreen = _scene_cache[name].instantiate()
 	node.screen_name = name
 	node.setup(params)
@@ -211,7 +266,12 @@ func switch_area(a: String) -> void:
 	top.visible = true
 	top.process_mode = Node.PROCESS_MODE_INHERIT
 	_apply_chrome(top)
+	if _fresh(top):
+		# Nada mudou desde que esta tela foi montada: ela volta como estava, rolagem incluída.
+		_animate_in(top, 0.0)
+		return
 	top.on_show()
+	_stamp(top)
 	_restore_scroll(top)
 	_animate_in(top, 0.0)
 
@@ -223,11 +283,13 @@ func pop_to_root() -> void:
 	while stack.size() > 1:
 		var s: BaseScreen = stack.pop_back()
 		s.queue_free()
+	mark_dirty()
 	var root := current()
 	root.visible = true
 	root.process_mode = Node.PROCESS_MODE_INHERIT
 	_apply_chrome(root)
 	root.on_show()
+	_stamp(root)
 	_animate_in(root, -40.0)
 
 
@@ -310,21 +372,25 @@ func back() -> bool:
 		return false
 	var cur: BaseScreen = stack.pop_back()
 	cur.queue_free()
+	mark_dirty()
 	var prev := current()
 	prev.visible = true
 	prev.process_mode = Node.PROCESS_MODE_INHERIT
 	_apply_chrome(prev)
 	prev.on_show()
+	_stamp(prev)
 	_restore_scroll(prev)
 	_animate_in(prev, -40.0)
 	return true
 
 
 func _show(screen: BaseScreen, from_x: float) -> void:
+	mark_dirty()
 	stack.append(screen)
 	main.screen_host.add_child(screen)
 	_apply_chrome(screen)
 	screen.on_show()
+	_stamp(screen)
 	_animate_in(screen, from_x)
 
 
@@ -407,6 +473,7 @@ func handle_back() -> void:
 
 ## Mostra um conteúdo como modal centralizado (dialog) ou folha inferior (sheet).
 func show_modal(content: Control, as_sheet: bool = false, dismissable: bool = true) -> Control:
+	mark_dirty()
 	var layer: Control = main.modal_host
 	var dim := ColorRect.new()
 	dim.color = Color(0, 0, 0, 0.62)
@@ -593,6 +660,7 @@ func popover(content: Control, anchor: Control, width: float = 460.0) -> Control
 func close_modal() -> void:
 	if _modals.is_empty():
 		return
+	mark_dirty()
 	var m: Control = _modals.pop_back()
 	m.queue_free()
 

@@ -69,6 +69,11 @@ func refresh() -> void:
 	if w == null:
 		return
 	var club := w.user_club()
+	if _tab == "search" and _pool == "all" and _recheck:
+		# Voltando de outra tela: só refaz a avaliação do mundo se algo que ela usa mudou.
+		_recheck = false
+		if _base_key != "" and _base_key != _search_key(w, club, _weakest_starter_by_group(w, club), _scouted(w)):
+			_base_key = ""
 	if _tab == "search" and _pool == "all" and _base_key == "":
 		# Não bloquear a thread de entrada do Android avaliando o mundo inteiro. O trabalho
 		# usa um único dono dos caches; a UI só monta Controls depois da conclusão.
@@ -464,14 +469,14 @@ func _market_cols(w: GameWorld, club: Club, weakest: Array) -> Array:
 	]
 
 
-var _base: Array = [] # [jogador, avaliação, relevância] de quem pode ser contratado
-var _base_key := ""
+static var _base: Array = [] # [jogador, avaliação, relevância] de quem pode ser contratado
+static var _base_key := ""
 
 
 ## Base da busca: todos os jogadores de outros clubes com avaliação e relevância, refeita quando
 ## algo que pesa nelas muda (rodada, verba, elenco, olheiros, jogadores novos) ou a tela reaparece.
 func _search_base(w: GameWorld, club: Club, weakest: Array, budget: float, scouted: Dictionary) -> Array:
-	var key := "%d|%d|%d|%d|%d|%s" % [w.current_turn(), club.transfer_budget, w.players.size(), scouted.size(), club.player_ids.size(), str(weakest)]
+	var key := _search_key(w, club, weakest, scouted)
 	if key == _base_key:
 		return _base
 	_base_key = key
@@ -499,14 +504,26 @@ func _search_base(w: GameWorld, club: Club, weakest: Array, budget: float, scout
 	return _base
 
 
+var _recheck := false
+
+
+static func _scouted(w: GameWorld) -> Dictionary:
+	return w.stats["scouting"]["ids"] if w.stats.has("scouting") else {}
+
+
+## O que a avaliação do mercado usa: se nada disso mudou, a lista anterior continua valendo.
+func _search_key(w: GameWorld, club: Club, weakest: Array, scouted: Dictionary) -> String:
+	return "%d|%d|%d|%d|%d|%s" % [w.current_turn(), club.transfer_budget, w.players.size(), scouted.size(), club.player_ids.size(), str(weakest)]
+
+
 func on_show() -> void:
-	_base_key = "" # voltando de outra tela (negociação, perfil): o mundo pode ter mudado
+	_recheck = true # voltando de outra tela (negociação, perfil): o mundo pode ter mudado
 	super.on_show()
 
 
 ## Nome e nome completo em minúsculas, guardados enquanto a tela existe: a busca por nome roda a
 ## cada letra digitada e passava por todos os jogadores montando os textos de novo.
-var _names := {}
+static var _names := {}
 
 
 func _name_key(p: Player) -> String:

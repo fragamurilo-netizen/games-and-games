@@ -16,15 +16,66 @@ static func available(screen: BaseScreen) -> bool:
 	return not (screen.screen_name == "hub" and not screen.show_nav)
 
 
+## Telas abertas pelo menu há pouco (as mais recentes primeiro), para voltar a elas num toque.
+static var recent: Array = []
+const RECENT_MAX := 4
+
+
+## Grupos do menu: [título, [[rótulo, tela, ícone], ...]]. Os parâmetros que dependem do clube
+## entram em _params(). As cinco áreas já estão na barra de navegação.
+const GROUPS := [
+	["Caixa de entrada", [["Mensagens", "inbox", "mail"], ["Notícias", "news", "news"], ["Redes", "social", "chat"]]],
+	["Elenco", [["Treino", "training", "whistle"], ["Base", "academy", "ball"], ["Contratos", "contracts", "card"],
+		["Numeração", "numbers", "hash"], ["Vestiário", "dressing_room", "heart"], ["Relações", "relations", "users"],
+		["Raio-X tático", "xray", "tactics"], ["Revelados pela base", "graduates", "medal"]]],
+	["Clube", [["Competições", "table", "table"], ["Estatísticas", "team_stats", "bolt"], ["Estatísticas da liga", "league_stats", "chart"],
+		["Confrontos", "rivalry", "swap"], ["Uniformes", "kit", "shirt"], ["Camisas antigas", "kit_history", "palette"],
+		["Elencos antigos", "past_squads", "list"]]],
+	["Carreira e mundo", [["Treinador", "manager", "user"], ["Reputação", "reputation", "star"], ["Conquistas", "achievements", "trophy"],
+		["Seleções", "national", "globe"], ["Mercado de técnicos", "jobs", "search"], ["Dança das cadeiras", "coach_moves", "fast"],
+		["Escolas de técnicos", "coach_schools", "info"], ["História", "history", "book"], ["Joias", "nextgen", "gem"],
+		["Gerações", "generations", "up"]]],
+]
+
+
+static func _params(w: GameWorld, screen: String) -> Dictionary:
+	var cid := w.user_club_id
+	match screen:
+		"graduates", "kit_history", "past_squads":
+			return {"id": cid}
+		"rivalry":
+			return {"a": cid}
+	return {}
+
+
+static func _badge(w: GameWorld, screen: String) -> int:
+	match screen:
+		"inbox":
+			return InboxManager.unread_count(w)
+		"news":
+			return w.unread_news_count()
+	return 0
+
+
+static func _item(screen: String) -> Array:
+	for g in GROUPS:
+		for it in g[1]:
+			if it[1] == screen:
+				return it
+	return []
+
+
+## Menu do ☰: ladrilhos com ícone em grade (duas colunas no celular, quatro na tela larga), as
+## telas usadas há pouco no alto e as ações do jogo numa fileira de ícones no pé. Antes era uma
+## lista de 30 linhas que pedia várias rolagens para chegar ao fim.
 static func open() -> void:
 	var w: GameWorld = GameManager.world
 	if w == null or not w.has_user():
 		return
-	var cid := w.user_club_id
 	# O menu é do técnico: sempre nas cores do clube dele, mesmo aberto sobre uma tabela (cor da
 	# liga) ou sobre a tela de outro clube. Ao fechar, a tela de baixo volta às cores dela.
 	UIColors.apply_colors_for(w.user_club())
-	var v := UIKit.vbox(6)
+	var v := UIKit.vbox(UITokens.S2)
 	v.tree_exited.connect(_restore_colors)
 	var head := UIKit.hbox(8)
 	var t := UIKit.label("Menu", "H2")
@@ -32,73 +83,19 @@ static func open() -> void:
 	head.add_child(t)
 	head.add_child(UIKit.icon_button("close", func(): UIManager.close_modal(), "Fechar"))
 	v.add_child(head)
-	# Lista em duas colunas quando cabe; as cinco áreas já estão na barra de navegação.
-	var cols := UIKit.hbox(28)
-	var left := UIKit.vbox(6)
-	var right := UIKit.vbox(6)
-	for c: VBoxContainer in [left, right]:
-		c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var wide: bool = UIManager.main != null and UIManager.main.get_viewport_rect().size.x >= 1000.0
-	if wide:
-		cols.add_child(left)
-		cols.add_child(right)
-	else:
-		cols.free()
-		right.free()
-	_group(left, "Caixa de entrada", [
-		["Mensagens", "inbox", {}, InboxManager.unread_count(w)],
-		["Notícias", "news", {}, w.unread_news_count()],
-		["Redes", "social", {}, 0],
-	])
-	_group(left, "Elenco", [
-		["Treino", "training", {}, 0],
-		["Base", "academy", {}, 0],
-		["Contratos", "contracts", {}, 0],
-		["Numeração", "numbers", {}, 0],
-		["Vestiário", "dressing_room", {}, 0],
-		["Relações", "relations", {}, 0],
-		["Raio-X tático", "xray", {}, 0],
-		["Revelados pela base", "graduates", {"id": cid}, 0],
-	])
-	var r := right if wide else left
-	_group(r, "Clube", [
-		["Competições", "table", {}, 0],
-		["Estatísticas", "team_stats", {}, 0],
-		["Estatísticas da liga", "league_stats", {}, 0],
-		["Confrontos", "rivalry", {"a": cid}, 0],
-		["Uniformes", "kit", {}, 0],
-		["Camisas antigas", "kit_history", {"id": cid}, 0],
-		["Elencos antigos", "past_squads", {"id": cid}, 0],
-	])
-	_group(r, "Carreira e mundo", [
-		["Treinador", "manager", {}, 0],
-		["Reputação", "reputation", {}, 0],
-		["Conquistas", "achievements", {}, 0],
-		["Seleções", "national", {}, 0],
-		["Mercado de técnicos", "jobs", {}, 0],
-		["Dança das cadeiras", "coach_moves", {}, 0],
-		["Escolas de técnicos", "coach_schools", {}, 0],
-		["História", "history", {}, 0],
-		["Joias", "nextgen", {}, 0],
-		["Gerações", "generations", {}, 0],
-	])
-	var game := UIKit.vbox(0)
-	game.add_child(UIKit.section_header("Jogo"))
-	game.add_child(_row("Salvar", func():
-		UIManager.close_modal()
-		if GameManager.save_now():
-			UIManager.toast("Salvando...", UIColors.ACCENT)
-		else:
-			UIManager.toast("Não foi possível salvar agora.", UIColors.RED), false, 0))
-	game.add_child(_row("Carregar", _go.bind("load", {}), _here("load"), 0))
-	game.add_child(_row("Editor", _go.bind("editor", {}), _here("editor"), 0))
-	game.add_child(_row("Opções", _go.bind("settings", {}), _here("settings"), 0))
-	game.add_child(_row("Sair para o menu", func():
-		UIManager.close_modal()
-		UIManager.confirm("Sair para o menu?", "Seu progresso é salvo automaticamente.", "Sair", func():
-			GameManager.close_career_async(func() -> void: UIManager.goto("menu"))), false, 0))
-	r.add_child(game)
-	v.add_child(cols if wide else left)
+	var vw: float = UIManager.main.get_viewport_rect().size.x if UIManager.main != null else 600.0
+	# A folha tem no máximo 820 px (UIManager.show_modal): cabem colunas de ~260 px.
+	var cols := clampi(int(minf(vw, 820.0) / 260.0), 2, 4)
+	var recent_items: Array = []
+	for screen: String in recent:
+		var it := _item(screen)
+		if not it.is_empty():
+			recent_items.append(it)
+	if not recent_items.is_empty():
+		v.add_child(_group(w, "Usados há pouco", recent_items, cols))
+	for g in GROUPS:
+		v.add_child(_group(w, String(g[0]), g[1], cols))
+	v.add_child(_game_actions())
 	UIManager.show_modal(v, true)
 
 
@@ -111,30 +108,82 @@ static func _restore_colors() -> void:
 		UIManager.main.restyle()
 
 
-static func _group(v: VBoxContainer, title: String, items: Array) -> void:
-	var g := UIKit.vbox(0)
+static func _group(w: GameWorld, title: String, items: Array, cols: int) -> Control:
+	var g := UIKit.vbox(UITokens.S1)
 	g.add_child(UIKit.section_header(title))
+	var grid := GridContainer.new()
+	grid.columns = cols
+	grid.add_theme_constant_override(&"h_separation", UITokens.S1)
+	grid.add_theme_constant_override(&"v_separation", UITokens.S1)
 	for it in items:
 		var screen := String(it[1])
-		g.add_child(_row(String(it[0]), _go.bind(screen, it[2]), _here(screen), int(it[3])))
-	g.add_child(UIKit.gap(10))
-	v.add_child(g)
+		grid.add_child(_tile(String(it[0]), String(it[2]), _go.bind(screen, _params(w, screen)), _here(screen), _badge(w, screen)))
+	g.add_child(grid)
+	return g
 
 
-## Linha do menu: nome à esquerda, contador de não lidos à direita. A tela atual fica marcada.
-static func _row(title: String, cb: Callable, here: bool, badge: int) -> PanelContainer:
-	var h := UIKit.hbox(10)
-	var l := UIKit.label(title)
-	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+## Ladrilho do menu: ícone, nome (até duas linhas) e o contador de não lidos. É um botão
+## secundário (surface-raised), do tamanho de uma linha de lista; a tela atual fica marcada.
+static func _tile(title: String, icon: String, cb: Callable, here: bool, badge: int) -> PanelContainer:
+	var h := UIKit.hbox(UITokens.S2)
+	var tint := UIColors.ink(UIColors.ACCENT) if here else UIColors.TEXT
+	var ic := UIKit.icon_rect(icon, 28, tint)
+	ic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	h.add_child(ic)
+	var l := UIKit.label(title, "", true)
+	l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD
+	l.max_lines_visible = 2
 	l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	if here:
-		l.add_theme_color_override(&"font_color", UIColors.ink(UIColors.ACCENT))
+		l.add_theme_color_override(&"font_color", tint)
 	h.add_child(l)
 	if badge > 0:
-		h.add_child(UIKit.colored(str(badge) if badge < 100 else "99+", UIColors.RED, "Caps"))
-	var row := UIKit.tap_row(h, cb)
-	row.custom_minimum_size.y = UITokens.H_ROW
-	return row
+		var b := UIKit.colored(str(badge) if badge < 100 else "99+", UIColors.RED, "Caps")
+		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		h.add_child(b)
+	var tile := UIKit.tap_row(h, cb, "CardFlat")
+	tile.custom_minimum_size.y = UITokens.H_ROW
+	tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return tile
+
+
+## Ações do jogo numa fileira: ícone com o nome embaixo, cada uma com alvo de toque inteiro.
+static func _game_actions() -> Control:
+	var g := UIKit.vbox(UITokens.S1)
+	g.add_child(UIKit.section_header("Jogo"))
+	var row := UIKit.hbox(UITokens.S1)
+	var acts := [
+		["Salvar", "save", func():
+			UIManager.close_modal()
+			if GameManager.save_now():
+				UIManager.toast("Salvando...", UIColors.ACCENT)
+			else:
+				UIManager.toast("Não foi possível salvar agora.", UIColors.RED)],
+		["Carregar", "archive", _go.bind("load", {})],
+		["Editor", "palette", _go.bind("editor", {})],
+		["Opções", "gear", _go.bind("settings", {})],
+		["Sair", "back", func():
+			UIManager.close_modal()
+			UIManager.confirm("Sair para o menu?", "Seu progresso é salvo automaticamente.", "Sair", func():
+				GameManager.close_career_async(func() -> void: UIManager.goto("menu")))],
+	]
+	for a in acts:
+		var col := UIKit.vbox(2)
+		col.alignment = BoxContainer.ALIGNMENT_CENTER
+		var ic := UIKit.icon_rect(String(a[1]), 28)
+		ic.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		col.add_child(ic)
+		var l := UIKit.label(String(a[0]), "Small")
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		col.add_child(l)
+		var tile := UIKit.tap_row(col, a[2], "CardFlat")
+		tile.custom_minimum_size.y = UITokens.H_ROW
+		tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(tile)
+	g.add_child(row)
+	return g
 
 
 static func _tab_name(tab: String) -> String:
@@ -148,6 +197,10 @@ static func _here(screen: String) -> bool:
 
 static func _go(screen: String, params: Dictionary) -> void:
 	UIManager.close_modal()
+	if not _item(screen).is_empty():
+		recent.erase(screen)
+		recent.push_front(screen)
+		recent.resize(mini(recent.size(), RECENT_MAX))
 	if _here(screen):
 		return
 	if screen in UIManager.TABS:

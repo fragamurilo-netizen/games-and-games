@@ -35,7 +35,8 @@ func _ready() -> void:
 	_configure_window()
 	UILayout.viewport = get_viewport_rect().size
 	$Background.color = UIColors.BG
-	add_child(TouchScroll.new())
+	_touch = TouchScroll.new()
+	add_child(_touch)
 	get_viewport().gui_focus_changed.connect(_on_focus_changed)
 	_shadow = _edge(Color(0, 0, 0, 0.45), Color(0, 0, 0, 0))
 	_fade = _edge(Color(UIColors.BG, 0.0), Color(UIColors.BG, 0.92))
@@ -64,6 +65,7 @@ func _ready() -> void:
 	GameManager.save_failed.connect(func(): UIManager.toast("Não foi possível salvar a carreira. Verifique o espaço livre e tente novamente.", UIColors.RED))
 	Sfx.start_music()
 	UIManager.goto("menu")
+	UIManager.prefetch_screens.call_deferred()
 
 
 func _configure_window() -> bool:
@@ -337,6 +339,7 @@ func _redraw_all(n: Node) -> void:
 
 ## Última entrada foi teclado/controle: só então a rolagem acompanha o foco.
 var _keys_nav := false
+var _touch: TouchScroll
 
 
 ## Toque e clique não deixam foco em botão (o contorno de foco é só para teclado e controle).
@@ -348,6 +351,14 @@ func _input(event: InputEvent) -> void:
 	var tap: bool = (event is InputEventMouseButton and not event.pressed) or (event is InputEventScreenTouch and not event.pressed)
 	if tap:
 		_drop_button_focus.call_deferred()
+		# Toque (ou arraste que não foi rolagem) dentro da tela pode ter mudado o mundo: as telas
+		# guardadas nas outras abas se refazem ao voltar. Rolar e trocar de aba não mudam nada.
+		var pos: Vector2 = event.position
+		var on_nav := bottom_nav.visible and bottom_nav.get_global_rect().has_point(pos)
+		if not on_nav and not (event is InputEventMouseButton and _touch.last_was_scroll):
+			UIManager.mark_dirty()
+	elif event is InputEventKey and event.pressed:
+		UIManager.mark_dirty()
 	if event is InputEventScreenTouch and not event.pressed:
 		# Tela de toque não tem "passar por cima": sem isto a linha tocada ficava acesa até o
 		# próximo toque, porque o mouse emulado continua parado onde o dedo saiu.

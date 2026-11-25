@@ -96,10 +96,15 @@ func _on_motion(event: InputEventMouseMotion) -> void:
 	get_viewport().set_input_as_handled()
 
 
+## O último toque que terminou foi uma rolagem (não um toque em botão nem um arraste no campo).
+var last_was_scroll := false
+
+
 func _on_release() -> void:
 	if not _pressing:
 		return
 	_pressing = false
+	last_was_scroll = _dragging
 	if not _dragging:
 		return
 	_dragging = false

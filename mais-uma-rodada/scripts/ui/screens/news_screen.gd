@@ -4,7 +4,7 @@ extends BaseScreen
 ## opinião (colunas geradas dos números) e o resto do mundo. Toque numa matéria para ler inteira.
 
 const SECTIONS := [["capa", "Capa"], ["mine", "Meu clube"], ["market", "Mercado"], ["results", "Resultados"], ["table", "Tabela"], ["opinion", "Opinião"], ["world", "Mundo"], ["nat", "Seleções"]]
-const PAGE := 30
+const PAGE := 12
 ## Portais fictícios por país (os demais usam o nome genérico com o país).
 const PORTALS := {
 	"BRA": "Bola na Rede", "ENG": "The Matchday Post", "ESP": "El Balón Diario", "ITA": "Calcio Oggi",
