@@ -206,8 +206,11 @@ static func timeline(w: GameWorld, f: Fighter) -> Array:
 			t += ", %dº round" % int(h.get("round", 1))
 		return t
 	var first: Dictionary = all[0]
-	var verb: String = {"V": "Vence", "D": "Perde para", "E": "Empata com"}.get(String(first["res"]), "Enfrenta")
-	add.call(first, "Estreia profissional", "%s %s por %s. %s." % [verb, String(first["opp_name"]), how.call(first), String(first.get("event", ""))], "")
+	var tpl: String = {"V": "Vence %s por %s.", "D": "Perde para %s por %s.", "E": "Empata com %s por %s."}.get(String(first["res"]), "Enfrenta %s por %s.")
+	var ev := String(first.get("event", ""))
+	if ev != "":
+		tpl = tpl.trim_suffix(".") + " em %s."
+	add.call(first, "Estreia profissional", tpl % ([String(first["opp_name"]), how.call(first), ev] if ev != "" else [String(first["opp_name"]), how.call(first)]), "")
 	var streak := 0
 	var best := 0
 	var best_end := -1

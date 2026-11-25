@@ -3944,5 +3944,22 @@
 	"Menos hype. Três semanas aqui e vem o ultimato de %d semanas.": "Меньше хайпа. Три недели здесь — и придёт ультиматум на %d нед.",
 	"Mandato %d. Ultimatos perdidos: %d de 2.": "Срок %d. Проиграно ультиматумов: %d из 2.",
 	"Fecha no fim do ano. Prêmio: %s.": "Засчитывается в конце года. Награда: %s.",
-	"Prêmio: %s.": "Награда: %s."
+	"Prêmio: %s.": "Награда: %s.",
+	"Vence %s por %s.": "Побеждает {1}: {2}.",
+	"Perde para %s por %s.": "Проигрывает {1}: {2}.",
+	"Empata com %s por %s.": "Ничья с {1}: {2}.",
+	"Enfrenta %s por %s.": "Бой с {1}: {2}.",
+	"Vence %s por %s em %s.": "Побеждает {1} на {3}: {2}.",
+	"Perde para %s por %s em %s.": "Проигрывает {1} на {3}: {2}.",
+	"Empata com %s por %s em %s.": "Ничья с {1} на {3}: {2}.",
+	"Enfrenta %s por %s em %s.": "Бой с {1} на {3}: {2}.",
+	"finalização": "сабмишн",
+	"nocaute": "нокаут",
+	"direto": "прямой",
+	"gancho": "хук",
+	"cruzado": "кросс",
+	"uppercut": "апперкот",
+	"overhand": "оверхенд",
+	"joelhada": "колено",
+	"cotovelada": "локоть"
 }

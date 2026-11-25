@@ -134,9 +134,9 @@ func _lookup_uncached(src: String, depth: int) -> String:
 		var low := _match_patterns(lf, depth, false, false)
 		if low != "":
 			out = _cap_first(low)
-	if out == "" and depth < 2:
+	if out == "" and depth < 4:
 		out = _split_compound(src, depth)
-	if out == "" and depth < 3:
+	if out == "" and depth < 5:
 		out = _strip_affix(src, depth)
 	# Moldes quase sem texto fixo ("%s a %s", "%s e %s") só por último: pegam quase qualquer frase.
 	if out == "":
@@ -326,7 +326,7 @@ func _render(p: Dictionary, m: RegExMatch, depth: int) -> String:
 				fem = true
 			groups.append(g)
 			continue
-		if depth < 2 and not g.is_valid_int() and _letter_re.search(g) != null:
+		if depth < 4 and not g.is_valid_int() and _letter_re.search(g) != null:
 			var tg := lookup(g, depth + 1)
 			if tg != "":
 				g = tg

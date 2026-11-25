@@ -3975,5 +3975,22 @@
 	"Menos hype. Três semanas aqui e vem o ultimato de %d semanas.": "热度降低。在这里停留三周就会收到为期%d周的最后通牒。",
 	"Mandato %d. Ultimatos perdidos: %d de 2.": "第%d届任期。已失败的最后通牒：%d/2。",
 	"Fecha no fim do ano. Prêmio: %s.": "年底结算。奖励：%s。",
-	"Prêmio: %s.": "奖励：%s。"
+	"Prêmio: %s.": "奖励：%s。",
+	"Vence %s por %s.": "以{2}击败{1}。",
+	"Perde para %s por %s.": "以{2}负于{1}。",
+	"Empata com %s por %s.": "与{1}战平（{2}）。",
+	"Enfrenta %s por %s.": "对阵{1}：{2}。",
+	"Vence %s por %s em %s.": "在{3}以{2}击败{1}。",
+	"Perde para %s por %s em %s.": "在{3}以{2}负于{1}。",
+	"Empata com %s por %s em %s.": "在{3}与{1}战平（{2}）。",
+	"Enfrenta %s por %s em %s.": "在{3}对阵{1}：{2}。",
+	"finalização": "降服",
+	"nocaute": "击倒",
+	"direto": "直拳",
+	"gancho": "勾拳",
+	"cruzado": "交叉拳",
+	"uppercut": "上勾拳",
+	"overhand": "过顶拳",
+	"joelhada": "膝撞",
+	"cotovelada": "肘击"
 }

@@ -3975,5 +3975,22 @@
 	"Menos hype. Três semanas aqui e vem o ultimato de %d semanas.": "Menos hype. Tres semanas aquí y llega el ultimátum de %d semanas.",
 	"Mandato %d. Ultimatos perdidos: %d de 2.": "Mandato %d. Ultimátums perdidos: %d de 2.",
 	"Fecha no fim do ano. Prêmio: %s.": "Cuenta a fin de año. Premio: %s.",
-	"Prêmio: %s.": "Premio: %s."
+	"Prêmio: %s.": "Premio: %s.",
+	"Vence %s por %s.": "Vence a %s por %s.",
+	"Perde para %s por %s.": "Pierde ante %s por %s.",
+	"Empata com %s por %s.": "Empata con %s por %s.",
+	"Enfrenta %s por %s.": "Enfrenta a %s: %s.",
+	"Vence %s por %s em %s.": "Vence a %s por %s en %s.",
+	"Perde para %s por %s em %s.": "Pierde ante %s por %s en %s.",
+	"Empata com %s por %s em %s.": "Empata con %s por %s en %s.",
+	"Enfrenta %s por %s em %s.": "Enfrenta a {1} en {3}: {2}.",
+	"finalização": "sumisión",
+	"nocaute": "nocaut",
+	"direto": "recto",
+	"gancho": "gancho",
+	"cruzado": "cruzado",
+	"uppercut": "uppercut",
+	"overhand": "overhand",
+	"joelhada": "rodillazo",
+	"cotovelada": "codazo"
 }

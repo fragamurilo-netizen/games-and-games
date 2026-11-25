@@ -182,10 +182,10 @@ func _story_card(w: GameWorld, f: Fighter) -> Control:
 	chips.add_child(UIKit.pill(Styles.name(f.base), UIColors.BLUE, 16))
 	var g := Bio.gift(f)
 	if not g.is_empty():
-		chips.add_child(UIKit.pill("★ " + String(g.get("name", "")), UIColors.GOLD, 16))
+		chips.add_child(UIKit.pill("★ " + I18n.t(String(g.get("name", ""))), UIColors.GOLD, 16))
 	var her := Bio.heritage(f)
 	if her != "":
-		chips.add_child(UIKit.pill("Família " + her, UIColors.MUTED, 16))
+		chips.add_child(UIKit.pill("Família %s" % her, UIColors.MUTED, 16))
 	for t: String in f.traits:
 		chips.add_child(UIKit.pill(Persona.name_of(t), UIColors.ORANGE, 16))
 	card.add_child(chips)
