@@ -53,6 +53,20 @@ CAPS = {
     "principal": ("", "A luta principal\né sua"),
     "visual": ("", "Mude o visual\nde cada um"),
 }
+END = ("JOGO DE GESTÃO DE MMA", "Android · em português")
+if os.environ.get("TR_LANG") == "en":
+    CAPS = {
+        "gancho": ("Noite de Luta", "You are\nthe coach"),
+        "inicio": ("", "Build your\ngym"),
+        "ficha": ("", "Every fighter\nhas a story"),
+        "plano": ("", "It's\nfight night"),
+        "luta": ("", "Corner shouts"),
+        "card": ("President mode", "Or run\nthe league"),
+        "sede": ("", "Pack\nthe arena"),
+        "principal": ("", "The main event\nis yours"),
+        "visual": ("", "Change every\nfighter's look"),
+    }
+    END = ("MMA MANAGEMENT GAME", "Android")
 for k, (a, b) in CAPS.items():
     caption(k, a, b, k == "luta")
 
@@ -73,7 +87,7 @@ def center(text, y, f, fill):
 center("NOITE DE", 720, font(96, 800, 87.5), TXT)
 center("LUTA", 800, font(220, 800, 87.5), TXT)
 d.rectangle([W // 2 - 90, 1062, W // 2 + 90, 1072], fill=YEL)
-center("JOGO DE GESTÃO DE MMA", 1110, font(50, 800, 80), YEL)
-center("Android · em português", 1180, font(40, 500, 100), MUT)
+center(END[0], 1110, font(50, 800, 80), YEL)
+center(END[1], 1180, font(40, 500, 100), MUT)
 img.save(f"{OUT}/final.png")
 print("ok")
