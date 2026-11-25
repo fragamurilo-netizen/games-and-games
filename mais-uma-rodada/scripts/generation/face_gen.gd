@@ -1599,7 +1599,9 @@ static func _pleasant(f: Dictionary) -> void:
 	f["nose_w"] = float(f["nose_w"]) * 0.93
 	f["nose_len"] = float(f["nose_len"]) * 0.97
 	f["lip_l"] = float(f["lip_l"]) * 1.05
-	f["brow_t"] = float(f["brow_t"]) * 0.86
+	# 25/11: sobrancelha de verdade tem massa (o risco fino de antes deixava o rosto com cara de
+	# boneco desenhado a lápis).
+	f["brow_t"] = float(f["brow_t"]) * 1.12
 	f["brow_tilt"] = float(f["brow_tilt"]) * 0.7
 	f["ear"] = float(f["ear"]) * 0.92
 	f["ear_out"] = float(f["ear_out"]) * 0.5
