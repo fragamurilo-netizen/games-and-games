@@ -2238,6 +2238,41 @@ func set_instruction(side: int, pid: int, key: String) -> void:
 	_retune(t, {"instr": key}, "%s: %s" % [mp.p.display_name(), String(ins.get("name", "sem instrução")).to_lower()], pid)
 
 
+## Aplica de uma vez uma tática salva (GameModels) no meio do jogo: formação, mentalidade,
+## estilo, ajustes finos, instruções de equipe e as individuais por vaga. Um único lance de
+## "mudança tática" na narração; a formação nova continua custando entrosamento.
+func apply_plan(side: int, model: Dictionary) -> void:
+	var t: MatchTeam = teams[side]
+	var fname := String(model.get("f", t.formation_name))
+	if fname != t.formation_name:
+		set_formation(side, fname)
+	var v := GameModels.values(model)
+	t.mentality = clampi(int(v["m"]), 0, 4)
+	t.style = clampi(int(v["st"]), 0, 5)
+	t.intensity = clampi(int(v["i"]), 0, 2)
+	t.line = clampi(int(v["l"]), 0, 2)
+	t.pressing = clampi(int(v["p"]), 0, 2)
+	t.width_i = clampi(int(v["wd"]), 0, 2)
+	var deep_keys := ["tp", "pa", "mk", "tr", "fo", "tw", "cr"]
+	for k in TacticsManager.DEEP.size():
+		var dv := clampi(int(v[deep_keys[k]]), 0, TacticsManager.deep_options(TacticsManager.DEEP[k]).size() - 1)
+		if int(t.deep[k]) != dv:
+			t.set_deep(k, dv)
+	var by_slot: Dictionary = model.get("ins_slot", {})
+	var by_pos: Dictionary = model.get("ins", {})
+	for i in range(1, t.slots.size()):
+		var mp: MatchPlayer = t.slots[i]
+		if mp == null or not mp.on_pitch:
+			continue
+		var key := String(by_slot.get(str(i), by_pos.get(Pos.code(int(t.formation["slots"][i]["pos"])), "")))
+		var ins: Dictionary = TeamSheet.INSTRUCTIONS.get(key, {})
+		if ins != mp.instr:
+			mp.instr = ins
+			_assign_slot(mp, i, t.formation["slots"][i])
+	_refresh_fam(t)
+	_retune(t, {"plan": String(model.get("name", ""))}, "Tática %s" % String(model.get("name", "")))
+
+
 func _retune(t: MatchTeam, x: Dictionary, label: String, pid: int = -1) -> void:
 	t.refresh_tactics()
 	t.recompute_units()

@@ -1,5 +1,5 @@
 {
-	"_doc": "Copas nacionais, copas da liga e supercopas. kind: national (todos os clubes do país, mata-mata nas datas N1..N12 de meio de semana; quanto maior o país, mais fases — quem sobra na conta de potência de 2 joga a fase preliminar e os demais entram direto, os de divisão mais alta primeiro), league_cup (igual, nas datas E1..E10 que o país não usa), super (jogo único antes da 1ª rodada: U1 nacionais, U0 continentais; from: [origem A, origem B] com L:<liga> campeão, L2:<liga> vice, N:<copa> ou C:<copa> campeão da temporada anterior; se as duas origens forem o mesmo clube, entra o vice da liga). two_legs: fases em ida e volta, contadas do fim (f, sf, qf, r16, r32, r64...). neutral_final: final em campo neutro; neutral_all: todos os jogos em campo neutro; small_home: em jogo único o clube de divisão mais baixa (ou de menor reputação) manda o jogo. qualifies: o campeão ganha vaga nessa copa continental se ainda não tiver uma igual ou maior. prize_scale: premiação relativa (1 = copa nacional grande).",
+	"_doc": "Copas nacionais, copas da liga e supercopas. kind: national (todos os clubes do país, mata-mata nas datas N1..N12 de meio de semana; quanto maior o país, mais fases — quem sobra na conta de potência de 2 joga a fase preliminar e os demais entram direto, os de divisão mais alta primeiro), league_cup (igual, nas datas E1..E10 que o país não usa), super (jogo único antes da 1ª rodada: U1 nacionais, U0 continentais; from: [origem A, origem B] com L:<liga> campeão, L2:<liga> vice, N:<copa> ou C:<copa> campeão da temporada anterior; se as duas origens forem o mesmo clube, entra o vice da liga). two_legs: fases em ida e volta, contadas do fim (f, sf, qf, r16, r32, r64...). neutral_final: final em campo neutro; neutral_all: todos os jogos em campo neutro; small_home: em jogo único o clube de divisão mais baixa (ou de menor reputação) manda o jogo. qualifies: o campeão ganha vaga nessa copa continental se ainda não tiver uma igual ou maior. prize_scale: premiação relativa (1 = copa nacional grande). late: entrada escalonada ({tier, at}): os clubes até a divisão tier estreiam na fase at (r32 = 32 clubes); os demais jogam fases eliminatórias antes, com os mais fortes folgando nas primeiras (Copa do Brasil 2026: Série A na 5ª fase).",
 	"cups": {
 		"FAC": {
 			"name": "FA Cup",
@@ -281,11 +281,14 @@
 				"r32",
 				"r16",
 				"qf",
-				"sf",
-				"f"
+				"sf"
 			],
-			"neutral_final": false,
-			"prize_scale": 2.2
+			"neutral_final": true,
+			"prize_scale": 2.2,
+			"late": {
+				"tier": 1,
+				"at": "r32"
+			}
 		},
 		"CAR": {
 			"name": "Copa Argentina",

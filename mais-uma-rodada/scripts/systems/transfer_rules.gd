@@ -19,6 +19,59 @@ const EU := ["ESP", "GER", "ITA", "FRA", "POR", "NED", "BEL", "AUT", "SUI", "CRO
 
 
 # ---------------------------------------------------------------------------
+# Limite de empréstimos internacionais (FIFA, regulamento de transferências desde 2024/25)
+# ---------------------------------------------------------------------------
+
+## Cada clube pode ter no máximo LOAN_MAX jogadores emprestados para fora do país e LOAN_MAX
+## recebidos de outro país ao mesmo tempo. Jogadores de até LOAN_FREE_AGE anos não contam.
+const LOAN_MAX := 6
+const LOAN_FREE_AGE := 21
+
+static var _loan_key := ""
+static var _loans_out: Dictionary = {}
+static var _loans_in: Dictionary = {}
+
+
+static func _loan_counts(world: GameWorld) -> void:
+	var key := "%d:%d:%d" % [world.world_seed, world.year, world.season.day if world.season != null else -1]
+	if key == _loan_key:
+		return
+	_loan_key = key
+	_loans_out = {}
+	_loans_in = {}
+	for p: Player in world.players.values():
+		if p.loan.is_empty() or p.club_id < 0 or p.age(world.year) <= LOAN_FREE_AGE:
+			continue
+		var owner := world.club(int(p.loan.get("from", -1)))
+		var borrower := world.club(p.club_id)
+		if owner == null or borrower == null or owner.nation == borrower.nation:
+			continue
+		_loans_out[owner.id] = int(_loans_out.get(owner.id, 0)) + 1
+		_loans_in[borrower.id] = int(_loans_in.get(borrower.id, 0)) + 1
+
+
+## O empréstimo de `p` de `owner` para `borrower` estoura o limite da FIFA? "" = pode.
+static func loan_block(world: GameWorld, p: Player, owner: Club, borrower: Club) -> String:
+	if owner == null or borrower == null or owner.nation == borrower.nation or p.age(world.year) <= LOAN_FREE_AGE:
+		return ""
+	_loan_counts(world)
+	if int(_loans_out.get(owner.id, 0)) >= LOAN_MAX:
+		return "O %s já tem %d jogadores emprestados a clubes de outros países, o máximo da FIFA." % [owner.short_name, LOAN_MAX]
+	if int(_loans_in.get(borrower.id, 0)) >= LOAN_MAX:
+		return "O %s já tem %d jogadores emprestados por clubes de outros países, o máximo da FIFA." % [borrower.short_name, LOAN_MAX]
+	return ""
+
+
+## Conta o empréstimo que acabou de sair (sem refazer a contagem do dia).
+static func on_loan(world: GameWorld, p: Player, owner: Club, borrower: Club) -> void:
+	if owner == null or borrower == null or owner.nation == borrower.nation or p.age(world.year) <= LOAN_FREE_AGE:
+		return
+	_loan_counts(world)
+	_loans_out[owner.id] = int(_loans_out.get(owner.id, 0)) + 1
+	_loans_in[borrower.id] = int(_loans_in.get(borrower.id, 0)) + 1
+
+
+# ---------------------------------------------------------------------------
 # Menores de 18
 # ---------------------------------------------------------------------------
 

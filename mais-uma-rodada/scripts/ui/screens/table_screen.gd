@@ -1222,7 +1222,14 @@ func _playoff_card(w: GameWorld, league: League) -> Control:
 	card.add_child(UIKit.section("Playoffs de acesso" if promo else "Playoffs"))
 	var ko: Array = LeagueFormat.cfg(league).get("ko", [])
 	var champ := int(league.po.get("champ", -1))
-	if champ >= 0:
+	var po_won: Array = league.po.get("winners", [])
+	if promo and po_won.size() > 1:
+		for wcid in po_won:
+			var crw := UIKit.hbox(10)
+			crw.add_child(UIKit.crest(w.club(int(wcid)), 48))
+			crw.add_child(UIKit.label("%s conquistou o acesso" % w.club(int(wcid)).name, "H3", true))
+			card.add_child(crw)
+	elif champ >= 0:
 		var cr := UIKit.hbox(10)
 		cr.add_child(UIKit.crest(w.club(champ), 48))
 		var to_barrage := promo and LeagueFormat.barrage_upper(w, league) != null

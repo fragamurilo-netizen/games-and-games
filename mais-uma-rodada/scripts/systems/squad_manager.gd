@@ -103,7 +103,22 @@ static func depth(world: GameWorld, club: Club) -> Array:
 		for c in cands:
 			if c[1] >= level - 6.0:
 				good += 1
-		out.append({"pos": row, "best": cands.slice(0, 3), "weak": good < need, "need": need})
+		var best := cands.slice(0, 3)
+		# Futuro: o garoto (até 21) mais promissor que joga ali e ainda não está entre os três.
+		var future: Player = null
+		for c in cands:
+			var p: Player = c[0]
+			if p.age(world.year) <= 21 and not best.any(func(b): return b[0] == p):
+				if future == null or p.potential > future.potential:
+					future = p
+		# Sucessão: os dois primeiros já passaram dos 31 (ou saem no fim do contrato) e não há garoto.
+		var aging := 0
+		for c in best.slice(0, 2):
+			var p: Player = c[0]
+			if p.age(world.year) >= 31 or p.contract_years_left(world.year) <= 0:
+				aging += 1
+		out.append({"pos": row, "best": best, "weak": good < need, "need": need, "future": future,
+			"succession": aging >= mini(2, best.size()) and best.size() > 0 and future == null})
 	return out
 
 

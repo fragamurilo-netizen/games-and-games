@@ -20,6 +20,10 @@ var round_names: Array = []
 var plan: Array = []
 var plan_slots: Array = []
 var byes: Array = []
+## Entradas escalonadas (Copa do Brasil 2026): clubes que estreiam em cada fase {"fase": [ids]} e
+## quantos dos mais fortes de cada fase folgam para a seguinte (stage_byes[fase]).
+var late: Dictionary = {}
+var stage_byes: Array = []
 ## Stored on the season: legacy 32-team group stages keep their original rules.
 var league_phase := false
 var league_rank: Array = []
@@ -34,6 +38,16 @@ func fixtures_at(slot: int) -> Array:
 		if f.slot == slot:
 			out.append(f)
 	return out
+
+
+## Fase em que o clube estreia (0 = primeira).
+func debut_round(club_id: int) -> int:
+	if byes.has(club_id):
+		return 1
+	for k in late:
+		if Array(late[k]).has(club_id):
+			return int(k)
+	return 0
 
 
 func has_club(club_id: int) -> bool:
@@ -97,7 +111,7 @@ func to_dict() -> Dictionary:
 		gs.append({"n": g["n"], "clubs": g["clubs"], "table": tb})
 	return {"id": id, "name": name, "short": short_name, "clubs": club_ids, "groups": gs, "fx": fx, "ties": ties,
 		"rn": round_names, "champ": champion, "ru": runner_up, "fin": finished,
-		"plan": plan, "ps": plan_slots, "byes": byes, "lp": league_phase, "lr": league_rank}
+		"plan": plan, "ps": plan_slots, "byes": byes, "lp": league_phase, "lr": league_rank, "late": late, "sb": stage_byes}
 
 
 static func from_dict(d: Dictionary) -> Cup:
@@ -122,6 +136,8 @@ static func from_dict(d: Dictionary) -> Cup:
 	c.plan = Array(d.get("plan", []))
 	c.plan_slots = Array(d.get("ps", []))
 	c.byes = Array(d.get("byes", []))
+	c.late = Dictionary(d.get("late", {}))
+	c.stage_byes = Array(d.get("sb", []))
 	c.league_phase = bool(d.get("lp", false))
 	c.league_rank = Array(d.get("lr", []))
 	return c

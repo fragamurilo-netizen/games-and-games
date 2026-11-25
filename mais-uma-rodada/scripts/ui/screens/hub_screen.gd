@@ -533,13 +533,14 @@ func _cups_card(w: GameWorld, club: Club) -> Control:
 				status = "%dº · %d pts" % [order.find(club.id) + 1, int(g["table"][club.id]["pts"])] if cup.league_phase else "%dº no grupo %s · %d pts" % [order.find(club.id) + 1, g["n"], int(g["table"][club.id]["pts"])]
 			else:
 				status = "Classificado"
-		if status != "CAMPEÃO" and status != "Eliminado" and cup.byes.has(club.id) and cup.round_names.size() > 1:
+		var debut := cup.debut_round(club.id)
+		if status != "CAMPEÃO" and status != "Eliminado" and debut > 0 and debut < cup.round_names.size():
 			var played_tie := false
 			for t in cup.ties:
 				if int(t["a"]) == club.id or int(t["b"]) == club.id:
 					played_tie = true
 			if not played_tie:
-				status = "Estreia na %s" % String(cup.round_names[1]).to_lower()
+				status = "Estreia na %s" % String(cup.round_names[debut]).to_lower()
 		rows.append([cup, status, color])
 	if rows.is_empty():
 		return null

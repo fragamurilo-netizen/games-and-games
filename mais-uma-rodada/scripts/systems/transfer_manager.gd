@@ -573,6 +573,9 @@ static func loan_in_terms(world: GameWorld, p: Player, terms: Dictionary = {}) -
 		return {"ok": false, "msg": "%s não empresta jogadores para o rival." % seller.short_name}
 	if TransferRules.minor_blocked(world, p, user):
 		return {"ok": false, "msg": "Menor de 18 não pode se mudar de país (regra da FIFA)."}
+	var lb := TransferRules.loan_block(world, p, seller, user)
+	if lb != "":
+		return {"ok": false, "msg": lb}
 	if user.player_ids.size() >= int(DatabaseManager.squad_rules()["max_players"]):
 		return {"ok": false, "msg": "Elenco cheio."}
 	if interest(world, p, user) < 0.25:
@@ -637,6 +640,8 @@ static func loan_out(world: GameWorld, p: Player, kind: String = "") -> Dictiona
 		var level := PlayerGenerator.club_level(c)
 		if p.ovr_f < level - 3.0 or p.ovr_f > level + 10.0 or TransferRules.minor_blocked(world, p, c):
 			continue
+		if TransferRules.loan_block(world, p, user, c) != "":
+			continue
 		var v := -absf(p.ovr_f - level - 2.0) + (4.0 if c.nation == user.nation else 0.0) + world.rng.randf_range(0.0, 3.0)
 		if v > best_v:
 			best_v = v
@@ -662,6 +667,7 @@ static func loan_out(world: GameWorld, p: Player, kind: String = "") -> Dictiona
 
 
 static func _move_loan(world: GameWorld, p: Player, owner: Club, borrower: Club) -> void:
+	TransferRules.on_loan(world, p, owner, borrower)
 	PlayerCareer.on_leave(world, p)
 	owner.player_ids.erase(p.id)
 	borrower.player_ids.append(p.id)

@@ -282,6 +282,9 @@ func _only_pass() -> void:
 		if spec == "!maps":
 			await _maps_match()
 			continue
+		if spec == "!plan":
+			await _plan_shot(w)
+			continue
 		if spec == "!taps":
 			await _tap_check(w)
 			continue
@@ -407,6 +410,32 @@ func _pace_time(speed: int) -> void:
 ## Partida nos melhores momentos: um lance perigoso encenado, o intervalo com o mapa do jogo, a
 ## aba de números (finalizações e calor) e o resumo. Imprime quanto tempo o jogo levou, quantos
 ## minutos pararam para um lance e confere o mapa de finalizações contra as estatísticas.
+## Painel de tática no meio do jogo com duas táticas salvas (troca com um toque).
+func _plan_shot(w: GameWorld) -> void:
+	var club := w.user_club()
+	var a := club.sheet.duplicate_sheet()
+	GameModels.save_current(w, a, "Segurar")
+	var b := club.sheet.duplicate_sheet()
+	b.mentality = TeamSheet.MENT_OFENSIVA
+	b.style = TeamSheet.STYLE_PRESSAO
+	GameModels.save_current(w, b, "Abafa")
+	GameManager.begin_match()
+	UIManager.goto("match")
+	await _frames(12)
+	UIManager.close_all_modals()
+	var screen := _screen()
+	screen.call("_open_tactics")
+	await _frames(8)
+	await _shot(prefix + "plan_01_tatica")
+	var mine := GameModels.saved(w)
+	var sim: MatchSimulation = screen.get("_sim")
+	sim.apply_plan(int(screen.get("_user_side")), mine[0])
+	screen.call("_render_tactics")
+	await _frames(6)
+	await _shot(prefix + "plan_02_aplicada")
+	UIManager.close_all_modals()
+
+
 func _maps_match() -> void:
 	AppSettings.match_speed = AppSettings.SPEED_HIGHLIGHTS
 	GameManager.begin_match()

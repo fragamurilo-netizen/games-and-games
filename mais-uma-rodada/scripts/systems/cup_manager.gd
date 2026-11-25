@@ -665,6 +665,9 @@ static func _setup_domestic_cups(world: GameWorld, s: SeasonState) -> void:
 		if list.size() < 4:
 			continue
 		list.sort_custom(func(a, b): return _strength_key(world, a) > _strength_key(world, b) or (_strength_key(world, a) == _strength_key(world, b) and a < b))
+		var late_cfg: Dictionary = c.get("late", {})
+		if not late_cfg.is_empty() and _setup_staged_cup(world, s, id, c, list, late_cfg):
+			continue
 		var plan := domestic_plan(list.size())
 		var ps := _assign_slots(plan, Array(c.get("two_legs", [])), _pool_codes(s, String(c.get("pool", "N"))))
 		if ps.is_empty():
@@ -685,6 +688,68 @@ static func _setup_domestic_cups(world: GameWorld, s: SeasonState) -> void:
 			first = list.slice(list.size() - n_pre)
 		s.cups[id] = cup
 		_create_ko_round(world, s, cup, 0, _domestic_pairs(world, cup, first, 0))
+
+
+## Copa com entrada escalonada (Copa do Brasil 2026): os clubes até a divisão late.tier estreiam
+## na fase late.at (r32 = 5ª fase); os outros jogam fases eliminatórias antes, as primeiras em jogo
+## único, até sobrarem as vagas que faltam. Em cada fase os mais fracos jogam e os mais fortes
+## folgam, como nas fases iniciais reais (126 → 112 → 68 → 44 → 32). Retorna false se não couber.
+static func _setup_staged_cup(world: GameWorld, s: SeasonState, id: String, c: Dictionary, list: Array, late_cfg: Dictionary) -> bool:
+	var max_tier := int(late_cfg.get("tier", 1))
+	var at := String(late_cfg.get("at", "r32"))
+	var size := 32
+	if at == "r16": size = 16
+	elif at.begins_with("r") and at.substr(1).is_valid_int(): size = int(at.substr(1))
+	var late_ids: Array = list.filter(func(cid): return world.club(int(cid)).tier <= max_tier)
+	var early: Array = list.filter(func(cid): return world.club(int(cid)).tier > max_tier)
+	var k := size - late_ids.size()
+	if k <= 0 or early.size() <= k:
+		return false
+	var stages := 0
+	while k * (1 << stages) < early.size():
+		stages += 1
+	var byes_per: Array = []
+	var n := early.size()
+	for i in stages:
+		var target := maxi(k << (stages - i - 1), int(ceil(n / 2.0)))
+		var m := n - target
+		byes_per.append(n - 2 * m)
+		n = target
+	var plan: Array = []
+	for i in stages:
+		plan.append("p%d" % (i + 1))
+	var sz := size
+	while sz >= 2:
+		plan.append(_size_key(sz))
+		sz /= 2
+	var ps := _assign_slots(plan, Array(c.get("two_legs", [])), _pool_codes(s, String(c.get("pool", "N"))))
+	if ps.is_empty():
+		return false
+	var cup := Cup.new()
+	cup.id = id
+	cup.name = cup_name(id)
+	cup.short_name = cup_short(id)
+	cup.club_ids = list
+	cup.plan = plan
+	cup.plan_slots = ps
+	cup.round_names = domestic_round_names(plan)
+	cup.stage_byes = byes_per
+	cup.late = {str(stages): late_ids}
+	s.cups[id] = cup
+	_create_ko_round(world, s, cup, 0, _domestic_pairs(world, cup, _stage_field(world, cup, 0, early), 0))
+	return true
+
+
+## Quem joga a fase r: tira os mais fortes que folgam (stage_byes) e os guarda para a fase seguinte.
+static func _stage_field(world: GameWorld, cup: Cup, r: int, field: Array) -> Array:
+	var nb := int(cup.stage_byes[r]) if r < cup.stage_byes.size() else 0
+	if nb <= 0:
+		return field
+	var sorted := field.duplicate()
+	sorted.sort_custom(func(a, b): return _strength_key(world, a) > _strength_key(world, b) or (_strength_key(world, a) == _strength_key(world, b) and a < b))
+	var key := str(r + 1)
+	cup.late[key] = Array(cup.late.get(key, [])) + sorted.slice(0, nb)
+	return sorted.slice(nb)
 
 
 ## Sorteio livre de uma fase da copa nacional. Em ida e volta o mais forte decide em casa; em jogo
@@ -1052,6 +1117,9 @@ static func after_slot(world: GameWorld, slot: int) -> Array:
 					elif not cup.plan.is_empty():
 						if last_r == 0:
 							winners.append_array(cup.byes) # quem entrou direto estreia na 2ª fase
+						if not cup.late.is_empty() or not cup.stage_byes.is_empty():
+							winners.append_array(cup.late.get(str(last_r + 1), []))
+							winners = _stage_field(world, cup, last_r + 1, winners)
 						_create_ko_round(world, s, cup, last_r + 1, _domestic_pairs(world, cup, winners, last_r + 1))
 					else:
 						_create_ko_round(world, s, cup, last_r + 1, _next_pairs(world, cup, winners))

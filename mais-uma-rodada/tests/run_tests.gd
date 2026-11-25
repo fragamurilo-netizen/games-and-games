@@ -23,6 +23,8 @@ func _initialize() -> void:
 	_run("partida ao vivo = partida instantânea", _test_live_equals_instant)
 	_run("mata-mata: prorrogação e pênaltis", _test_knockout)
 	_run("troca de formação durante a partida", _test_formation_change)
+	_run("tática salva aplicada durante a partida", _test_saved_plan_live)
+	_run("profundidade por posição: futuro e sucessão", _test_depth_future)
 	_run("temporada completa, copas e Mundial", _test_season_cycle)
 	_run("virada de ano: acessos, quedas e vagas", _test_end_season)
 	_run("calendário de ano civil (Brasil, América do Sul, MLS)", _test_year_calendar)
@@ -442,6 +444,57 @@ func _test_formation_change() -> void:
 	check(sim.finished and not sim.pressure.is_empty(), "partida não terminou ou sem gráfico de pressão")
 
 
+## Uma tática salva (GameModels) aplicada no meio do jogo troca tudo de uma vez, sem gastar
+## substituição, e a partida segue até o fim.
+func _test_saved_plan_live() -> void:
+	var w := WorldGenerator.generate(4242, "padrao")
+	var cl := w.clubs_in_league("ENG2")
+	var h: Club = cl[2]
+	var a: Club = cl[3]
+	var hs := ClubAI.prepare_ai_sheet(w, h, a, true)
+	var as_ := ClubAI.prepare_ai_sheet(w, a, h, false)
+	var plan_sheet := hs.duplicate_sheet()
+	plan_sheet.formation = "3-4-3" if hs.formation != "3-4-3" else "4-4-2"
+	plan_sheet.mentality = TeamSheet.MENT_OFENSIVA
+	plan_sheet.style = TeamSheet.STYLE_PRESSAO
+	plan_sheet.pressing = 2
+	plan_sheet.line = 2
+	plan_sheet.tempo = 2
+	var m := GameModels.save_current(w, plan_sheet, "Abafa")
+	check(GameModels.saved(w).size() == 1, "tática não foi salva")
+	var ctx := {"derby": false, "importance": 0.3, "attendance": 10000, "competition": "F"}
+	var sim := MatchSimulation.new()
+	sim.setup(w, h, a, hs, as_, ctx, 77, true)
+	while sim.minute < 60:
+		sim.step()
+	var t: MatchTeam = sim.teams[0]
+	var gk := t.goalkeeper()
+	sim.apply_plan(0, m)
+	check(t.formation_name == plan_sheet.formation, "formação da tática não entrou")
+	check(t.mentality == TeamSheet.MENT_OFENSIVA and t.style == TeamSheet.STYLE_PRESSAO, "mentalidade/estilo não entraram")
+	check(t.pressing == 2 and t.line == 2, "ajustes finos não entraram")
+	check(int(t.deep[TacticsManager.DEEP.find("tempo")]) == 2, "instrução de equipe não entrou")
+	check(t.goalkeeper() == gk, "goleiro saiu do gol")
+	check(t.subs_used == 0, "aplicar tática gastou substituição")
+	sim.run_to_end()
+	check(sim.finished, "partida não terminou")
+
+
+## A profundidade por posição aponta o garoto de futuro e quem precisa de sucessor.
+func _test_depth_future() -> void:
+	var w := WorldGenerator.generate(4242, "padrao")
+	var rows_with_future := 0
+	for c: Club in w.clubs_in_league("BRA1"):
+		for row: Dictionary in SquadManager.depth(w, c):
+			var fut: Player = row.get("future", null)
+			if fut != null:
+				rows_with_future += 1
+				check(fut.age(w.year) <= 21, "futuro com mais de 21 anos")
+				check(not row["best"].any(func(b): return b[0] == fut), "futuro repetido entre os três melhores")
+			check(row.has("succession"), "linha sem a marca de sucessão")
+	check(rows_with_future > 0, "nenhuma posição com garoto de futuro")
+
+
 ## Jogo que decide confronto nunca termina empatado no agregado.
 
 
@@ -650,8 +703,18 @@ func _test_season_cycle() -> void:
 			check(f.played, "%s: jogo não disputado" % cid)
 		check(w.club(dc.champion).title_count(CupManager.title_key(cid)) == int(titles_before[dc.champion].get(CupManager.title_key(cid), 0)) + 1, "%s: título não registrado" % cid)
 	var cdb: Cup = w.season.cups["CDB"]
-	check(cdb.club_ids.size() == 80 and cdb.plan == ["pre", "r64", "r32", "r16", "qf", "sf", "f"] and cdb.byes.size() == 48, "Copa do Brasil com fases erradas: %s" % [cdb.plan])
-	check(Array(cdb.plan_slots[6]).size() == 2 and Array(cdb.plan_slots[0]).size() == 1, "Copa do Brasil: final deveria ser em ida e volta")
+	# Formato de 2026: fases iniciais em jogo único sem a Série A, que estreia na 5ª fase (32 clubes);
+	# daí em diante ida e volta até a semifinal, e final única em campo neutro.
+	check(cdb.club_ids.size() == 80 and cdb.plan == ["p1", "p2", "p3", "r32", "r16", "qf", "sf", "f"], "Copa do Brasil com fases erradas: %s" % [cdb.plan])
+	var cdb_late: Array = cdb.late.get("3", [])
+	check(cdb_late.size() >= 20 and cdb_late.filter(func(cid): return w.club(int(cid)).tier == 1).size() == 20, "Série A deveria estrear na 5ª fase da Copa do Brasil")
+	check(cdb.ties_of_round(3).size() == 16, "5ª fase da Copa do Brasil deveria ter 16 confrontos")
+	for t in cdb.ties_of_round(0):
+		check(w.club(int(t["a"])).tier > 1 and w.club(int(t["b"])).tier > 1, "clube da Série A na 1ª fase da Copa do Brasil")
+	check(Array(cdb.plan_slots[7]).size() == 1 and Array(cdb.plan_slots[6]).size() == 2 and Array(cdb.plan_slots[0]).size() == 1, "Copa do Brasil: semifinal em ida e volta e final única")
+	for f in cdb.fixtures:
+		if f.round == cdb.plan.size() - 1:
+			check(f.neutral, "final da Copa do Brasil deveria ser em campo neutro")
 	var fac: Cup = w.season.cups["FAC"]
 	check(fac.club_ids.size() == 92 and fac.plan == ["pre", "r64", "r32", "r16", "qf", "sf", "f"], "FA Cup com fases erradas: %s" % [fac.plan])
 	for f in fac.fixtures:

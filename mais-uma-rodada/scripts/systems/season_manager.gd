@@ -172,6 +172,24 @@ static func _league_format_news(world: GameWorld, league: League, ev: Dictionary
 			NewsManager.post_raw(world, "Playoffs da %s definidos" % league.short_name,
 				("%d clubes disputam o acesso em mata-mata. %s é o melhor classificado entre os participantes." if LeagueFormat.kind(league) == "promo" else "%d clubes disputam o título em mata-mata. %s termina a fase regular na liderança.") % [cl.size(), world.club(int(cl[0])).short_name],
 				int(cl[0]), -1, NewsEvent.IMP_HIGH if mine else NewsEvent.IMP_NORMAL, "liga")
+		"quad_start":
+			var qg: Array = league.po.get("qg", [])
+			var parts: Array = []
+			for g in qg:
+				var names: Array = []
+				for cid in g:
+					names.append(world.club(int(cid)).short_name)
+				parts.append(", ".join(PackedStringArray(names)))
+			var gup := int(LeagueFormat.cfg(league).get("group_up", 0))
+			var qbody := ("Os %d primeiros seguem na briga pelo acesso, com os pontos zerados. Grupos: %s. Os %d primeiros de cada grupo sobem, e os líderes decidem o título." % [Array(ev["clubs"]).size(), " | ".join(PackedStringArray(parts)), gup]) if gup > 0 \
+				else ("Os %d primeiros seguem na briga pelo título, com os pontos zerados. Grupos: %s. Os líderes dos grupos fazem a final." % [Array(ev["clubs"]).size(), " | ".join(PackedStringArray(parts))])
+			NewsManager.post_raw(world, "%s: definidos os quadrangulares" % league.short_name, qbody,
+				-1, -1, NewsEvent.IMP_HIGH if mine else NewsEvent.IMP_NORMAL, "liga")
+		"quad_final":
+			var fc: Array = ev["clubs"]
+			NewsManager.post_raw(world, "Final da %s: %s x %s" % [league.short_name, world.club(int(fc[0])).short_name, world.club(int(fc[1])).short_name],
+				("Os líderes dos quadrangulares, já com o acesso garantido, decidem o título em dois jogos. O %s fez a melhor campanha e decide em casa." if int(LeagueFormat.cfg(league).get("group_up", 0)) > 0 else "Os líderes dos quadrangulares decidem o título em dois jogos. O %s fez a melhor campanha e decide em casa.") % world.club(int(fc[0])).name,
+				int(fc[0]), -1, NewsEvent.IMP_HIGH if mine else NewsEvent.IMP_NORMAL, "liga")
 		"barrage_start":
 			var cl2: Array = ev["clubs"]
 			var a := world.club(int(cl2[0]))
@@ -920,7 +938,7 @@ static func advance_to_user(world: GameWorld) -> Array:
 
 ## Vencedor dos playoffs da liga (título ou acesso), ou -1.
 static func kind_po_champ(league: League) -> int:
-	return int(league.po.get("champ", -1)) if LeagueFormat.kind(league) in ["playoff", "promo"] else -1
+	return int(league.po.get("champ", -1)) if LeagueFormat.kind(league) in ["playoff", "promo", "quad"] else -1
 
 
 static func _is_major(league: League) -> bool:

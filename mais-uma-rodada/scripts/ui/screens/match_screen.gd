@@ -2751,6 +2751,23 @@ func _render_tactics() -> void:
 		_render_player_instructions(t)
 		return
 	var tac := DatabaseManager.tactics()
+	# Táticas salvas: trocar o plano inteiro com um toque (formação, estilo, ajustes e instruções).
+	var mine := GameModels.saved(world())
+	if not mine.is_empty():
+		_tac_box.add_child(UIKit.section("Minhas táticas"))
+		var gp := ButtonGroup.new()
+		var pl := UIKit.flow(8)
+		for m: Dictionary in mine:
+			var mm := m
+			var same := String(m.get("f", "")) == t.formation_name and int(m.get("m", -1)) == t.mentality and int(m.get("st", -1)) == t.style
+			pl.add_child(UIKit.chip(String(m["name"]), same, gp, func():
+				_sim.apply_plan(_user_side, mm)
+				_drain(false)
+				_sync_slots()
+				_update_board()
+				UIManager.toast("Tática aplicada: %s." % String(mm["name"]))
+				_render_tactics()))
+		_tac_box.add_child(pl)
 	_tac_box.add_child(UIKit.section("Formação"))
 	var gf := ButtonGroup.new()
 	var fl := UIKit.flow(8)

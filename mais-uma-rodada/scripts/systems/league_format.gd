@@ -8,6 +8,11 @@ extends RefCounted
 ##   playoff os primeiros da fase regular decidem o título em mata-mata; a tabela continua valendo
 ##           para vagas e rebaixamento. {"type": "playoff", "teams": 8, "byes": 0,
 ##           "ko": ["qf", "sf", "f"], "legs": {"qf": 2, "sf": 2, "f": 2}, "neutral_final": false}
+##   quad    quadrangulares (Série C): os "teams" primeiros da fase de classificação formam "groups"
+##           grupos em zigue-zague (1º, 4º, 5º e 8º num; 2º, 3º, 6º e 7º no outro), jogam entre si
+##           em "group_legs" turnos com pontos zerados e os "group_up" primeiros de cada grupo sobem;
+##           os líderes dos grupos decidem o título na final (ko ["f"], legs). {"type": "quad",
+##           "teams": 8, "groups": 2, "group_legs": 2, "group_up": 2, "ko": ["f"], "legs": {"f": 2}}
 ##   promo   playoffs de acesso: os colocados de "from" em diante (teams clubes) decidem a última vaga
 ##           de acesso em mata-mata (Championship, LaLiga 2, Serie B, Ligue 2). O campeão continua sendo
 ##           o primeiro da tabela. {"type": "promo", "from": 3, "teams": 4, "ko": ["sf", "f"], ...}
@@ -25,7 +30,7 @@ extends RefCounted
 ## Número de "rodada" dos jogos da repescagem (fora da numeração do mata-mata).
 const BAR_R := 50
 const PROMEDIO_YEARS := 3
-const KO_NAMES := {"r16": "Oitavas", "ef": "Eliminatória", "qf": "Quartas", "sf": "Semifinal", "f": "Final"}
+const KO_NAMES := {"r16": "Oitavas", "ef": "Eliminatória", "qf": "Quartas", "sf": "Semifinal", "f": "Final", "po": "Confronto"}
 
 
 static func cfg(league: League) -> Dictionary:
@@ -55,7 +60,14 @@ static func extra_rounds(league_cfg: Dictionary, n_clubs: int) -> int:
 			for k in f.get("ko", []):
 				n += int(legs2.get(k, 1))
 			return n
+		"quad":
+			return _quad_group_rounds(f) + int(Dictionary(f.get("legs", {})).get("f", 2))
 	return 0
+
+
+static func _quad_group_rounds(f: Dictionary) -> int:
+	var g := int(f.get("teams", 8)) / maxi(1, int(f.get("groups", 2)))
+	return (g - 1 + g % 2) * int(f.get("group_legs", 2))
 
 
 static func _group_sizes(f: Dictionary, n_clubs: int) -> Array:
@@ -76,6 +88,10 @@ static func after_slot(world: GameWorld, league: League) -> Array:
 	var k := kind(league)
 	if k == "" or league.regular_rounds <= 0:
 		return events
+	# Temporada montada antes de a liga ganhar este formato (save antigo): sem datas reservadas,
+	# vale a tabela até a próxima temporada.
+	if league.phase_slots.is_empty():
+		return events
 	if not _regular_done(league):
 		return events
 	if k == "split" and league.phase_groups.is_empty():
@@ -83,6 +99,8 @@ static func after_slot(world: GameWorld, league: League) -> Array:
 		events.append({"t": "split", "league": league.id})
 	elif k == "playoff" or k == "promo":
 		events.append_array(_playoff_step(world, league))
+	elif k == "quad":
+		events.append_array(_quad_step(world, league))
 	return events
 
 
@@ -140,11 +158,207 @@ static func _start_split(world: GameWorld, league: League) -> void:
 
 ## Classificação final respeitando os grupos da segunda fase.
 static func sorted_ids(league: League) -> Array:
+	if kind(league) == "quad" and league.po.has("qg"):
+		return _quad_sorted(league)
 	if league.phase_groups.is_empty():
 		return CompetitionManager.sort_table(league.club_ids, league.table)
 	var out: Array = []
 	for g in league.phase_groups:
 		out.append_array(CompetitionManager.sort_table(g, league.table))
+	return out
+
+
+# ---------------------------------------------------------------------------
+# Quadrangulares (Série C)
+# ---------------------------------------------------------------------------
+
+static func _quad_step(world: GameWorld, league: League) -> Array:
+	var f := cfg(league)
+	var po := league.po
+	var gr := _quad_group_rounds(f)
+	if not po.has("qg"):
+		var order := CompetitionManager.sort_table(league.club_ids, league.table)
+		var n := mini(int(f.get("teams", 8)), order.size())
+		var ng := maxi(1, int(f.get("groups", 2)))
+		var groups: Array = []
+		for _g in ng:
+			groups.append([])
+		# Zigue-zague: 1º A, 2º B, 3º B, 4º A, 5º A, 6º B... (com dois grupos: 1-4-5-8 e 2-3-6-7).
+		for i in n:
+			var lap := i / ng
+			var gi := i % ng if lap % 2 == 0 else ng - 1 - i % ng
+			groups[gi].append(int(order[i]))
+		po["qg"] = groups
+		po["seeds"] = order.slice(0, n)
+		po["ties"] = []
+		po["champ"] = -1
+		po["runner"] = -1
+		var legs := int(f.get("group_legs", 2))
+		var group_rounds: Array = []
+		for gi in groups.size():
+			var rng := RandomNumberGenerator.new()
+			rng.seed = hash([world.world_seed, world.year, league.id, "quad", gi])
+			group_rounds.append(FixtureManager.round_robin(rng, groups[gi], legs))
+		# Uma rodada por data com os jogos de todos os grupos (como no split).
+		for r in mini(gr, league.phase_slots.size()):
+			var slot := int(league.phase_slots[r])
+			var arr: Array = []
+			for rounds: Array in group_rounds:
+				if r >= rounds.size():
+					continue
+				for pair in rounds[r]:
+					var fx := Fixture.new()
+					fx.home = pair[0]
+					fx.away = pair[1]
+					fx.round = league.rounds.size()
+					fx.comp = league.id
+					fx.stage = Fixture.STAGE_LEAGUE
+					fx.slot = slot
+					arr.append(fx)
+			league.rounds.append(arr)
+			league.round_slots.append(slot)
+		return [{"t": "quad_start", "league": league.id, "clubs": po["seeds"]}]
+	if int(po.get("champ", -1)) >= 0:
+		return []
+	# Fase de grupos ainda rolando?
+	for r in range(league.regular_rounds, league.rounds.size()):
+		for g: Fixture in league.rounds[r]:
+			if g.stage == Fixture.STAGE_LEAGUE and not g.played:
+				return []
+	if Array(po["ties"]).is_empty():
+		var tops: Array = []
+		for gi in Array(po["qg"]).size():
+			var t := quad_table(league, gi)
+			if not t.is_empty():
+				tops.append(int(t[0]["id"]))
+		if tops.size() < 2:
+			po["champ"] = int(tops[0]) if not tops.is_empty() else -1
+			return []
+		# Decide em casa quem fez a melhor campanha nos quadrangulares.
+		var ta: Dictionary = quad_table(league, 0)[0]
+		var tb: Dictionary = quad_table(league, 1)[0]
+		var best_a := _quad_better(league, ta, tb)
+		var a := int(tops[0]) if best_a else int(tops[1])
+		var b := int(tops[1]) if best_a else int(tops[0])
+		var legs2 := _legs(league, 0)
+		for leg in legs2:
+			var si := gr + leg
+			if si >= league.phase_slots.size():
+				break
+			var fx := Fixture.new()
+			fx.home = b if (leg == 0 and legs2 == 2) else a
+			fx.away = a if (leg == 0 and legs2 == 2) else b
+			fx.round = 0
+			fx.leg = leg
+			fx.comp = league.id
+			fx.stage = Fixture.STAGE_KO
+			fx.slot = int(league.phase_slots[si])
+			league.rounds.append([fx])
+			league.round_slots.append(fx.slot)
+		po["ties"].append({"r": 0, "a": a, "b": b, "w": -1})
+		return [{"t": "quad_final", "league": league.id, "clubs": [a, b]}]
+	var tie: Dictionary = po["ties"][0]
+	var fxs := _tie_fixtures(league, tie)
+	if fxs.size() < _legs(league, 0):
+		# Sem datas para a final: a melhor campanha fica com o título.
+		if fxs.is_empty():
+			tie["w"] = int(tie["a"])
+		else:
+			return []
+	for g: Fixture in fxs:
+		if not g.played:
+			return []
+	if int(tie["w"]) < 0:
+		tie["w"] = _tie_winner(world, tie, fxs)
+	po["champ"] = int(tie["w"])
+	po["runner"] = int(tie["b"]) if int(tie["w"]) == int(tie["a"]) else int(tie["a"])
+	return [{"t": "playoff_champion", "league": league.id, "club": po["champ"]}]
+
+
+## Classificação de um grupo dos quadrangulares (pontos zerados no começo da fase):
+## [{id, pts, pl, w, d, l, gf, ga}] do primeiro ao último. Empate: vitórias, saldo, gols e a
+## campanha da primeira fase.
+static func quad_table(league: League, gi: int) -> Array:
+	var groups: Array = league.po.get("qg", [])
+	if gi < 0 or gi >= groups.size():
+		return []
+	var ids: Array = groups[gi]
+	var rows := {}
+	for cid in ids:
+		rows[int(cid)] = {"id": int(cid), "pts": 0, "pl": 0, "w": 0, "d": 0, "l": 0, "gf": 0, "ga": 0}
+	for r in range(league.regular_rounds, league.rounds.size()):
+		for g: Fixture in league.rounds[r]:
+			if g.stage != Fixture.STAGE_LEAGUE or not g.played or not rows.has(g.home) or not rows.has(g.away):
+				continue
+			var h: Dictionary = rows[g.home]
+			var a: Dictionary = rows[g.away]
+			h["pl"] += 1
+			a["pl"] += 1
+			h["gf"] += g.hg
+			h["ga"] += g.ag
+			a["gf"] += g.ag
+			a["ga"] += g.hg
+			if g.hg > g.ag:
+				h["w"] += 1
+				h["pts"] += 3
+				a["l"] += 1
+			elif g.hg < g.ag:
+				a["w"] += 1
+				a["pts"] += 3
+				h["l"] += 1
+			else:
+				h["d"] += 1
+				a["d"] += 1
+				h["pts"] += 1
+				a["pts"] += 1
+	var out: Array = rows.values()
+	var seeds: Array = league.po.get("seeds", [])
+	out.sort_custom(func(x, y):
+		if x["pts"] != y["pts"]: return x["pts"] > y["pts"]
+		if x["w"] != y["w"]: return x["w"] > y["w"]
+		var sx: int = x["gf"] - x["ga"]
+		var sy: int = y["gf"] - y["ga"]
+		if sx != sy: return sx > sy
+		if x["gf"] != y["gf"]: return x["gf"] > y["gf"]
+		return seeds.find(x["id"]) < seeds.find(y["id"]))
+	return out
+
+
+static func _quad_better(league: League, a: Dictionary, b: Dictionary) -> bool:
+	if a["pts"] != b["pts"]: return a["pts"] > b["pts"]
+	if a["w"] != b["w"]: return a["w"] > b["w"]
+	var sa: int = a["gf"] - a["ga"]
+	var sb: int = b["gf"] - b["ga"]
+	if sa != sb: return sa > sb
+	var seeds: Array = league.po.get("seeds", [])
+	return seeds.find(a["id"]) < seeds.find(b["id"])
+
+
+## Final: campeão e vice; depois os grupos, posição por posição; depois o resto da 1ª fase.
+static func _quad_sorted(league: League) -> Array:
+	var out: Array = []
+	var po := league.po
+	if int(po.get("champ", -1)) >= 0:
+		out.append(int(po["champ"]))
+		if int(po.get("runner", -1)) >= 0:
+			out.append(int(po["runner"]))
+	var tables: Array = []
+	var most := 0
+	for gi in Array(po["qg"]).size():
+		var t := quad_table(league, gi)
+		tables.append(t)
+		most = maxi(most, t.size())
+	for r in most:
+		var tier_rows: Array = []
+		for t: Array in tables:
+			if r < t.size() and not out.has(int(t[r]["id"])):
+				tier_rows.append(t[r])
+		tier_rows.sort_custom(func(x, y): return _quad_better(league, x, y))
+		for row in tier_rows:
+			out.append(int(row["id"]))
+	for cid in CompetitionManager.sort_table(league.club_ids, league.table):
+		if not out.has(int(cid)):
+			out.append(int(cid))
 	return out
 
 
@@ -215,6 +429,14 @@ static func _playoff_step(world: GameWorld, league: League) -> Array:
 		var final_tie: Dictionary = po["ties"][po["ties"].size() - 1]
 		po["champ"] = int(final_tie["w"])
 		po["runner"] = int(final_tie["a"]) if int(final_tie["w"]) == int(final_tie["b"]) else int(final_tie["b"])
+		if promo_spots(league) > 1:
+			# Vários acessos pelos playoffs (Série B: 3º x 6º e 4º x 5º, sem final): sobe cada vencedor.
+			winners.sort_custom(func(a, b): return Array(po["seeds"]).find(a) < Array(po["seeds"]).find(b))
+			po["winners"] = winners
+			po["champ"] = int(winners[0])
+			for wcid in winners:
+				events.append({"t": "playoff_champion", "league": league.id, "club": int(wcid)})
+			return events
 		events.append({"t": "playoff_champion", "league": league.id, "club": po["champ"]})
 		return events
 	if last_r + 1 == int(f.get("bye_round", 1)):
@@ -324,20 +546,24 @@ static func aggregate_before(world: GameWorld, f: Fixture) -> Array:
 
 ## Campeão da temporada: o dos playoffs quando a liga tem playoffs; senão o primeiro da tabela.
 static func champion(league: League, ids: Array) -> int:
-	if kind(league) == "playoff" and int(league.po.get("champ", -1)) >= 0:
+	if kind(league) in ["playoff", "quad"] and int(league.po.get("champ", -1)) >= 0:
 		return int(league.po["champ"])
 	return int(ids[0]) if not ids.is_empty() else -1
 
 
 static func runner_up(league: League, ids: Array) -> int:
-	if kind(league) == "playoff" and int(league.po.get("runner", -1)) >= 0:
+	if kind(league) in ["playoff", "quad"] and int(league.po.get("runner", -1)) >= 0:
 		return int(league.po["runner"])
 	return int(ids[1]) if ids.size() > 1 else -1
 
 
 static func round_label(league: League, f: Fixture) -> String:
 	if f.stage != Fixture.STAGE_KO:
+		if kind(league) == "quad" and f.round >= league.regular_rounds:
+			return "Quadrangular · %dª rodada" % (maxi(0, league.phase_slots.find(f.slot)) + 1)
 		return "%dª rodada" % (f.round + 1)
+	if kind(league) == "quad":
+		return "Final" + (" · %s" % ("ida" if f.leg == 0 else "volta") if _legs(league, f.round) == 2 else "")
 	if f.round == BAR_R:
 		var n := _legs(league, BAR_R)
 		return "Repescagem · " + ("jogo único" if n == 1 else ("ida" if f.leg == 0 else "volta"))
@@ -366,12 +592,49 @@ static func promoted(league: League, ids: Array, up: int, world: GameWorld = nul
 		if bw >= 0 and bw == int(bar.get("b", -1)) and not direct.has(bw):
 			direct.append(bw)
 		return direct
+	if kind(league) == "playoff" and cfg(league).has("up_round"):
+		return _round_winners_promoted(league, ids, up)
 	if kind(league) != "promo":
 		return ids.slice(0, up)
-	var out: Array = ids.slice(0, up - 1)
-	var w := int(league.po.get("champ", -1))
-	out.append(w if w >= 0 and not out.has(w) else ids[mini(up - 1, ids.size() - 1)])
+	var spots := clampi(promo_spots(league), 1, up)
+	var out: Array = ids.slice(0, up - spots)
+	var won: Array = league.po.get("winners", [])
+	if won.is_empty() and int(league.po.get("champ", -1)) >= 0:
+		won = [int(league.po["champ"])]
+	for wcid in won:
+		if out.size() < up and not out.has(int(wcid)):
+			out.append(int(wcid))
+	# Playoffs não decididos: vale a tabela.
+	var i := up - spots
+	while out.size() < up and i < ids.size():
+		if not out.has(ids[i]):
+			out.append(ids[i])
+		i += 1
 	return out
+
+
+## Acesso pelo mata-mata (Série D): sobem os vencedores da fase "up_round" (0 = a primeira do ko);
+## enquanto ela não termina, vale a tabela.
+static func _round_winners_promoted(league: League, ids: Array, up: int) -> Array:
+	var r := int(cfg(league).get("up_round", 0))
+	var seeds: Array = league.po.get("seeds", ids)
+	var won: Array = []
+	for t in league.po.get("ties", []):
+		if int(t["r"]) == r and int(t["w"]) >= 0:
+			won.append(int(t["w"]))
+	won.sort_custom(func(a, b): return seeds.find(a) < seeds.find(b))
+	var out: Array = won.slice(0, up)
+	var i := 0
+	while out.size() < up and i < ids.size():
+		if not out.has(int(ids[i])):
+			out.append(int(ids[i]))
+		i += 1
+	return out
+
+
+## Quantas vagas de acesso os playoffs decidem (padrão 1; na Série B são 2, sem final).
+static func promo_spots(league: League) -> int:
+	return int(cfg(league).get("spots", 1)) if kind(league) == "promo" else 0
 
 
 static func promotion_candidates(world: GameWorld, ids: Array) -> Array:

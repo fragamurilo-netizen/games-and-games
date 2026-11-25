@@ -632,6 +632,8 @@ static func _loan_with_option(world: GameWorld, c: Club, p: Player) -> bool:
 	var owner := world.club(p.club_id)
 	if owner.is_rival(c.id) or c.is_rival(owner.id) or c.player_ids.size() >= int(DatabaseManager.squad_rules()["max_players"]) - 1:
 		return false
+	if TransferRules.loan_block(world, p, owner, c) != "":
+		return false
 	if TransferManager._family_count(world, owner, p.position) <= TransferManager._family_min(p.position) + 1:
 		return false
 	if world.rng.randf() > player_interest(world, p, c):

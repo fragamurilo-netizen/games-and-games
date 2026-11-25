@@ -284,6 +284,8 @@ func _build_depth(w: GameWorld, club: Club, c: VBoxContainer) -> void:
 		head.add_child(UIKit.spacer())
 		if row["weak"]:
 			head.add_child(UIKit.colored("Carência", UIColors.ORANGE, "Caps"))
+		elif row.get("succession", false):
+			head.add_child(UIKit.colored("Renovar", UIColors.ACCENT, "Caps"))
 		card.add_child(head)
 		if row["best"].is_empty():
 			card.add_child(UIKit.colored("Ninguém do elenco joga aqui.", UIColors.RED, "Small"))
@@ -295,10 +297,26 @@ func _build_depth(w: GameWorld, club: Club, c: VBoxContainer) -> void:
 			nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 			line.add_child(nm)
+			var age := p.age(w.year)
+			line.add_child(UIKit.colored(str(age), UIColors.ORANGE if age >= 32 else UIColors.MUTED, "Small"))
+			if p.contract_years_left(w.year) <= 0 and p.loan.is_empty():
+				line.add_child(UIKit.colored("Último ano", UIColors.ORANGE, "Small"))
 			if not p.is_available():
 				line.add_child(UIKit.icon_rect("cross", 18, UIColors.RED))
 			line.add_child(UIKit.player_stars(w,p,15,false,int(row["pos"][0])))
 			card.add_child(UIKit.tap_row(line, func(): UIManager.push("player", {"id": pid})))
+		var fut: Player = row.get("future", null)
+		if fut != null:
+			var fid := fut.id
+			var fl := UIKit.hbox(8)
+			var fn := UIKit.label("%s: %s" % [tr("Futuro"), fut.display_name()], "Small")
+			fn.add_theme_color_override(&"font_color", UIColors.ink(UIColors.GREEN))
+			fn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			fn.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			fl.add_child(fn)
+			fl.add_child(UIKit.colored(str(fut.age(w.year)), UIColors.MUTED, "Small"))
+			fl.add_child(UIKit.player_stars(w, fut, 15, false, int(row["pos"][0])))
+			card.add_child(UIKit.tap_row(fl, func(): UIManager.push("player", {"id": fid})))
 		c.add_child(UIKit.card_panel(card))
 
 
