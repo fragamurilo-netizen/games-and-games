@@ -220,6 +220,8 @@ func _split_compound(src: String, depth: int) -> String:
 			var tr: Variant = _exact.get(right, null)
 			var tr2 := String(tr) if tr != null else lookup(right.strip_edges(), depth + 1)
 			if tr2 != "":
+				if left.right(1) in ["。", "！", "？"]:
+					return left + tr2.strip_edges(true, false)
 				return left + (tr2 if tr2.begins_with(" ") else " " + tr2)
 		at = src.find(". ", at + 1)
 	for sep in [" · ", " — ", " / ", ": ", " | ", ". ", ", "]:
@@ -238,11 +240,24 @@ func _split_compound(src: String, depth: int) -> String:
 				any = true
 		if any:
 			if sep == ". ":
-				for j in parts.size() - 1:
-					if parts[j].ends_with("."):
-						parts[j] = parts[j].substr(0, parts[j].length() - 1)
+				return _join_sentences(parts)
 			return sep.join(parts)
 	return ""
+
+
+## Junta frases que já trazem a própria pontuação ("。", "!", ".") sem repetir o ponto.
+func _join_sentences(parts: PackedStringArray) -> String:
+	var out := ""
+	for j in parts.size():
+		var p := parts[j]
+		out += p
+		if j == parts.size() - 1:
+			break
+		var last := p.right(1)
+		if last in ["。", "！", "？"]:
+			continue
+		out += " " if last in [".", "!", "?", "…"] else ". "
+	return out
 
 
 func _add_pattern(src: String, dst: String, upper: bool) -> void:

@@ -1,5 +1,19 @@
 # Noite de Luta — nota de passagem (24/11/2026)
 
+## Rodada 19 de 25/11/2026: seis idiomas (APK 1.4.0)
+
+O dono: "Acho que já vale fazer a tradução pro Ingles, Espanhol, Alemão, Frances, Russo e Chines". O português continua sendo o texto-fonte escrito no código e nos JSON; os outros idiomas são catálogos.
+
+- **Catálogo** `data/i18n/<idioma>.json` (en, es, de, fr, ru, zh): chave = texto em português, valor = tradução. Chaves com `%s`/`%d`/`{nome}` viram moldes; no valor, `{1}`, `{2}` reordenam os trechos e `[[m|f]]` escolhe o gênero que o português marcou (`{o}`, `{ao}`, `Nascid%s`). Chave com contexto `ctx|texto` (lida por `I18n.tc`): `visual|Mosca` (barba) e `treino|Leve` (intensidade). Plural russo "2–4|5+"; adjetivos de nacionalidade "masc|fem".
+- **Motor** `scripts/core/i18n.gd` + `pattern_translation.gd` (o auto-translate dos Controls chama sozinho). Para texto montado sem chave inteira, corta em " · ", ": ", ", ", ". " etc., guarda número, ponto e "(…)" do fim e número do começo; moldes quase sem texto fixo ("%s a %s") só por último. Texto desenhado à mão (placas da luta 2D, tabelas, gráfico) passa por `I18n.t`. `I18n.shutdown()` (chamado pelo GameManager) evita o abort na saída.
+- **Formatos** (`Fmt`): dinheiro (M/K, Mio./Tsd., млн/тыс., 万/亿), separador decimal e de milhar, meses, datas, ordinais, plural russo. Pesos (`Matchmaker.division_name`) vêm do catálogo fora do português.
+- **Fontes**: Noto Sans (cirílico) e um recorte do Noto Sans SC entram como fallback de cada Saira (`Fonts.add_fallbacks`). O recorte chinês só tem os caracteres usados em zh.json: mudou o zh, recorte de novo com `pyftsubset NotoSansSC.ttf --text-file=… --layout-features='*'`. Créditos e licenças com a entrada Noto.
+- **Idioma**: o do aparelho na primeira vez (sem tradução, inglês), Opções › Idioma, ou `--lang=xx`. Rodando pelo editor/ferramentas sem `--lang` fica em português, para os `tools/*_runner.gd` (que acham botões pelo texto em português) continuarem funcionando.
+- **Ferramentas**: `tools/i18n_check.py --lang=xx --list` (o que falta), `--i18n-miss=ARQ` nos passeios de tela grava todo texto que apareceu sem tradução, `tools/i18n_cover.py` confere um desses arquivos. Texto novo no código precisa de chave nos seis JSON.
+- Conferido com os passeios de tela nos seis idiomas (início, ficha, card e sede do presidente, luta ao vivo com narração e gritos do corner, coletiva, visual).
+
+**Não feito**: nomes de cidades natais ficam na grafia local (Roma, München); apelidos brasileiros ficam em português; algumas concordâncias de gênero em russo/francês foram resolvidas com frase neutra. Ninguém nativo revisou as traduções.
+
 ## Rodada 18 de 25/11/2026: cara de cartaz de luta (APK 1.3.0)
 
 O dono, ao receber o 1.2.0: "deixar ui e UX com menos cara de ia por favor". Leitura: azul-escuro com dourado, cartões arredondados com filete empilhados, cápsulas, frases de apoio e slogan em três tempos são o que dá cara de coisa gerada. Resposta: identidade própria de cartaz e transmissão de luta. Nenhuma regra do jogo mudou.

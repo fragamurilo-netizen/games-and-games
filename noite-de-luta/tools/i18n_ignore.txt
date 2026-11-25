@@ -166,3 +166,5 @@ F. Arantes
 O. Lindahl
 máquina
 flat top
+Noto Sans
+noto

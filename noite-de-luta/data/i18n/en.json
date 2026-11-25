@@ -1618,7 +1618,7 @@
 	"%s × %s": "%s × %s",
 	"%s no %dº round": "%s in round %d",
 	"%s e %s empatam na %s.": "%s and %s draw at %s.",
-	"%s vence %s por %s, mas o cinturão dos %s segue vago: %s não bateu o peso.": "%s beats %s by %s, but the %s belt stays vacant: %s missed weight.",
+	"%s vence %s por %s, mas o cinturão dos %s segue vago: %s não bateu o peso.": "{1} beats {2} by {3}, but the {4} belt stays vacant: {1} missed weight.",
 	"%s defende o cinturão dos %s: vence %s por %s.": "%s defends the %s belt: beats %s by %s.",
 	"Novo campeão! %s vence %s por %s e leva o cinturão dos %s.": "New champion! %s beats %s by %s and takes the %s belt.",
 	"%s vence %s por %s na %s.": "%s beats %s by %s at %s.",
@@ -2829,7 +2829,7 @@
 	"novidade": "update",
 	"novidades": "updates",
 	"Termômetro da noite": "Night meter",
-	"E mais %s": "And %s more",
+	"E mais %s": "Plus %s",
 	"motivo menor": "minor reason",
 	"motivos menores": "minor reasons",
 	"Por que a luta principal vende": "Why the main event sells",
@@ -3898,5 +3898,7 @@
 	"empatou %s": "drew %s",
 	"Fontes do russo e do chinês, do Google. SIL Open Font License 1.1.": "Google fonts for Russian and Chinese. SIL Open Font License 1.1.",
 	"Para o russo e o chinês, o jogo usa partes das fontes Noto Sans e Noto Sans SC, do Google, distribuídas sob a SIL Open Font License 1.1. Os textos das licenças seguem abaixo.": "For Russian and Chinese, the game uses parts of Google's Noto Sans and Noto Sans SC typefaces, distributed under the SIL Open Font License 1.1. The license texts follow below.",
-	"queda": "takedown"
+	"queda": "takedown",
+	"rosto": "face",
+	"corpo": "body"
 }

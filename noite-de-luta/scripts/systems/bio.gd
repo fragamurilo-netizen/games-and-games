@@ -141,7 +141,7 @@ static func roll_gift(rng: RandomNumberGenerator, f: Fighter) -> void:
 
 static func _fill(t: String, f: Fighter, age: int) -> String:
 	var fem := f.is_female()
-	return t.format({"age": age, "city": f.city if f.city != "" else DataDB.nation_name(f.nation), "art": Styles.name(f.base).to_lower(),
+	return t.format({"age": age, "city": f.city if f.city != "" else DataDB.nation_name(f.nation), "art": Styles.name(f.base) if I18n.lang == "de" else Styles.name(f.base).to_lower(),
 		"o": "a" if fem else "o", "ao": "ã" if fem else "ão"})
 
 
