@@ -341,36 +341,68 @@ func _carreira(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 	if f.is_pro():
 		c.add_child(_numbers_card(w, f))
 		c.add_child(_marks_card(w, f))
-	c.add_child(UIKit.section_header("Lutas no jogo"))
-	if f.history.is_empty():
-		c.add_child(UIKit.label("O cartel acima vem de antes do início da carreira. As lutas a partir de agora aparecem aqui.", "Muted", true))
-		return
+	c.add_child(_fights_block(w, f))
+
+
+var _all_fights := false
+
+
+## As lutas dele, da mais nova para a mais antiga: as do jogo e, depois, as de antes (PastFights).
+func _fights_block(w: GameWorld, f: Fighter) -> Control:
+	var box := UIKit.vbox(0)
+	var past := PastFights.of(w, f)
+	var all: Array = []
 	for i in range(f.history.size() - 1, -1, -1):
-		var hst: Dictionary = f.history[i]
-		var h := UIKit.hbox(UITokens.S2)
-		var res := String(hst["res"])
-		var rl := UIKit.label(res, "Section")
-		rl.custom_minimum_size.x = 40
-		rl.add_theme_color_override(&"font_color", UIColors.ink(UIColors.result_color(res)))
-		h.add_child(rl)
-		var v := UIKit.vbox(0)
-		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var t := UIKit.label(("Cinturão · " if bool(hst.get("title", false)) else "") + "contra " + String(hst["opp_name"]), "H3")
-		t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		v.add_child(t)
-		var how := String(hst.get("detail", ""))
-		if String(hst["method"]) != "DEC" and String(hst["method"]) != "EMP":
-			how += ", %dº round" % int(hst.get("round", 1))
-		# Quebra em duas linhas quando não cabe: aqui o detalhe vale mais do que a altura da linha.
-		var sub := UIKit.label("%s · %s · %s" % [how, String(hst.get("event", "")), GameWorld.fight_date_text(int(hst["week"]), true).trim_prefix("sáb, ")], "Small", true)
-		v.add_child(sub)
-		# Os números dele naquela luta.
-		var nums := CareerStats.bout_line(hst)
-		if nums != "":
-			v.add_child(UIKit.label(nums, "Caps", true))
-		h.add_child(v)
-		var oid := int(hst["opp"])
-		c.add_child(UIKit.tap_row(h, func(): if w.fighter(oid) != null: UIManager.push("fighter", {"id": oid})))
+		all.append(f.history[i])
+	for i in range(past.size() - 1, -1, -1):
+		all.append(past[i])
+	box.add_child(UIKit.section_header("Lutas (%d)" % all.size() if not all.is_empty() else "Lutas"))
+	if all.is_empty():
+		box.add_child(UIKit.label("Ainda não lutou como profissional.", "Muted", true))
+		return box
+	var shown := all.size() if _all_fights else mini(all.size(), 8)
+	for i in shown:
+		box.add_child(_fight_row(w, all[i]))
+	if all.size() > shown:
+		box.add_child(UIKit.button("Ver as %d lutas" % all.size(), "TextButton", func():
+			_all_fights = true
+			refresh()))
+	return box
+
+
+func _fight_row(w: GameWorld, hst: Dictionary) -> Control:
+	var h := UIKit.hbox(UITokens.S2)
+	var res := String(hst["res"])
+	var rl := UIKit.label(res, "Section")
+	rl.custom_minimum_size.x = 40
+	rl.add_theme_color_override(&"font_color", UIColors.ink(UIColors.result_color(res)))
+	h.add_child(rl)
+	var v := UIKit.vbox(0)
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var who := "contra " + String(hst["opp_name"])
+	if hst.has("opp_rec"):
+		who += " (%s)" % String(hst["opp_rec"])
+	var t := UIKit.label(("Cinturão · " if bool(hst.get("title", false)) else "") + who, "H3")
+	t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	v.add_child(t)
+	var how := String(hst.get("detail", ""))
+	if not String(hst["method"]) in ["DEC", "EMP"]:
+		how += ", %dº round" % int(hst.get("round", 1))
+	# Quebra em duas linhas quando não cabe: aqui o detalhe vale mais do que a altura da linha.
+	var sub := UIKit.label("%s · %s · %s" % [how, String(hst.get("event", "")), GameWorld.fight_date_text(int(hst["week"]), true).trim_prefix("sáb, ")], "Small", true)
+	v.add_child(sub)
+	# Os números dele naquela luta.
+	var nums := CareerStats.bout_line(hst)
+	if nums != "":
+		v.add_child(UIKit.label(nums, "Caps", true))
+	h.add_child(v)
+	var oid := int(hst["opp"])
+	if oid < 0 or w.fighter(oid) == null:
+		var pc := PanelContainer.new()
+		pc.theme_type_variation = "RowPanel"
+		pc.add_child(h)
+		return pc
+	return UIKit.tap_row(h, func(): UIManager.push("fighter", {"id": oid}))
 
 
 ## Evolução: o nível pela idade, com as lutas do jogo, o auge e o teto que o olheiro enxerga, e

@@ -86,6 +86,12 @@ var history: Array = []
 var rating: float = 1200.0
 var streak: int = 0
 var last_fight_week: int = -999
+## Como ele chegou à primeira luta dentro do jogo: semana da última luta de antes e a sequência
+## que trazia (ver PastFights). -999 = ainda não lutou no jogo (ou save antigo).
+var pre_week: int = -999
+## Dom raro (ver Bio e data/world/bio.json → gifts). "" = não tem.
+var gift: String = ""
+var pre_streak: int = 0
 ## Condição física (0–100): cai com a luta e o treino pesado, volta com descanso.
 var condition: float = 100.0
 ## Lesão em curso: {name, weeks}. Vazio = saudável.
@@ -355,6 +361,11 @@ func to_dict() -> Dictionary:
 		"mor": snappedf(morale, 0.1),
 	}
 	# O que quase ninguém tem só entra no save quando existe.
+	if gift != "":
+		d["gift"] = gift
+	if pre_week > -900:
+		d["pw"] = pre_week
+		d["ps"] = pre_streak
 	if not mood_log.is_empty():
 		d["mlog"] = mood_log
 	if talk_week > -900:
@@ -405,6 +416,9 @@ static func from_dict(d: Dictionary) -> Fighter:
 	f.rating = float(d.get("rating", 1200.0))
 	f.streak = int(d.get("streak", 0))
 	f.last_fight_week = int(d.get("last_fw", -999))
+	f.gift = String(d.get("gift", ""))
+	f.pre_week = int(d.get("pw", -999))
+	f.pre_streak = int(d.get("ps", 0))
 	f.condition = float(d.get("cond", 100.0))
 	f.injury = d.get("inj", {})
 	f.suspension = int(d.get("susp", 0))

@@ -59,7 +59,16 @@ static func make(w: GameWorld, div: String, level: float, age_: int = 0, amateur
 	var cities: Array = DataDB.cities(f.nation)
 	if not cities.is_empty():
 		f.city = String((cities[rng.randi_range(0, mini(cities.size() - 1, 14))] as Array)[0])
+	# Sorteio à parte para a terra, a arte rara e o dom (não mexe no resto do mundo gerado).
+	var vr := RandomNumberGenerator.new()
+	vr.seed = hash([f.id, f.first, f.last, "vida"])
+	var hm := Bio.home(vr, f.nation, String(origin["c"]))
+	if hm != "":
+		f.city = hm
 	f.base = Styles.pick_base(rng, f.nation, String(origin["c"]), fem)
+	var rare := Bio.rare_base(vr, fem)
+	if rare != "":
+		f.base = rare
 	f.base2 = Styles.pick_second(rng, f.base, fem)
 	# Idade
 	var age := age_
@@ -89,6 +98,7 @@ static func make(w: GameWorld, div: String, level: float, age_: int = 0, amateur
 	if age < 29:
 		gap = maxf(0.0, (29.0 - age) * rng.randf_range(0.6, 2.4))
 	f.potential = clampf(level + gap + rng.randf_range(0.0, 3.0), level, 96.0)
+	Bio.roll_gift(vr, f)
 	if amateur:
 		# Talento: entre os amadores, alguns nasceram para a elite (sorteio à parte, para o mundo
 		# gerado não mudar). Sem isso a elite envelhece e ninguém chega no lugar.

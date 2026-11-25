@@ -153,6 +153,11 @@ static func resolve(w: GameWorld, b: Bout, res: Dictionary, e: FightEngine) -> v
 	if b.title and winner_id >= 0 and champ_before >= 0 and champ_before != winner_id and b.has(champ_before):
 		var old := w.fighter(champ_before)
 		dethroned = old != null and old.title_defenses >= 1
+	# Como cada um chegou à primeira luta dentro do jogo (amarra as lutas de antes: PastFights).
+	for pf: Fighter in [fa, fb]:
+		if pf.history.is_empty() and pf.pre_week < -900 and pf.last_fight_week > -900:
+			pf.pre_week = pf.last_fight_week
+			pf.pre_streak = pf.streak
 	Rankings.apply_result(w, b)
 	for i in 2:
 		var f := fa if i == 0 else fb

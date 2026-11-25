@@ -71,10 +71,10 @@ static func is_ppv_week(wk: int) -> bool:
 static func event_name(w: GameWorld, wk: int) -> String:
 	var short := w.league_short()
 	if is_ppv_week(wk):
-		var n := int(w.event_counters.get("ORG_PPV", 40)) + 1
+		var n := int(w.event_counters.get("ORG_PPV", Calendar.start_num(w, "ppv"))) + 1
 		w.event_counters["ORG_PPV"] = n
 		return "%s %d" % [short, n]
-	var m := int(w.event_counters.get("ORG_FN", 10)) + 1
+	var m := int(w.event_counters.get("ORG_FN", Calendar.start_num(w, "fn"))) + 1
 	w.event_counters["ORG_FN"] = m
 	return "%s Fight Night %d" % [short, m]
 

@@ -1,0 +1,789 @@
+{
+	"_doc": "Vida dos lutadores (ver scripts/systems/bio.gd). homes: cidades e região por cultura dentro de um país (quem é daguestanês nasce no Daguestão, não em Moscou). heritage: como chamar a família de quem tem cultura diferente do país. start: como começou, por arte de base (age = faixa de idade; frases com {age}, {city}, {art}, {o} = o/a, {ao} = ão/ã). start_by_culture: frases próprias de uma cultura, usadas quando a arte bate com `arts`. jobs, drive, quirk: a vida fora do cage. Tudo fictício. rare_bases: artes que de vez em quando aparecem em qualquer país (o irlandês do sambo, o japonês da capoeira). gifts: dons raros, um por lutador no máximo (name, desc curta, fam = família da arte que combina ou '' para todas, attrs = pontos somados na geração, strikes/td/subs/traits = somam ao repertório como uma arte a mais; w = peso no sorteio).",
+	"homes": {
+		"RUS": {
+			"dag": {
+				"region": "Daguestão",
+				"cities": [
+					"Makhachkala",
+					"Khasavyurt",
+					"Kaspiysk",
+					"Derbent",
+					"Kizilyurt",
+					"Buynaksk",
+					"Izberbash"
+				]
+			},
+			"chech": {
+				"region": "Chechênia",
+				"cities": [
+					"Grozny",
+					"Gudermes",
+					"Argun",
+					"Shali",
+					"Urus-Martan"
+				]
+			},
+			"tatar": {
+				"region": "Tartaristão",
+				"cities": [
+					"Kazan",
+					"Naberezhnye Chelny",
+					"Nizhnekamsk"
+				]
+			},
+			"ge": {
+				"region": "Ossétia do Norte",
+				"cities": [
+					"Vladikavkaz",
+					"Beslan"
+				]
+			},
+			"ru": {
+				"region": "",
+				"cities": [
+					"Moskva",
+					"Sankt-Peterburg",
+					"Stary Oskol",
+					"Krasnodar",
+					"Rostov-na-Donu",
+					"Novosibirsk",
+					"Omsk",
+					"Yekaterinburg",
+					"Chelyabinsk",
+					"Belgorod",
+					"Irkutsk",
+					"Vladivostok",
+					"Nizhny Novgorod",
+					"Samara"
+				]
+			}
+		},
+		"KAZ": {
+			"kz": {
+				"region": "",
+				"cities": [
+					"Almaty",
+					"Astana",
+					"Shymkent",
+					"Karaganda",
+					"Aktobe",
+					"Taraz"
+				]
+			}
+		},
+		"GEO": {
+			"ge": {
+				"region": "",
+				"cities": [
+					"Tbilisi",
+					"Kutaisi",
+					"Batumi",
+					"Gori",
+					"Rustavi"
+				]
+			}
+		},
+		"POL": {
+			"pl": {
+				"region": "",
+				"cities": [
+					"Warszawa",
+					"Kraków",
+					"Łódź",
+					"Wrocław",
+					"Poznań",
+					"Gdańsk",
+					"Szczecin",
+					"Lublin"
+				]
+			}
+		},
+		"SWE": {
+			"se": {
+				"region": "",
+				"cities": [
+					"Stockholm",
+					"Göteborg",
+					"Malmö",
+					"Uppsala",
+					"Västerås"
+				]
+			}
+		}
+	},
+	"heritage": {
+		"dag": "daguestanesa",
+		"chech": "chechena",
+		"tatar": "tártara",
+		"mx": "mexicana",
+		"tr": "turca",
+		"maghreb": "magrebina",
+		"waf_fr": "da África Ocidental",
+		"waf_en": "da África Ocidental",
+		"lusoaf": "africana",
+		"kr": "coreana",
+		"jp": "japonesa",
+		"ge": "georgiana",
+		"am": "armênia",
+		"az": "azerbaijana",
+		"persian": "iraniana",
+		"arab": "árabe",
+		"alb": "albanesa",
+		"south_slav": "dos Bálcãs",
+		"west_slav": "eslava",
+		"it": "italiana",
+		"pt": "portuguesa",
+		"es": "espanhola",
+		"ru": "russa",
+		"uz": "uzbeque",
+		"kz": "cazaque",
+		"tj": "tadjique",
+		"afg": "afegã",
+		"cn": "chinesa",
+		"ph": "filipina",
+		"vn": "vietnamita",
+		"latam": "latina",
+		"de": "alemã",
+		"nl": "holandesa",
+		"fr": "francesa",
+		"ro": "romena",
+		"bg": "búlgara",
+		"lt": "lituana"
+	},
+	"start": {
+		"*": {
+			"age": [
+				11,
+				17
+			],
+			"lines": [
+				"Começou a treinar {art} aos {age}, em {city}.",
+				"Entrou numa academia de {art} aos {age} e não saiu mais.",
+				"Descobriu {art} aos {age}, por causa de um primo que já lutava."
+			]
+		},
+		"mma": {
+			"age": [
+				14,
+				20
+			],
+			"lines": [
+				"É da geração que começou direto no MMA, aos {age}.",
+				"Entrou numa academia de MMA aos {age} para perder peso e ficou.",
+				"Começou no MMA aos {age}, vendo luta de madrugada com o pai."
+			]
+		},
+		"boxe": {
+			"age": [
+				8,
+				15
+			],
+			"lines": [
+				"Calçou as luvas aos {age}, num ginásio de bairro em {city}.",
+				"Aprendeu a boxear com o pai, aos {age}.",
+				"Começou no boxe aos {age} e fez carreira longa no amador antes do MMA."
+			]
+		},
+		"muay_thai": {
+			"age": [
+				9,
+				16
+			],
+			"lines": [
+				"Começou no muay thai aos {age} e cresceu batendo canela em saco de areia.",
+				"Entrou no muay thai aos {age}, numa academia pequena de {city}.",
+				"Fez as primeiras lutas de muay thai aos {age}, ainda sem idade para isso."
+			]
+		},
+		"kickboxing": {
+			"age": [
+				10,
+				16
+			],
+			"lines": [
+				"Começou no kickboxing aos {age}, em {city}.",
+				"Veio do kickboxing, onde luta desde os {age}."
+			]
+		},
+		"dutch_kb": {
+			"age": [
+				10,
+				16
+			],
+			"lines": [
+				"Formad{o} no kickboxing holandês desde os {age}: sparring duro toda semana.",
+				"Começou aos {age} numa academia de kickboxing à moda de Amsterdã."
+			]
+		},
+		"karate": {
+			"age": [
+				5,
+				10
+			],
+			"lines": [
+				"Vestiu o primeiro kimono de caratê aos {age}, levad{o} pela mãe.",
+				"Faixa-preta de caratê desde a adolescência; começou aos {age}."
+			]
+		},
+		"kyokushin": {
+			"age": [
+				6,
+				11
+			],
+			"lines": [
+				"Começou no kyokushin aos {age}: contato total desde criança.",
+				"Cresceu em torneios de kyokushin, que treina desde os {age}."
+			]
+		},
+		"taekwondo": {
+			"age": [
+				5,
+				10
+			],
+			"lines": [
+				"Começou no taekwondo aos {age} e chegou a competir pela seleção de base.",
+				"Faixa-preta de taekwondo; treina desde os {age}."
+			]
+		},
+		"sanda": {
+			"age": [
+				9,
+				14
+			],
+			"lines": [
+				"Entrou numa escola de sanda aos {age}, em regime de internato.",
+				"Começou no sanda aos {age}, em {city}."
+			]
+		},
+		"capoeira": {
+			"age": [
+				6,
+				12
+			],
+			"lines": [
+				"Cresceu na roda de capoeira, que joga desde os {age}.",
+				"Começou na capoeira aos {age}, num projeto de bairro."
+			]
+		},
+		"savate": {
+			"age": [
+				10,
+				15
+			],
+			"lines": [
+				"Começou no savate aos {age}, num clube de {city}."
+			]
+		},
+		"wrestling": {
+			"age": [
+				6,
+				11
+			],
+			"lines": [
+				"Entrou no tapete de luta aos {age}, levad{o} pelo irmão mais velho.",
+				"Luta wrestling desde os {age}; passou a adolescência em competição.",
+				"Começou no wrestling aos {age}, na escola de esportes de {city}."
+			]
+		},
+		"folkstyle": {
+			"age": [
+				5,
+				10
+			],
+			"lines": [
+				"Luta wrestling desde os {age}; foi destaque no colégio e na faculdade.",
+				"Começou no wrestling aos {age} e pagou a faculdade com bolsa de atleta."
+			]
+		},
+		"greco": {
+			"age": [
+				7,
+				12
+			],
+			"lines": [
+				"Começou na greco-romana aos {age} e chegou à seleção de base.",
+				"Treina greco-romana desde os {age}, em {city}."
+			]
+		},
+		"judo": {
+			"age": [
+				5,
+				10
+			],
+			"lines": [
+				"Começou no judô aos {age}, como quase toda criança do clube.",
+				"Judoca desde os {age}; faixa-preta antes dos dezoito."
+			]
+		},
+		"sambo": {
+			"age": [
+				7,
+				12
+			],
+			"lines": [
+				"Começou no sambo aos {age}, na escola de esportes de {city}.",
+				"Mestre de esportes no sambo; treina desde os {age}."
+			]
+		},
+		"combat_sambo": {
+			"age": [
+				8,
+				13
+			],
+			"lines": [
+				"Começou no sambo aos {age} e migrou para o sambo de combate na adolescência.",
+				"Treina sambo de combate desde os {age}; foi campe{ao} nacional antes do MMA."
+			]
+		},
+		"bjj": {
+			"age": [
+				8,
+				16
+			],
+			"lines": [
+				"Vestiu o primeiro kimono aos {age}, num projeto social de {city}.",
+				"Começou no jiu-jitsu aos {age} para parar de apanhar na escola.",
+				"Faixa-preta de jiu-jitsu; competiu de kimono por anos antes do MMA, treina desde os {age}."
+			]
+		},
+		"nogi": {
+			"age": [
+				13,
+				19
+			],
+			"lines": [
+				"Começou no grappling aos {age} e viveu de torneio de submission antes do MMA."
+			]
+		},
+		"luta_livre": {
+			"age": [
+				12,
+				18
+			],
+			"lines": [
+				"Começou na luta livre aos {age}, na escola carioca que nunca usou kimono."
+			]
+		},
+		"catch": {
+			"age": [
+				13,
+				19
+			],
+			"lines": [
+				"Aprendeu catch wrestling aos {age}, com um treinador da velha guarda."
+			]
+		},
+		"kurash": {
+			"age": [
+				6,
+				11
+			],
+			"lines": [
+				"Começou no kurash aos {age}, nas festas da aldeia, antes de qualquer academia."
+			]
+		},
+		"laamb": {
+			"age": [
+				8,
+				14
+			],
+			"lines": [
+				"Lutava laamb na areia desde os {age}, diante da vila inteira."
+			]
+		}
+	},
+	"start_by_culture": {
+		"dag": {
+			"arts": [
+				"wrestling",
+				"greco",
+				"combat_sambo",
+				"sambo",
+				"mma",
+				"judo"
+			],
+			"age": [
+				6,
+				10
+			],
+			"lines": [
+				"Como quase todo menino das montanhas, entrou no tapete de luta aos {age}.",
+				"Treina desde os {age} na mesma sala de luta de {city}, com o mesmo treinador.",
+				"Cresceu numa aldeia perto de {city} e descia de ônibus para treinar todo dia, desde os {age}."
+			]
+		},
+		"chech": {
+			"arts": [
+				"wrestling",
+				"greco",
+				"boxe",
+				"mma",
+				"combat_sambo",
+				"kickboxing"
+			],
+			"age": [
+				7,
+				11
+			],
+			"lines": [
+				"Começou na luta aos {age}, num ginásio de {city} erguido de novo depois da guerra.",
+				"Filh{o} de lutador, entrou no tapete aos {age}.",
+				"Aprendeu luta e boxe ao mesmo tempo, aos {age}, com os primos mais velhos."
+			]
+		},
+		"th": {
+			"arts": [
+				"muay_thai"
+			],
+			"age": [
+				6,
+				9
+			],
+			"lines": [
+				"Luta muay thai desde os {age}: passou de cem lutas antes de calçar luva de MMA.",
+				"Foi morar num camp de muay thai aos {age} para ajudar a família."
+			]
+		},
+		"br": {
+			"arts": [
+				"bjj",
+				"luta_livre",
+				"capoeira",
+				"muay_thai"
+			],
+			"age": [
+				8,
+				15
+			],
+			"lines": [
+				"Começou a treinar aos {age}, num projeto social de {city}.",
+				"Conheceu {art} aos {age} e passou a dormir na academia para não perder treino."
+			]
+		},
+		"mx": {
+			"arts": [
+				"boxe"
+			],
+			"age": [
+				7,
+				12
+			],
+			"lines": [
+				"Como manda a tradição da família, calçou as luvas aos {age}.",
+				"Aprendeu boxe aos {age}, num ginásio de bairro onde todo mundo queria ser campeão."
+			]
+		},
+		"us": {
+			"arts": [
+				"folkstyle",
+				"wrestling"
+			],
+			"age": [
+				5,
+				9
+			],
+			"lines": [
+				"Luta wrestling desde os {age}; foi campe{ao} estadual no colégio.",
+				"Começou no wrestling aos {age}, numa cidade pequena onde luta vale mais que futebol."
+			]
+		},
+		"jp": {
+			"arts": [
+				"judo",
+				"karate",
+				"kyokushin"
+			],
+			"age": [
+				5,
+				8
+			],
+			"lines": [
+				"Entrou no dojô aos {age} e nunca faltou a um treino."
+			]
+		},
+		"ge": {
+			"arts": [
+				"wrestling",
+				"judo",
+				"greco",
+				"sambo"
+			],
+			"age": [
+				6,
+				10
+			],
+			"lines": [
+				"Começou na luta aos {age}; na terra dele, toda criança aprende a derrubar antes de aprender a ler."
+			]
+		}
+	},
+	"jobs": [
+		"Trabalhou como segurança de casa noturna até conseguir viver da luta.",
+		"Ajudava o pai em obra até o primeiro contrato.",
+		"Largou a faculdade de educação física para lutar.",
+		"Serviu o exército antes de virar profissional.",
+		"Dava aula para crianças para pagar o camp.",
+		"Fazia entregas de dia e treinava à noite.",
+		"Trabalhou em oficina mecânica até a terceira luta profissional.",
+		"Tem diploma de direito e nunca exerceu.",
+		"Trabalhou na terra da família até os vinte anos.",
+		"Serviu mesa em restaurante por anos entre uma luta e outra.",
+		"Foi policial antes de se dedicar só à luta.",
+		"Trabalhou em frigorífico e diz que foi o melhor preparo físico da vida.",
+		"Estudou engenharia e largou no último ano.",
+		"Carregava caminhão de madrugada no começo da carreira.",
+		"Já dormiu no tatame da academia por falta de onde morar."
+	],
+	"drive": [
+		"Diz que luta para dar uma casa para a mãe.",
+		"Promete parar no dia em que conquistar o cinturão.",
+		"Quer o cinturão e uma academia própria em {city}.",
+		"Sustenta os irmãos mais novos desde cedo.",
+		"Não fala de dinheiro: quer o nome na história.",
+		"Entra sempre com a bandeira de casa nas costas.",
+		"Diz que só tem medo de uma coisa: voltar para a vida de antes.",
+		"Luta para provar que o primeiro treinador estava errado.",
+		"Quer se aposentar em casa, diante da torcida de {city}.",
+		"Diz que cada luta é uma prestação da casa dos pais."
+	],
+	"quirk": [
+		"Entra para lutar sempre com a mesma música.",
+		"Não corta o cabelo em semana de luta.",
+		"Reza antes de cada round.",
+		"Joga xadrez para se acalmar na semana da luta.",
+		"Cria cavalos na terra da família.",
+		"Tem pavor de avião e viaja de carro sempre que dá.",
+		"Não perde jogo do time do coração nem em camp.",
+		"Coleciona tênis e não deixa ninguém encostar.",
+		"Pesca sempre que termina um camp.",
+		"Cozinha para o time inteiro no fim do camp.",
+		"Dorme doze horas na véspera da luta.",
+		"Não dá entrevista antes da pesagem.",
+		"Treina de madrugada porque diz que a academia vazia rende mais.",
+		"Assiste à própria derrota antes de toda luta.",
+		"Leva a mãe para o córner da torcida em toda luta.",
+		"Cumprimenta todo mundo da arena, do segurança ao locutor."
+	],
+	"rare_bases": {
+		"capoeira": 3,
+		"sanda": 3,
+		"kyokushin": 3,
+		"taekwondo": 2,
+		"savate": 2,
+		"catch": 3,
+		"luta_livre": 2,
+		"kurash": 2,
+		"laamb": 1,
+		"combat_sambo": 3,
+		"dutch_kb": 3,
+		"nogi": 3,
+		"greco": 2,
+		"judo": 3,
+		"karate": 3
+	},
+	"rare_base_chance": 0.045,
+	"gift_chance": 0.075,
+	"gifts": {
+		"mao_de_pedra": {
+			"name": "Mão de pedra",
+			"desc": "Um soco limpo apaga qualquer um.",
+			"fam": "",
+			"w": 10,
+			"attrs": {
+				"potencia": 14,
+				"maos": 4
+			},
+			"strikes": {
+				"overhand": 1.7,
+				"gancho": 1.35,
+				"direto": 1.2
+			}
+		},
+		"queixo_de_granito": {
+			"name": "Queixo de granito",
+			"desc": "Ninguém lembra de ter visto cair.",
+			"fam": "",
+			"w": 9,
+			"attrs": {
+				"queixo": 16,
+				"coracao": 6
+			}
+		},
+		"folego_sem_fim": {
+			"name": "Fôlego sem fim",
+			"desc": "No terceiro round ainda está no ritmo do primeiro.",
+			"fam": "",
+			"w": 9,
+			"attrs": {
+				"cardio": 16,
+				"velocidade": 3
+			}
+		},
+		"guarda_de_borracha": {
+			"name": "Guarda de borracha",
+			"desc": "De costas no chão é onde mais assusta.",
+			"fam": "agarrada",
+			"w": 6,
+			"attrs": {
+				"finalizacao": 10,
+				"por_baixo": 12
+			},
+			"subs": {
+				"triangulo": 5,
+				"omoplata": 4,
+				"chave_braco": 3
+			},
+			"traits": {
+				"guard": 1.0
+			}
+		},
+		"giros": {
+			"name": "Giros de cinema",
+			"desc": "Chuta rodando de onde ninguém espera.",
+			"fam": "trocacao",
+			"w": 6,
+			"attrs": {
+				"chutes": 8,
+				"movimentacao": 6
+			},
+			"strikes": {
+				"giros": 3.2,
+				"chute_alto": 1.3
+			},
+			"traits": {
+				"spin": 0.9
+			}
+		},
+		"cacador_de_pernas": {
+			"name": "Caçador de pernas",
+			"desc": "Onde tem um calcanhar solto, ele gira.",
+			"fam": "agarrada",
+			"w": 5,
+			"attrs": {
+				"finalizacao": 10
+			},
+			"subs": {
+				"chave_calcanhar": 8,
+				"chave_joelho": 5,
+				"botinha": 3
+			},
+			"traits": {
+				"legs": 1.0
+			}
+		},
+		"arremessos": {
+			"name": "Arremessos de vitrine",
+			"desc": "Tira o outro do chão e devolve de cabeça para baixo.",
+			"fam": "agarrada",
+			"w": 6,
+			"attrs": {
+				"queda": 8,
+				"clinch": 8,
+				"forca": 6
+			},
+			"traits": {
+				"throws": 1.0
+			}
+		},
+		"intocavel": {
+			"name": "Intocável",
+			"desc": "O soco passa sempre a um dedo do rosto.",
+			"fam": "trocacao",
+			"w": 6,
+			"attrs": {
+				"defesa": 12,
+				"movimentacao": 8
+			},
+			"traits": {
+				"head_movement": 1.0,
+				"counter": 0.6
+			}
+		},
+		"joelho_voador": {
+			"name": "Joelho voador",
+			"desc": "Corre e salta: se pegar, acabou.",
+			"fam": "trocacao",
+			"w": 4,
+			"attrs": {
+				"velocidade": 6,
+				"potencia": 5
+			},
+			"strikes": {
+				"joelhada_voadora": 5.0,
+				"superman": 2.2,
+				"joelhada": 1.4
+			}
+		},
+		"canela_de_ferro": {
+			"name": "Canela de ferro",
+			"desc": "Três chutes na perna e o outro já manca.",
+			"fam": "trocacao",
+			"w": 6,
+			"attrs": {
+				"chutes": 12,
+				"potencia": 4
+			},
+			"strikes": {
+				"chute_baixo": 1.8,
+				"chute_panturrilha": 1.8,
+				"chute_corpo": 1.3
+			}
+		},
+		"pressao": {
+			"name": "Rolo compressor",
+			"desc": "Anda para a frente os quinze minutos.",
+			"fam": "",
+			"w": 7,
+			"attrs": {
+				"cardio": 8,
+				"coracao": 10,
+				"forca": 5
+			},
+			"traits": {
+				"cage": 0.8,
+				"chain": 0.6
+			}
+		},
+		"mata_leao": {
+			"name": "Costas é sentença",
+			"desc": "Pegou as costas, a luta acabou.",
+			"fam": "agarrada",
+			"w": 6,
+			"attrs": {
+				"finalizacao": 8,
+				"por_cima": 6
+			},
+			"subs": {
+				"mata_leao": 8
+			},
+			"traits": {
+				"back": 1.0
+			}
+		},
+		"cotovelo": {
+			"name": "Cotovelo de navalha",
+			"desc": "Abre corte em toda luta.",
+			"fam": "trocacao",
+			"w": 5,
+			"attrs": {
+				"clinch": 10
+			},
+			"strikes": {
+				"cotovelada": 2.6
+			},
+			"traits": {
+				"elbows": 1.0,
+				"plum": 0.5
+			}
+		},
+		"prodigio": {
+			"name": "Prodígio",
+			"desc": "Aprende em meses o que os outros levam anos.",
+			"fam": "",
+			"w": 7,
+			"attrs": {},
+			"potential": 12
+		}
+	}
+}

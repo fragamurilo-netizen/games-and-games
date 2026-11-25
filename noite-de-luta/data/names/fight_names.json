@@ -1,5 +1,5 @@
 {
-	"_doc": "Complemento do names.json (que veio do futebol masculino) para o MMA. cultures: culturas que faltavam (Daguestão, Chechênia, tártaros, Ásia Central, Cáucaso, Afeganistão, Tailândia, Lituânia, Bulgária). origins: de onde vêm os lutadores (vale antes do nations.json; mesmo formato, com fw = peso nas mulheres). A Rússia do MMA tem muito mais Daguestão e Chechênia do que a Rússia do futebol. female: primeiros nomes femininos por cultura; female_group liga as culturas sem lista própria a uma lista parecida.",
+	"_doc": "Complemento do names.json (que veio do futebol masculino) para o MMA. cultures: culturas que faltavam (Daguestão, Chechênia, tártaros, Ásia Central, Cáucaso, Afeganistão, Tailândia, Lituânia, Bulgária). origins: de onde vêm os lutadores (vale antes do nations.json; mesmo formato, com fw = peso nas mulheres). A Rússia do MMA tem muito mais Daguestão e Chechênia do que a Rússia do futebol. female: primeiros nomes femininos por cultura; female_group liga as culturas sem lista própria a uma lista parecida. Origens de AUT, GER, FRA, BEL, SWE, POL e NOR: as do país mais uma fatia de famílias chechenas (a diáspora que luta por essas bandeiras).",
 	"cultures": {
 		"kz": {
 			"first": [
@@ -803,7 +803,7 @@
 		"RUS": [
 			{
 				"c": "ru",
-				"w": 56,
+				"w": 50,
 				"eth": {
 					"slv": 82,
 					"eur": 10,
@@ -812,7 +812,7 @@
 			},
 			{
 				"c": "dag",
-				"w": 24,
+				"w": 26,
 				"fw": 0.12,
 				"eth": {
 					"cau": 100
@@ -820,7 +820,7 @@
 			},
 			{
 				"c": "chech",
-				"w": 10,
+				"w": 14,
 				"fw": 0.1,
 				"eth": {
 					"cau": 100
@@ -1145,6 +1145,423 @@
 				"w": 100,
 				"eth": {
 					"sea": 100
+				}
+			}
+		],
+		"AUT": [
+			{
+				"c": "de",
+				"w": 80,
+				"eth": {
+					"nor": 40,
+					"eur": 45,
+					"slv": 5,
+					"afr": 5,
+					"mix": 5
+				}
+			},
+			{
+				"c": "south_slav",
+				"w": 8,
+				"eth": {
+					"bal": 1
+				}
+			},
+			{
+				"c": "tr",
+				"w": 4,
+				"eth": {
+					"cau": 0.8,
+					"med": 0.2
+				}
+			},
+			{
+				"c": "waf_fr",
+				"w": 3,
+				"eth": {
+					"afr": 0.8,
+					"sah": 0.2
+				}
+			},
+			{
+				"c": "west_slav",
+				"w": 3,
+				"eth": {
+					"slv": 1
+				}
+			},
+			{
+				"c": "maghreb",
+				"w": 1,
+				"eth": {
+					"naf": 0.85,
+					"arb": 0.15
+				}
+			},
+			{
+				"c": "nordic",
+				"w": 1,
+				"eth": {
+					"nor": 1
+				}
+			},
+			{
+				"c": "chech",
+				"w": 6.0,
+				"fw": 0.1,
+				"eth": {
+					"cau": 100
+				}
+			}
+		],
+		"GER": [
+			{
+				"c": "de",
+				"w": 80,
+				"eth": {
+					"nor": 55,
+					"eur": 40,
+					"afr": 3,
+					"mix": 2
+				}
+			},
+			{
+				"c": "tr",
+				"w": 8,
+				"eth": {
+					"cau": 0.8,
+					"med": 0.2
+				}
+			},
+			{
+				"c": "south_slav",
+				"w": 4,
+				"eth": {
+					"bal": 1
+				}
+			},
+			{
+				"c": "west_slav",
+				"w": 3,
+				"eth": {
+					"slv": 1
+				}
+			},
+			{
+				"c": "waf_fr",
+				"w": 3,
+				"eth": {
+					"afr": 0.8,
+					"sah": 0.2
+				}
+			},
+			{
+				"c": "maghreb",
+				"w": 1,
+				"eth": {
+					"naf": 0.85,
+					"arb": 0.15
+				}
+			},
+			{
+				"c": "arab",
+				"w": 1,
+				"eth": {
+					"arb": 1
+				}
+			},
+			{
+				"c": "chech",
+				"w": 3.0,
+				"fw": 0.1,
+				"eth": {
+					"cau": 100
+				}
+			}
+		],
+		"FRA": [
+			{
+				"c": "fr",
+				"w": 55,
+				"eth": {
+					"eur": 60,
+					"nor": 15,
+					"med": 10,
+					"mix": 10,
+					"afr": 5,
+					"sea": 2,
+					"mel": 0.5
+				}
+			},
+			{
+				"c": "waf_fr",
+				"w": 25,
+				"eth": {
+					"afr": 0.8,
+					"sah": 0.2
+				}
+			},
+			{
+				"c": "maghreb",
+				"w": 12,
+				"eth": {
+					"naf": 0.85,
+					"arb": 0.15
+				}
+			},
+			{
+				"c": "lusoaf",
+				"w": 2,
+				"eth": {
+					"afr": 1
+				}
+			},
+			{
+				"c": "pt",
+				"w": 3,
+				"eth": {
+					"eur": 1
+				}
+			},
+			{
+				"c": "es",
+				"w": 1,
+				"eth": {
+					"eur": 1
+				}
+			},
+			{
+				"c": "it",
+				"w": 1,
+				"eth": {
+					"eur": 1
+				}
+			},
+			{
+				"c": "south_slav",
+				"w": 1,
+				"eth": {
+					"bal": 1
+				}
+			},
+			{
+				"c": "chech",
+				"w": 3.0,
+				"fw": 0.1,
+				"eth": {
+					"cau": 100
+				}
+			}
+		],
+		"BEL": [
+			{
+				"c": "nl",
+				"w": 45,
+				"eth": {
+					"nor": 50,
+					"eur": 35,
+					"afr": 10,
+					"mix": 5
+				}
+			},
+			{
+				"c": "fr",
+				"w": 25,
+				"eth": {
+					"eur": 60,
+					"nor": 20,
+					"afr": 10,
+					"mix": 10
+				}
+			},
+			{
+				"c": "waf_fr",
+				"w": 15,
+				"eth": {
+					"afr": 0.8,
+					"sah": 0.2
+				}
+			},
+			{
+				"c": "maghreb",
+				"w": 10,
+				"eth": {
+					"naf": 0.85,
+					"arb": 0.15
+				}
+			},
+			{
+				"c": "tr",
+				"w": 2,
+				"eth": {
+					"cau": 0.8,
+					"med": 0.2
+				}
+			},
+			{
+				"c": "south_slav",
+				"w": 1,
+				"eth": {
+					"bal": 1
+				}
+			},
+			{
+				"c": "it",
+				"w": 2,
+				"eth": {
+					"eur": 1
+				}
+			},
+			{
+				"c": "chech",
+				"w": 4.0,
+				"fw": 0.1,
+				"eth": {
+					"cau": 100
+				}
+			}
+		],
+		"SWE": [
+			{
+				"c": "se",
+				"w": 80,
+				"eth": {
+					"nor": 95,
+					"eur": 5,
+					"hae": 3
+				}
+			},
+			{
+				"c": "waf_en",
+				"w": 6,
+				"eth": {
+					"afr": 1
+				}
+			},
+			{
+				"c": "arab",
+				"w": 4,
+				"eth": {
+					"arb": 1
+				}
+			},
+			{
+				"c": "south_slav",
+				"w": 4,
+				"eth": {
+					"bal": 1
+				}
+			},
+			{
+				"c": "persian",
+				"w": 2,
+				"eth": {
+					"cau": 0.85,
+					"arb": 0.15
+				}
+			},
+			{
+				"c": "alb",
+				"w": 2,
+				"eth": {
+					"bal": 1
+				}
+			},
+			{
+				"c": "tr",
+				"w": 2,
+				"eth": {
+					"cau": 0.8,
+					"med": 0.2
+				}
+			},
+			{
+				"c": "chech",
+				"w": 4.0,
+				"fw": 0.1,
+				"eth": {
+					"cau": 100
+				}
+			}
+		],
+		"POL": [
+			{
+				"c": "pl",
+				"w": 98,
+				"eth": {
+					"slv": 75,
+					"eur": 15,
+					"nor": 10
+				}
+			},
+			{
+				"c": "waf_en",
+				"w": 2,
+				"eth": {
+					"afr": 1
+				}
+			},
+			{
+				"c": "chech",
+				"w": 3.0,
+				"fw": 0.1,
+				"eth": {
+					"cau": 100
+				}
+			}
+		],
+		"NOR": [
+			{
+				"c": "no",
+				"w": 88,
+				"eth": {
+					"nor": 95,
+					"eur": 5,
+					"hae": 3
+				}
+			},
+			{
+				"c": "waf_en",
+				"w": 5,
+				"eth": {
+					"afr": 1
+				}
+			},
+			{
+				"c": "arab",
+				"w": 2,
+				"eth": {
+					"arb": 1
+				}
+			},
+			{
+				"c": "south_slav",
+				"w": 2,
+				"eth": {
+					"bal": 1
+				}
+			},
+			{
+				"c": "persian",
+				"w": 1,
+				"eth": {
+					"cau": 0.85,
+					"arb": 0.15
+				}
+			},
+			{
+				"c": "alb",
+				"w": 2,
+				"eth": {
+					"bal": 1
+				}
+			},
+			{
+				"c": "chech",
+				"w": 4.0,
+				"fw": 0.1,
+				"eth": {
+					"cau": 100
 				}
 			}
 		]

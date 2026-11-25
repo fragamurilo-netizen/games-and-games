@@ -136,9 +136,9 @@ func _status(w: GameWorld, ev: FightEvent, f: Fighter) -> String:
 
 
 func _last(w: GameWorld, f: Fighter) -> String:
-	if f.history.is_empty():
+	var h := PastFights.last(w, f)
+	if h.is_empty():
 		return "sem luta na liga ainda"
-	var h: Dictionary = f.history.back()
 	return "%s %s" % [{"V": "venceu", "D": "perdeu", "E": "empatou"}.get(String(h.get("res", "")), ""), w.weeks_from_now(int(h.get("week", w.week)))]
 
 

@@ -22,6 +22,43 @@ static func ensure_events(w: GameWorld) -> void:
 	w.calendar_weeks = w.calendar_weeks.filter(func(x: int) -> bool: return x >= w.week - 1)
 
 
+## Numeração dos eventos: o número que cada série tinha na semana 0 da carreira e quanto ela
+## anda por semana. As lutas de antes do jogo (PastFights) contam para trás a partir daqui.
+## Carreiras antigas (sem a marca `_v`) seguem com a numeração curta de antes.
+const NUM_V := 2
+const CONT_START := {"UEFA": 380, "CONMEBOL": 200, "CONCACAF": 200, "AFC": 200, "CAF": 110, "OFC": 110}
+
+
+static func start_num(w: GameWorld, kind: String, key: String = "") -> int:
+	var v2 := int(w.event_counters.get("_v", 1)) >= NUM_V
+	match kind:
+		"lgc":
+			return 300 if v2 else 40
+		"ppv":
+			return 150 if v2 else 40
+		"fn":
+			return 150 if v2 else 10
+		"cont":
+			return int(CONT_START.get(key, 200)) if v2 else 20
+	return (125 + int(abs(hash(key)) % 40)) if v2 else 15
+
+
+static func rate(kind: String, key: String = "") -> float:
+	match kind:
+		"lgc":
+			return 0.5
+		"ppv", "fn":
+			return 0.25
+		"cont":
+			return float(CONT_ORDER.count(key)) / float(CONT_ORDER.size())
+	return 0.125
+
+
+## O número da série numa semana qualquer (0 ou menos: a série ainda não era numerada).
+static func num_at(w: GameWorld, kind: String, key: String, wk: int) -> int:
+	return start_num(w, kind, key) + int(floor(float(wk) * rate(kind, key)))
+
+
 static func _next_num(w: GameWorld, key: String, start: int) -> int:
 	var n := int(w.event_counters.get(key, start)) + 1
 	w.event_counters[key] = n
@@ -49,7 +86,7 @@ static func _lgc(w: GameWorld, wk: int) -> void:
 		var e := _new_event(w, wk, 2, Org.event_name(w, wk), String(c[0]), String(c[1]), 11 if Org.is_ppv_week(wk) else 10)
 		e.ppv = Org.is_ppv_week(wk)
 		return
-	var n := _next_num(w, "LGC", 40)
+	var n := _next_num(w, "LGC", start_num(w, "lgc"))
 	_new_event(w, wk, 2, "LGC %d" % n, String(c[0]), String(c[1]), 11)
 
 
@@ -61,7 +98,7 @@ static func _continental(w: GameWorld, wk: int) -> void:
 		if String(DataDB.nation(code).get("confed", "")) == confed:
 			nations.append(code)
 	var nat: String = nations[w.rng.randi_range(0, nations.size() - 1)] if not nations.is_empty() else "USA"
-	var n := _next_num(w, name, 20)
+	var n := _next_num(w, name, start_num(w, "cont", confed))
 	_new_event(w, wk, 1, "%s %d" % [name, n], _city(w, nat), nat, 8)
 
 
@@ -70,7 +107,7 @@ static func _regional(w: GameWorld, wk: int) -> void:
 	var city := _city(w, nat)
 	var pats: Array = DataDB.mma()["regional_patterns"]
 	var key := String(pats[abs(hash(city)) % pats.size()]).format({"c": city})
-	var n := _next_num(w, key, w.rng.randi_range(0, 30))
+	var n := _next_num(w, key, start_num(w, "reg", key) + w.rng.randi_range(0, 3))
 	_new_event(w, wk, 0, "%s %d" % [key, n], city, nat, 6)
 
 

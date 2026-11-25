@@ -76,7 +76,7 @@ static func trait_info(id: String) -> Dictionary:
 ## O repertório do lutador: base inteira + segunda arte pela metade. Guardado por lutador
 ## (muda só se a base mudar, o que não acontece durante a carreira).
 static func profile(f: Fighter) -> Dictionary:
-	var key := f.base + "|" + f.base2
+	var key := f.base + "|" + f.base2 + "|" + f.gift
 	if _cache.has(key):
 		return _cache[key]
 	var b1 := base(f.base)
@@ -84,6 +84,9 @@ static func profile(f: Fighter) -> Dictionary:
 	_merge(p, b1, 1.0)
 	if f.base2 != "" and f.base2 != f.base:
 		_merge(p, base(f.base2), SECOND_WEIGHT)
+	# O dom raro entra como uma arte a mais, inteira.
+	if f.gift != "":
+		_merge(p, Bio.gift(f), 1.0)
 	if (p["td"] as Dictionary).is_empty():
 		_merge_only(p, base("mma"), "td")
 	if (p["subs"] as Dictionary).is_empty():

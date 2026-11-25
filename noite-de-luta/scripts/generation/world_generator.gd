@@ -22,6 +22,7 @@ static func generate(seed_v: int) -> GameWorld:
 	var w := GameWorld.new()
 	w.seed = seed_v
 	w.rng.seed = seed_v
+	w.event_counters["_v"] = Calendar.NUM_V
 	_make_teams(w)
 	for d: Dictionary in DataDB.divisions():
 		_fill_division(w, d)
