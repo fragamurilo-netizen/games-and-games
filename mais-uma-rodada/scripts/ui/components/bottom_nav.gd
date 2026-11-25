@@ -8,7 +8,7 @@ signal tab_selected(tab: String)
 const TABS := [
 	["hub", "Início", "home"],
 	["squad", "Elenco", "shirt"],
-	["tactics", "Tática", "tactics"],
+	["tactics", "Tática", "pitch"],
 	["market", "Mercado", "swap"],
 	["club", "Clube", "shield"],
 ]
@@ -83,20 +83,31 @@ func set_vertical(on: bool) -> void:
 
 func select(tab: String) -> void:
 	for k in _buttons:
-		_buttons[k].set_pressed_no_signal(k == tab)
+		var b: Button = _buttons[k]
+		b.set_pressed_no_signal(k == tab)
+		# O ícone da aba ativa fica sobre a tarja na cor do clube: usa a cor que lê por cima dela.
+		for nm in [&"icon_pressed_color", &"icon_hover_pressed_color"]:
+			if k == tab:
+				b.add_theme_color_override(nm, UIColors.ON_ACCENT)
+			else:
+				b.remove_theme_color_override(nm)
 	_active = tab
 	queue_redraw()
 
 
-## Aba ativa: filete na cor do clube na borda (em cima da aba na barra de baixo, à esquerda
-## no trilho lateral). Sem cápsula atrás do ícone.
+## Aba ativa: tarja inclinada na cor do clube atrás do ícone, como a tarja de um placar de TV
+## (embaixo no celular e no trilho lateral). O rótulo fica de cal embaixo dela.
 func _draw() -> void:
 	if not _buttons.has(_active):
 		return
 	var b: Button = _buttons[_active]
 	var r := Rect2(b.position + (get_node("Row") as Control).position, b.size)
-	if vertical:
-		draw_rect(Rect2(0, r.position.y + 10.0, 3.0, r.size.y - 20.0), UIColors.ACCENT)
-	else:
-		var w := minf(56.0, r.size.x - 24.0)
-		draw_rect(Rect2(r.get_center().x - w * 0.5, 0, w, 3.0), UIColors.ACCENT)
+	var top := float(b.get_theme_stylebox(&"normal").content_margin_top)
+	var ic := float(b.get_theme_constant(&"icon_max_width"))
+	var c := Vector2(r.get_center().x, r.position.y + top + ic * 0.5)
+	var hw := 34.0
+	var hh := ic * 0.5 + 7.0
+	var sk := 7.0
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(c.x - hw + sk, c.y - hh), Vector2(c.x + hw + sk, c.y - hh),
+		Vector2(c.x + hw - sk, c.y + hh), Vector2(c.x - hw - sk, c.y + hh)]), UIColors.ACCENT)

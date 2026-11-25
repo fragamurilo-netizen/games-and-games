@@ -1,34 +1,34 @@
 ---
 version: alpha
-name: Mais Uma Rodada — Lousa e Giz
+name: Mais Uma Rodada — Dia de jogo
 description: >
-  Sistema visual de um jogo de gestão de futebol. A referência é a sala de futebol de um
-  clube profissional: análise de desempenho, lousa tática do treinador, relatório de scout,
-  central de operações do clube, grafismo da transmissão e a página de esporte. Fundo de
-  ardósia, texto em giz, campo de grama, e a cor do clube só como contexto.
+  Sistema visual de um jogo de gestão de futebol. A referência é o dia de jogo: o gramado à
+  noite sob o refletor, as linhas de cal, as cores do clube na camisa e na arquibancada, o
+  cartão amarelo e o vermelho, e o grafismo da transmissão. Fundo de noite de estádio, texto de
+  cal, grama de verdade na barra superior e no bloco do jogo, e a cor do clube marcando o que é seu.
 colors:
-  canvas: "#15181B"
-  surface: "#1C2024"
-  surface-raised: "#24292E"
-  surface-selected: "#30363C"
-  divider: "#343A40"
-  chalk: "#F1F0EC"
-  text-primary: "#F1F0EC"
-  text-secondary: "#A5ABB2"
-  text-muted: "#747C85"
+  canvas: "#0E1318"
+  surface: "#161D24"
+  surface-raised: "#1F2831"
+  surface-selected: "#2C3744"
+  divider: "#35414E"
+  chalk: "#F4F2EA"
+  text-primary: "#F4F2EA"
+  text-secondary: "#AAB2BC"
+  text-muted: "#8892A0"
   disabled: "#565D65"
-  success: "#57976B"
-  warning: "#D39B45"
-  danger: "#C75B5B"
-  info: "#6F93B8"
-  pitch: "#2F5A42"
-  pitch-stripe: "#2B5440"
-  pitch-line: "#F1F0EC8C"
-  rating-elite: "#7FB28C"
-  rating-good: "#9DB46C"
-  rating-fair: "#C4AE5C"
-  rating-weak: "#C98A4B"
-  rating-poor: "#C75B5B"
+  success: "#3DBE7A"
+  warning: "#F0A33A"
+  danger: "#E5484D"
+  info: "#4EA8DE"
+  pitch: "#2A7A45"
+  pitch-stripe: "#246D3D"
+  pitch-line: "#F4F2EACC"
+  rating-elite: "#3DBE7A"
+  rating-good: "#9BCB4B"
+  rating-fair: "#F2C230"
+  rating-weak: "#F08A3C"
+  rating-poor: "#E5484D"
   club-accent: DYNAMIC
   club-accent-muted: DYNAMIC
 typography:
@@ -128,8 +128,14 @@ components:
   nav-item:
     textColor: "{colors.text-muted}"
     activeTextColor: "{colors.text-primary}"
-    activeIndicator: "{colors.club-accent}"
+    activeIndicator: "tarja inclinada em {colors.club-accent} atrás do ícone"
     height: 88px
+  top-bar:
+    backgroundColor: "{colors.pitch} em faixas com {colors.pitch-stripe}, escurecido 34%"
+    textColor: "{colors.chalk}"
+  control-selected:
+    backgroundColor: "{colors.club-accent}"
+    textColor: "a cor que lê sobre o destaque (quase preto ou branco)"
   toast:
     backgroundColor: "{colors.surface-raised}"
     textColor: "{colors.text-primary}"
@@ -140,7 +146,7 @@ components:
     rounded: "{rounded.lg} {rounded.lg} 0 0"
 ---
 
-# Mais Uma Rodada — Lousa e Giz
+# Mais Uma Rodada — Dia de jogo
 
 > Leia este arquivo inteiro antes de qualquer trabalho visual ou de UI. É contrato, não
 > inspiração. Cor, tamanho, raio ou componente que não esteja aqui não existe até ser
@@ -163,16 +169,27 @@ Depois de mudar tokens, gere o tema de novo:
 
 ## Overview
 
-**Direção: a sala de futebol de um clube.** Paredes de ardósia, giz na lousa tática, grama
-no campo, o papel do relatório de scout e o grafismo da transmissão de domingo. Software de
-quem vive futebol. Não é fintech, SaaS, casa de apostas nem painel administrativo.
+**Direção: dia de jogo.** Noite de estádio, grama cortada em faixas sob o refletor, linha de
+cal, a camisa e a bandeira nas cores do clube, cartão amarelo e vermelho, e o grafismo da
+transmissão. A tela tem de parecer futebol antes de alguém ler uma palavra. Não é fintech,
+SaaS, casa de apostas nem painel administrativo, e não é um painel escuro genérico com um
+destaque colorido.
 
-Palavras: preciso, esportivo, editorial, tátil, denso, maduro, rápido, funcional.
-Densidade 8/10 · variação de composição 6/10 · movimento 3/10 · decoração 3/10.
+Palavras: futebol, vivo, direto, tátil, denso, rápido, do clube.
+Densidade 8/10 · variação de composição 6/10 · movimento 3/10 · decoração 5/10.
 
-**A ousadia fica num lugar só: giz sobre ardósia.** A ação principal é de giz (botão claro,
-texto escuro), não da cor do clube. O campo é o único grande campo de cor do jogo. O resto
-fica quieto.
+**De onde vem a cara de futebol (e só daqui):**
+
+1. **O gramado.** Grama de verdade (faixas de corte e marcações de cal, `Grass`) na barra
+   superior de toda tela, no bloco do próximo jogo e nos campos. O escudo do clube fica no
+   círculo central da barra. Texto sobre a grama é sempre de cal, no escuro e no claro.
+2. **A cor do clube.** Tinge o fundo, veste os ícones dos ladrilhos, o friso de cada título de
+   seção, a tarja da aba ativa e o controle selecionado. Trocar de clube troca a cara do jogo.
+3. **As cores que o futebol já usa para dizer as coisas.** Verde de vitória, amarelo de cartão,
+   vermelho de cartão, vivos como num placar. Nada de tons lavados "de bom gosto".
+4. **O grafismo de TV.** Tarjas inclinadas (aba ativa, friso) e os pacotes de transmissão.
+
+A ação principal continua de cal (botão claro, texto escuro), não da cor do clube.
 
 ### Três modos, um sistema
 
@@ -196,19 +213,25 @@ Os três dividem tokens e tipografia, mas nunca o mesmo molde de tela. Cada tela
 
 ## Colors
 
-Base neutra de ardósia (`canvas`, `surface`, `surface-raised`, `surface-selected`, `divider`)
-e texto de giz (`text-primary`) em três níveis (`text-secondary`, `text-muted`).
+Base de noite de estádio (`canvas`, `surface`, `surface-raised`, `surface-selected`, `divider`),
+tingida com a cor do clube, e texto de cal (`text-primary`) em três níveis (`text-secondary`,
+`text-muted`).
 
-- **A cor do clube é contexto, não a marca do jogo.** `club-accent` (`UIColors.ACCENT`) pode
-  aparecer em: indicador da navegação ativa, sublinhado da aba ativa, bloco de identidade do
-  clube, placar, um estado selecionado e detalhes editoriais. **Nunca** em número, valor
-  positivo, atributo, físico ou no botão principal.
-- **Estados** têm cor própria: `success`, `warning`, `danger`, `info`. Cor nunca sozinha:
+- **A cor do clube marca o que é seu.** `club-accent` (`UIColors.ACCENT`) aparece em: tarja da
+  navegação ativa, sublinhado da aba ativa, controle selecionado (segmento e chip), ícone dos
+  ladrilhos de destino, friso dos títulos de seção, bloco de identidade do clube, placar e
+  detalhes editoriais. **Nunca** em número, valor positivo, atributo, físico ou no botão
+  principal (que é de cal).
+- **Estados** têm as cores do placar e do árbitro: `success` (vitória), `warning` (cartão
+  amarelo), `danger` (cartão vermelho), `info`. Vivas, não lavadas. Cor nunca sozinha:
   sempre com texto ou valor (`100%`, `Lesionado · 3 sem.`, `+4`).
-- **Notas** têm escala própria e moderada, nunca verde néon: `rating-elite` ≥80,
+- **Notas** têm escala própria de placar (verde, limão, amarelo, laranja, vermelho): `rating-elite` ≥80,
   `rating-good` 70–79, `rating-fair` 60–69, `rating-weak` 50–59, `rating-poor` <50
   (`Fmt.rating_color`).
-- **Campo**: grama em duas faixas com linhas de giz. Só existe onde há futebol.
+- **Gramado** (`pitch`, `pitch-stripe`, `pitch-line`): grama em faixas de corte com linhas de
+  cal. Vive nos campos (tática, partida), na barra superior e no bloco do próximo jogo; nesses
+  dois últimos escurece ~35% para o texto de cal ler por cima. Não vira fundo de lista, de
+  tabela nem de cartão comum.
 - Existe o modo claro (`UIColors.LIGHT`) com os mesmos papéis; tela não escreve cor solta.
 
 Todas as 218 seleções usam a arte SVG em `assets/flags/` (flag-icons, licença MIT
@@ -267,6 +290,21 @@ estado alternável.
 
 ## Components
 
+- **Gramado** (`Grass`): desenha as faixas de corte e as marcações de cal para quem está "no
+  campo". Barra superior (`TopBar`): grama de ponta a ponta, subindo por trás do entalhe; o
+  escudo fica dentro do círculo central, com a linha do meio passando por ele; na base, a faixa
+  nas duas cores do clube. Bloco do próximo jogo (`MatchHero` com `pitch`): o campo visto de
+  cima, o "×" na marca do meio-campo, a cor de cada clube nascendo da sua borda como um véu.
+  Sobre a grama todo texto é de cal (`MatchHero.chalk_text`), também no modo claro.
+- **Friso do clube** (`UIKit.trim_mark`, dentro de `UIKit.section_header`): duas barras
+  inclinadas, a cor de destaque e a outra cor do clube, como o friso de uma manga. Abre os
+  títulos de seção das telas (não os títulos dentro de cartões).
+- **Controle selecionado** (`SegmentButton`, `ChipButton`): o escolhido veste a cor do clube,
+  com o texto na cor que lê por cima dela. Os outros ficam apagados.
+- **Ícones** (`assets/icons/`): sólidos, 24 px de desenho. Para coisa de futebol, objeto de
+  futebol: cone (treino), chuteira (base), apito (comissão), trave (estatísticas), bandeira
+  (torcida), estádio (história), pódio (ranking), campo (tática). Ícone genérico só para ação
+  genérica (buscar, salvar, fechar).
 - **Superfície (objeto)**: `surface`, `rounded.sm`, margem 18. Só para entidade ou
   acontecimento real: próximo jogo, proposta recebida, relatório de scout, conversa, notícia
   de destaque, convocação, alerta da diretoria, cabeçalho de jogador/clube. Métrica pequena
@@ -279,7 +317,7 @@ estado alternável.
   o número tem teto (folha contra o limite, vagas, elenco), uma barra fina embaixo do rótulo
   mostra o quanto já foi usado: verde, laranja perto do teto, vermelha estourada
   (`StatStrip.load_color`). No máximo quatro valores. Frase só aparece quando algo estourou.
-- **Ladrilho de destino** (`UIKit.link_tile` em `UIKit.link_grid`): ícone, nome e, embaixo, a
+- **Ladrilho de destino** (`UIKit.link_tile` em `UIKit.link_grid`): ícone na cor do clube, nome e, embaixo, a
   informação viva do lugar ("20 garotos", "2º, 14 pontos"). `surface-raised`, raio `sm`, altura
   de linha (84). Duas colunas no celular, três ou quatro em tela larga. Usado no menu ☰ e nas
   áreas do Clube no lugar das listas de texto com seta.
@@ -288,7 +326,7 @@ estado alternável.
 - **Cabeçalho de identidade** (`IdentityBand` → `ClubGradient`): degradê na cor do clube, funda
   atrás do escudo ou do retrato e sumindo na superfície antes do texto, com uma luz fraca da
   segunda cor no canto oposto e pontilhado fino (sem degraus). Cor clara demais (branco, amarelo)
-  escurece para o giz continuar legível. **Sem faixas diagonais.** No perfil do jogador o
+  escurece para a cal continuar legível. **Sem faixas diagonais.** No perfil do jogador o
   recorte sai do degradê, encostado na base, como no FM.
 - **Retrato** (`UIKit.portrait`, `CoachScreen.portrait`): quadrado do tamanho pedido, que nunca
   estica com a linha. A cabeça fica sempre na mesma altura e escala, com os olhos a 47% do quadro.
@@ -298,9 +336,10 @@ estado alternável.
   reto dos ombros flutuando, não existe. A exceção é o campo da seleção da rodada, onde a faixa do
   nome é o chão. Tamanhos: 56 nas linhas, 72 em diálogo de conversa, 104 no documento de contrato,
   118–132 em cabeçalho e comparação.
-- **Bloco de jogo** (`MatchHero`): faixa da competição nas cores da transmissão; o corpo em
-  degradê duplo (mandante nasce na borda esquerda, visitante na direita, escuro no meio onde fica
-  o texto), escudos, ação principal de giz.
+- **Bloco de jogo** (`MatchHero`): faixa da competição nas cores da transmissão; o corpo é o
+  gramado no bloco do próximo jogo (ver Gramado) e, nos confrontos e comparações, o degradê duplo
+  sobre a superfície (mandante nasce na borda esquerda, visitante na direita, escuro no meio onde
+  fica o texto). Escudos, ação principal de cal.
 - **Grafismo de TV** (`TvPackage` → `TvGraphics`, mostrado pela `TvLayer` na partida): cada
   competição tem o pacote da sua transmissão (Premier, EFL, FA Cup, LaLiga, Serie A, Bundesliga,
   Ligue 1, Liga Portugal, Eredivisie, Süper Lig, Brasileirão, Liga Profesional, MLS, J.League,
@@ -322,16 +361,16 @@ estado alternável.
   desliza da linha antiga até a nova quando a tabela aparece. Animações reduzidas: nada disso.
 - **Campo** (`PitchView`): mini camisas, sobrenome, condição discreta. Toque = painel
   rápido, arrastar = trocar, segurar = perfil.
-- **Botão principal**: giz. **Secundário**: `surface-raised`. **Texto**: sem fundo.
+- **Botão principal**: cal. **Secundário**: `surface-raised`. **Texto**: sem fundo.
   Uma ação principal por tela.
-- **Navegação**: 5 destinos (Início, Elenco, Tática, Mercado, Clube). O ativo tem rótulo e
-  ícone em contraste total e barra na cor do clube; os inativos ficam apagados. Embaixo no
+- **Navegação**: 5 destinos (Início, Elenco, Tática, Mercado, Clube). O ativo tem uma tarja
+  inclinada na cor do clube atrás do ícone e o rótulo de cal; os inativos ficam apagados. Embaixo no
   celular, trilho estreito na lateral em tela larga.
 - **Aviso / conquista**: 108 px (~72 dp), abaixo da barra superior, dentro da área segura,
   3,5 s, toque abre. Nunca cobre título e abas por mais que isso.
 - **Folha**: `surface`, raio 12 em cima, alça. Nunca modal sobre modal: ação dentro de uma
   folha fecha a folha antes de abrir a próxima coisa.
-- **Estados**: padrão, pressionado, selecionado, desativado, foco (contorno de giz de 2 px
+- **Estados**: padrão, pressionado, selecionado, desativado, foco (contorno de cal de 2 px
   no teclado), carregando, vazio, erro (`UIKit.state_block`). Toque não tem hover: nada se
   descobre só passando o mouse.
 
@@ -346,7 +385,9 @@ Fazer:
 Não fazer:
 - Card para métrica pequena, bento, painel de KPIs, sparkline decorativa.
 - Tudo em tabela **ou** tudo em card: o componente segue o objeto.
-- Preto + verde ácido como assinatura global; cor do clube pintando a tela inteira.
+- Preto + verde ácido como assinatura global; cor do clube em botão principal ou em número.
+- Estados e notas em tons lavados (sálvia, ocre, tijolo): placar é cor viva.
+- Grama como fundo de lista, tabela ou cartão comum; texto escuro em cima da grama.
 - Brilho, vidro, desfoque, sombra pesada, raio alto em tudo, pílula como enfeite.
 - 10 colunas no celular; esconder o jogador para mostrar estatística.
 - Gráfico sem decisão associada; métrica inventada.
@@ -364,7 +405,7 @@ existir numa fintech? Se uma das duas últimas for "sim", refazer.
 
 ## Estados de seleção (0.5.3)
 
-Linhas selecionadas usam `surface-selected` em toda a largura, atrás do conteúdo, sem filete lateral. Pressionar uma linha não altera sua escala nem seus recuos. Foco por teclado mantém o contorno de giz. A avaliação de atletas usa estrelas douradas (`UIColors.GOLD`), com a parte incerta em texto secundário; CA/PA só aparecem mediante revelação explícita no editor.
+Linhas selecionadas usam `surface-selected` em toda a largura, atrás do conteúdo, sem filete lateral. Pressionar uma linha não altera sua escala nem seus recuos. Foco por teclado mantém o contorno de cal. A avaliação de atletas usa estrelas douradas (`UIColors.GOLD`), com a parte incerta em texto secundário; CA/PA só aparecem mediante revelação explícita no editor.
 
 ## Tipografia 0.5.3
 

@@ -4,22 +4,23 @@ extends RefCounted
 ## (cinzas quentes, texto quase preto), com o destaque na cor do clube.
 ## Use estas cores em vez de cores soltas; elas mudam quando o modo muda.
 
-## Paleta escura (a gravada no tema do projeto). "Lousa e giz" (ver DESIGN.md): ardósia neutra
-## em degraus de tom, texto de giz, estados em tons sóbrios. A cor do clube entra só como contexto.
-const D_BG := Color("#15181B")
-const D_SURFACE := Color("#1C2024")
-const D_SURFACE_2 := Color("#24292E")
-const D_SURFACE_3 := Color("#30363C")
-const D_LINE := Color("#343A40")
-const D_TEXT := Color("#F1F0EC")
-const D_MUTED := Color("#A5ABB2")
-const D_DIM := Color("#8A9199")
-const D_GOLD := Color("#D3A94A")
-const D_GOLD_DARK := Color("#A8843A")
-const D_GREEN := Color("#57976B")
-const D_RED := Color("#C75B5B")
-const D_BLUE := Color("#6F93B8")
-const D_ORANGE := Color("#D39B45")
+## Paleta escura (a gravada no tema do projeto). "Dia de jogo" (ver DESIGN.md): noite de estádio
+## em degraus de tom, texto de cal, e os estados com as cores que o futebol já usa: verde de
+## vitória, amarelo de cartão, vermelho de cartão. A cor do clube tinge o fundo e marca o que é seu.
+const D_BG := Color("#0E1318")
+const D_SURFACE := Color("#161D24")
+const D_SURFACE_2 := Color("#1F2831")
+const D_SURFACE_3 := Color("#2C3744")
+const D_LINE := Color("#35414E")
+const D_TEXT := Color("#F4F2EA")
+const D_MUTED := Color("#AAB2BC")
+const D_DIM := Color("#8892A0")
+const D_GOLD := Color("#F2C230")
+const D_GOLD_DARK := Color("#C39A1E")
+const D_GREEN := Color("#3DBE7A")
+const D_RED := Color("#E5484D")
+const D_BLUE := Color("#4EA8DE")
+const D_ORANGE := Color("#F0A33A")
 ## Paleta clara: os mesmos papéis, contraste de texto AA sobre o fundo e as superfícies.
 const LIGHT := {
 	"BG": Color("#E4E6E8"), "SURFACE": Color("#F4F5F6"), "SURFACE_2": Color("#EAECEE"),
@@ -45,8 +46,8 @@ const LEGACY := {
 ## Cores do tema escuro que não são da paleta acima e seus pares no modo claro.
 const LIGHT_EXTRA := [
 	[Color("#0E0F11"), Color("#E4E7EB")],
-	[Color("#111417"), Color("#F4F5F6")],
-	[Color("#262B30"), Color("#D3D7DC")],
+	[Color("#0A0F13"), Color("#F4F5F6")],
+	[Color("#232C36"), Color("#D3D7DC")],
 	[Color("#1F2126"), Color("#E9EBEE")],
 	[Color("#20252F"), Color("#E9ECF1")],
 	[Color("#FFB3B5"), Color("#B3261E")],
@@ -89,9 +90,10 @@ const TINT_KEYS := ["BG", "SURFACE", "SURFACE_2", "SURFACE_3", "LINE"]
 const INK_KEYS := ["MUTED", "DIM", "GOLD", "GREEN", "RED", "BLUE", "ORANGE"]
 ## Valor atual (tingido/ajustado) de cada chave da paleta em TINT_KEYS e INK_KEYS.
 static var _cur := {}
-const PITCH_A := Color("#2F5A42")
-const PITCH_B := Color("#2B5440")
-const PITCH_LINE := Color(0.87, 0.95, 0.89, 0.75)
+## Gramado (campo, barra superior, bloco de jogo): grama de jogo à noite, cortada em faixas.
+const PITCH_A := Color("#2A7A45")
+const PITCH_B := Color("#246D3D")
+const PITCH_LINE := Color(0.96, 0.95, 0.92, 0.8)
 
 
 ## Cor de destaque a partir das cores do clube: a mais viva que aparece bem no fundo.

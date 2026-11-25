@@ -25,6 +25,7 @@ uniform vec4 d2 : source_color;
 uniform int mode = 0;
 uniform float reach = 0.75;
 uniform float strength = 0.9;
+uniform bool veil = false;
 uniform vec2 size_px = vec2(600.0, 200.0);
 
 float hash(vec2 p) {
@@ -71,7 +72,17 @@ void fragment() {
 	}
 	// Pontilhado: tira os degraus do degradê
 	col += (hash(floor(UV * size_px)) - 0.5) / 255.0;
-	COLOR = vec4(col, 1.0);
+	float alpha = 1.0;
+	if (veil && mode == 2) {
+		// Véu: só a cor dos clubes nas bordas, transparente no meio (o gramado aparece por baixo)
+		float vl = 1.0 - smoothstep(0.0, reach * 0.62, uv.x);
+		float vr = smoothstep(1.0 - reach * 0.62, 1.0, uv.x);
+		vl = vl * vl * (3.0 - 2.0 * vl);
+		vr = vr * vr * (3.0 - 2.0 * vr);
+		col = (c1.rgb * vl + d1.rgb * vr) / max(vl + vr, 0.001);
+		alpha = clamp((vl + vr) * strength, 0.0, 1.0);
+	}
+	COLOR = vec4(col, alpha);
 }
 """
 
@@ -87,6 +98,9 @@ var away2 := Color.BLACK
 ## Fundo de onde a cor nasce (transparente = a superfície da interface). Os grafismos de TV usam o
 ## fundo do pacote da competição.
 var base_color := Color(0, 0, 0, 0)
+## Véu (só no modo DUAL): em vez de pintar o fundo, deixa passar o que está atrás no meio do
+## bloco (o gramado do MatchHero) e só tinge as bordas com a cor de cada clube.
+var veil := false
 var _rect: ColorRect
 
 
@@ -187,4 +201,5 @@ func _apply() -> void:
 	mat.set_shader_parameter(&"mode", mode)
 	mat.set_shader_parameter(&"reach", reach)
 	mat.set_shader_parameter(&"strength", strength)
+	mat.set_shader_parameter(&"veil", veil)
 	mat.set_shader_parameter(&"size_px", _rect.size)

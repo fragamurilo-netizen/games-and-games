@@ -54,6 +54,6 @@ const H_ROW := 84
 const H_NAV := 96
 
 ## Divisor fino dentro de superfícies (mapeado no modo claro em UIColors.LIGHT_EXTRA).
-const HAIRLINE := Color("#262B30")
+const HAIRLINE := Color("#232C36")
 ## Fundo das barras (superior, navegação, rodapés).
-const BAR := Color("#111417")
+const BAR := Color("#0A0F13")

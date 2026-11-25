@@ -15,10 +15,18 @@ signal bell_pressed
 @onready var menu_btn: Button = $Row/Menu
 
 var _unread := 0
+## Quanto a grama da barra escurece: o título, o saldo e os ícones de cal precisam ler por cima.
+const GRASS_DARK := 0.34
 
 
 func _ready() -> void:
 	back_btn.icon = UIKit.icon("back")
+	# Sobre a grama tudo é de cal, no modo escuro e no claro.
+	title_lbl.add_theme_color_override(&"font_color", Grass.CHALK)
+	subtitle_lbl.add_theme_color_override(&"font_color", Grass.chalk(0.78))
+	for b: Button in [back_btn, bell_btn, menu_btn]:
+		for nm in [&"icon_normal_color", &"icon_hover_color", &"icon_pressed_color", &"icon_hover_pressed_color", &"icon_focus_color"]:
+			b.add_theme_color_override(nm, Grass.CHALK)
 	title_lbl.add_theme_font_override(&"font", get_theme_font(&"font", &"H2"))
 	title_lbl.add_theme_font_size_override(&"font_size", 31)
 	money_lbl.add_theme_font_size_override(&"font_size", 24)
@@ -37,14 +45,24 @@ func _ready() -> void:
 		menu_pressed.emit())
 
 
-## Faixa nas duas cores do clube na base da barra (a identidade do save, sempre à vista).
+## A barra é um pedaço do gramado: faixas de corte, o círculo central em volta do escudo (com a
+## linha do meio passando por ele) e, na base, a faixa nas duas cores do clube. A grama sobe até a
+## borda da tela, por trás do entalhe e da barra de status.
 func _draw() -> void:
+	var safe := Rect2()
+	if is_instance_valid(UIManager.main) and UIManager.main.has_method("safe_margins"):
+		safe = UIManager.main.safe_margins()
+	var r := Rect2(-safe.position.x, -safe.position.y, size.x + safe.position.x + safe.size.x, size.y + safe.position.y)
+	Grass.stripes(self, r, 75.0, GRASS_DARK)
+	if crest.visible:
+		var c := ($Row as Control).position + crest.position + crest.size * 0.5
+		Grass.center_mark(self, c, minf(size.y * 0.5 - 5.0, crest.size.x * 0.5 + 9.0), r, 0.42)
+	var h := 5.0
 	if UIColors.TEAM_1.a > 0.0:
-		var h := 4.0
-		draw_rect(Rect2(0, size.y - h, size.x * 0.72, h), UIColors.TEAM_1)
-		draw_rect(Rect2(size.x * 0.72, size.y - h, size.x * 0.28, h), UIColors.TEAM_2)
+		draw_rect(Rect2(r.position.x, size.y - h, r.size.x * 0.72, h), UIColors.TEAM_1)
+		draw_rect(Rect2(r.position.x + r.size.x * 0.72, size.y - h, r.size.x * 0.28, h), UIColors.TEAM_2)
 	else:
-		draw_rect(Rect2(0, size.y - 1.0, size.x, 1.0), UITokens.HAIRLINE if not UIColors.light else UIColors.LINE)
+		draw_rect(Rect2(r.position.x, size.y - 3.0, r.size.x, 3.0), Grass.chalk(0.85))
 
 
 ## Contador de não lidos: número pequeno no canto do sino, sem cápsula.
@@ -76,7 +94,7 @@ func set_state(title: String, subtitle: String, show_back: bool, club: Club, sho
 	if club != null:
 		crest.set_club(club)
 		money_lbl.text = Fmt.money(club.balance)
-		money_lbl.add_theme_color_override(&"font_color", UIColors.TEXT if club.balance >= 0 else UIColors.RED)
+		money_lbl.add_theme_color_override(&"font_color", Grass.CHALK if club.balance >= 0 else Color("#FFB3B5"))
 
 
 const TITLE_MAX := 31

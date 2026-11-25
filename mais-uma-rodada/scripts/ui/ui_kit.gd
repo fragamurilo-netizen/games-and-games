@@ -612,11 +612,38 @@ static func eyebrow(text: String, color: Color = Color(0, 0, 0, 0)) -> Label:
 	return l
 
 
-## Cabeçalho de seção: filete na cor do clube, título em caixa alta e, opcional, um link à
-## direita ("VER TUDO").
+## Friso do uniforme: duas barras inclinadas nas cores do clube (a de destaque e a outra), como
+## o friso de uma manga. Abre cada título de seção: é a assinatura do clube na tela.
+static func trim_mark(h: float = 24.0) -> Control:
+	var c := Control.new()
+	c.custom_minimum_size = Vector2(h * 0.95, h)
+	c.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	c.draw.connect(func() -> void:
+		var a := UIColors.ACCENT
+		var b := UIColors.TEXT
+		for t: Color in [UIColors.TEAM_2, UIColors.TEAM_1]:
+			# A segunda cor do clube, se ela aparece no fundo e não é a mesma do destaque.
+			var same := (t.s > 0.2 and a.s > 0.2 and minf(absf(t.h - a.h), 1.0 - absf(t.h - a.h)) < 0.08) or (t.s <= 0.2 and a.s <= 0.2)
+			if t.a > 0.0 and not same and UIColors.contrast(t, UIColors.BG) >= 2.2:
+				b = t
+				break
+		var sk := c.size.y * 0.32
+		var bw := c.size.x * 0.34
+		var x := 0.0
+		for col: Color in [a, b]:
+			c.draw_colored_polygon(PackedVector2Array([
+				Vector2(x + sk, 0), Vector2(x + sk + bw, 0), Vector2(x + bw, c.size.y), Vector2(x, c.size.y)]), col)
+			x += bw + c.size.x * 0.12)
+	return c
+
+
+## Cabeçalho de seção: friso nas cores do clube, título e, opcional, um link à direita
+## ("Ver tudo").
 static func section_header(text: String, action: String = "", cb: Callable = Callable()) -> HBoxContainer:
 	var h := hbox(10)
 	h.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	h.add_child(trim_mark())
 	var l := label(text, "Eyebrow")
 	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -724,8 +751,9 @@ static func menu_row(icon_name: String, title: String, subtitle: String, cb: Cal
 ## (surface-raised) do tamanho de uma linha de lista; o lugar atual fica marcado.
 static func link_tile(icon_name: String, title: String, info: String, cb: Callable, here: bool = false, badge: int = 0) -> PanelContainer:
 	var h := hbox(UITokens.S2)
-	var tint := UIColors.ink(UIColors.ACCENT) if here else UIColors.TEXT
-	var ic := icon_rect(icon_name, 28, tint)
+	# O ícone veste a cor do clube: é ele que dá cor à grade de destinos.
+	var tint := UIColors.ink(UIColors.ACCENT)
+	var ic := icon_rect(icon_name, 32, tint)
 	ic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	h.add_child(ic)
 	var col := vbox(-2)

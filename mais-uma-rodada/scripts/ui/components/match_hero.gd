@@ -1,8 +1,9 @@
 class_name MatchHero
 extends Control
 ## Fundo do cartão de dia de jogo (hub, pré-jogo): faixa superior na identidade da competição
-## (cores da transmissão da liga ou copa, ScoreboardTheme) e o campo dividido nas cores dos
-## dois clubes, que se dissolvem no centro. Vai como primeiro filho de um PanelContainer sem
+## (cores da transmissão da liga ou copa, ScoreboardTheme) e, embaixo, o gramado visto de cima:
+## faixas de corte, linha do meio e círculo central de cal, com a cor de cada clube nascendo da
+## sua borda (mandante à esquerda) e sumindo antes do meio-campo. Vai como primeiro filho de um PanelContainer sem
 ## margens internas (ver `wrap`).
 
 var band_h := 58.0
@@ -16,10 +17,19 @@ var right_color2 := Color(0, 0, 0, 0)
 var radius := float(UITokens.R_SM)
 ## Degradê dos clubes no corpo do cartão (abaixo da faixa da competição).
 var body_bg: ClubGradient = null
+## Onde fica o centro do círculo central, medido do alto do gramado (a altura do "×" entre os
+## escudos); 0 = meio do gramado.
+var center_y := 0.0
+## Corpo no gramado (ver `wrap`).
+var pitch := false
+## Quanto a grama escurece para o texto de cal ler por cima.
+const GRASS_DARK := 0.36
 
 
 ## Monta o painel: devolve [painel, caixa da faixa, caixa do corpo]. Os filhos vão nas caixas.
-static func wrap(w: GameWorld, comp: String, home: Club, away: Club) -> Array:
+## Com `pitch`, o corpo é o gramado (bloco do próximo jogo); sem ele, a superfície da interface
+## (confrontos e comparações, que têm muita leitura por cima).
+static func wrap(w: GameWorld, comp: String, home: Club, away: Club, pitch: bool = false) -> Array:
 	var p := PanelContainer.new()
 	var box := StyleBoxFlat.new()
 	box.bg_color = UIColors.SURFACE
@@ -27,7 +37,9 @@ static func wrap(w: GameWorld, comp: String, home: Club, away: Club) -> Array:
 	box.anti_aliasing = true
 	box.corner_detail = 8
 	p.add_theme_stylebox_override(&"panel", box)
+	p.clip_children = CanvasItem.CLIP_CHILDREN_AND_DRAW # a grama respeita os cantos do cartão
 	var bg := MatchHero.new()
+	bg.pitch = pitch
 	var st := ScoreboardTheme.for_competition(w, comp)
 	bg.band_bg = st["bg"]
 	bg.band_bg2 = st["bg2"]
@@ -42,8 +54,9 @@ static func wrap(w: GameWorld, comp: String, home: Club, away: Club) -> Array:
 	# Corpo: mandante nasce na borda esquerda, visitante na direita, escuro no meio (sem faixas)
 	var g := ClubGradient.new()
 	g.mode = ClubGradient.DUAL
-	g.reach = 0.9
-	g.strength = 0.85
+	g.reach = 0.82 if pitch else 0.9
+	g.strength = 0.92 if pitch else 0.85
+	g.veil = pitch
 	var ch := ClubGradient.club_colors(home)
 	var ca := ClubGradient.club_colors(away)
 	g.color1 = ch[0]
@@ -62,6 +75,34 @@ static func wrap(w: GameWorld, comp: String, home: Club, away: Club) -> Array:
 	var body := UIKit.vbox(14)
 	v.add_child(UIKit.margin(body, 22, 18, 22, 20))
 	return [p, band, body]
+
+
+## Prende o círculo central à altura de um controle do corpo (o "×" ou o placar entre os escudos).
+static func pin_center(panel: PanelContainer, at: Control) -> void:
+	var bg := panel.get_child(0) as MatchHero
+	if bg == null or at == null:
+		return
+	var upd := func() -> void:
+		if not is_instance_valid(bg) or not is_instance_valid(at) or not at.is_inside_tree() or not bg.is_inside_tree():
+			return
+		var y := at.global_position.y + at.size.y * 0.5 - bg.global_position.y - (bg.band_h + 12.0)
+		if absf(y - bg.center_y) > 0.5:
+			bg.center_y = y
+			bg.queue_redraw()
+	at.item_rect_changed.connect(upd)
+	bg.resized.connect(upd)
+	upd.call_deferred()
+
+
+## Texto de cal em tudo o que está sobre o gramado, no modo escuro e no claro (o que já tem cor
+## própria, como um aviso em vermelho, fica como está). Chamar depois de montar o corpo.
+static func chalk_text(root: Node) -> void:
+	for n in root.get_children():
+		if n is Label and not (n as Label).has_theme_color_override(&"font_color"):
+			var soft := String((n as Label).theme_type_variation) in ["Small", "Muted", "Meta", "Caps"]
+			(n as Label).add_theme_color_override(&"font_color", Grass.chalk(0.8) if soft else Grass.CHALK)
+		if not n is BaseButton:
+			chalk_text(n)
 
 
 func _ready() -> void:
@@ -88,6 +129,12 @@ func _draw() -> void:
 	draw_rect(Rect2(inset, inset + band_h + 9.0, w, 3.0), band_accent)
 	# Lados nas cores dos clubes (mandante à esquerda): faixas chapadas com corte diagonal,
 	# como no grafismo de uma transmissão. Cor cheia, sem degradê nem brilho.
+	# Gramado: faixas de corte, linha do meio e círculo central.
+	if pitch:
+		var field := Rect2(0, top, size.x, maxf(0.0, bottom - top))
+		Grass.stripes(self, field, size.x / 8.0, GRASS_DARK)
+		var cy := top + (center_y if center_y > 0.0 else field.size.y * 0.5)
+		Grass.center_mark(self, Vector2(size.x * 0.5, cy), minf(size.x * 0.13, 78.0), field, 0.32)
 	if body_bg != null:
 		body_bg.position = Vector2(0, top)
 		body_bg.size = Vector2(size.x, maxf(0.0, bottom - top))

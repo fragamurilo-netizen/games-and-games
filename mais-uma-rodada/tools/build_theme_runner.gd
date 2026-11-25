@@ -147,7 +147,7 @@ func _buttons(th: Theme) -> void:
 	th.set_font_size(&"font_size", "Button", UITokens.F_BODY)
 	th.set_constant(&"h_separation", "Button", 12)
 	th.set_constant(&"icon_max_width", "Button", 34)
-	# Primário: giz sobre a ardósia (DESIGN.md). Uma ação principal por tela, nunca na cor do clube.
+	# Primário: cal sobre a noite (DESIGN.md). Uma ação principal por tela, nunca na cor do clube.
 	th.add_type("PrimaryButton")
 	th.set_type_variation("PrimaryButton", "Button")
 	var pn := sb(UIColors.TEXT, r, clear, 0, 24, 14)
@@ -193,11 +193,11 @@ func _buttons(th: Theme) -> void:
 	th.add_type("ChipButton")
 	th.set_type_variation("ChipButton", "Button")
 	_button_states(th, "ChipButton",
-		sb(UIColors.SURFACE, UITokens.R_SM, clear, 0, 14, 6),
+		sb(UIColors.SURFACE_2, UITokens.R_SM, clear, 0, 14, 6),
 		sb(UIColors.SURFACE_3, UITokens.R_SM, clear, 0, 14, 6),
-		sb(UIColors.SURFACE_3, UITokens.R_SM, UIColors.LINE, 1, 14, 6),
+		sb(UIColors.ACCENT, UITokens.R_SM, clear, 0, 14, 6),
 		sb(UIColors.SURFACE, UITokens.R_SM, UITokens.HAIRLINE, 1, 14, 6))
-	_button_colors(th, "ChipButton", UIColors.MUTED, UIColors.TEXT)
+	_button_colors(th, "ChipButton", UIColors.MUTED, UIColors.ON_ACCENT)
 	th.set_font(&"font", "ChipButton", f_semi)
 	th.set_font_size(&"font_size", "ChipButton", UITokens.F_BODY_SMALL)
 	# Abas (seções de uma tela): texto em caixa alta com sublinhado na cor do clube.
@@ -219,10 +219,11 @@ func _buttons(th: Theme) -> void:
 	# Segmento (seletor compacto dentro de uma cápsula "Segment")
 	th.add_type("SegmentButton")
 	th.set_type_variation("SegmentButton", "Button")
-	# Selecionado: um tom acima, texto cheio. A cor do clube fica para o que é ação.
+	# Selecionado: a cor do clube, como a braçadeira (o estado escolhido é o único lugar em que
+	# um controle veste a cor do clube; a ação principal continua de cal).
 	_button_states(th, "SegmentButton", sb(clear, UITokens.R_XS, clear, 0, 10, 6), sb(Color(1, 1, 1, 0.04), UITokens.R_XS, clear, 0, 10, 6),
-		sb(UIColors.SURFACE_3, UITokens.R_XS, clear, 0, 10, 6), sb(clear, UITokens.R_XS, clear, 0, 10, 6))
-	_button_colors(th, "SegmentButton", UIColors.DIM, UIColors.TEXT)
+		sb(UIColors.ACCENT, UITokens.R_XS, clear, 0, 10, 6), sb(clear, UITokens.R_XS, clear, 0, 10, 6))
+	_button_colors(th, "SegmentButton", UIColors.MUTED, UIColors.ON_ACCENT)
 	th.set_font(&"font", "SegmentButton", f_semi)
 	th.set_font_size(&"font_size", "SegmentButton", UITokens.F_BODY_SMALL)
 	# Navegação inferior (o indicador da aba ativa é desenhado pela BottomNav)

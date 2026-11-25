@@ -25,14 +25,14 @@ const RECENT_MAX := 4
 ## entram em _params(). As cinco áreas já estão na barra de navegação.
 const GROUPS := [
 	["Caixa de entrada", [["Mensagens", "inbox", "mail"], ["Notícias", "news", "news"], ["Redes", "social", "chat"]]],
-	["Elenco", [["Treino", "training", "whistle"], ["Base", "academy", "ball"], ["Contratos", "contracts", "card"],
+	["Elenco", [["Treino", "training", "cone"], ["Base", "academy", "boot"], ["Contratos", "contracts", "card"],
 		["Numeração", "numbers", "hash"], ["Vestiário", "dressing_room", "heart"], ["Relações", "relations", "users"],
-		["Raio-X tático", "xray", "tactics"], ["Revelados pela base", "graduates", "medal"]]],
-	["Clube", [["Competições", "table", "table"], ["Estatísticas", "team_stats", "bolt"], ["Estatísticas da liga", "league_stats", "chart"],
+		["Raio-X tático", "xray", "pitch"], ["Revelados pela base", "graduates", "medal"]]],
+	["Clube", [["Competições", "table", "table"], ["Estatísticas", "team_stats", "goal"], ["Estatísticas da liga", "league_stats", "podium"],
 		["Confrontos", "rivalry", "swap"], ["Uniformes", "kit", "shirt"], ["Camisas antigas", "kit_history", "palette"],
 		["Elencos antigos", "past_squads", "list"]]],
 	["Carreira e mundo", [["Treinador", "manager", "user"], ["Reputação", "reputation", "star"], ["Conquistas", "achievements", "trophy"],
-		["Seleções", "national", "globe"], ["Mercado de técnicos", "jobs", "search"], ["Dança das cadeiras", "coach_moves", "fast"],
+		["Seleções", "national", "globe"], ["Mercado de técnicos", "jobs", "whistle"], ["Dança das cadeiras", "coach_moves", "fast"],
 		["Escolas de técnicos", "coach_schools", "info"], ["História", "history", "book"], ["Joias", "nextgen", "gem"],
 		["Gerações", "generations", "up"]]],
 ]

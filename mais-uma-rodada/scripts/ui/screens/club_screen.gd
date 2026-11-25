@@ -232,11 +232,11 @@ func _kits_row(club: Club) -> Control:
 
 ## Ícone de cada área do clube (os mesmos do menu ☰).
 const AREA_ICONS := {
-	"Elenco": "shirt", "Base": "ball", "Treino": "whistle", "Comissão técnica": "users",
-	"Confrontos": "swap", "Calendário": "clock", "Classificação": "table", "Seleções": "globe",
-	"Ranking de clubes": "medal", "Finanças": "money", "Diretoria e torcida": "heart",
-	"Estatísticas": "bolt", "Uniformes e patrocínio": "palette", "História do clube": "book",
-	"Elencos anteriores": "list", "Revelados pela base": "up", "Sua carreira": "user",
+	"Elenco": "shirt", "Base": "boot", "Treino": "cone", "Comissão técnica": "whistle",
+	"Confrontos": "swap", "Calendário": "calendar", "Classificação": "table", "Seleções": "globe",
+	"Ranking de clubes": "podium", "Finanças": "money", "Diretoria e torcida": "flag",
+	"Estatísticas": "chart", "Uniformes e patrocínio": "palette", "História do clube": "stadium",
+	"Elencos anteriores": "list", "Revelados pela base": "medal", "Sua carreira": "user",
 	"História do futebol": "trophy",
 }
 
@@ -244,7 +244,7 @@ const AREA_ICONS := {
 ## Grupo de áreas do clube: título de seção e os ladrilhos (ícone, nome, informação viva).
 func _group(parent: VBoxContainer, title: String, rows: Array) -> void:
 	var v := UIKit.vbox(UITokens.S1)
-	v.add_child(UIKit.label(title, "Section"))
+	v.add_child(UIKit.section_header(title))
 	var tiles: Array = []
 	for r in rows:
 		tiles.append(UIKit.link_tile(String(AREA_ICONS.get(String(r[0]), "forward")), String(r[0]), String(r[1]), r[2]))

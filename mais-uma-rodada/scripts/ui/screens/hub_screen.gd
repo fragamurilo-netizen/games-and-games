@@ -214,7 +214,7 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 	var derby := MatchEngine.is_derby(w, f.home, f.away)
 	# Dia de jogo como objeto do jogo: faixa da competição (cores da transmissão), os dois
 	# clubes com escudo grande sobre as cores deles, e a ação de jogar.
-	var hero := MatchHero.wrap(w, f.comp, w.club(f.home), w.club(f.away))
+	var hero := MatchHero.wrap(w, f.comp, w.club(f.home), w.club(f.away), true)
 	var band: HBoxContainer = hero[1]
 	var st := ScoreboardTheme.for_competition(w, f.comp)
 	band.add_child(UIKit.comp_logo(f.comp, 36))
@@ -239,12 +239,14 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 	row.add_child(_club_tap(w, _team_block(w, w.club(f.home), f), f.home))
 	var vs := UIKit.label("×", "Title")
 	vs.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	vs.add_theme_color_override(&"font_color", UIColors.DIM)
+	vs.add_theme_color_override(&"font_color", Grass.chalk(0.9))
 	row.add_child(vs)
 	row.add_child(_club_tap(w, _team_block(w, w.club(f.away), f), f.away))
 	body.add_child(row)
+	MatchHero.pin_center(hero[0], vs) # o "×" fica na marca do meio-campo
 	var venue := UIKit.label("Campo neutro" if f.neutral else "%s · %s" % [w.club(f.home).stadium, w.club(f.home).city], "Muted")
 	venue.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	venue.add_theme_color_override(&"font_color", Grass.chalk(0.82))
 	body.add_child(venue)
 	if derby:
 		var d := UIKit.label("Clássico", "H2")
@@ -272,6 +274,7 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 	quick.custom_minimum_size.y = 92
 	act.add_child(quick)
 	body.add_child(act)
+	MatchHero.chalk_text(body)
 	return hero[0]
 
 
