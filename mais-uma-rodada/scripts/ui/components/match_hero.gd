@@ -23,7 +23,7 @@ var center_y := 0.0
 ## Corpo no gramado (ver `wrap`).
 var pitch := false
 ## Quanto a grama escurece para o texto de cal ler por cima.
-const GRASS_DARK := 0.36
+const GRASS_DARK := 0.16
 
 
 ## Monta o painel: devolve [painel, caixa da faixa, caixa do corpo]. Os filhos vão nas caixas.

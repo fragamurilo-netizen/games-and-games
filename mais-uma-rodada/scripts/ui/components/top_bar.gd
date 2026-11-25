@@ -16,7 +16,7 @@ signal bell_pressed
 
 var _unread := 0
 ## Quanto a grama da barra escurece: o título, o saldo e os ícones de cal precisam ler por cima.
-const GRASS_DARK := 0.34
+const GRASS_DARK := 0.2
 
 
 func _ready() -> void:
