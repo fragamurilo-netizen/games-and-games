@@ -1,5 +1,19 @@
 # Noite de Luta — nota de passagem (24/11/2026)
 
+## Rodada 20 de 25/11/2026: retoque na luta, nos bonecos e atalhos (APK 1.4.1)
+
+O dono: "Acho que podemos dar mais um retoque em todo o jogo e nas animações e lutas" e depois "Caprichar bastante nos bonecos 2d e em mecanicas de qualidade de vida".
+
+- **Chão** (`FightStage2D._ground_base`): guarda fechada com quem está por cima ajoelhado colado no quadril e a perna de baixo passando por cima da cintura (desenho em camadas: `layered` vale também para a guarda, não só para as costas); meia e lateral peito no peito com os braços dobrados; montada com a guarda alta; nas costas os braços fecham no pescoço. No chão o `plant` (pé plantado) desliga. O `y` negativo da pose é zerado em `_spring`: não serve para afundar ninguém.
+- **Juiz** (`_animate_ref`): no chão fica do lado das pernas de quem está embaixo, a 4 U; colado na grade dá a volta pela cabeça.
+- **Impacto**: `_kick` é um tranco de câmera na direção do golpe (mola), além do tremor. No knockdown as pernas cedem logo (`kd` entrou na lista `fast` e a câmera lenta dura 0,9 s), então a queda é o que passa devagar.
+- **Bonecos** (`Rig2D`): luva com almofada, costuras, pontas dos dedos, polegar e tira do punho; pé com dedos, peito do pé e tornozelo; olho com íris na cor do rosto gerado (`eye_col`), pupila, brilho e pálpebra; narina e maçã do rosto; `sheen` (suor) só aumenta com o cansaço e acende ombro, antebraço e testa.
+- **Atalhos** (`inbox_screen._bulk`): presidente com duas ou mais pendências de card ou cinturão vago ganha "Deixar N com o matchmaker" (`Org.matchmaker_now`: fecha as disputas vagas sem esperar as 10 semanas e completa os cards das próximas 6); manager com dois ou mais camps ganha "Deixar N camps com o técnico".
+- **Texto**: frases de apoio de temporada, sócios, metas e eventos do presidente encurtadas. Essas chaves mudaram no português: os catálogos de idioma precisam das novas.
+- `tools/fight_strip.gd` ganhou o caso `pos` (as cinco posições de chão em sequência). Para ver o chão use `--sw=780 --sh=790`.
+
+**Não feito**: raspagem, levantar e finalizações continuam com a animação antiga; o interino e a unificação não entram no atalho do matchmaker; nada testado em celular de verdade.
+
 ## Rodada 19 de 25/11/2026: seis idiomas (APK 1.4.0)
 
 O dono: "Acho que já vale fazer a tradução pro Ingles, Espanhol, Alemão, Frances, Russo e Chines". O português continua sendo o texto-fonte escrito no código e nos JSON; os outros idiomas são catálogos.

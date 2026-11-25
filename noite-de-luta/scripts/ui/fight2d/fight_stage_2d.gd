@@ -729,6 +729,8 @@ func _spring(i: int, target: Dictionary, dt: float, fast: bool) -> void:
 	var v: Dictionary = _pv[i]
 	var tired := clampf(1.0 - float(stamina[i]), 0.0, 1.0)
 	var n := clampi(int(ceil(dt * 150.0)), 1, 6)
+	# O suor só aumenta: quem cansou continua brilhando até o fim da luta.
+	r.sheen = maxf(r.sheen, clampf(0.15 + tired * 1.3, 0.0, 1.0))
 	var h := dt / float(n)
 	var soft := 1.0 - 0.25 * tired
 	var a := 1.0 - exp(-(34.0 if fast else 9.0) * dt)

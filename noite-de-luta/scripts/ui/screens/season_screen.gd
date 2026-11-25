@@ -109,10 +109,10 @@ func _support(w: GameWorld, c: VBoxContainer) -> void:
 	var rows: Array = []
 	if pres:
 		rows = [
-			["75 ou mais", "Verba de marketing: +3 de hype em toda noite. Na virada do ano, bônus dos sócios.", UIColors.GREEN],
-			["40 a 74", "Os sócios acompanham sem interferir.", UIColors.BLUE],
+			["75 ou mais", "Mais hype em toda noite e bônus na virada do ano.", UIColors.GREEN],
+			["40 a 74", "Ninguém interfere.", UIColors.BLUE],
 			["20 a 39", "Os sócios avisam que estão inquietos.", UIColors.ORANGE],
-			["Abaixo de 20", "Verba de marketing segurada: −2 de hype. Três semanas seguidas aqui e vem o ultimato de %d semanas." % Season.ULT_WEEKS, UIColors.RED],
+			["Abaixo de 20", "Menos hype. Três semanas aqui e vem o ultimato de %d semanas." % Season.ULT_WEEKS, UIColors.RED],
 		]
 	else:
 		rows = [
@@ -130,7 +130,7 @@ func _support(w: GameWorld, c: VBoxContainer) -> void:
 		bands.add_child(h)
 	if pres:
 		var st := int(w.support.get("strikes", 0))
-		bands.add_child(UIKit.label("Mandato %d. Ultimatos perdidos neste mandato: %d de 2 (no segundo, o mandato acaba)." % [int(w.support.get("terms", 1)), st], "Caps", true))
+		bands.add_child(UIKit.label("Mandato %d. Ultimatos perdidos: %d de 2." % [int(w.support.get("terms", 1)), st], "Caps", true))
 	c.add_child(UIKit.card_panel(bands))
 	# Por que subiu e por que caiu.
 	var why := UIKit.card("Card", UITokens.S1)

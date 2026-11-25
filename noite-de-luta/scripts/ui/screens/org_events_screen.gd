@@ -29,7 +29,7 @@ func refresh() -> void:
 			w.delegate_cards = on
 			GameManager.save_now())
 		c.add_child(del)
-		c.add_child(UIKit.label("Ligado, o matchmaker da organização fecha as lutas que faltarem %d semanas antes de cada noite. As disputas de cinturão e as lutas principais são sempre suas." % Org.DELEGATE_WEEKS, "Small", true))
+		c.add_child(UIKit.label("O matchmaker fecha o que faltar %d semanas antes da noite. Cinturão e luta principal são seus." % Org.DELEGATE_WEEKS, "Small", true))
 		var ups := Org.upcoming_events(w)
 		if ups.is_empty():
 			c.add_child(UIKit.state_block("empty", "Nenhuma noite marcada", "O calendário marca uma noite da liga a cada duas semanas."))

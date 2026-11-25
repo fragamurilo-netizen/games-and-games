@@ -820,7 +820,7 @@ static func _pick_president(w: GameWorld, r: RandomNumberGenerator, frac: float,
 	var belts := _count(_grow(_base(w, "title_bouts"), float(FIRST["title_bouts"]), divs * 1.5, k), frac, 2.0)
 	var hot := _count(_grow(_base(w, "hot"), float(FIRST["hot"]), 20.0, k), frac, 2.0)
 	out.append(_choose(r, [
-		_g("title_bouts", "Promover %d disputas de cinturão" % int(belts), "Cinturão em jogo vende a noite e mantém as categorias andando. O matchmaker não marca disputa sozinho.", belts, "c", prize, 1.0),
+		_g("title_bouts", "Promover %d disputas de cinturão" % int(belts), "Cinturão em jogo vende a noite.", belts, "c", prize, 1.0),
 		_g("hot", "Fazer %d noites quentes" % int(hot), "Noites com hype de 70 para cima: luta principal de nome, rivalidade, cinturão.", hot, "c", prize * 1.2, 2.0),
 	], avoid))
 	# 2. O público: arenas, cards completos, pay-per-view.
@@ -836,10 +836,10 @@ static func _pick_president(w: GameWorld, r: RandomNumberGenerator, frac: float,
 	var house: Array = []
 	var profit_last := _base(w, "profit")
 	var profit_goal := snappedf((maxf(profit_last * k, float(FIRST["profit"]) * 0.9) if profit_last > 0.0 else float(FIRST["profit"])) * frac, 500000.0)
-	house.append(_g("profit", "Lucrar %s com as noites" % Fmt.money(profit_goal), "A soma do resultado de todas as noites da liga. Vale como o ano terminar.", profit_goal, "h", prize, 1.0))
+	house.append(_g("profit", "Lucrar %s com as noites" % Fmt.money(profit_goal), "A soma do resultado de todas as noites.", profit_goal, "h", prize, 1.0))
 	if rep < 93.0:
 		var rep_goal := floorf(rep + clampf(6.0 - rep / 20.0, 2.0, 5.0) * maxf(0.5, frac))
-		house.append(_g("rep", "Chegar a %d de prestígio" % int(rep_goal), "O prestígio cresce com noites cheias de estrelas e de finalizações, e cai com cards vazios.", rep_goal, "r", prize, 0.0))
+		house.append(_g("rep", "Chegar a %d de prestígio" % int(rep_goal), "Sobe com estrelas e finalizações, cai com card vazio.", rep_goal, "r", prize, 0.0))
 	out.append(_choose(r, house, avoid))
 	return out
 

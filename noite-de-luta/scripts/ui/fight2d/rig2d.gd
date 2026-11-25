@@ -71,6 +71,9 @@ var cut := 0.0
 var bruise := 0.0
 ## Apagado (olhos fechados) e sangue do outro nas luvas.
 var ko := false
+## Suor na pele (0 seco, 1 encharcado): brilho na testa, no ombro e no peito.
+var sheen := 0.0
+var eye_col := Color(0.25, 0.15, 0.08)
 var glove_blood := 0.0
 ## Castigo acumulado na luta (0 a 1): coxa da frente (chutes baixos) e costela.
 var leg_dmg := 0.0
@@ -220,6 +223,9 @@ func _read_face() -> void:
 	neck_k = clampf(float(face.get("neck_w", 0.7)) / 0.7, 0.88, 1.25)
 	if bool(face.get("fem", false)):
 		neck_k = clampf(neck_k * 0.92, 0.8, 1.0)
+	var ec: Variant = face.get("eye")
+	if ec is Color:
+		eye_col = (ec as Color).darkened(0.15)
 
 
 ## Árbitro: camisa escura, calça cinza, sem luvas; cabeça de alguém comum.
@@ -997,6 +1003,10 @@ func _arm(j: Dictionary, side: String, off: Vector2, sk: Color, dim: float, Uh: 
 		_pl(PackedVector2Array([_at(0.34, 0.82), _at(0.5, 0.2), _at(0.44, -0.55)]), mc, lw)
 		_pl(PackedVector2Array([_at(0.56, -0.12), _at(0.9, -0.2), _at(1.2, -0.1)]), mc, lw)
 		_pl(PackedVector2Array([_at(1.5, 0.25), _at(1.85, 0.05), _at(2.3, 0.0)]), Color(mc, mc.a * 0.7), lw)
+		# Luz no alto do ombro e no antebraço: mais forte com a pele suada.
+		var hl := Color(_tone(sk, 1.35), 0.22 + 0.3 * sheen)
+		_pl(PackedVector2Array([_at(0.08, 0.55), _at(0.2, 0.72), _at(0.36, 0.6)]), hl, lw * 1.5)
+		_ln(_at(1.45, 0.6), _at(1.8, 0.55), Color(hl, hl.a * 0.7), lw)
 	if is_ref:
 		# Mão do árbitro com luva de látex azul.
 		_cov(wr + fd * Uh * 0.17, fd * Uh * 0.22, fn * Uh * 0.13, 10, _tone(hand, dim))
@@ -1009,8 +1019,22 @@ func _arm(j: Dictionary, side: String, off: Vector2, sk: Color, dim: float, Uh: 
 	_cov(wr + fd * Uh * 0.3 - fn * Uh * 0.15, fd * Uh * 0.17, fn * Uh * 0.11, 8, _tone(sk, dim * 0.78))
 	_cov(wr + fd * Uh * 0.26 + fn * Uh * 0.02, fd * Uh * 0.28, fn * Uh * 0.24, 12, gc)
 	if _ol <= 0.0:
-		_ov(wr + fd * Uh * 0.34 + fn * Uh * 0.08, fd * Uh * 0.14, fn * Uh * 0.12, 10, gc.lightened(0.16))
+		# Almofada dos nós com as costuras entre os dedos, pontas dos dedos de fora, polegar e a tira do punho.
+		_ov(wr + fd * Uh * 0.35 + fn * Uh * 0.07, fd * Uh * 0.15, fn * Uh * 0.17, 10, gc.lightened(0.13))
+		_ov(wr + fd * Uh * 0.4 + fn * Uh * 0.12, fd * Uh * 0.05, fn * Uh * 0.08, 8, Color(gc.lightened(0.42), 0.55))
+		var seam := Color(gc.darkened(0.55), 0.8)
+		var sw := maxf(1.0, Uh * 0.022)
+		for q in 3:
+			var so := fn * Uh * (-0.045 + 0.085 * float(q))
+			_ln(wr + fd * Uh * 0.24 + so, wr + fd * Uh * 0.49 + so * 0.8, seam, sw)
+		var tip := _tone(sk, dim * 0.86)
+		for q in 3:
+			var fp := wr + fd * Uh * (0.21 + 0.1 * float(q)) - fn * Uh * (0.2 - 0.012 * float(q))
+			_ov(fp, fd * Uh * 0.052, fn * Uh * 0.06, 6, tip)
 		_ov(wr + fd * Uh * 0.1 + fn * Uh * 0.2, fd * Uh * 0.13, fn * Uh * 0.075, 8, _tone(sk, dim * 0.9))
+		_ov(wr + fd * Uh * 0.19 + fn * Uh * 0.21, fd * Uh * 0.04, fn * Uh * 0.04, 6, _tone(sk, dim * 1.05))
+		_ln(wr - fd * Uh * 0.09 + fn * Uh * 0.2, wr - fd * Uh * 0.09 - fn * Uh * 0.19, Color(cuff.darkened(0.3), 0.9), maxf(1.0, Uh * 0.03))
+		_ln(wr - fd * Uh * 0.02 + fn * Uh * 0.04, wr - fd * Uh * 0.02 + fn * Uh * 0.14, Color(1, 1, 1, 0.55 * dim), maxf(1.0, Uh * 0.028))
 
 
 ## Definição muscular: some com barriga, é mais leve nas mulheres e cresce com o braço forte.
@@ -1075,6 +1099,16 @@ func _leg(j: Dictionary, side: String, off: Vector2, sk: Color, dim: float, Uh: 
 			else:
 				_row(an + f * (fx * fk) + upv * (float(row[1]) * fk), upv, float(row[2]) * fk, float(row[3]) * fk, fcol)
 	_emit(side + "p", dim, 0.4 if near else 0.0, maxf(1.0, Uh * 0.03))
+	if _ol <= 0.0 and not is_ref and not bent:
+		# Dedos, peito do pé com luz e o osso do tornozelo.
+		var dkf := Color(sk.r * 0.42, sk.g * 0.33, sk.b * 0.36, 0.55 * dim)
+		var tw := maxf(1.0, Uh * 0.022)
+		for q in 3:
+			var tx := 0.6 + 0.075 * float(q)
+			_ln(an + f * (tx * fk) + upv * (0.012 * fk), an + f * ((tx + 0.02) * fk) + upv * ((0.085 - 0.012 * float(q)) * fk), dkf, tw)
+		_ln(an + f * (0.1 * fk) + upv * (0.19 * fk), an + f * (0.5 * fk) + upv * (0.1 * fk), Color(_tone(sk, 1.18), 0.5 * dim), maxf(1.0, Uh * 0.03))
+		_ov(an + f * (0.0 * fk) + upv * (0.13 * fk), f * (0.05 * fk), upv * (0.05 * fk), 6, Color(_tone(sk, 1.14), 0.6 * dim))
+		_ln(an - f * (0.12 * fk) + upv * (0.03 * fk), an + f * (0.05 * fk) + upv * (0.02 * fk), Color(dkf, dkf.a * 0.7), tw)
 
 
 ## Perna do calção: mais larga que a coxa, com barra na cor do detalhe e listra lateral.
@@ -1458,7 +1492,13 @@ func _head(j: Dictionary, Uh: float, sk: Color) -> void:
 	else:
 		if r >= 9.0:
 			_ov(e + X * 0.02, X * 0.14, Y * 0.08, 8, Color(0.93, 0.92, 0.9))
-		_dot(e + X * 0.07, maxf(1.0, r * 0.075), Color(0.08, 0.06, 0.05))
+			# Íris na cor do lutador, pupila, brilho e a pálpebra pesando em cima.
+			_dot(e + X * 0.07, r * 0.085, eye_col)
+			_dot(e + X * 0.075, maxf(1.0, r * 0.045), Color(0.05, 0.04, 0.04))
+			_dot(e + X * 0.1 + Y * 0.035, maxf(0.8, r * 0.022), Color(1, 1, 1, 0.9))
+			_ln(e - X * 0.13 + Y * 0.07, e + X * 0.17 + Y * 0.075, Color(dk, 0.9), maxf(1.0, r * 0.045))
+		else:
+			_dot(e + X * 0.07, maxf(1.0, r * 0.075), Color(0.08, 0.06, 0.05))
 		if fem:
 			# Delineado: da frente do olho até o canto de trás, subindo
 			_pl(PackedVector2Array([e + X * 0.17 + Y * 0.06, e + X * 0.02 + Y * 0.1, e - X * 0.14 + Y * 0.07, e - X * 0.25 + Y * 0.15]), Color(0.07, 0.05, 0.05, 0.95), maxf(1.0, r * 0.055))
@@ -1467,6 +1507,12 @@ func _head(j: Dictionary, Uh: float, sk: Color) -> void:
 		_ov(T * Vector2(0.9, -0.51), X * 0.1, Y * 0.085, 8, lipc)
 	_ln(T * _hp[10] - X * 0.02, c + X * 0.72 - Y * 0.5, Color(dk, 0.85), maxf(1.0, r * (0.045 if fem else 0.06)))
 	_ln(T * _hp[8], c + X * 0.86 - Y * 0.3, Color(dk, 0.5), maxf(1.0, r * 0.05))
+	# Narina, maçã do rosto com luz e a sombra embaixo dela; o suor brilha na testa.
+	_dot(c + X * 0.9 - Y * 0.21, maxf(0.8, r * 0.035), Color(dk, 0.75))
+	_ov(c + X * 0.5 - Y * 0.08, X * 0.17, Y * 0.07, 8, Color(_tone(sk, 1.22), 0.3))
+	_ln(c + X * 0.34 - Y * 0.24, c + X * 0.62 - Y * 0.34, Color(dk, 0.22), maxf(1.0, r * 0.06))
+	if sheen > 0.05 and not long_hair:
+		_ov(c + X * 0.62 + Y * 0.5, X * 0.14, Y * 0.07, 8, Color(1, 1, 1, 0.3 * sheen))
 	# Olho inchado, nariz sangrando e corte.
 	if bruise > 0.25:
 		_dot(e + X * 0.02, r * (0.22 + 0.12 * bruise), Color(0.38, 0.12, 0.2, clampf((bruise - 0.25) * 0.7, 0.0, 0.5)))

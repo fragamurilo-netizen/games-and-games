@@ -367,17 +367,18 @@ static func delegate_fill(w: GameWorld) -> void:
 ## escolher os nomes marca antes.
 const VACANT_WEEKS := 10
 
-static func _fill_vacant_belts(w: GameWorld) -> void:
+static func _fill_vacant_belts(w: GameWorld, now: bool = false) -> int:
+	var made := 0
 	var vac: Dictionary = w.support.get("vac", {})
 	for d: Dictionary in DataDB.divisions():
 		var div := String(d["id"])
 		if int(w.champions.get(div, -1)) >= 0 or title_booked(w, div) != null:
 			continue
-		if not vac.has(div) or w.week - int(vac[div]) < VACANT_WEEKS:
+		if not now and (not vac.has(div) or w.week - int(vac[div]) < VACANT_WEEKS):
 			continue
 		for ev: FightEvent in upcoming_events(w):
 			var ahead := ev.week - w.week
-			if ahead < 4 or ahead > 10 or event_bouts(w, ev).size() >= ev.slots:
+			if ahead < (3 if now else 4) or ahead > (14 if now else 10) or event_bouts(w, ev).size() >= ev.slots:
 				continue
 			if event_bouts(w, ev).filter(func(b: Bout) -> bool: return b.title).size() >= (2 if ev.ppv else 1):
 				continue
@@ -394,8 +395,22 @@ static func _fill_vacant_belts(w: GameWorld) -> void:
 					book(w, ev, pool[i], pool[j], true, true, 1.0)
 					w.add_news("cinturao", "Cinturão vago dos %s: o matchmaker fechou %s × %s na %s." % [Matchmaker.division_name(div, true), (pool[i] as Fighter).display_name(), (pool[j] as Fighter).display_name(), ev.name], [(pool[i] as Fighter).id, (pool[j] as Fighter).id], true)
 					done = true
+					made += 1
 			if done:
 				break
+	return made
+
+
+## "Deixar com o matchmaker": fecha de uma vez as disputas dos cinturões vagos e completa os
+## cards que já estão pedindo luta. Devolve {belts, fights}.
+static func matchmaker_now(w: GameWorld, weeks: int) -> Dictionary:
+	var belts := _fill_vacant_belts(w, true)
+	var fights := 0
+	for ev: FightEvent in upcoming_events(w):
+		var left := ev.week - w.week
+		if left > 0 and left <= weeks and not ev.done and event_bouts(w, ev).size() < ev.slots:
+			fights += auto_fill(w, ev)
+	return {"belts": belts, "fights": fights}
 
 
 # --- Noite de luta ------------------------------------------------------------------------
