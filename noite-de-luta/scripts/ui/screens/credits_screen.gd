@@ -46,6 +46,7 @@ func refresh() -> void:
 	c.add_child(UIKit.menu_group([
 		UIKit.menu_row("gear", "Godot Engine %s" % _engine_version(), "Motor do jogo. Licença MIT.", func(): UIManager.push("licenses", {"doc": "godot"})),
 		UIKit.menu_row("book", "Saira", "Fonte de Omnibus-Type. SIL Open Font License 1.1.", func(): UIManager.push("licenses", {"doc": "saira"})),
+		UIKit.menu_row("book", "Noto Sans", "Fontes do russo e do chinês, do Google. SIL Open Font License 1.1.", func(): UIManager.push("licenses", {"doc": "noto"})),
 		UIKit.menu_row("archive", "Componentes da Godot", "Avisos de direitos autorais e licenças de terceiros.", func(): UIManager.push("licenses")),
 	]))
 

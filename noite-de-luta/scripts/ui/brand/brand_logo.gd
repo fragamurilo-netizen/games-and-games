@@ -38,7 +38,7 @@ static func font(weight: float, width: float, spacing: int = 0) -> FontVariation
 	f.spacing_glyph = spacing
 	f.spacing_top = -2
 	f.spacing_bottom = -3
-	return f
+	return Fonts.add_fallbacks(f, weight, width)
 
 
 func _init(p_emblem := 200.0, p_big := 118, p_side := false, with_tagline := false) -> void:

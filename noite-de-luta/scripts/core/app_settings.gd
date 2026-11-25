@@ -19,6 +19,9 @@ static var fight_view: String = "2d"
 static var reduce_motion: bool = false
 ## A abertura animada ao abrir o app (ferramentas e passeios de telas desligam; não é salvo).
 static var intro: bool = true
+## Idioma do jogo (I18n.LANGS). Vazio: o do aparelho na primeira abertura do app instalado;
+## rodando do editor ou das ferramentas, português. `--lang=xx` na linha de comando vale antes.
+static var lang: String = ""
 static var _loaded := false
 
 
@@ -26,6 +29,11 @@ static func load_settings() -> void:
 	if _loaded:
 		return
 	_loaded = true
+	_read()
+	apply_lang()
+
+
+static func _read() -> void:
 	var cfg := ConfigFile.new()
 	if cfg.load(PATH) != OK:
 		return
@@ -37,6 +45,22 @@ static func load_settings() -> void:
 	fight_view = String(cfg.get_value("jogo", "fight_view", fight_view))
 	if fight_view not in FIGHT_VIEWS:
 		fight_view = "2d"
+	lang = String(cfg.get_value("jogo", "lang", lang))
+
+
+## Idioma salvo, o da linha de comando ou o do aparelho; aplica no TranslationServer.
+static func apply_lang() -> void:
+	var code := lang
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--lang="):
+			code = a.substr(7)
+	if code == "" and not OS.has_feature("template"):
+		code = I18n.DEFAULT
+	I18n.apply(code)
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--i18n-miss="):
+			I18n.log_misses = true
+			I18n.miss_path = a.substr(12)
 
 
 static func save_settings() -> void:
@@ -47,4 +71,5 @@ static func save_settings() -> void:
 	cfg.set_value("jogo", "fight_speed", fight_speed)
 	cfg.set_value("jogo", "reduce_motion", reduce_motion)
 	cfg.set_value("jogo", "fight_view", fight_view)
+	cfg.set_value("jogo", "lang", lang)
 	cfg.save(PATH)

@@ -265,7 +265,7 @@ func _intro_p() -> float:
 ## Legenda na tela por `t` segundos. `big`: entra grande no meio do quadro (nocaute, knockdown)
 ## antes de assentar na faixa de cima.
 func _say(text: String, t: float, big: bool = false) -> void:
-	_caption = text
+	_caption = I18n.t(text)
 	_caption_t = t
 	_cap_age = 0.0
 	_cap_big = big
@@ -1782,7 +1782,7 @@ func _draw() -> void:
 		var blink := 0.6 + 0.4 * sin(_rt * 12.0)
 		var ty := bar * 0.5
 		draw_circle(Vector2(14 + _U * 0.2, ty), _U * 0.18, Color(0.9, 0.1, 0.1, blink))
-		var lbl := "REPLAY" if replay_take() == 0 else "REPLAY · CÂMERA LENTA"
+		var lbl := "REPLAY" if replay_take() == 0 else I18n.t("REPLAY · CÂMERA LENTA")
 		draw_string(font2, Vector2(14 + _U * 0.55, ty + _U * 0.2), lbl, HORIZONTAL_ALIGNMENT_LEFT, -1, int(_U * 0.55), Color.WHITE)
 	_draw_plates(w, h)
 	_draw_caption(w, h)
@@ -1838,7 +1838,7 @@ func _draw_plates(w: float, h: float) -> void:
 			var a0 := 0.03 if i == 0 else 0.36
 			var a1 := 0.33 if i == 0 else 0.66
 			var info: Dictionary = _info[i]
-			var tag := "CANTO VERMELHO" if i == 0 else "CANTO AZUL"
+			var tag := ("CANTO VERMELHO" if i == 0 else "CANTO AZUL")
 			if String(info["nick"]) != "":
 				tag += "  ·  “%s”" % String(info["nick"])
 			_plate(w, h, i, smoothstep(a0, a0 + 0.05, p) * (1.0 - smoothstep(a1 - 0.04, a1, p)), tag, String(info["name"]), String(info["sub"]))
@@ -1853,6 +1853,8 @@ func _draw_plates(w: float, h: float) -> void:
 ## oposto ao lutador (a do canto vermelho à direita, para onde ele olha; a do azul à esquerda).
 ## `k`: 0 fora da tela, 1 no lugar.
 func _plate(w: float, h: float, i: int, k: float, tag: String, title: String, sub: String) -> void:
+	tag = I18n.t(tag)
+	sub = I18n.t(sub)
 	if k <= 0.0:
 		return
 	var font := get_theme_default_font()

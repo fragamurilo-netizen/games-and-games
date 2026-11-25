@@ -1,0 +1,168 @@
+# Textos que o tools/i18n_check.py encontra mas que nunca aparecem na tela (ids, chaves, nomes de nó).
+# Um por linha.
+until
+need
+season
+wins
+fin
+name
+bonus
+cut
+fights
+text
+age
+wage
+desc
+delta
+results
+kind
+partner
+U
+sub
+shown
+Night
+profit
+ticket
+viewers
+legacy
+empty
+mult
+main
+interim
+hub
+licenses
+godot
+saira
+look
+corpo
+market
+left
+total
+subs
+hall
+premios
+year
+month
+focus
+intensity
+quality
+place
+spar
+cost
+offer
+rankings
+challenge
+event
+div
+reward
+label
+role
+settings
+titles
+pend
+tudo
+recordes
+doc
+license
+staff
+help
+empresario
+presidente
+organização
+academia
+fight
+fotn
+potn
+expires
+gone
+night
+next
+past
+events
+sex
+metas
+conquistas
+gala
+credits
+tips
+fee
+start
+gate
+production
+resultado
+val
+nights
+Slider
+Tap
+result
+Body
+Scroll
+Margin
+Content
+Footer
+Row
+venue
+show
+camp
+casa
+opp
+cat
+from
+act
+style
+inbox
+fighter
+weeks
+round
+R1
+M70
+B3262E
+F1F0EC
+BRA
+IRL
+GBR
+MEX
+USA
+POR
+ENG
+ARG
+POL
+RUS
+JPN
+AUS
+CAN
+FRA
+ESP
++m
+ã
+ão
+Ana
+pt_BR
+zh_CN
+visual
+checked%s%s
+unchecked%s%s
+%s@%d
+sáb, 
+A. Brandão
+D. Okafor
+M. Lindqvist
+R. Tavares
+S. Yamada
+J. Castellano
+P. Novak
+H. Mwangi
+L. Ferreira
+C. Whitlock
+T. Azevedo
+E. Marchetti
+K. Sandoval
+N. Petrov
+B. Achterberg
+G. Monteiro
+I. Haddad
+V. Kowalczyk
+F. Arantes
+O. Lindahl
+máquina
+flat top

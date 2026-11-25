@@ -139,7 +139,8 @@ func _last(w: GameWorld, f: Fighter) -> String:
 	var h := PastFights.last(w, f)
 	if h.is_empty():
 		return "sem luta na liga ainda"
-	return "%s %s" % [{"V": "venceu", "D": "perdeu", "E": "empatou"}.get(String(h.get("res", "")), ""), w.weeks_from_now(int(h.get("week", w.week)))]
+	var tpl: String = {"V": "venceu %s", "D": "perdeu %s", "E": "empatou %s"}.get(String(h.get("res", "")), "%s")
+	return tpl % w.weeks_from_now(int(h.get("week", w.week)))
 
 
 ## A oferta: cinturão ou interino (quando pode), luta principal e a bolsa, com o hype que a

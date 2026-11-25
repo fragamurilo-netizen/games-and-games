@@ -272,8 +272,12 @@ static func _has_main(w: GameWorld, e: FightEvent) -> bool:
 ## "peso-leve masculino" / "peso-palha feminino" (`plural`: "pesos-leves").
 static func division_name(div: String, plural: bool = false) -> String:
 	var d := DataDB.division(div)
-	var n := String(d.get("name", div)).to_lower()
 	var fem := String(d.get("sex", "m")) == "f"
+	if not I18n.is_pt():
+		# Fora do português o nome vem do catálogo, já com a maiúscula do idioma.
+		var nm := I18n.t(String(d.get("name", div)))
+		return I18n.t("peso-%s feminino" if fem else "peso-%s") % nm
+	var n := String(d.get("name", div)).to_lower()
 	if plural:
 		return "pesos-%s%s" % [_plural(n), " femininos" if fem else ""]
 	return "peso-%s%s" % [n, " feminino" if fem else ""]

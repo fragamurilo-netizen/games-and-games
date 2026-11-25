@@ -147,7 +147,7 @@ static func _o(f: Fighter) -> String:
 
 
 static func _kg(v: float) -> String:
-	return ("%.1f" % v).replace(".", ",")
+	return Fmt.dec(v, 1)
 
 
 static func incident_title(w: GameWorld, i: Dictionary) -> String:

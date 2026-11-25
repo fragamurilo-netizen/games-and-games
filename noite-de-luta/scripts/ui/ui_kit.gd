@@ -47,8 +47,8 @@ static func button(text: String, variation: String = "", cb: Callable = Callable
 	var b := Button.new()
 	b.text = text
 	if variation == "PrimaryButton":
+		# Caixa alta no texto em português: a tradução tem as chaves em maiúsculas também.
 		b.text = text.to_upper()
-		b.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	if variation != "":
 		b.theme_type_variation = variation
 	# O primário é só o texto; nos outros o ícone anda junto do texto, à esquerda (ícone colado na
@@ -491,7 +491,6 @@ static func pill(text: String, color: Color, font_size: int = 18) -> PanelContai
 	p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var l := label(text, "Chip")
 	l.uppercase = true
-	l.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	l.add_theme_color_override(&"font_color", UIColors.readable_on(color, [UIColors.SURFACE_2], 4.5))
 	l.add_theme_font_size_override(&"font_size", maxi(font_size, 17))
 	p.add_child(l)

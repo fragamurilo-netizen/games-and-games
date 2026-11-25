@@ -51,7 +51,7 @@ static func identity(w: GameWorld, t: Team, sub: String, rep_caption: String, ti
 	if n >= 2:
 		var d := t.reputation - float(t.rep_log[maxi(0, n - 5)])
 		if absf(d) >= 0.5:
-			rc += " %s" % ("subindo" if d > 0.0 else "caindo")
+			rc = ("%s subindo" if d > 0.0 else "%s caindo") % rc
 	var rl := UIKit.label(rc, "Caps")
 	rl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	rep.add_child(rl)

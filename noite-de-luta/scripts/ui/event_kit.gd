@@ -25,7 +25,7 @@ static func pts_text(p: float) -> String:
 	var a := absf(p)
 	var s := str(int(round(a)))
 	if a < 9.95 and absf(a - round(a)) > 0.05:
-		s = ("%.1f" % a).replace(".", ",")
+		s = Fmt.dec(a, 1)
 	return ("+" if p > 0.0 else "−") + s
 
 

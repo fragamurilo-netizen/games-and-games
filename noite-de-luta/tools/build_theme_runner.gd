@@ -38,7 +38,7 @@ func _saira(weight: float, width: float) -> FontVariation:
 	# Saira includes generous vertical metrics; keep compact UI leading.
 	font.spacing_top = -2
 	font.spacing_bottom = -3
-	return font
+	return Fonts.add_fallbacks(font, weight, width)
 
 
 ## Caixa lisa. `cut` é o tamanho do corte em diagonal dos quatro cantos (0 = canto reto): o
@@ -81,6 +81,8 @@ func _spaced(base: Font, px: int) -> FontVariation:
 		fv.spacing_top = src.spacing_top
 		fv.spacing_bottom = src.spacing_bottom
 	fv.spacing_glyph = px
+	if src != null:
+		fv.fallbacks = src.fallbacks
 	return fv
 
 

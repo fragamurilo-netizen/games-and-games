@@ -643,7 +643,7 @@ func _marks_card(w: GameWorld, f: Fighter) -> Control:
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(nm)
 		var d := GameWorld.date_of(int(m[1]), 5)
-		row.add_child(UIKit.label("%s %d" % [Fmt.MONTHS[int(d["month"]) - 1], int(d["year"])], "Caps"))
+		row.add_child(UIKit.label(Fmt.month_year(int(d["month"]), int(d["year"])), "Caps"))
 		card.add_child(row)
 	if dated.size() > 8:
 		card.add_child(UIKit.label("e mais %d." % (dated.size() - 8), "Muted"))
@@ -679,7 +679,7 @@ func _treino(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 		Tutorial.mark(world(), "treino")
 		refresh()))
 	c.add_child(UIKit.section_header("Intensidade"))
-	c.add_child(UIKit.segment([["0", "Leve"], ["1", "Normal"], ["2", "Pesado"]], str(int(f.training.get("intensity", 1))), func(k: String):
+	c.add_child(UIKit.segment([["0", I18n.tc("treino", "Leve")], ["1", "Normal"], ["2", I18n.tc("treino", "Pesado")]], str(int(f.training.get("intensity", 1))), func(k: String):
 		f.training["intensity"] = int(k)
 		Tutorial.mark(world(), "treino")
 		refresh()))

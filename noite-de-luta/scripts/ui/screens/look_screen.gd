@@ -361,7 +361,7 @@ func _title(text: String, value: String = "", keep: bool = false) -> Control:
 
 
 func _swatches(c: VBoxContainer, title: String, names: Array, colors: Array, cur: int, key: String) -> void:
-	c.add_child(_title(title, String(names[clampi(cur, 0, names.size() - 1)])))
+	c.add_child(_title(title, I18n.tc("visual", String(names[clampi(cur, 0, names.size() - 1)]))))
 	var fl := UIKit.flow(4)
 	for i in colors.size():
 		var s := Swatch.new(colors[i], i == cur)
@@ -386,7 +386,7 @@ func _stepper(card: VBoxContainer, title: String, key: String, names: Array, cur
 	var prev := UIKit.icon_button("back", func(): _put(key, (cur - 1 + n) % n), "Anterior")
 	prev.custom_minimum_size = Vector2(56, 56)
 	h.add_child(prev)
-	var v := UIKit.label(String(names[cur]), "H3")
+	var v := UIKit.label(I18n.tc("visual", String(names[cur])), "H3")
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	v.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.clip_text = true
@@ -464,7 +464,7 @@ func _thumbs(c: VBoxContainer, key: String, ids: Array, names: Array, cur: int) 
 		holder.size = Vector2(tw - 8, tw - 8)
 		holder.clip_contents = true
 		b.add_child(holder)
-		var l := UIKit.label(String(names[id]), "Caps")
+		var l := UIKit.label(I18n.tc("visual", String(names[id])), "Caps")
 		l.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

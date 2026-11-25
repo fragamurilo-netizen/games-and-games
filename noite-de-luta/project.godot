@@ -48,6 +48,10 @@ window/handheld/orientation=6
 
 theme/custom="res://assets/theme/main_theme.tres"
 
+[internationalization]
+
+locale/include_text_server_data=true
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

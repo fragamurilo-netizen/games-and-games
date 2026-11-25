@@ -122,12 +122,12 @@ func _draw() -> void:
 			bot = top + 3.0
 		draw_rect(Rect2(r.position.x, top, r.size.x, bot - top), Color(UIColors.GOLD, 0.13))
 		draw_line(Vector2(r.position.x, top), Vector2(r.end.x, top), Color(UIColors.GOLD, 0.45), 1.0)
-		draw_string(font, Vector2(r.position.x + 8.0, top - 6.0), "teto estimado", HORIZONTAL_ALIGNMENT_LEFT, -1, fs - 2, UIColors.MUTED)
+		draw_string(font, Vector2(r.position.x + 8.0, top - 6.0), I18n.t("teto estimado"), HORIZONTAL_ALIGNMENT_LEFT, -1, fs - 2, UIColors.MUTED)
 	# Idade do auge.
 	if peak_age > _x0 and peak_age < _x1:
 		var px := _px(peak_age, _y0).x
 		draw_line(Vector2(px, r.position.y), Vector2(px, r.end.y), UIColors.LINE, 1.0)
-		draw_string(font, Vector2(px - 60.0, r.position.y - 8.0), "auge", HORIZONTAL_ALIGNMENT_CENTER, 120.0, fs - 2, UIColors.MUTED)
+		draw_string(font, Vector2(px - 60.0, r.position.y - 8.0), I18n.t("auge"), HORIZONTAL_ALIGNMENT_CENTER, 120.0, fs - 2, UIColors.MUTED)
 	# A linha: passado reconstruído apagado, o que aconteceu no jogo na cor de destaque.
 	var past := PackedVector2Array()
 	var live := PackedVector2Array()

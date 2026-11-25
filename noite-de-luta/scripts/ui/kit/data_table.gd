@@ -48,6 +48,7 @@ static func tabular_font() -> Font:
 			_tnum.variation_opentype = source.variation_opentype.duplicate()
 			_tnum.spacing_top = source.spacing_top
 			_tnum.spacing_bottom = source.spacing_bottom
+			_tnum.fallbacks = source.fallbacks
 		_tnum.opentype_features = {"tnum": 1, "lnum": 1}
 	return _tnum
 
@@ -291,7 +292,7 @@ func _cell(c: Dictionary, item: Variant, lead: bool) -> Control:
 		ctl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		return ctl
 	var l := Label.new()
-	l.text = String((c["text"] as Callable).call(item)) if c.has("text") else ""
+	l.text = I18n.t(String((c["text"] as Callable).call(item))) if c.has("text") else ""
 	l.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	l.horizontal_alignment = _align(String(c.get("align", "l" if lead else "r")))
 	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER

@@ -79,6 +79,10 @@ static func nation_name(code: String) -> String:
 ## Gentílico ("brasileiro"); no feminino troca o -o final por -a.
 static func nation_adj(code: String, fem: bool = false) -> String:
 	var a := String(nation(code).get("adj", nation_name(code)))
+	if not I18n.is_pt():
+		# A tradução pode trazer as duas formas: "brasileño|brasileña".
+		var t := I18n.forms(a)
+		return t[1] if fem and t.size() > 1 else t[0]
 	if fem and a.ends_with("o"):
 		return a.substr(0, a.length() - 1) + "a"
 	return a

@@ -14,6 +14,22 @@ func setup(p: Dictionary) -> void:
 
 func refresh() -> void:
 	var c := reset()
+	c.add_child(UIKit.section_header("Idioma"))
+	var langs := GridContainer.new()
+	langs.columns = 2
+	langs.add_theme_constant_override(&"h_separation", 10)
+	langs.add_theme_constant_override(&"v_separation", 10)
+	var g := ButtonGroup.new()
+	for code in I18n.LANGS:
+		var b := UIKit.chip(I18n.lang_name(code), code == I18n.lang, g, func(): _set_lang(code))
+		# Cada idioma aparece escrito nele mesmo, nunca traduzido.
+		b.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		langs.add_child(b)
+	var lcard := UIKit.card()
+	lcard.add_child(langs)
+	c.add_child(UIKit.card_panel(lcard))
+
 	c.add_child(UIKit.section_header("Som"))
 	var sound := UIKit.card()
 	sound.add_child(_toggle("Efeitos sonoros", AppSettings.sound, func(on: bool):
@@ -69,6 +85,18 @@ func refresh() -> void:
 	c.add_child(UIKit.menu_group([
 		UIKit.menu_row("book", "Créditos e licenças", "Noite de Luta, versão %s" % GameManager.app_version(), func(): UIManager.push("credits")),
 	]))
+
+
+func _set_lang(code: String) -> void:
+	if code == I18n.lang:
+		return
+	AppSettings.lang = code
+	AppSettings.save_settings()
+	I18n.apply(code)
+	# Telas guardadas têm datas e números montados no idioma antigo: o carimbo novo as remonta.
+	GameManager.rev += 1
+	UIManager.refresh_chrome()
+	refresh.call_deferred()
 
 
 ## O degrau de volume mais perto do valor guardado (saves de opções antigos tinham 90).

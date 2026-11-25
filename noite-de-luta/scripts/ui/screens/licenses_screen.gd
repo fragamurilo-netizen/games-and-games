@@ -1,9 +1,10 @@
 extends BaseScreen
 ## Licenças. Sem parâmetro, a lista dos componentes que a Godot traz dentro dela (vem da própria
 ## engine: `Engine.get_copyright_info`). Com `component`, os avisos de um deles. Com `license`,
-## o texto de uma licença. Com `doc`, o texto da licença da Godot ("godot") ou da fonte ("saira").
+## o texto de uma licença. Com `doc`, o texto da licença da Godot ("godot") ou das fontes ("saira", "noto").
 
 const SAIRA := "res://assets/fonts/OFL-Saira.txt"
+const NOTO := ["res://assets/fonts/OFL-NotoSans.txt", "res://assets/fonts/OFL-NotoSansSC.txt"]
 
 
 func setup(p: Dictionary) -> void:
@@ -11,7 +12,7 @@ func setup(p: Dictionary) -> void:
 	show_nav = false
 	max_content_width = 820.0
 	if p.has("doc"):
-		screen_title = "Godot Engine" if String(p["doc"]) == "godot" else "Saira"
+		screen_title = {"godot": "Godot Engine", "noto": "Noto Sans"}.get(String(p["doc"]), "Saira")
 	elif p.has("license"):
 		screen_title = String(p["license"])
 	elif p.has("component"):
@@ -36,6 +37,13 @@ func _doc(c: VBoxContainer, which: String) -> void:
 	if which == "godot":
 		c.add_child(UIKit.label("Este jogo usa a Godot Engine, distribuída sob a licença MIT. O texto da licença, como ela pede, segue abaixo.", "Muted", true))
 		_text(c, Engine.get_license_text())
+		return
+	if which == "noto":
+		c.add_child(UIKit.label("Para o russo e o chinês, o jogo usa partes das fontes Noto Sans e Noto Sans SC, do Google, distribuídas sob a SIL Open Font License 1.1. Os textos das licenças seguem abaixo.", "Muted", true))
+		for path: String in NOTO:
+			var nf := FileAccess.open(path, FileAccess.READ)
+			if nf != null:
+				_text(c, nf.get_as_text())
 		return
 	c.add_child(UIKit.label("O jogo usa a fonte Saira, de Omnibus-Type, distribuída sob a SIL Open Font License 1.1. O texto da licença segue abaixo.", "Muted", true))
 	var f := FileAccess.open(SAIRA, FileAccess.READ)

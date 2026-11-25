@@ -225,19 +225,18 @@ func month() -> int:
 ## "sáb, 9 jan 2027" (o sábado da semana `w`, dia das lutas).
 static func fight_date_text(w: int, with_year: bool = true) -> String:
 	var d := date_of(w, 5)
-	var t := "sáb, %d %s" % [int(d["day"]), Fmt.MONTHS[int(d["month"]) - 1]]
-	return t + (" %d" % int(d["year"]) if with_year else "")
+	return Fmt.fight_day(int(d["day"]), int(d["month"]), int(d["year"]) if with_year else -1)
 
 
 static func week_text(w: int) -> String:
 	var d := date_of(w)
-	return "%d de %s de %d" % [int(d["day"]), Fmt.MONTHS_FULL[int(d["month"]) - 1], int(d["year"])]
+	return Fmt.date_long(int(d["day"]), int(d["month"]), int(d["year"]))
 
 
 ## A mesma data, curta, para os títulos: "18 jan 2027".
 static func week_short(w: int) -> String:
 	var d := date_of(w)
-	return "%d %s %d" % [int(d["day"]), Fmt.MONTHS[int(d["month"]) - 1], int(d["year"])]
+	return Fmt.date_short(int(d["day"]), int(d["month"]), int(d["year"]))
 
 
 ## "em 3 semanas", "nesta semana", "há 2 semanas".
