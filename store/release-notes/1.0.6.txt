@@ -1,0 +1,7 @@
+<pt-BR>
+Novo visual "Dia de jogo", com gramado e a cor do seu clube, e menus mais rápidos. Partida com modo Melhores momentos, mapa de finalizações e mapa de calor. Regulamentos de 2026: Séries B, C e D, Copa do Brasil com entrada por fases e final única, Copa do Nordeste e janelas da CBF. Limite de empréstimos, táticas salvas durante o jogo e profundidade do elenco. Jogadores mais realistas, tabelas mais claras, editor de uniformes e retratos novos.
+</pt-BR>
+
+<en-US>
+New "Matchday" look with grass and your club's colours, plus faster menus. Matches get a Key moments mode, a shot map and a heat map. 2026 rules: Brazil's Série B, C and D formats, a staged Copa do Brasil with a one-off final, Copa do Nordeste and CBF transfer windows. Loan limits, tactics you can save mid-match and squad depth by position. More realistic players, clearer tables, a better kit editor and new portraits.
+</en-US>
