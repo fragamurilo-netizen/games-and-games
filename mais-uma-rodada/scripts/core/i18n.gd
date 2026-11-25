@@ -70,6 +70,19 @@ static func is_pt() -> bool:
 	return lang == DEFAULT
 
 
+## Explicit UI context for words that are also club names. The club identity
+## remains protected in names and headlines; squad roles still say "Star".
+static func term(text: String) -> String:
+	var table: PatternTranslation = _tables.get(lang, null)
+	if table != null and table.ui_terms.has(text):
+		return table.ui_terms[text]
+	return t(text)
+
+
+static func nation_name(code: String) -> String:
+	return term(DatabaseManager.nation_name(code))
+
+
 static func _build(code: String) -> PatternTranslation:
 	var path := "res://data/i18n/%s.json" % code
 	if not FileAccess.file_exists(path):
@@ -87,6 +100,9 @@ static func _build(code: String) -> PatternTranslation:
 		for club: Dictionary in DatabaseManager.club_data(nation):
 			for field in ["name", "short", "official"]:
 				var name := String(club.get(field, ""))
-				if name != "": parsed[name] = name
+				if name != "":
+					if parsed.has(name) and String(parsed[name]) != name:
+						t.ui_terms[name] = String(parsed[name])
+					parsed[name] = name
 	t.load_entries(parsed)
 	return t

@@ -102,7 +102,7 @@ static func _all(w: GameWorld, mode: String, exact: bool, y: int) -> Dictionary:
 	c["pos"] = {"key": "pos", "title": "Jogador", "first": "asc",
 		"sort": func(p: Player) -> int: return Pos.DISPLAY_ORDER.find(p.position) * 1000 - int(PlayerAssessment.score(w,p) * 10),
 		"cell": func(p: Player) -> Control: return lead_cell(w, p, mode)}
-	c["ovr"] = {"key": "ovr", "title": "Avaliação", "w": 88, "tip": "Estimativa para a posição no seu elenco; estrelas claras indicam incerteza",
+	c["ovr"] = {"key": "ovr", "title": "Nível", "w": 88, "tip": "Estimativa para a posição no seu elenco; estrelas claras indicam incerteza",
 		"sort": func(p: Player) -> float: return PlayerAssessment.stars(w,p),
 		"cell": func(p: Player) -> Control: return ovr_cell(w, p, exact)}
 	c["pot"] = {"key": "pot", "title": "Projeção", "w": 100, "tip": "Estimativa da comissão",
@@ -293,7 +293,7 @@ static func status(w: GameWorld, p: Player, mode: String) -> Array:
 				return [PlayerAssessment.summary(w,p,true), UIColors.MUTED]
 			return ["Observado", UIColors.MUTED]
 		return [PlayStyle.of(p), UIColors.MUTED]
-	return [Player.STATUS_NAMES[p.squad_status], UIColors.MUTED]
+	return [I18n.term(Player.STATUS_NAMES[p.squad_status]), UIColors.MUTED]
 
 
 static func ovr_cell(w: GameWorld, p: Player, _exact: bool) -> Control:

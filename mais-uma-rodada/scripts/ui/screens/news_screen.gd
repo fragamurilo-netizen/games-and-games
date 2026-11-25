@@ -39,7 +39,7 @@ func on_show() -> void:
 
 
 static func portal_name(nation: String) -> String:
-	return String(PORTALS.get(nation, "Diário da Bola · %s" % DatabaseManager.nation_name(nation)))
+	return String(PORTALS.get(nation, "Diário da Bola · %s" % I18n.nation_name(nation)))
 
 
 func refresh() -> void:
@@ -50,7 +50,7 @@ func refresh() -> void:
 		_nation = w.user_nation() if w.has_user() else "BRA"
 	max_content_width = 1700
 	screen_title = portal_name(_nation)
-	screen_subtitle = "Temporada %d · %s" % [w.year, DatabaseManager.nation_name(_nation)]
+	screen_subtitle = "Temporada %d · %s" % [w.year, I18n.nation_name(_nation)]
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
@@ -89,7 +89,7 @@ func _masthead(w: GameWorld) -> Control:
 	var pick := UIKit.hbox(UITokens.S1)
 	pick.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	pick.add_child(UIKit.flag(_nation, 36))
-	pick.add_child(UIKit.label(DatabaseManager.nation_name(_nation), "Muted"))
+	pick.add_child(UIKit.label(I18n.nation_name(_nation), "Muted"))
 	pick.add_child(UIKit.icon_rect("down", 18, UIColors.DIM))
 	var nat_btn := UIKit.tap_row(pick, func(): _nation_sheet(w))
 	nat_btn.size_flags_horizontal = Control.SIZE_SHRINK_END
@@ -120,7 +120,7 @@ func _nation_sheet(w: GameWorld) -> void:
 		h.add_child(UIKit.flag(code, 36))
 		var box := UIKit.vbox(0)
 		box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var nm := UIKit.label(DatabaseManager.nation_name(code))
+		var nm := UIKit.label(I18n.nation_name(code))
 		if code == _nation:
 			nm.add_theme_color_override(&"font_color", UIColors.ink(UIColors.ACCENT))
 		box.add_child(nm)

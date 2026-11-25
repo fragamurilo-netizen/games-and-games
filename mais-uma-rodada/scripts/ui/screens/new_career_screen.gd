@@ -212,7 +212,7 @@ func _fill_nations() -> void:
 		var fl := UIKit.flag(code, 72)
 		fl.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		inner.add_child(fl)
-		var nl := UIKit.label(DatabaseManager.nation_name(code), "Small")
+		var nl := UIKit.label(I18n.nation_name(code), "Small")
 		nl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		inner.add_child(nl)
@@ -400,7 +400,7 @@ func _update_details() -> void:
 		_start_btn.disabled = _world == null or _selected < 0
 	if _step < 2:
 		var cfg := DatabaseManager.league_cfg(_league)
-		var line := "%s · %s · %s" % [GameWorld.DIFF_NAMES[_difficulty], DatabaseManager.nation_name(_nation), cfg.get("name", _league)]
+		var line := "%s · %s · %s" % [GameWorld.DIFF_NAMES[_difficulty], I18n.nation_name(_nation), cfg.get("name", _league)]
 		_details.add_child(UIKit.label(line, "Small"))
 		return
 	if _world == null or _selected < 0:

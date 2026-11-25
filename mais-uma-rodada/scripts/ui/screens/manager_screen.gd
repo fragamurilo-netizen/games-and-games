@@ -66,7 +66,7 @@ func _update_preview() -> void:
 		UIKit.clear(_portrait_box)
 		_portrait_box.add_child(ManagerProfile.portrait(w, 150))
 	if _info_label != null:
-		_info_label.text = "%s · %d anos" % [DatabaseManager.nation_name(String(m["nat"])), ManagerProfile.age(w)]
+		_info_label.text = "%s · %d anos" % [I18n.nation_name(String(m["nat"])), ManagerProfile.age(w)]
 	if _flag_box != null:
 		UIKit.clear(_flag_box)
 		_flag_box.add_child(UIKit.flag(String(m["nat"]), 34))
@@ -88,7 +88,7 @@ func _preview(w: GameWorld, m: Dictionary) -> Control:
 	_flag_box = UIKit.hbox(0)
 	_flag_box.add_child(UIKit.flag(String(m["nat"]), 34))
 	nrow.add_child(_flag_box)
-	_info_label = UIKit.label("%s · %d anos" % [DatabaseManager.nation_name(String(m["nat"])), ManagerProfile.age(w)], "Small", true)
+	_info_label = UIKit.label("%s · %d anos" % [I18n.nation_name(String(m["nat"])), ManagerProfile.age(w)], "Small", true)
 	nrow.add_child(_info_label)
 	col.add_child(nrow)
 	_style_pill_box = UIKit.hbox(0)
@@ -118,7 +118,7 @@ func _identity(w: GameWorld, m: Dictionary) -> Control:
 	card.add_child(le)
 	if _nations.is_empty():
 		_nations = DatabaseManager.nations().keys()
-		_nations.sort_custom(func(a, b): return DatabaseManager.nation_name(a) < DatabaseManager.nation_name(b))
+		_nations.sort_custom(func(a, b): return I18n.nation_name(a) < I18n.nation_name(b))
 	# Nacionalidade
 	var nrow := UIKit.hbox(6)
 	var nl := UIKit.label("Nacionalidade", "Small")
@@ -131,7 +131,7 @@ func _identity(w: GameWorld, m: Dictionary) -> Control:
 	var show_nat := func():
 		UIKit.clear(flag_box)
 		flag_box.add_child(UIKit.flag(String(m["nat"]), 34))
-		nv.text = DatabaseManager.nation_name(String(m["nat"]))
+		nv.text = I18n.nation_name(String(m["nat"]))
 	var step_nat := func(d: int):
 		var idx := maxi(0, _nations.find(String(m["nat"])))
 		m["nat"] = _nations[posmod(idx + d, _nations.size())]
@@ -223,13 +223,13 @@ func _cycler(caption: String, names: Array, current: int, set_value: Callable) -
 	cl.custom_minimum_size.x = 150
 	row.add_child(cl)
 	var cur := [clampi(current, 0, names.size() - 1)]
-	var v := UIKit.label(String(names[cur[0]]), "H3")
+	var v := UIKit.label(I18n.term(String(names[cur[0]])), "H3")
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	v.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	var step := func(d: int):
 		cur[0] = posmod(cur[0] + d, names.size())
-		v.text = String(names[cur[0]])
+		v.text = I18n.term(String(names[cur[0]]))
 		set_value.call(cur[0])
 	row.add_child(UIKit.icon_button("back", func(): step.call(-1), "Anterior"))
 	row.add_child(v)

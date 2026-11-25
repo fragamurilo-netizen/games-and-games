@@ -319,7 +319,7 @@ func _build_roles(w: GameWorld, club: Club, c: VBoxContainer) -> void:
 		if list.is_empty():
 			continue
 		list.sort_custom(func(a, b): return a.ovr_f > b.ovr_f)
-		c.add_child(UIKit.section("%s (%d)" % [Player.STATUS_NAMES[st], list.size()]))
+		c.add_child(UIKit.section("%s (%d)" % [I18n.term(Player.STATUS_NAMES[st]), list.size()]))
 		for p: Player in list:
 			var pp := p
 			c.add_child(PlayerRowView.make(w, p, {"mode": "squad"}, func(): _pick_status(pp)))
@@ -330,12 +330,12 @@ func _pick_status(p: Player) -> void:
 	var club := w.user_club()
 	var v := UIKit.vbox(8)
 	v.add_child(UIKit.label("Papel de %s" % p.display_name(), "Title"))
-	v.add_child(UIKit.label("Hoje: %s · %s" % [Player.STATUS_NAMES[p.squad_status], UIColors.morale_label(p.morale)], "Small"))
+	v.add_child(UIKit.label("Hoje: %s · %s" % [I18n.term(Player.STATUS_NAMES[p.squad_status]), UIColors.morale_label(p.morale)], "Small"))
 	for st in Player.STATUS_NAMES.size():
 		var s := st
 		var box := UIKit.vbox(2)
 		var head := UIKit.hbox(8)
-		head.add_child(UIKit.label(Player.STATUS_NAMES[s], "H3"))
+		head.add_child(UIKit.label(I18n.term(Player.STATUS_NAMES[s]), "H3"))
 		head.add_child(UIKit.spacer())
 		var react := SquadManager.status_reaction(p, s)
 		if s == p.squad_status:

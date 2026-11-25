@@ -87,7 +87,7 @@ static func open() -> void:
 	game.add_child(_row("Salvar", func():
 		UIManager.close_modal()
 		if GameManager.save_now():
-			UIManager.toast("Jogo salvo.", UIColors.GREEN)
+			UIManager.toast("Salvando...", UIColors.ACCENT)
 		else:
 			UIManager.toast("Não foi possível salvar agora.", UIColors.RED), false, 0))
 	game.add_child(_row("Carregar", _go.bind("load", {}), _here("load"), 0))

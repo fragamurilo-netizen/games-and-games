@@ -263,17 +263,17 @@ func _intl_card(w: GameWorld, rec: Dictionary) -> Control:
 	var col := UIKit.vbox(0)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.add_child(UIKit.label("Campeã", "Caps"))
-	var cn := UIKit.label(DatabaseManager.nation_name(rec["champion"]), "H3", true)
+	var cn := UIKit.label(I18n.nation_name(rec["champion"]), "H3", true)
 	if rec["champion"] == w.user_nation():
 		cn.add_theme_color_override(&"font_color", UIColors.ACCENT)
 	col.add_child(cn)
-	col.add_child(UIKit.label("Vice: %s" % DatabaseManager.nation_name(rec["runner_up"]), "Small"))
+	col.add_child(UIKit.label("Vice: %s" % I18n.nation_name(rec["runner_up"]), "Small"))
 	row.add_child(col)
 	var id := String(rec["t"])
 	card.add_child(UIKit.tap_row(row, func(): UIManager.push("national", {"tab": "tours", "tour": id}), "CardFlat"))
 	var sc: Dictionary = rec.get("scorer", {})
 	if not sc.is_empty():
-		card.add_child(UIKit.label("Artilheiro: %s (%s) · %d gols" % [sc["name"], DatabaseManager.nation_name(sc["nation"]), int(sc["goals"])], "Small", true))
+		card.add_child(UIKit.label("Artilheiro: %s (%s) · %d gols" % [sc["name"], I18n.nation_name(sc["nation"]), int(sc["goals"])], "Small", true))
 	return UIKit.card_panel(card)
 
 
@@ -289,7 +289,7 @@ func _cup_card(w: GameWorld, cu: Dictionary) -> Control:
 	row.add_child(UIKit.crest(champ, 48))
 	var col := UIKit.vbox(0)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.add_child(UIKit.label("Campeão · %s" % DatabaseManager.nation_name(champ.nation), "Caps"))
+	col.add_child(UIKit.label("Campeão · %s" % I18n.nation_name(champ.nation), "Caps"))
 	var cn := UIKit.label(champ.name, "H3", true)
 	if w.is_user_club(champ.id):
 		cn.add_theme_color_override(&"font_color", UIColors.ACCENT)
@@ -393,7 +393,7 @@ func _awards_card(w: GameWorld) -> Control:
 		# Copas de base: campeão e a campanha do seu clube
 		for e: Dictionary in yl.get("cups", []):
 			var ch: Variant = e.get("champion", -1)
-			var who := DatabaseManager.nation_name(String(ch)) if ch is String else (w.club(int(ch)).short_name if w.club(int(ch)) != null else "?")
+			var who := I18n.nation_name(String(ch)) if ch is String else (w.club(int(ch)).short_name if w.club(int(ch)) != null else "?")
 			var mine := String(e.get("user", ""))
 			card.add_child(UIKit.kv(String(e["name"]), who + ((" · " + mine.to_lower()) if mine != "" and mine != "Não classificado" else ""), UIColors.ACCENT if mine == "Campeão" else UIColors.TEXT))
 	return UIKit.card_panel(card)

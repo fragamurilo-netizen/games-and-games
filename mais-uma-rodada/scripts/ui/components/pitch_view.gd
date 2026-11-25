@@ -305,7 +305,7 @@ func _draw_broadcast() -> void:
 		draw_rect(Rect2(0, 0, size.x, bar_h), Color(0, 0, 0, 0.72))
 		draw_rect(Rect2(0, size.y - bar_h, size.x, bar_h), Color(0, 0, 0, 0.72))
 		var fs := int(clampf(bar_h * 0.58, 18.0, 30.0))
-		var txt := "REPLAY"
+		var txt := I18n.t("REPLAY")
 		var tw := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		var badge := Rect2(Vector2(12, (bar_h - fs * 1.3) * 0.5), Vector2(tw + fs * 1.6, fs * 1.3))
 		draw_rect(badge, comp_accent)
@@ -319,12 +319,13 @@ func _draw_broadcast() -> void:
 		draw_rect(Rect2(pr.position, Vector2(pw * motion.replay_k, 4)), comp_accent)
 	elif pressure_text != "" and callout.is_empty():
 		var pfs := int(clampf(size.y * 0.04, 12.0, 20.0))
-		var pw2 := small.get_string_size(pressure_text, HORIZONTAL_ALIGNMENT_LEFT, -1, pfs).x
+		var localized_pressure := I18n.t(pressure_text)
+		var pw2 := small.get_string_size(localized_pressure, HORIZONTAL_ALIGNMENT_LEFT, -1, pfs).x
 		var a := 0.65 + 0.35 * absf(sin(_t * 3.0))
 		var pr2 := Rect2(Vector2((size.x - pw2) * 0.5 - 12, 6), Vector2(pw2 + 24, pfs * 1.5))
 		draw_rect(pr2, Color(0.03, 0.035, 0.04, 0.75 * a))
 		draw_rect(Rect2(pr2.position, Vector2(4, pr2.size.y)), pressure_color)
-		draw_string(small, pr2.position + Vector2(12, pfs * 1.1), pressure_text, HORIZONTAL_ALIGNMENT_LEFT, -1, pfs, Color(1, 1, 1, a))
+		draw_string(small, pr2.position + Vector2(12, pfs * 1.1), localized_pressure, HORIZONTAL_ALIGNMENT_LEFT, -1, pfs, Color(1, 1, 1, a))
 	if not callout.is_empty():
 		var t := float(callout["t"])
 		var dur := float(callout["dur"])
@@ -332,7 +333,7 @@ func _draw_broadcast() -> void:
 		var sc := 1.35 - 0.35 * pop
 		var alpha := clampf((dur - t) / 0.35, 0.0, 1.0) * pop
 		var cfs := int(clampf(size.y * 0.11, 26.0, 64.0) * sc)
-		var txt2 := String(callout["text"])
+		var txt2 := I18n.t(String(callout["text"]))
 		var cw := font.get_string_size(txt2, HORIZONTAL_ALIGNMENT_LEFT, -1, cfs).x
 		var col: Color = callout["color"]
 		var base := Vector2((size.x - cw) * 0.5, size.y * 0.5 + cfs * 0.35)
@@ -1342,7 +1343,7 @@ func _draw_caption() -> void:
 	var alpha := clampf((CAPTION_DUR - t) / 0.5, 0.0, 1.0) * clampf(t / 0.12, 0.0, 1.0)
 	var col: Color = caption["color"]
 	draw_rect(Rect2(bar.position, Vector2(5, h)), Color(col, alpha))
-	var base := String(caption["text"])
+	var base := I18n.t(String(caption["text"]))
 	var txt := base
 	var max_w := size.x - 24.0
 	while base.length() > 8 and small.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > max_w:

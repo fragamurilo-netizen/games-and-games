@@ -99,7 +99,7 @@ func _draw() -> void:
 		var gy := _y_of(float(g[0]), r)
 		_dashed(Vector2(PAD_L, gy), Vector2(size.x - PAD_R, gy), UIColors.ORANGE)
 		if g.size() > 1:
-			draw_string(font, Vector2(size.x - PAD_R - 220, gy - 6), String(g[1]), HORIZONTAL_ALIGNMENT_RIGHT, 220, 16, UIColors.ORANGE)
+			draw_string(font, Vector2(size.x - PAD_R - 220, gy - 6), I18n.t(String(g[1])), HORIZONTAL_ALIGNMENT_RIGHT, 220, 16, UIColors.ORANGE)
 	# Rótulos do eixo x (pula quando não cabem)
 	var n := labels.size()
 	var step := maxi(1, int(ceil(float(n) * 56.0 / maxf(1.0, size.x - PAD_L - PAD_R))))
@@ -107,7 +107,7 @@ func _draw() -> void:
 		if i % step != 0 and i != n - 1 and i != sel:
 			continue
 		var col := UIColors.TEXT if i == sel else UIColors.DIM
-		draw_string(tf, Vector2(_x_of(i) - 40, size.y - 6), str(labels[i]), HORIZONTAL_ALIGNMENT_CENTER, 80, fs, col)
+		draw_string(tf, Vector2(_x_of(i) - 40, size.y - 6), I18n.t(str(labels[i])), HORIZONTAL_ALIGNMENT_CENTER, 80, fs, col)
 	# Coluna escolhida
 	if sel >= 0 and sel < n:
 		var sx := _x_of(sel)
@@ -159,7 +159,7 @@ func _draw() -> void:
 		var x := clampf(_x_of(sel) - 110.0, 0.0, size.x - 220.0)
 		var tx := x
 		for pt in parts:
-			var txt := ("%s %s" % [pt[0], pt[1]]).strip_edges()
+			var txt := ("%s %s" % [I18n.t(String(pt[0])), pt[1]]).strip_edges()
 			draw_string(tf, Vector2(tx, 20), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, pt[2])
 			tx += tf.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x + 14.0
 

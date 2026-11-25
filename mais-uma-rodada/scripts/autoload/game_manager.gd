@@ -6,6 +6,7 @@ extends Node
 signal world_changed
 signal matchday_finished(report: Dictionary)
 signal season_finished(summary: Dictionary)
+signal save_failed
 
 var world: GameWorld = null
 var slot: int = -1
@@ -135,7 +136,18 @@ func _work_body(work: Callable) -> void:
 func _save_core() -> bool:
 	if world == null or slot <= 0 or not matchday.is_empty():
 		return false
-	return SaveManager.save_world(world, slot) == OK
+	var gen := _save_gen
+	var ok := SaveManager.save_world(world, slot) == OK
+	if not ok:
+		_report_save_failure.call_deferred(gen)
+	return ok
+
+
+func _report_save_failure(gen: int) -> void:
+	if gen != _save_gen or world == null:
+		return
+	_save_dirty = true
+	save_failed.emit()
 
 
 ## Mundo sendo alterado por uma thread de trabalho: a interface não deve lê-lo agora.
@@ -345,27 +357,34 @@ func save_now() -> bool:
 		_batch_save = true
 		return true
 	if DisplayServer.get_name() == "headless":
-		return SaveManager.save_world(world, slot) == OK
+		var ok := SaveManager.save_world(world, slot) == OK
+		if not ok:
+			_report_save_failure(_save_gen)
+		return ok
 	_save_dirty = true
 	if not _save_busy:
 		_save_busy = true
-		_run_save.call_deferred()
+		_run_save.call_deferred(_save_gen)
 	return true
 
 
 ## Termina o que estiver pendente agora mesmo (fechar a carreira, app indo para o fundo).
-func save_blocking() -> void:
+func save_blocking() -> bool:
 	_wait_work()
 	var need := _save_dirty or _save_phase >= 1
+	var ok := true
 	if _save_writer != null:
 		_save_writer.abort() # fecha o arquivo do save em andamento antes de gravar de uma vez
 		_save_writer = null
 	if need and world != null and slot > 0 and matchday.is_empty():
-		SaveManager.save_world(world, slot)
+		ok = SaveManager.save_world(world, slot) == OK
 	_save_gen += 1 # o job que estava no meio fica sem efeito
 	_save_busy = false
 	_save_dirty = false
 	_save_phase = 0
+	if not ok:
+		_report_save_failure(_save_gen)
+	return ok
 
 
 ## Troca de carreira: espera a gravação em curso e descarta o job (ele é da carreira anterior).
@@ -379,8 +398,14 @@ func _cancel_save() -> void:
 	_save_phase = 0
 
 
-func _run_save() -> void:
-	var gen := _save_gen
+func _run_save(gen: int) -> void:
+	# A deferred request can outlive the career that scheduled it. Check the
+	# captured generation before touching the current world or writer.
+	if gen != _save_gen or not _save_busy:
+		return
+	if world == null or slot <= 0 or is_busy() or not matchday.is_empty():
+		_save_busy = false
+		return
 	var w := world
 	var s := slot
 	_save_dirty = false
@@ -392,6 +417,7 @@ func _run_save() -> void:
 	if wr == null:
 		_save_phase = 0
 		_save_busy = false
+		_report_save_failure(gen)
 		return
 	var items: Array = w.clubs.duplicate()
 	items.append_array(w.players.values())
@@ -420,17 +446,22 @@ func _run_save() -> void:
 			_save_busy = false
 			if w == world and matchday.is_empty():
 				_save_dirty = true
-				_run_save.call_deferred()
+				_run_save.call_deferred(gen)
 				_save_busy = true
 		return
 	_save_phase = 2
-	if wr.finish(w) == OK:
+	var save_error := wr.finish(w)
+	if save_error == OK:
 		SaveManager.write_meta(w, s)
 	if _save_writer == wr:
 		_save_writer = null
 	_save_phase = 0
+	if save_error != OK:
+		_save_busy = false
+		_report_save_failure(gen)
+		return # retry on the next explicit save/pause, never a busy retry loop
 	if _save_dirty:
-		_run_save.call_deferred()
+		_run_save.call_deferred(gen)
 	else:
 		_save_busy = false
 
@@ -452,8 +483,8 @@ func save_copy_async(to_slot: int, done: Callable) -> void:
 	var need := _save_dirty or _save_phase >= 1 or _batch_save
 	_cancel_save()
 	var work := func() -> bool:
-		if need:
-			_save_core()
+		if need and not _save_core():
+			return false
 		return SaveManager.save_world(world, to_slot) == OK
 	if not run_work(work, done, "Salvando..."):
 		done.call(false)
@@ -462,8 +493,8 @@ func save_copy_async(to_slot: int, done: Callable) -> void:
 func close_career() -> void:
 	end_batch()
 	save_now()
-	save_blocking()
-	_drop_career()
+	if save_blocking():
+		_drop_career()
 
 
 func _drop_career() -> void:
@@ -488,9 +519,10 @@ func close_career_async(done: Callable) -> void:
 	var need := _save_dirty or _save_phase >= 1 or _batch_save
 	_cancel_save()
 	if need and world != null and slot > 0 and matchday.is_empty() \
-			and run_work(_save_core, func(_r: Variant) -> void:
-				_drop_career()
-				done.call(), "Salvando..."):
+			and run_work(_save_core, func(saved: Variant) -> void:
+				if bool(saved):
+					_drop_career()
+					done.call(), "Salvando..."):
 		return
 	_drop_career()
 	done.call()
@@ -838,9 +870,20 @@ func _after_season(r: Variant) -> Dictionary:
 # ---------------------------------------------------------------------------
 
 func _exit_tree() -> void:
+	# SceneTree.quit() can bypass the window-close notification (Android, tests,
+	# programmatic exit). Workers must finish while their autoloads and the
+	# translation tables still exist. Do not invoke UI callbacks during teardown.
+	if _work_task >= 0:
+		WorkerThreadPool.wait_for_task_completion(_work_task)
+		_work_task = -1
+	_work_done = Callable()
+	_work_result = null
 	if _gen_task >= 0:
 		WorkerThreadPool.wait_for_task_completion(_gen_task)
 		_gen_task = -1
+	_gen_callback = Callable()
+	_gen_result = null
+	_cancel_save()
 	I18n.release()
 
 

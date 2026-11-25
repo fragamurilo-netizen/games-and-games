@@ -73,7 +73,7 @@ func _draw() -> void:
 	var fs := clampi(int(size.x / 20.0), 14, 20)
 	var nfs := fs + 6
 	for i in n:
-		var label := String(axes[i][0])
+		var label := I18n.t(String(axes[i][0]))
 		var val := int(axes[i][1])
 		var tip := _point(i, rad + fs * 1.9)
 		var lw := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x

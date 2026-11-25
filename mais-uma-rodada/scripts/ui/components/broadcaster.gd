@@ -57,7 +57,7 @@ static func for_competition(w: GameWorld, comp: String) -> Dictionary:
 		var n: Array = NATIONS[nation]
 		return _make([n[0], n[1], n[2], n[3]] if elite else [n[4], n[5], n[2], n[3]])
 	# País sem canal próprio nos dados: "Esporte <país>", nas cores do placar da competição
-	var nm := DatabaseManager.nation_name(nation) if nation != "" else ""
+	var nm := I18n.nation_name(nation) if nation != "" else ""
 	var bg: Color = th.get("bg2", Color("#18191C"))
 	var fg: Color = th.get("accent", Color("#FFC940"))
 	return {"name": ("Esporte %s" % nm) if nm != "" else "Esporte TV", "short": (nation.left(2) + "S") if nation != "" else "ETV",

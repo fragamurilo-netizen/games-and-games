@@ -114,6 +114,12 @@ static func _bubble(who: String, text: String) -> Control:
 	var row := UIKit.hbox(0)
 	var lbl := UIKit.label(text, "" if who != "info" else "Small", true)
 	lbl.custom_minimum_size.x = 380
+	if who not in ["me", "npc"]:
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl.add_theme_color_override(&"font_color", UIColors.MUTED)
+		row.add_child(lbl)
+		lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		return row
 	var panel := PanelContainer.new()
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	match who:
@@ -125,12 +131,6 @@ static func _bubble(who: String, text: String) -> Control:
 			panel.add_theme_stylebox_override(&"panel", _bubble_box(UIColors.SURFACE_3, UIColors.LINE))
 			row.add_child(panel)
 			row.add_child(UIKit.gap(60))
-		_:
-			lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			lbl.add_theme_color_override(&"font_color", UIColors.MUTED)
-			row.add_child(lbl)
-			lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			return row
 	panel.add_child(UIKit.margin(lbl, 14, 10, 14, 10))
 	return row
 

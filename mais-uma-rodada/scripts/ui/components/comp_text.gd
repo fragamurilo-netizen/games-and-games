@@ -11,7 +11,7 @@ static func fixture_title(w: GameWorld, f: Fixture) -> String:
 		return "Rodada %d de %d · %s" % [f.round + 1, rounds, w.league_short(f.comp)]
 	var pl := w.league(f.comp)
 	if pl != null:
-		return "%s · %s" % [pl.short_name, LeagueFormat.round_label(pl, f)]
+		return "%s · %s" % [I18n.t(pl.short_name), I18n.t(LeagueFormat.round_label(pl, f))]
 	var cup: Cup = w.season.cups.get(f.comp, null) if w.season != null else null
 	if cup == null:
 		return CupManager.cup_short(f.comp)
@@ -19,10 +19,10 @@ static func fixture_title(w: GameWorld, f: Fixture) -> String:
 		if cup.league_phase:
 			return "%s · Fase de liga · %dª rodada" % [cup.short_name, f.round + 1]
 		return "%s · Grupo %s · %dª rodada" % [cup.short_name, cup.group_of(f.home).get("n", "?"), f.round + 1]
-	var stage: String = cup.round_names[f.round] if f.round < cup.round_names.size() else ""
+	var stage: String = I18n.t(cup.round_names[f.round]) if f.round < cup.round_names.size() else ""
 	if f.neutral:
-		return "%s · %s" % [cup.short_name, stage]
-	return "%s · %s (%s)" % [cup.short_name, stage, "ida" if f.leg == 0 else "volta"]
+		return "%s · %s" % [I18n.t(cup.short_name), stage]
+	return "%s · %s (%s)" % [I18n.t(cup.short_name), stage, I18n.t("ida" if f.leg == 0 else "volta")]
 
 
 ## Nome curto de uma competição (liga ou copa).
@@ -65,7 +65,7 @@ static func logo(comp: String) -> Dictionary:
 	else:
 		# Liga: anel com o nome e o país, iniciais no centro
 		logo.merge({"shape": "ring", "symbol": "letter", "border": "thin", "text": name.to_upper(),
-			"text2": DatabaseManager.nation_name(nat).to_upper() if nat != "" else ""})
+			"text2": I18n.nation_name(nat).to_upper() if nat != "" else ""})
 	return logo
 
 

@@ -98,7 +98,7 @@ func _hero(w: GameWorld, co: Dictionary, club: Club) -> Control:
 	col.add_child(UIKit.label(String(co["n"]), "Title", true))
 	var nrow := UIKit.hbox(8)
 	nrow.add_child(UIKit.flag(String(co["nat"]), 34))
-	nrow.add_child(UIKit.label("%s · %d anos" % [DatabaseManager.nation_name(String(co["nat"])), w.year - int(co.get("by", w.year - 50))], "Small", true))
+	nrow.add_child(UIKit.label("%s · %d anos" % [I18n.nation_name(String(co["nat"])), w.year - int(co.get("by", w.year - 50))], "Small", true))
 	col.add_child(nrow)
 	if club != null and w.is_user_club(club.id) and not bool(co.get("int", false)):
 		col.add_child(UIKit.label(Languages.coach_text(w), "Small", true))

@@ -193,7 +193,7 @@ static func subtitle(w: GameWorld, p: Player, mode: String) -> String:
 	elif p.intl_duty:
 		parts.append("na seleção")
 	else:
-		parts.append(Player.STATUS_NAMES[p.squad_status])
+		parts.append(I18n.term(Player.STATUS_NAMES[p.squad_status]))
 	if p.club_id >= 0 and w.is_user_club(p.club_id):
 		parts.append("até %d" % p.contract_end)
 	if p.stats[Player.S_APPS] > 0:

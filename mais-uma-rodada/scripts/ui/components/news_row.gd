@@ -97,7 +97,7 @@ static func kicker(w: GameWorld, n: NewsEvent) -> String:
 	if is_foreign(w, n):
 		var c := w.club(n.club_id) if n.club_id >= 0 else null
 		var nat := c.nation if c != null else String(n.media.get("code", ""))
-		k += " · " + DatabaseManager.nation_name(nat).to_upper()
+		k += " · " + I18n.nation_name(nat).to_upper()
 	return k
 
 

@@ -148,7 +148,7 @@ func _free(w: GameWorld, c: VBoxContainer) -> void:
 		var car: Array = co.get("car", [])
 		var last: Dictionary = car.back() if not car.is_empty() else {}
 		var t := CoachCareer.totals(co)
-		var info: Array = ["%s, %d anos" % [DatabaseManager.nation_name(String(co.get("nat", ""))), w.year - int(co.get("by", w.year - 50))]]
+		var info: Array = ["%s, %d anos" % [I18n.nation_name(String(co.get("nat", ""))), w.year - int(co.get("by", w.year - 50))]]
 		if not last.is_empty():
 			info.append("último: %s (%s)" % [String(last.get("cn", "")), CoachCareer.end_text(last).to_lower()] if CoachCareer.end_text(last) != "" else "último: %s" % String(last.get("cn", "")))
 		if int(t["t"]) > 0:

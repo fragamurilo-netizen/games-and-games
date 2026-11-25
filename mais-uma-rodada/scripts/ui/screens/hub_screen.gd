@@ -188,7 +188,7 @@ func _team_block(w: GameWorld, cl: Club, f: Fixture) -> VBoxContainer:
 			var order := LeaguePhase.sorted_ids(cup) if cup.league_phase else CompetitionManager.sort_table(g["clubs"], g["table"])
 			text = "%dº na fase de liga" % [order.find(cl.id) + 1] if cup.league_phase else "%dº no grupo %s" % [order.find(cl.id) + 1, g["n"]]
 		else:
-			text = "%s · %s" % [DatabaseManager.nation_name(cl.nation), w.league_short(cl.league_id)]
+			text = "%s · %s" % [I18n.nation_name(cl.nation), w.league_short(cl.league_id)]
 	var sub := UIKit.label(text, "Small")
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sub)
@@ -567,10 +567,10 @@ static func _team_morale(w: GameWorld, club: Club) -> float:
 static func _nt_line(w: GameWorld) -> String:
 	var code := NationalCoach.nation(w)
 	if code != "":
-		return "Técnico: %s · %dº" % [DatabaseManager.nation_name(code), NationalTeamManager.rank_of(w, code)]
+		return "Técnico: %s · %dº" % [I18n.nation_name(code), NationalTeamManager.rank_of(w, code)]
 	if not NationalCoach.offers(w).is_empty():
 		return ("%d convite de seleção" if NationalCoach.offers(w).size() == 1 else "%d convites de seleção") % NationalCoach.offers(w).size()
-	return "%s · %dº" % [DatabaseManager.nation_name(w.user_nation()), NationalTeamManager.rank_of(w, w.user_nation())]
+	return "%s · %dº" % [I18n.nation_name(w.user_nation()), NationalTeamManager.rank_of(w, w.user_nation())]
 
 
 ## Data FIFA chegando (ou em andamento): datas, convocados do elenco e a lista do técnico de seleção.
@@ -592,7 +592,7 @@ func _fifa_alert(w: GameWorld, club: Club) -> Array:
 		return []
 	var code := NationalCoach.nation(w)
 	if code != "" and not NationalTeamManager.data(w).has("next"):
-		return ["globe", UIColors.ACCENT, "%s: monte a lista para a data FIFA de %s" % [DatabaseManager.nation_name(code), NationalTeamManager.window_label(w, nxt)],
+		return ["globe", UIColors.ACCENT, "%s: monte a lista para a data FIFA de %s" % [I18n.nation_name(code), NationalTeamManager.window_label(w, nxt)],
 			func(): UIManager.push("national", {"tab": "squad", "nation": code})]
 	var d := NationalTeamManager.data(w)
 	var nats: Array = []

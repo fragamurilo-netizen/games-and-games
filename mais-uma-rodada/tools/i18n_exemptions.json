@@ -1,0 +1,499 @@
+{
+	"scripts/autoload/store.gd": {
+		"Play Billing: erro %d ao conectar": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/autoload/ui_manager.gd": {
+		"Dialog": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/core/fm_logo_import.gd": {
+		"USERPROFILE": "Technical literal or identity used by code; not a UI message",
+		"Documents": "Technical literal or identity used by code; not a UI message",
+		"Documentos": "Technical literal or identity used by code; not a UI message",
+		"OneDrive/Documents": "Technical literal or identity used by code; not a UI message",
+		"OneDrive/Documentos": "Technical literal or identity used by code; not a UI message",
+		"Sports Interactive": "Technical literal or identity used by code; not a UI message",
+		"HOME": "Technical literal or identity used by code; not a UI message",
+		"Library/Application Support/Sports Interactive": "Technical literal or identity used by code; not a UI message",
+		".local/share/Sports Interactive": "Technical literal or identity used by code; not a UI message",
+		"Documents/Sports Interactive": "Technical literal or identity used by code; not a UI message",
+		"Football Manager %s": "Technical literal or identity used by code; not a UI message",
+		"/storage/emulated/0/Download": "Technical literal or identity used by code; not a UI message",
+		"/storage/emulated/0/Documents": "Technical literal or identity used by code; not a UI message",
+		"from=\"([^\"]+)\"\\s+to=\"graphics/pictures/([a-z_]+)/(\\d+)/": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/core/fmt.gd": {
+		"BRL": "Technical literal or identity used by code; not a UI message",
+		"USD": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/systems/economy.gd": {
+		"BRL": "Technical literal or identity used by code; not a UI message",
+		"USD": "Technical literal or identity used by code; not a UI message",
+		"EUR": "Technical literal or identity used by code; not a UI message",
+		"R$ %s": "Technical literal or identity used by code; not a UI message",
+		"US$ %s": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/core/pattern_translation.gd": {
+		"(?<!%)%[-+0#]*\\d*(?:\\.\\d+)?[sdf]|\\{[A-Za-z_][A-Za-z0-9_]*\\}": "Technical literal or identity used by code; not a UI message",
+		"(?<!%)%[-+0#]*\\d*(?:\\.\\d+)?[sdf]|\\{[A-Za-z0-9_]+\\}": "Technical literal or identity used by code; not a UI message",
+		"(?s)^": "Technical literal or identity used by code; not a UI message",
+		"([+ -]*\\d+)": "Technical literal or identity used by code; not a UI message",
+		"([+ -]*[\\d.,]+)": "Technical literal or identity used by code; not a UI message",
+		"ª": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/generation/name_generator.gd": {
+		"+m": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/models/season_state.gd": {
+		"Sunday": "Already localized by the date formatter",
+		"Monday": "Already localized by the date formatter",
+		"Tuesday": "Already localized by the date formatter",
+		"Wednesday": "Already localized by the date formatter",
+		"Thursday": "Already localized by the date formatter",
+		"Friday": "Already localized by the date formatter",
+		"Saturday": "Already localized by the date formatter",
+		"January": "Already localized by the date formatter",
+		"February": "Already localized by the date formatter",
+		"March": "Already localized by the date formatter",
+		"April": "Already localized by the date formatter",
+		"June": "Already localized by the date formatter",
+		"July": "Already localized by the date formatter",
+		"August": "Already localized by the date formatter",
+		"September": "Already localized by the date formatter",
+		"October": "Already localized by the date formatter",
+		"November": "Already localized by the date formatter",
+		"December": "Already localized by the date formatter",
+		"%s, %d de %s": "Already localized by the date formatter",
+		"Domingo": "Already localized by the date formatter",
+		"Lunes": "Already localized by the date formatter",
+		"Martes": "Already localized by the date formatter",
+		"Miércoles": "Already localized by the date formatter",
+		"Jueves": "Already localized by the date formatter",
+		"Viernes": "Already localized by the date formatter",
+		"Sábado": "Already localized by the date formatter"
+	},
+	"scripts/systems/generations.gd": {
+		"ês": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/systems/languages.gd": {
+		"Genève": "Technical literal or identity used by code; not a UI message",
+		"Lausanne": "Technical literal or identity used by code; not a UI message",
+		"Sion": "Technical literal or identity used by code; not a UI message",
+		"Yverdon-les-Bains": "Technical literal or identity used by code; not a UI message",
+		"Lugano": "Technical literal or identity used by code; not a UI message",
+		"Charleroi": "Technical literal or identity used by code; not a UI message",
+		"Liège": "Technical literal or identity used by code; not a UI message",
+		"Bruxelles": "Technical literal or identity used by code; not a UI message",
+		"Montréal": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/systems/league_format.gd": {
+		"P": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/systems/season_manager.gd": {
+		"P": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/systems/league_phase.gd": {
+		"C1": "Technical literal or identity used by code; not a UI message",
+		"C2": "Technical literal or identity used by code; not a UI message",
+		"C3": "Technical literal or identity used by code; not a UI message",
+		"C4": "Technical literal or identity used by code; not a UI message",
+		"C5": "Technical literal or identity used by code; not a UI message",
+		"C6": "Technical literal or identity used by code; not a UI message",
+		"C14": "Technical literal or identity used by code; not a UI message",
+		"C15": "Technical literal or identity used by code; not a UI message",
+		"C16": "Technical literal or identity used by code; not a UI message",
+		"C17": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/systems/national_kits.gd": {
+		"SEL_": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/systems/national_leagues.gd": {
+		"UNL": "Technical literal or identity used by code; not a UI message",
+		"CNL": "Technical literal or identity used by code; not a UI message",
+		"ABCD": "Technical literal or identity used by code; not a UI message",
+		"ABC": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/systems/national_team_manager.gd": {
+		"CNL": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/screens/academy_screen.gd": {
+		"ABCD": "Technical literal or identity used by code; not a UI message",
+		"Section": "Technical literal or identity used by code; not a UI message",
+		"empty": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/screens/national_screen.gd": {
+		"ABCD": "Technical literal or identity used by code; not a UI message",
+		"Section": "Technical literal or identity used by code; not a UI message",
+		"empty": "Technical literal or identity used by code; not a UI message",
+		"users": "Technical literal or identity used by code; not a UI message",
+		"selecao": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/systems/national_schedule.gd": {
+		"qual": "Technical literal or identity used by code; not a UI message",
+		"nl": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/systems/nationality_manager.gd": {
+		"PAN": "Technical literal or identity used by code; not a UI message",
+		"SLV": "Technical literal or identity used by code; not a UI message",
+		"NCA": "Technical literal or identity used by code; not a UI message",
+		"GUA": "Technical literal or identity used by code; not a UI message",
+		"CUB": "Technical literal or identity used by code; not a UI message",
+		"DOM": "Technical literal or identity used by code; not a UI message",
+		"PUR": "Technical literal or identity used by code; not a UI message",
+		"PHI": "Technical literal or identity used by code; not a UI message",
+		"EQG": "Technical literal or identity used by code; not a UI message",
+		"BHR": "Technical literal or identity used by code; not a UI message",
+		"KUW": "Technical literal or identity used by code; not a UI message",
+		"OMA": "Technical literal or identity used by code; not a UI message",
+		"STP": "Technical literal or identity used by code; not a UI message",
+		"TLS": "Technical literal or identity used by code; not a UI message",
+		"citizenship": "Technical literal or identity used by code; not a UI message",
+		"selection": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/systems/squad_rules.gd": {
+		"CUB": "Technical literal or identity used by code; not a UI message",
+		"DOM": "Technical literal or identity used by code; not a UI message",
+		"EQG": "Technical literal or identity used by code; not a UI message",
+		"BFA": "Technical literal or identity used by code; not a UI message",
+		"GUI": "Technical literal or identity used by code; not a UI message",
+		"GAB": "Technical literal or identity used by code; not a UI message",
+		"CGO": "Technical literal or identity used by code; not a UI message",
+		"TOG": "Technical literal or identity used by code; not a UI message",
+		"BEN": "Technical literal or identity used by code; not a UI message",
+		"NIG": "Technical literal or identity used by code; not a UI message",
+		"GAM": "Technical literal or identity used by code; not a UI message",
+		"SLE": "Technical literal or identity used by code; not a UI message",
+		"LBR": "Technical literal or identity used by code; not a UI message",
+		"ZAM": "Technical literal or identity used by code; not a UI message",
+		"ZIM": "Technical literal or identity used by code; not a UI message",
+		"KEN": "Technical literal or identity used by code; not a UI message",
+		"TAN": "Technical literal or identity used by code; not a UI message",
+		"UGA": "Technical literal or identity used by code; not a UI message",
+		"ETH": "Technical literal or identity used by code; not a UI message",
+		"MAD": "Technical literal or identity used by code; not a UI message",
+		"BDI": "Technical literal or identity used by code; not a UI message",
+		"RWA": "Technical literal or identity used by code; not a UI message",
+		"TRI": "Technical literal or identity used by code; not a UI message",
+		"HAI": "Technical literal or identity used by code; not a UI message",
+		"BAR": "Technical literal or identity used by code; not a UI message",
+		"GUY": "Technical literal or identity used by code; not a UI message",
+		"SUR": "Technical literal or identity used by code; not a UI message",
+		"FIJ": "Technical literal or identity used by code; not a UI message",
+		"PNG": "Technical literal or identity used by code; not a UI message",
+		"ACP": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/systems/talks.gd": {
+		"sair": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/systems/tie_stakes.gd": {
+		"Série": "Technical literal or identity used by code; not a UI message",
+		"Premier": "Technical literal or identity used by code; not a UI message",
+		"Champions": "Technical literal or identity used by code; not a UI message",
+		"Conference": "Technical literal or identity used by code; not a UI message",
+		"Ligue": "Technical literal or identity used by code; not a UI message",
+		"Super Liga": "Technical literal or identity used by code; not a UI message",
+		"da ": "Technical literal or identity used by code; not a UI message",
+		"do ": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/tv_package.gd": {
+		"Champions": "Technical literal or identity used by code; not a UI message",
+		"Conference": "Technical literal or identity used by code; not a UI message",
+		"GOAL": "Technical literal or identity used by code; not a UI message",
+		"EFL": "Technical literal or identity used by code; not a UI message",
+		"TOR": "Technical literal or identity used by code; not a UI message",
+		"BUT": "Technical literal or identity used by code; not a UI message",
+		"GOLO": "Technical literal or identity used by code; not a UI message",
+		"Brasileirão": "Technical literal or identity used by code; not a UI message",
+		"J.League": "Technical literal or identity used by code; not a UI message",
+		"FAC": "Technical literal or identity used by code; not a UI message",
+		"CSH": "Technical literal or identity used by code; not a UI message",
+		"USC": "Technical literal or identity used by code; not a UI message",
+		"REC": "Technical literal or identity used by code; not a UI message",
+		"SPE": "Technical literal or identity used by code; not a UI message",
+		"RJE": "Technical literal or identity used by code; not a UI message",
+		"MGE": "Technical literal or identity used by code; not a UI message",
+		"RSE": "Technical literal or identity used by code; not a UI message",
+		"PRE": "Technical literal or identity used by code; not a UI message",
+		"SCE": "Technical literal or identity used by code; not a UI message",
+		"CEE": "Technical literal or identity used by code; not a UI message",
+		"GOE": "Technical literal or identity used by code; not a UI message",
+		"VER": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/systems/transfer_brain.gd": {
+		"carencia": "Technical literal or identity used by code; not a UI message",
+		"sistema": "Technical literal or identity used by code; not a UI message",
+		"sucessor": "Technical literal or identity used by code; not a UI message",
+		"lesao": "Technical literal or identity used by code; not a UI message",
+		"contrato": "Technical literal or identity used by code; not a UI message",
+		"joia": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/systems/transfer_manager.gd": {
+		"rejected": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/award_ceremony.gd": {
+		"premio": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/brand_logo.gd": {
+		"telefonía": "Technical literal or identity used by code; not a UI message",
+		"energía": "Technical literal or identity used by code; not a UI message",
+		"énergie": "Technical literal or identity used by code; not a UI message",
+		"cervecería": "Technical literal or identity used by code; not a UI message",
+		"imobiliária": "Technical literal or identity used by code; not a UI message",
+		"rádio": "Technical literal or identity used by code; not a UI message",
+		"credit union": "Technical literal or identity used by code; not a UI message",
+		"pojišťovna": "Technical literal or identity used by code; not a UI message",
+		"symbol": "Technical literal or identity used by code; not a UI message",
+		"wide": "Technical literal or identity used by code; not a UI message",
+		"lower": "Technical literal or identity used by code; not a UI message",
+		"upper": "Technical literal or identity used by code; not a UI message",
+		"badge": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/brand_mark.gd": {
+		"telefonía": "Technical literal or identity used by code; not a UI message",
+		"energía": "Technical literal or identity used by code; not a UI message",
+		"énergie": "Technical literal or identity used by code; not a UI message",
+		"cervecería": "Technical literal or identity used by code; not a UI message",
+		"imobiliária": "Technical literal or identity used by code; not a UI message",
+		"rádio": "Technical literal or identity used by code; not a UI message",
+		"frigorífico": "Technical literal or identity used by code; not a UI message",
+		"pollería": "Technical literal or identity used by code; not a UI message",
+		"Kora": "Technical literal or identity used by code; not a UI message",
+		"Veloce": "Technical literal or identity used by code; not a UI message",
+		"Striker": "Technical literal or identity used by code; not a UI message",
+		"Tenkai": "Technical literal or identity used by code; not a UI message",
+		"Albion Kit": "Technical literal or identity used by code; not a UI message",
+		"Olimpo": "Technical literal or identity used by code; not a UI message",
+		"Tessuto": "Technical literal or identity used by code; not a UI message",
+		"Nordvik": "Technical literal or identity used by code; not a UI message",
+		"Alouette": "Technical literal or identity used by code; not a UI message",
+		"Pampa Sport": "Technical literal or identity used by code; not a UI message",
+		"Rinha": "Technical literal or identity used by code; not a UI message",
+		"Gol Norte": "Technical literal or identity used by code; not a UI message",
+		"Tramela": "Technical literal or identity used by code; not a UI message",
+		"Tango Deportes": "Technical literal or identity used by code; not a UI message",
+		"Gauchito": "Technical literal or identity used by code; not a UI message",
+		"Cóndor Sport": "Technical literal or identity used by code; not a UI message",
+		"Xolo Sport": "Technical literal or identity used by code; not a UI message",
+		"Hamle": "Technical literal or identity used by code; not a UI message",
+		"Hanse Trikot": "Technical literal or identity used by code; not a UI message",
+		"Alpina Sport": "Technical literal or identity used by code; not a UI message",
+		"Lusitano": "Technical literal or identity used by code; not a UI message",
+		"Delta Sport": "Technical literal or identity used by code; not a UI message",
+		"Tartan Kit": "Technical literal or identity used by code; not a UI message",
+		"Ferrier": "Technical literal or identity used by code; not a UI message",
+		"Vardar Sport": "Technical literal or identity used by code; not a UI message",
+		"Hwarang": "Technical literal or identity used by code; not a UI message",
+		"Longwei": "Technical literal or identity used by code; not a UI message",
+		"Sahel Sport": "Technical literal or identity used by code; not a UI message",
+		"Rimal Sport": "Technical literal or identity used by code; not a UI message",
+		"Southern Kit": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/screens/match_screen.gd": {
+		"Section": "Technical literal or identity used by code; not a UI message",
+		"hit": "Technical literal or identity used by code; not a UI message",
+		"fresh": "Technical literal or identity used by code; not a UI message",
+		"pitch": "Technical literal or identity used by code; not a UI message",
+		"resume": "Technical literal or identity used by code; not a UI message",
+		"user": "Technical literal or identity used by code; not a UI message",
+		"Body": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/crest_view.gd": {
+		"auto": "Technical literal or identity used by code; not a UI message",
+		"tc": "Technical literal or identity used by code; not a UI message",
+		"canton": "Technical literal or identity used by code; not a UI message",
+		"accent": "Technical literal or identity used by code; not a UI message",
+		"dc": "Technical literal or identity used by code; not a UI message",
+		"thick": "Technical literal or identity used by code; not a UI message",
+		"FCB": "Technical literal or identity used by code; not a UI message",
+		"band": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/portrait_view.gd": {
+		"dc": "Technical literal or identity used by code; not a UI message",
+		"iris": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/face_shade.gd": {
+		"partes": "Technical literal or identity used by code; not a UI message",
+		"alturas": "Technical literal or identity used by code; not a UI message",
+		"desfoques": "Technical literal or identity used by code; not a UI message",
+		"luz": "Technical literal or identity used by code; not a UI message",
+		"suavizar": "Technical literal or identity used by code; not a UI message",
+		"camadas": "Technical literal or identity used by code; not a UI message",
+		"peças": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/flag_view.gd": {
+		"Texture2D": "Technical literal or identity used by code; not a UI message",
+		"disc": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/kit_presentation.gd": {
+		"uniforme": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/kit_shade.gd": {
+		"v|": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/kit_view.gd": {
+		"ss|%s|%s|%s": "Technical literal or identity used by code; not a UI message",
+		"w|%s|%s": "Technical literal or identity used by code; not a UI message",
+		"t|%s|%s": "Technical literal or identity used by code; not a UI message",
+		"hem": "Technical literal or identity used by code; not a UI message",
+		"sl|%s|%s": "Technical literal or identity used by code; not a UI message",
+		"torso": "Technical literal or identity used by code; not a UI message",
+		"lg|%s|%s": "Technical literal or identity used by code; not a UI message",
+		"thigh|%s": "Technical literal or identity used by code; not a UI message",
+		"limb": "Technical literal or identity used by code; not a UI message",
+		"thigh": "Technical literal or identity used by code; not a UI message",
+		"sock|%s": "Technical literal or identity used by code; not a UI message",
+		"sock": "Technical literal or identity used by code; not a UI message",
+		"sh|": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/negotiation.gd": {
+		"ws": "Technical literal or identity used by code; not a UI message",
+		"ab": "Technical literal or identity used by code; not a UI message",
+		"gb": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/pitch_motion.gd": {
+		"mark": "Technical literal or identity used by code; not a UI message",
+		"throw": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/pitch_view.gd": {
+		"lineup": "Technical literal or identity used by code; not a UI message",
+		"match": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/screens/prematch_screen.gd": {
+		"match": "Technical literal or identity used by code; not a UI message",
+		"Section": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/player_row_view.gd": {
+		"globe": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/scoreboard_theme.gd": {
+		"tv": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/scout_report_view.gd": {
+		"Section": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/sim_dialog.gd": {
+		"Section": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/tv_graphics.gd": {
+		"Section": "Technical literal or identity used by code; not a UI message",
+		"Word": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/kit/player_brief.gd": {
+		"Section": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/kit/stat_strip.gd": {
+		"Section": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/screens/club_screen.gd": {
+		"Section": "Technical literal or identity used by code; not a UI message",
+		"empty": "Technical literal or identity used by code; not a UI message",
+		"calendar": "Technical literal or identity used by code; not a UI message",
+		"manage": "Technical literal or identity used by code; not a UI message",
+		"stats": "Technical literal or identity used by code; not a UI message",
+		"history": "Technical literal or identity used by code; not a UI message",
+		"lose": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/screens/coach_schools_screen.gd": {
+		"Section": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/screens/generations_screen.gd": {
+		"Section": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/screens/hub_screen.gd": {
+		"Section": "Technical literal or identity used by code; not a UI message",
+		"empty": "Technical literal or identity used by code; not a UI message",
+		"jobs": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/screens/league_stats_screen.gd": {
+		"Section": "Technical literal or identity used by code; not a UI message",
+		"gf": "Technical literal or identity used by code; not a UI message",
+		"ga": "Technical literal or identity used by code; not a UI message",
+		"desc": "Technical literal or identity used by code; not a UI message",
+		"empty": "Technical literal or identity used by code; not a UI message",
+		"summary": "Technical literal or identity used by code; not a UI message",
+		"xg": "Technical literal or identity used by code; not a UI message",
+		"xga": "Technical literal or identity used by code; not a UI message",
+		"sh": "Technical literal or identity used by code; not a UI message",
+		"so": "Technical literal or identity used by code; not a UI message",
+		"sha": "Technical literal or identity used by code; not a UI message",
+		"kp": "Technical literal or identity used by code; not a UI message",
+		"dr": "Technical literal or identity used by code; not a UI message",
+		"tk": "Technical literal or identity used by code; not a UI message",
+		"it": "Technical literal or identity used by code; not a UI message",
+		"ad": "Technical literal or identity used by code; not a UI message",
+		"cs": "Technical literal or identity used by code; not a UI message",
+		"asc": "Technical literal or identity used by code; not a UI message",
+		"goals": "Technical literal or identity used by code; not a UI message",
+		"assists": "Technical literal or identity used by code; not a UI message",
+		"son": "Technical literal or identity used by code; not a UI message",
+		"sv": "Technical literal or identity used by code; not a UI message",
+		"conc": "Technical literal or identity used by code; not a UI message",
+		"motm": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/screens/market_screen.gd": {
+		"Section": "Technical literal or identity used by code; not a UI message",
+		"empty": "Technical literal or identity used by code; not a UI message",
+		"so": "Technical literal or identity used by code; not a UI message",
+		"shortlist": "Technical literal or identity used by code; not a UI message",
+		"bb": "Technical literal or identity used by code; not a UI message",
+		"scout": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/screens/player_profile_screen.gd": {
+		"Section": "Technical literal or identity used by code; not a UI message",
+		"user": "Technical literal or identity used by code; not a UI message",
+		"generations": "Technical literal or identity used by code; not a UI message",
+		"birth": "Technical literal or identity used by code; not a UI message",
+		"buyback": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/screens/season_end_screen.gd": {
+		"Section": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/screens/squad_screen.gd": {
+		"Section": "Technical literal or identity used by code; not a UI message",
+		"empty": "Technical literal or identity used by code; not a UI message",
+		"contracts": "Technical literal or identity used by code; not a UI message",
+		"numbers": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/screens/table_screen.gd": {
+		"Section": "Technical literal or identity used by code; not a UI message",
+		"chart": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/screens/training_screen.gd": {
+		"Section": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/table_rows.gd": {
+		"pl": "Technical literal or identity used by code; not a UI message",
+		"sg": "Technical literal or identity used by code; not a UI message",
+		"gf": "Technical literal or identity used by code; not a UI message",
+		"ga": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/training_sheet.gd": {
+		"Screen": "Technical literal or identity used by code; not a UI message",
+		"st": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/components/tv_layer.gd": {
+		"Word": "Technical literal or identity used by code; not a UI message",
+		"position": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/kit/data_table.gd": {
+		"desc": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/ui_kit.gd": {
+		"empty": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/screens/coach_screen.gd": {
+		"tecnico": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/screens/editor_screen.gd": {
+		"es": "Technical literal or identity used by code; not a UI message",
+		"ns": "Technical literal or identity used by code; not a UI message",
+		"mt": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/screens/jobs_screen.gd": {
+		"interview": "Technical literal or identity used by code; not a UI message",
+		"tac": "Technical literal or identity used by code; not a UI message"
+	},
+	"scripts/ui/screens/settings_screen.gd": {
+		"download": "Technical literal or identity used by code; not a UI message",
+		"edit": "Technical literal or identity used by code; not a UI message"
+	}
+}

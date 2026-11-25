@@ -34,7 +34,7 @@ func refresh() -> void:
 	if _nation == "":
 		_nation = w.user_nation() if w.has_user() else "BRA"
 	var nat_rank := NationalTeamManager.rank_of(w, _nation)
-	screen_subtitle = "%s · %dº no ranking" % [DatabaseManager.nation_name(_nation), nat_rank]
+	screen_subtitle = "%s · %dº no ranking" % [I18n.nation_name(_nation), nat_rank]
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
@@ -43,9 +43,9 @@ func refresh() -> void:
 	selector.custom_minimum_size.y = UITokens.H_BUTTON
 	selector.tooltip_text = "Consultar seleção"
 	var nations: Array = DatabaseManager.nations().keys()
-	nations.sort_custom(func(a,b): return DatabaseManager.nation_name(a) < DatabaseManager.nation_name(b))
+	nations.sort_custom(func(a,b): return I18n.nation_name(a) < I18n.nation_name(b))
 	for code in nations:
-		selector.add_item(DatabaseManager.nation_name(code))
+		selector.add_item(I18n.nation_name(code))
 	selector.select(nations.find(_nation))
 	selector.item_selected.connect(func(i: int):
 		_nation = nations[i]
@@ -81,7 +81,7 @@ func _hero(w: GameWorld, rank: int) -> Control:
 	var col := UIKit.vbox(0)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
-	var nm := UIKit.label(DatabaseManager.nation_name(_nation), "Title")
+	var nm := UIKit.label(I18n.nation_name(_nation), "Title")
 	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	col.add_child(nm)
 	var line := tr("%dº no ranking") % rank
@@ -120,7 +120,7 @@ func _job_card(w: GameWorld) -> Control:
 		h.add_child(UIKit.flag(code, 56))
 		var col := UIKit.vbox(0)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		col.add_child(UIKit.label(DatabaseManager.nation_name(code), "H2", true))
+		col.add_child(UIKit.label(I18n.nation_name(code), "H2", true))
 		col.add_child(UIKit.label("Você é o técnico desde %d, junto com o %s" % [int(st.get("since", w.year)), w.user_club().short_name], "Small", true))
 		h.add_child(col)
 		card.add_child(h)
@@ -140,7 +140,7 @@ func _job_card(w: GameWorld) -> Control:
 			refresh(), "users"))
 		row.add_child(UIKit.button("Uniformes", "GhostButton", func(): UIManager.push("kit", {"nation": code}), "shirt"))
 		row.add_child(UIKit.button("Deixar o cargo", "GhostButton", func():
-			UIManager.confirm("Deixar a seleção", "Você deixa o comando da seleção (%s) e segue só no clube." % DatabaseManager.nation_name(code), "Sair da seleção", func():
+			UIManager.confirm("Deixar a seleção", "Você deixa o comando da seleção (%s) e segue só no clube." % I18n.nation_name(code), "Sair da seleção", func():
 				NationalCoach.resign(w)
 				GameManager.save_now()
 				refresh()), "close"))
@@ -158,7 +158,7 @@ func _job_card(w: GameWorld) -> Control:
 		h.add_child(UIKit.flag(oc, 40))
 		var col := UIKit.vbox(0)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var nl := UIKit.label(DatabaseManager.nation_name(oc), "H3")
+		var nl := UIKit.label(I18n.nation_name(oc), "H3")
 		nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		col.add_child(nl)
 		col.add_child(UIKit.label("%dº no ranking · %s" % [NationalTeamManager.rank_of(w, oc), NationalCoach.expectation(w, oc)], "Small", true))
@@ -166,7 +166,7 @@ func _job_card(w: GameWorld) -> Control:
 		card.add_child(h)
 		var br := UIKit.hbox(8)
 		var yes := UIKit.button("Assumir seleção", "PrimaryButton", func():
-			UIManager.confirm("Assumir a seleção de %s" % DatabaseManager.nation_name(oc),
+			UIManager.confirm("Assumir a seleção de %s" % I18n.nation_name(oc),
 				"Você vai comandar esta seleção e continuar no %s." % w.user_club().short_name, "Assumir seleção", func():
 					NationalCoach.accept(w, oc)
 					_nation = oc
@@ -186,7 +186,7 @@ func _job_card(w: GameWorld) -> Control:
 		card.add_child(UIKit.section("Passagens"))
 		for i in range(hist.size() - 1, -1, -1):
 			var e: Dictionary = hist[i]
-			card.add_child(UIKit.kv("%s (%d-%d)" % [DatabaseManager.nation_name(e["n"]), int(e["from"]), int(e["to"])], "%d-%d-%d · %s" % [int(e["w"]), int(e["d"]), int(e["l"]), e["why"]]))
+			card.add_child(UIKit.kv("%s (%d-%d)" % [I18n.nation_name(e["n"]), int(e["from"]), int(e["to"])], "%d-%d-%d · %s" % [int(e["w"]), int(e["d"]), int(e["l"]), e["why"]]))
 	return UIKit.card_panel(card)
 
 
@@ -205,7 +205,7 @@ func _vacancies(w: GameWorld, card: VBoxContainer) -> void:
 		h.add_child(UIKit.flag(oc, 36))
 		var col := UIKit.vbox(0)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var nl := UIKit.label(DatabaseManager.nation_name(oc), "H3")
+		var nl := UIKit.label(I18n.nation_name(oc), "H3")
 		nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		col.add_child(nl)
 		col.add_child(UIKit.label("%dº no ranking · %s · pede reputação %d · chance %s" % [NationalTeamManager.rank_of(w, oc),
@@ -383,15 +383,15 @@ func _edition(w: GameWorld, rec: Dictionary) -> Control:
 	var ch := UIKit.hbox(12)
 	ch.add_child(UIKit.icon_rect("trophy", 36, UIColors.ACCENT))
 	ch.add_child(UIKit.flag(rec["champion"], 48))
-	var cl := UIKit.label("%s campeã" % DatabaseManager.nation_name(rec["champion"]), "H2", true)
+	var cl := UIKit.label("%s campeã" % I18n.nation_name(rec["champion"]), "H2", true)
 	cl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cl.add_theme_color_override(&"font_color", UIColors.ACCENT)
 	ch.add_child(cl)
 	head.add_child(ch)
-	head.add_child(UIKit.label("Vice: %s" % DatabaseManager.nation_name(rec["runner_up"]), ""))
+	head.add_child(UIKit.label("Vice: %s" % I18n.nation_name(rec["runner_up"]), ""))
 	var sc: Dictionary = rec.get("scorer", {})
 	if not sc.is_empty():
-		head.add_child(UIKit.label("Artilheiro: %s (%s), %d gols" % [sc["name"], DatabaseManager.nation_name(sc["nation"]), int(sc["goals"])], "Small"))
+		head.add_child(UIKit.label("Artilheiro: %s (%s), %d gols" % [sc["name"], I18n.nation_name(sc["nation"]), int(sc["goals"])], "Small"))
 	out.add_child(UIKit.card_panel(head))
 	# Mata-mata, da final para trás
 	var ko: Array = rec.get("ko", [])
@@ -416,7 +416,7 @@ func _edition(w: GameWorld, rec: Dictionary) -> Control:
 ## Linha de jogo de mata-mata: [a, b, ga, gb, pa, pb, et, vencedor].
 func _match_row(w: GameWorld, m: Array) -> Control:
 	var h := UIKit.hbox(8)
-	var a := UIKit.label(DatabaseManager.nation_name(m[0]), "H3" if m[7] == m[0] else "")
+	var a := UIKit.label(I18n.nation_name(m[0]), "H3" if m[7] == m[0] else "")
 	a.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	a.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	a.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -432,7 +432,7 @@ func _match_row(w: GameWorld, m: Array) -> Control:
 	s.custom_minimum_size.x = 110
 	h.add_child(s)
 	h.add_child(UIKit.flag(m[1], 30))
-	var b := UIKit.label(DatabaseManager.nation_name(m[1]), "H3" if m[7] == m[1] else "")
+	var b := UIKit.label(I18n.nation_name(m[1]), "H3" if m[7] == m[1] else "")
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	h.add_child(b)
@@ -451,7 +451,7 @@ func _nation_table_row(w: GameWorld, code: String, r: Dictionary, pos: int, high
 	h.add_child(pl)
 	h.add_child(UIKit.flag(code, 30))
 	var mine := code == NationalCoach.nation(w)
-	var n := UIKit.label(DatabaseManager.nation_name(code), "H3" if mine else "")
+	var n := UIKit.label(I18n.nation_name(code), "H3" if mine else "")
 	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	if mine:
@@ -486,10 +486,10 @@ func _champions_list(w: GameWorld, id: String) -> Control:
 		y.custom_minimum_size.x = 64
 		h.add_child(y)
 		h.add_child(UIKit.flag(r["champion"], 32))
-		var n := UIKit.label(DatabaseManager.nation_name(r["champion"]), "H3")
+		var n := UIKit.label(I18n.nation_name(r["champion"]), "H3")
 		n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		h.add_child(n)
-		h.add_child(UIKit.label("vice: %s" % DatabaseManager.nation_name(r["runner_up"]), "Small"))
+		h.add_child(UIKit.label("vice: %s" % I18n.nation_name(r["runner_up"]), "Small"))
 		card.add_child(h)
 	# Antes do save: os campeões reais (data/world/national_titles.json), do mais recente ao mais antigo.
 	var src: Variant = DatabaseManager.get_data("national_titles")
@@ -505,7 +505,7 @@ func _champions_list(w: GameWorld, id: String) -> Control:
 		y.custom_minimum_size.x = 64
 		h.add_child(y)
 		h.add_child(UIKit.flag(String(e[1]), 32))
-		var n := UIKit.label(DatabaseManager.nation_name(String(e[1])), "H3")
+		var n := UIKit.label(I18n.nation_name(String(e[1])), "H3")
 		n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		h.add_child(n)
 		card.add_child(h)
@@ -540,7 +540,7 @@ func _quals(w: GameWorld, c: VBoxContainer) -> void:
 	info.add_child(UIKit.label("%s %d" % [camp["name"], int(camp["y"])], "H2"))
 	info.add_child(UIKit.label(("Rodada %d de %d · %d vaga%s" if int(camp["spots"]) == 1 else "Rodada %d de %d · %d vagas%s") % [int(camp["md"]), int(camp["mdt"]), int(camp["spots"]), " · encerrada" if bool(camp["done"]) else ""], "Small"))
 	if bool(camp["done"]):
-		info.add_child(UIKit.label("Classificados: %s" % ", ".join((camp["q"] as Array).map(func(x): return DatabaseManager.nation_name(x))), "", true))
+		info.add_child(UIKit.label("Classificados: %s" % ", ".join((camp["q"] as Array).map(func(x): return I18n.nation_name(x))), "", true))
 	c.add_child(UIKit.card_panel(info))
 	var groups: Array = camp["groups"]
 	var per_group := int(camp["spots"]) / maxi(1, groups.size())
@@ -572,7 +572,7 @@ func _ranking(w: GameWorld) -> Control:
 		pl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		h.add_child(pl)
 		h.add_child(UIKit.flag(code, 34))
-		var n := UIKit.label(DatabaseManager.nation_name(code), "H3" if code == mine else "")
+		var n := UIKit.label(I18n.nation_name(code), "H3" if code == mine else "")
 		n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		if code == mine:
 			n.add_theme_color_override(&"font_color", UIColors.ACCENT)

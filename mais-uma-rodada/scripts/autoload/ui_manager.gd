@@ -165,6 +165,8 @@ func _instance(name: String, params: Dictionary) -> BaseScreen:
 ## Abre uma tela do zero. Área (Início, Elenco...): recomeça a pilha dela. Fora das áreas
 ## (menu, boas-vindas, nova carreira): descarta todas as pilhas.
 func goto(name: String, params: Dictionary = {}) -> void:
+	if GameManager.is_busy():
+		return
 	close_all_modals()
 	if AREA_OF.has(name) and not stack.is_empty() and GameManager.has_career():
 		push(name, params) # tabela aberta do Início: volta para o Início
@@ -177,7 +179,7 @@ func goto(name: String, params: Dictionary = {}) -> void:
 		if name != a:
 			stack.append(_instance(a, {}))
 			main.screen_host.add_child(stack[0])
-			stack[0].visible = false
+			_hide_top()
 			_show(_instance(name, params), 56.0)
 		else:
 			_show(_instance(name, params), 0.0)
@@ -191,6 +193,8 @@ func goto(name: String, params: Dictionary = {}) -> void:
 ## Toque na barra de navegação: volta à área como ela estava. Tocar na área atual sobe
 ## para a raiz dela (ou para o topo da lista, se já estiver na raiz).
 func switch_area(a: String) -> void:
+	if GameManager.is_busy() or GameManager.in_batch() or a not in TABS:
+		return
 	close_all_modals()
 	if a == area:
 		if stack.size() > 1:
@@ -213,12 +217,15 @@ func switch_area(a: String) -> void:
 
 
 func pop_to_root() -> void:
+	if GameManager.is_busy() or stack.is_empty():
+		return
 	close_all_modals()
 	while stack.size() > 1:
 		var s: BaseScreen = stack.pop_back()
 		s.queue_free()
 	var root := current()
 	root.visible = true
+	root.process_mode = Node.PROCESS_MODE_INHERIT
 	_apply_chrome(root)
 	root.on_show()
 	_animate_in(root, -40.0)
@@ -271,17 +278,17 @@ func _free_stack(a: String) -> void:
 
 ## Empilha uma tela (perfil, negociação...). "Voltar" retorna à anterior.
 func push(name: String, params: Dictionary = {}) -> void:
+	if GameManager.is_busy():
+		return
 	close_all_modals()
-	var cur := current()
-	if cur != null:
-		_remember_scroll(cur)
-		cur.visible = false
-		cur.on_hide()
+	_hide_top()
 	_show(_instance(name, params), 56.0)
 
 
 ## Substitui a tela do topo (fluxos lineares: pré-jogo → partida → resultados).
 func replace(name: String, params: Dictionary = {}) -> void:
+	if GameManager.is_busy():
+		return
 	close_all_modals()
 	var cur := current()
 	if cur != null:
@@ -296,7 +303,8 @@ func back() -> bool:
 		SimDialog.request_stop()
 		return true
 	if not _modals.is_empty():
-		close_modal()
+		if bool(_modals.back().get_meta(&"dismissable", true)):
+			close_modal()
 		return true
 	if stack.size() <= 1:
 		return false
@@ -323,9 +331,11 @@ func _show(screen: BaseScreen, from_x: float) -> void:
 ## Transição curta: a tela entra deslizando do lado de onde veio (avançar = da direita,
 ## voltar = da esquerda) enquanto aparece. Trocar de aba é só um fade rápido.
 func _animate_in(screen: Control, from_x: float) -> void:
-	screen.modulate.a = 0.0
 	if AppSettings.reduce_motion:
-		from_x = 0.0
+		screen.modulate.a = 1.0
+		screen.position.x = 0.0
+		return
+	screen.modulate.a = 0.0
 	screen.position.x = from_x
 	var tw := screen.create_tween().set_parallel()
 	tw.tween_property(screen, "modulate:a", 1.0, 0.16 if from_x != 0.0 else 0.12)
@@ -402,6 +412,7 @@ func show_modal(content: Control, as_sheet: bool = false, dismissable: bool = tr
 	dim.color = Color(0, 0, 0, 0.62)
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	dim.mouse_filter = Control.MOUSE_FILTER_STOP
+	dim.set_meta(&"dismissable", dismissable)
 	layer.add_child(dim)
 	var holder := MarginContainer.new()
 	holder.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -434,8 +445,7 @@ func show_modal(content: Control, as_sheet: bool = false, dismissable: bool = tr
 	var psb := panel.get_theme_stylebox(&"panel")
 	_clamp_width(content, vw - side * 2.0 - (psb.get_minimum_size().x if psb != null else 0.0), 2)
 	# Conteúdo maior que a tela rola dentro do modal em vez de vazar para fora dela.
-	var reserved := safe.position.y + 60.0 + (safe.size.y if as_sheet else safe.size.y + 60.0)
-	var body := _fit_to_screen(content, layer, panel, reserved)
+	var body := _scroll_modal(content)
 	if as_sheet:
 		var inner := MarginContainer.new()
 		inner.add_theme_constant_override(&"margin_bottom", int(safe.size.y))
@@ -462,7 +472,15 @@ func show_modal(content: Control, as_sheet: bool = false, dismissable: bool = tr
 			if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
 				close_modal())
 	_modals.append(dim)
+	# Recalculate both axes when the viewport rotates or translated text wraps.
+	# Signals belong to this modal, so closing it cannot retain resize callbacks.
+	var fit := _layout_modal.bind(dim, holder, panel, body, content, as_sheet)
+	dim.resized.connect(fit, CONNECT_DEFERRED)
+	content.minimum_size_changed.connect(fit, CONNECT_DEFERRED)
+	fit.call_deferred()
 	# Entrada: o fundo escurece e o painel sobe um pouco (a folha inferior vem de baixo).
+	if AppSettings.reduce_motion:
+		return dim
 	dim.modulate.a = 0.0
 	holder.position.y = 90.0 if as_sheet else 24.0
 	var tw := dim.create_tween().set_parallel()
@@ -484,14 +502,9 @@ func _clamp_width(n: Control, max_w: float, depth: int) -> void:
 			_clamp_width(ch, max_w, depth - 1)
 
 
-func _fit_to_screen(content: Control, layer: Control, panel: PanelContainer, reserved: float) -> Control:
-	var max_h := func() -> float:
-		var style := panel.get_theme_stylebox(&"panel")
-		var pad := style.get_minimum_size().y if style != null else 0.0
-		return maxf(200.0, layer.get_viewport_rect().size.y - reserved - pad)
+func _scroll_modal(content: Control) -> ScrollContainer:
 	if content is ScrollContainer:
-		var want := content.custom_minimum_size.y
-		content.custom_minimum_size.y = minf(want, max_h.call()) if want > 0.0 else want
+		content.set_meta(&"modal_wanted_height", content.custom_minimum_size.y)
 		return content
 	var sc := ScrollContainer.new()
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -500,12 +513,37 @@ func _fit_to_screen(content: Control, layer: Control, panel: PanelContainer, res
 	sc.follow_focus = false
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sc.add_child(content)
-	var fit := func() -> void:
-		if is_instance_valid(sc) and is_instance_valid(content):
-			sc.custom_minimum_size.y = minf(content.get_combined_minimum_size().y, max_h.call())
-	content.minimum_size_changed.connect(fit)
-	sc.ready.connect(fit)
 	return sc
+
+
+func _layout_modal(dim: Control, holder: MarginContainer, panel: PanelContainer, body: ScrollContainer, content: Control, as_sheet: bool) -> void:
+	if not is_instance_valid(dim) or dim.is_queued_for_deletion() or not is_instance_valid(content):
+		return
+	var safe: Rect2 = main.safe_margins()
+	var vp := dim.get_viewport_rect().size
+	var cap := 820.0 if as_sheet else 680.0
+	var side := maxi(0 if as_sheet else 28, int((vp.x - cap) / 2.0))
+	var top := int(safe.position.y) + 24
+	var bottom := 0 if as_sheet else int(safe.size.y) + 24
+	holder.add_theme_constant_override(&"margin_left", side)
+	holder.add_theme_constant_override(&"margin_right", side)
+	holder.add_theme_constant_override(&"margin_top", top)
+	holder.add_theme_constant_override(&"margin_bottom", bottom)
+	var style := panel.get_theme_stylebox(&"panel")
+	var pad := style.get_minimum_size() if style != null else Vector2.ZERO
+	var width := maxf(1.0, vp.x - side * 2.0 - pad.x)
+	_clamp_width(content, width, 3)
+	UIKit.fit_width(content, width)
+	var extra := safe.size.y + 20.0 if as_sheet else 0.0 # handle + spacing
+	var available := maxf(1.0, vp.y - top - bottom - pad.y - extra)
+	var wanted := content.get_combined_minimum_size().y
+	if body == content:
+		wanted = float(content.get_meta(&"modal_wanted_height", 0.0))
+		if wanted <= 0.0:
+			wanted = content.get_child(0).get_combined_minimum_size().y if content.get_child_count() > 0 else 0.0
+	var height := minf(wanted, available)
+	if not is_equal_approx(body.custom_minimum_size.y, height):
+		body.custom_minimum_size.y = height
 
 
 ## Popover: informação curta presa ao elemento tocado (o que é um atributo, a forma de um
@@ -580,10 +618,12 @@ func dialog(title: String, body: String, buttons: Array) -> void:
 		v.add_child(bl)
 	# Dois botões lado a lado (confirmar e cancelar), com o principal à direita, como nos
 	# diálogos de console; mais de dois, empilhados.
-	var row: BoxContainer = UIKit.vbox(10)
+	var row: BoxContainer
 	if buttons.size() == 2:
 		row = UIKit.hbox(12)
 		buttons = [buttons[1], buttons[0]]
+	else:
+		row = UIKit.vbox(10)
 	for b in buttons:
 		var cb: Callable = b.get("cb", Callable())
 		var btn := UIKit.button(b.get("text", "OK"), b.get("style", ""), func():

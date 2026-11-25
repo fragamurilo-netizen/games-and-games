@@ -199,7 +199,7 @@ func _open_picker(w: GameWorld) -> void:
 			var code: String = n
 			var inner := UIKit.hbox(8)
 			inner.add_child(UIKit.flag(code, 34))
-			inner.add_child(UIKit.label(DatabaseManager.nation_name(code), "Small"))
+			inner.add_child(UIKit.label(I18n.nation_name(code), "Small"))
 			flow.add_child(UIKit.tap_row(inner, func(): _pick_league(DatabaseManager.leagues_of_nation(code)[0]), "CardFlat"))
 		v.add_child(UIKit.section(confeds[cf]))
 		v.add_child(flow)
@@ -1508,7 +1508,7 @@ func _rank_view(c: VBoxContainer, w: GameWorld) -> void:
 	if u != null:
 		var confed := String(DatabaseManager.nation(u.nation).get("confed", ""))
 		scopes.append(["C:" + confed, {"UEFA": "Europa", "CONMEBOL": "Am. do Sul", "CONCACAF": "Am. do Norte", "CAF": "África", "AFC": "Ásia"}.get(confed, confed)])
-		scopes.append(["N:" + u.nation, DatabaseManager.nation_name(u.nation)])
+		scopes.append(["N:" + u.nation, I18n.nation_name(u.nation)])
 	var g := ButtonGroup.new()
 	var trow := UIKit.hbox(8)
 	for sc in scopes:

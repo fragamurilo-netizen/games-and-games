@@ -12,7 +12,7 @@ extends Control
 		var path := String(_spec.get("svg", ""))
 		if path.begins_with("res://") and ResourceLoader.exists(path, "Texture2D"):
 			_art = load(path) as Texture2D
-		tooltip_text = DatabaseManager.nation_name(v) if not Engine.is_editor_hint() else v
+		tooltip_text = I18n.nation_name(v) if not Engine.is_editor_hint() else v
 		queue_redraw()
 
 var _spec: Dictionary = {}

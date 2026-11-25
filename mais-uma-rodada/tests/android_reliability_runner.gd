@@ -185,6 +185,15 @@ func _run() -> void:
 		await _frames(4)
 	# Reproduce reopening Mercado after loading the same career, rather than only a new game.
 	print("RELIABILITY load begin")
+	# Closing a negotiation must release its static capture handle and career.
+	for attempt in 3:
+		Negotiation.open(w, w.squad(w.user_club())[0], "renew", func(): pass)
+		var closed_negotiation: WeakRef = weakref(Negotiation.last)
+		await _frames(5)
+		UIManager.close_all_modals()
+		await _frames(5)
+		check(Negotiation.last == null, "closed negotiation clears static handle")
+		check(closed_negotiation.get_ref() == null, "closed negotiation releases its instance and world")
 	w = null
 	UIManager.goto("menu")
 	await _frames(3)

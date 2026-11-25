@@ -233,7 +233,7 @@ static func _player_row(w: GameWorld, p: Player, cb: Callable) -> Control:
 		var o := w.player(People.bond_other(b, p.id))
 		if o != null:
 			tags.append("%s: %s" % [People.bond_text(b), o.display_name()])
-	col.add_child(UIKit.label("%s · %s%s" % [Pos.code(p.position), Player.STATUS_NAMES[p.squad_status], (" · " + ", ".join(tags)) if not tags.is_empty() else ""], "Small", true))
+	col.add_child(UIKit.label("%s · %s%s" % [Pos.code(p.position), I18n.term(Player.STATUS_NAMES[p.squad_status]), (" · " + ", ".join(tags)) if not tags.is_empty() else ""], "Small", true))
 	row.add_child(col)
 	var pid := p.id
 	return UIKit.tap_row(row, func(): TalkDialog.open("player", pid, cb))

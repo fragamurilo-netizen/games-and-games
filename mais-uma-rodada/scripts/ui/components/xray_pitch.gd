@@ -160,6 +160,7 @@ func _dot(p: Vector2, col: Color) -> void:
 
 
 func _label(t: String, p: Vector2, col: Color, fs: int) -> void:
+	t = I18n.t(t)
 	if _font == null or t == "":
 		return
 	draw_string_outline(_font, p, t, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 4, Color(0, 0, 0, 0.7))

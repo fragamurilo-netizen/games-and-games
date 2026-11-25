@@ -217,7 +217,7 @@ func _friendlies_card(w: GameWorld, pre: Dictionary) -> Control:
 		var col := UIKit.vbox(0)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		col.add_child(UIKit.label(opp.short_name, "H3", true))
-		col.add_child(UIKit.label("%s · %s · %s" % [DatabaseManager.nation_name(opp.nation), w.league_short(opp.league_id), "fora" if i == 1 else "em casa"], "Small", true))
+		col.add_child(UIKit.label("%s · %s · %s" % [I18n.nation_name(opp.nation), w.league_short(opp.league_id), "fora" if i == 1 else "em casa"], "Small", true))
 		row.add_child(col)
 		row.add_child(UIKit.label(LEVELS[mini(i, 2)], "Small"))
 		card.add_child(row)

@@ -61,6 +61,7 @@ func _ready() -> void:
 			UIManager.push("inbox"))
 	bottom_nav.tab_selected.connect(_on_tab)
 	GameManager.world_changed.connect(func(): UIManager.refresh_chrome())
+	GameManager.save_failed.connect(func(): UIManager.toast("Não foi possível salvar a carreira. Verifique o espaço livre e tente novamente.", UIColors.RED))
 	Sfx.start_music()
 	UIManager.goto("menu")
 

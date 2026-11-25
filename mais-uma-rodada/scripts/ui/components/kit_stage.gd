@@ -41,7 +41,8 @@ func _draw() -> void:
 	if caption != "":
 		var font := get_theme_font(&"font", &"Stat")
 		var fs := 18
-		var tw := font.get_string_size(caption, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		var localized_caption := I18n.t(caption)
+		var tw := font.get_string_size(localized_caption, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		var pos := Vector2(w * 0.5 - tw * 0.5, h - 9)
 		var tc := col2 if absf(col2.get_luminance() - base.get_luminance()) > 0.3 else Color.WHITE
-		draw_string(font, pos, caption, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, tc)
+		draw_string(font, pos, localized_caption, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, tc)

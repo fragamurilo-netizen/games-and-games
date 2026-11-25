@@ -128,7 +128,7 @@ func _draw() -> void:
 		var f := get_theme_default_font()
 		var fs := 20
 		draw_rect(Rect2(UITokens.S3, h - 84, w - UITokens.S3 * 2, 66), Color(0, 0, 0, 0.6))
-		draw_multiline_string(f, Vector2(UITokens.S4, h - 60), caption, HORIZONTAL_ALIGNMENT_CENTER, w - UITokens.S4 * 2, fs, 2, Color.WHITE)
+		draw_multiline_string(f, Vector2(UITokens.S4, h - 60), I18n.t(caption), HORIZONTAL_ALIGNMENT_CENTER, w - UITokens.S4 * 2, fs, 2, Color.WHITE)
 
 
 func _stands(r: Rect2) -> void:

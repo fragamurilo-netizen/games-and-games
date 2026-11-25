@@ -32,6 +32,9 @@ func _ready() -> void:
 func _frames(n: int) -> void:
 	for i in n:
 		await get_tree().process_frame
+	var deadline := Time.get_ticks_msec() + 180000
+	while GameManager.is_busy() and Time.get_ticks_msec() < deadline:
+		await get_tree().process_frame
 
 
 func _shot(shot_name: String) -> void:
@@ -42,7 +45,7 @@ func _shot(shot_name: String) -> void:
 	print("[tela] ", shot_name)
 	if not shots:
 		return
-	await RenderingServer.frame_post_draw
+	RenderingServer.force_draw() # Capture even when Windows occludes the review window.
 	get_viewport().get_texture().get_image().save_png("%s/%s.png" % [out_dir, shot_name])
 
 
@@ -208,7 +211,12 @@ func _wide_pass(w: GameWorld) -> void:
 
 
 func _only_pass() -> void:
-	var w := WorldGenerator.generate(WorldGenerator.DEFAULT_SEED, "padrao")
+	var w: GameWorld
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--reuse-save="):
+			w = SaveManager.load_world(int(arg.substr(13)))
+	if w == null:
+		w = WorldGenerator.generate(WorldGenerator.DEFAULT_SEED, "padrao")
 	var club_id := -1
 	for c: Club in w.clubs_in_league("BRA1"):
 		if c.archetype == "tradicional_decadente" or club_id < 0:
@@ -247,6 +255,7 @@ func _only_pass() -> void:
 	for i in rounds:
 		GameManager.play_instant()
 		await _frames(2)
+	GameManager.save_blocking()
 	UIManager.goto("hub")
 	# Avisos de conquista das rodadas simuladas não entram nas capturas (cobririam as telas).
 	w.pending_achievements.clear()
@@ -264,6 +273,9 @@ func _only_pass() -> void:
 		if n != null:
 			n.queue_free()
 	for spec in only.split(","):
+		if spec == "!promo":
+			await _promo_match()
+			continue
 		if spec == "!taps":
 			await _tap_check(w)
 			continue
@@ -345,6 +357,42 @@ func _only_pass() -> void:
 
 ## Formação personalizada (padrão: o caso dos prints, LD virou MD e o centroavante virou PD):
 ## pré-jogo e partida em alguns momentos, para conferir que ninguém fica em cima de ninguém.
+func _promo_match() -> void:
+	GameManager.begin_match()
+	UIManager.goto("match")
+	await _frames(12)
+	UIManager.close_all_modals()
+	var screen := _screen()
+	var sim: MatchSimulation = screen.get("_sim")
+	sim.team_talk(int(screen.get("_user_side")), "motivar")
+	screen.call("_drain", false)
+	screen.set("_pace", 2)
+	var deadline := Time.get_ticks_msec() + 120000
+	var captured := false
+	var field_captured := false
+	while not bool(screen.get("_done")) and Time.get_ticks_msec() < deadline:
+		await get_tree().process_frame
+		if not field_captured and sim.minute >= 5:
+			field_captured = true
+			await _shot(prefix + "01_partida")
+		var overlay: GoalOverlay = screen.get("_overlay")
+		if not captured and overlay != null and overlay.is_playing():
+			captured = true
+			await get_tree().create_timer(0.25).timeout
+			await _shot(prefix + "02_gol")
+		if bool(screen.get("_halftime")):
+			UIManager.close_all_modals()
+			screen.call("_start_second_half")
+	if not bool(screen.get("_done")):
+		push_error("Promo match did not finish within the capture deadline")
+		get_tree().quit(1)
+		return
+	UIManager.close_all_modals()
+	UIManager.goto("hub")
+	await _frames(6)
+	GameManager.save_blocking()
+
+
 func _lineup_check(w: GameWorld, fname: String) -> void:
 	var club := w.user_club()
 	club.sheet = ClubAI.auto_sheet(w, club, fname)

@@ -82,7 +82,7 @@ static func show(w: GameWorld, sim: MatchSimulation, fx: Fixture, stadium: Dicti
 	root.add_child(vs)
 	var record := FootballMemory.head_to_head(w, home.id, away.id)
 	if int(record["games"]) > 0:
-		root.add_child(UIKit.label("Últimos encontros: %d vitórias do %s, %d empates, %d do %s." % [record["wins"], home.short_name, record["draws"], away.short_name], "Small", true))
+		root.add_child(UIKit.label("Últimos encontros: %d vitórias do %s, %d empates, %d do %s." % [record["wins"], home.short_name, record["draws"], record["losses"], away.short_name], "Small", true))
 	if sim.derby:
 		var d := UIKit.pill("CLÁSSICO", UIColors.RED, 18)
 		d.size_flags_horizontal = Control.SIZE_SHRINK_CENTER

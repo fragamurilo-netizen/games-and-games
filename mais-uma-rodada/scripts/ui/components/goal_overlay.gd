@@ -167,6 +167,7 @@ func _draw() -> void:
 
 
 func _text_centered(font: Font, text: String, pos: Vector2, fs: int, color: Color, scale_f: float) -> void:
+	text = I18n.t(text)
 	if font == null or text == "":
 		return
 	var w := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x

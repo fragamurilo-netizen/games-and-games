@@ -169,7 +169,7 @@ func _club_picker(c: VBoxContainer) -> void:
 	var nations: Array = DatabaseManager.league_nations()
 	var ob := OptionButton.new()
 	for i in nations.size():
-		ob.add_item(DatabaseManager.nation_name(String(nations[i])), i)
+		ob.add_item(I18n.nation_name(String(nations[i])), i)
 		if String(nations[i]) == _nation:
 			ob.select(i)
 	ob.item_selected.connect(func(i: int):
@@ -327,7 +327,7 @@ func _crest_card(cl: Club) -> Control:
 		var current := String(CrestView.spec(cl.crest).get(key, "")) if key != "symbol" else String(cl.crest.get(key, ""))
 		for i in vals.size():
 			var val: String = vals[i]
-			flow.add_child(UIKit.chip(String(labels[i]), current == val, g, func():
+			flow.add_child(UIKit.chip(I18n.term(String(labels[i])), current == val, g, func():
 				cl.crest[key] = val
 				cl.crest.erase("stripes")
 				cl.crest["edited"] = true
@@ -645,7 +645,7 @@ func _player_picker(c: VBoxContainer) -> void:
 	var nations: Array = DatabaseManager.league_nations()
 	var ob := OptionButton.new()
 	for i in nations.size():
-		ob.add_item(DatabaseManager.nation_name(String(nations[i])), i)
+		ob.add_item(I18n.nation_name(String(nations[i])), i)
 		if String(nations[i]) == _nation:
 			ob.select(i)
 	ob.item_selected.connect(func(i: int):
@@ -822,9 +822,9 @@ func _player_editor(c: VBoxContainer) -> void:
 	nat_row.add_child(UIKit.label("Nacionalidade", "Small"))
 	var nob := OptionButton.new()
 	var codes: Array = DatabaseManager.nations().keys()
-	codes.sort_custom(func(a, b): return DatabaseManager.nation_name(String(a)) < DatabaseManager.nation_name(String(b)))
+	codes.sort_custom(func(a, b): return I18n.nation_name(String(a)) < I18n.nation_name(String(b)))
 	for i in codes.size():
-		nob.add_item(DatabaseManager.nation_name(String(codes[i])), i)
+		nob.add_item(I18n.nation_name(String(codes[i])), i)
 		if String(codes[i]) == p.nationality:
 			nob.select(i)
 	nob.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1062,7 +1062,7 @@ func _cycler(p: Player, key: String, caption: String, names: Array, current: int
 		refresh()
 	var prev := UIKit.icon_button("back", func(): step.call(-1), "Anterior")
 	row.add_child(prev)
-	var v := UIKit.label(String(names[clampi(current, 0, names.size() - 1)]), "H3")
+	var v := UIKit.label(I18n.term(String(names[clampi(current, 0, names.size() - 1)])), "H3")
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	v.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -1161,7 +1161,7 @@ func _comp_picker(c: VBoxContainer) -> void:
 	var nations: Array = DatabaseManager.league_nations()
 	var ob := OptionButton.new()
 	for i in nations.size():
-		ob.add_item(DatabaseManager.nation_name(String(nations[i])), i)
+		ob.add_item(I18n.nation_name(String(nations[i])), i)
 		if String(nations[i]) == _nation:
 			ob.select(i)
 	ob.item_selected.connect(func(i: int):

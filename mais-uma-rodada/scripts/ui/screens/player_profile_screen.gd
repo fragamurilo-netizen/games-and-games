@@ -7,7 +7,7 @@ var _tab := "geral"
 var _season_filter := 0 # temporada a temporada: 0 todas, 1 liga, 2 outras competições
 var _career_metric := "r" # número do gráfico da carreira
 var _career_year := -1 # ano escolhido no gráfico
-const TABS := [["geral", "Visão"], ["atributos", "Atributos"], ["numeros", "Forma"], ["carreira", "Histórico"], ["contrato", "Contrato"], ["origem", "Origem"]]
+const TABS := [["geral", "Resumo"], ["atributos", "Atributos"], ["numeros", "Forma"], ["carreira", "Histórico"], ["contrato", "Contrato"], ["origem", "Origem"]]
 
 
 func _init() -> void:
@@ -212,7 +212,7 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	names.add_child(UIKit.label(pos_txt, "Small", true))
 	var nat := UIKit.hbox(UITokens.S1)
 	nat.add_child(UIKit.flag(p.nationality, 26))
-	nat.add_child(UIKit.label("%s · %d anos" % [DatabaseManager.nation_name(p.nationality), p.age(w.year)], "Small", true))
+	nat.add_child(UIKit.label("%s · %d anos" % [I18n.nation_name(p.nationality), p.age(w.year)], "Small", true))
 	names.add_child(nat)
 	var assessment := UIKit.hbox(UITokens.S2)
 	assessment.add_child(UIKit.player_stars(w, p, 18))
@@ -240,7 +240,7 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 		cl.add_child(UIKit.label(p.club_tenure(w.year), "Small", true))
 		cr.add_child(cl)
 		if p.club_id == club.id and p.squad_status >= 0 and p.squad_status < Player.STATUS_NAMES.size():
-			cr.add_child(UIKit.label(Player.STATUS_NAMES[p.squad_status], "Small"))
+			cr.add_child(UIKit.label(I18n.term(Player.STATUS_NAMES[p.squad_status]), "Small"))
 		cr.add_child(UIKit.icon_rect("forward", 20, UIColors.DIM))
 		var cid := club.id
 		card.add_child(UIKit.tap_row(cr, func(): UIManager.push("club", {"id": cid}), "PanelContainer"))
@@ -373,7 +373,7 @@ func _summary(w: GameWorld, p: Player, own: bool) -> Control:
 	if p.club_id >= 0:
 		card.add_child(UIKit.kv("Salário", Fmt.money_month(p.wage)))
 		card.add_child(UIKit.kv("Contrato até", str(p.contract_end), UIColors.ORANGE if own and p.contract_end <= w.year else UIColors.TEXT))
-		card.add_child(UIKit.kv("Papel no elenco", Player.STATUS_NAMES[p.squad_status]))
+		card.add_child(UIKit.kv("Papel no elenco", I18n.term(Player.STATUS_NAMES[p.squad_status])))
 	else:
 		card.add_child(UIKit.kv("Situação", "Livre, sem taxa"))
 	var ag := Agents.agent_of(w, p)
@@ -498,7 +498,7 @@ func _positions_card(w: GameWorld, p: Player, own: bool) -> Control:
 func _fit_card(w: GameWorld, p: Player, _own: bool) -> Control:
 	var card := UIKit.card("Card",UITokens.S2)
 	var club := w.user_club()
-	card.add_child(UIKit.section("Para o elenco do " + club.short_name if club != null else "Avaliação da comissão"))
+	card.add_child(UIKit.section(tr("Para o elenco do %s") % club.short_name if club != null else "Avaliação da comissão"))
 	card.add_child(UIKit.label(PlayerAssessment.fit_text(w,p),"H3",true))
 	var ratings := UIKit.hbox(UITokens.S4)
 	for future in [false,true]:
@@ -759,25 +759,25 @@ func _origin_card(w: GameWorld, p: Player) -> Control:
 		var info: Dictionary = p.origin["passports"].get(code, {})
 		var basis := String(info.get("basis", "birth"))
 		var detail := "Desde o nascimento" if basis == "birth" else "Vínculo familiar" if basis == "parent" else "Naturalizado em %d" % int(info.get("since", w.year))
-		var text := UIKit.label(DatabaseManager.nation_name(code) + "\n" + detail, "", true)
+		var text := UIKit.label(I18n.nation_name(code) + "\n" + detail, "", true)
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(text)
 		card.add_child(row)
 	card.add_child(UIKit.separator())
-	card.add_child(UIKit.section("Seleção: " + DatabaseManager.nation_name(NationalityManager.team(p))))
+	card.add_child(UIKit.section("Seleção: " + I18n.nation_name(NationalityManager.team(p))))
 	for code in p.origin.get("records", {}):
 		var rec: Dictionary = p.origin["records"][code]
-		card.add_child(UIKit.label(("" if code == NationalityManager.team(p) else DatabaseManager.nation_name(code)+" · ") + "%d jogos · %d gols · %d assistências" % [int(rec.get("apps",0)),int(rec.get("goals",0)),int(rec.get("assists",0))], "", true))
+		card.add_child(UIKit.label(("" if code == NationalityManager.team(p) else I18n.nation_name(code)+" · ") + "%d jogos · %d gols · %d assistências" % [int(rec.get("apps",0)),int(rec.get("goals",0)),int(rec.get("assists",0))], "", true))
 	var alternatives: Array = []
 	for code in NationalityManager.passports(p):
-		if code != NationalityManager.team(p) and NationalityManager.eligible(w, p, code): alternatives.append(DatabaseManager.nation_name(code))
+		if code != NationalityManager.team(p) and NationalityManager.eligible(w, p, code): alternatives.append(I18n.nation_name(code))
 	if not alternatives.is_empty():
 		card.add_child(UIKit.label("Também pode representar: " + ", ".join(alternatives), "Small", true))
 	elif NationalTeamManager.caps_of(w, p.id)[0] > 0:
 		card.add_child(UIKit.label("Vinculado à seleção atual pelo histórico internacional.", "Small", true))
 	var coach := NationalCoach.nation(w)
 	if coach != "" and coach != NationalityManager.team(p) and NationalityManager.eligible(w, p, coach):
-		card.add_child(UIKit.button("Convidar para " + DatabaseManager.nation_name(coach), "PrimaryButton", func():
+		card.add_child(UIKit.button("Convidar para " + I18n.nation_name(coach), "PrimaryButton", func():
 			if NationalityManager.choose(w, p, coach):
 				GameManager.save_now()
 				refresh()))
@@ -785,7 +785,7 @@ func _origin_card(w: GameWorld, p: Player) -> Control:
 	var nation := String(status["nation"])
 	if nation != "" and not NationalityManager.passports(p).has(nation):
 		card.add_child(UIKit.separator())
-		card.add_child(UIKit.section("Residência em " + DatabaseManager.nation_name(nation)))
+		card.add_child(UIKit.section("Residência em " + I18n.nation_name(nation)))
 		card.add_child(UIKit.label("Desde %d · %d temporadas completas" % [int(p.origin["residence"].get("since", w.year)),int(status["years"])], "", true))
 		if bool(status["paused"]):
 			card.add_child(UIKit.label("Sem registro atual de residência para continuar a contagem.", "Small", true))
@@ -800,7 +800,7 @@ func _origin_card(w: GameWorld, p: Player) -> Control:
 		else:
 			card.add_child(UIKit.label("Sem naturalização automática por tempo de clube neste país.", "Small", true))
 	for event: Dictionary in p.origin.get("events", []):
-		card.add_child(UIKit.label("%d · %s %s" % [int(event["y"]),"Obteve a nacionalidade de" if event["kind"] == "citizenship" else "Escolheu representar",DatabaseManager.nation_name(event["nation"])], "Small", true))
+		card.add_child(UIKit.label("%d · %s %s" % [int(event["y"]),"Obteve a nacionalidade de" if event["kind"] == "citizenship" else "Escolheu representar",I18n.nation_name(event["nation"])], "Small", true))
 	return UIKit.card_panel(card)
 
 

@@ -189,7 +189,7 @@ func refresh() -> void:
 	var club := _club()
 	var pre := _editable(w)
 	if _nation != "":
-		screen_subtitle = "Seleção · %s" % DatabaseManager.nation_name(_nation)
+		screen_subtitle = "Seleção · %s" % I18n.nation_name(_nation)
 	elif _launch and pre:
 		screen_subtitle = "Lançamento %d" % w.year
 	else:
@@ -809,7 +809,7 @@ func _style_grid(k: Dictionary, field: String, opts: Array, default: String, ful
 			kv.custom_minimum_size = Vector2(84, 140)
 		kv.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		inner.add_child(kv)
-		var l := UIKit.label(String(o[1]), "Small")
+		var l := UIKit.label(I18n.term(String(o[1])), "Small")
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		l.custom_minimum_size.x = 104
@@ -834,7 +834,7 @@ func _options(card: VBoxContainer, caption: String, opts: Array, current: String
 	var flow := UIKit.flow(8)
 	for o in opts:
 		var val: String = o[0]
-		flow.add_child(UIKit.chip(String(o[1]), val == current, g, func():
+		flow.add_child(UIKit.chip(I18n.term(String(o[1])), val == current, g, func():
 			_edit(func(kk: Dictionary): kk[field] = val)))
 	card.add_child(flow)
 
@@ -1062,7 +1062,7 @@ func _brand_origin(o: Dictionary) -> String:
 	var s := String(o.get("s", e.get("s", "")))
 	var sector := "Material esportivo" if s == "material" else BrandCatalog.sector_name(s)
 	var origin := String(e.get("o", ""))
-	var where := DatabaseManager.nation_name(origin) if origin != "" else "multinacional"
+	var where := I18n.nation_name(origin) if origin != "" else "multinacional"
 	return "%s · %s" % [sector, where]
 
 

@@ -4,7 +4,7 @@ extends BaseScreen
 ## Mercado = busca + observação + vendas + transferências (DESIGN.md). Livres, fim de contrato e
 ## Moneyball são modos da busca, não abas próprias.
 const TABS := [["search", "Buscar"], ["shortlist", "Lista"], ["scout", "Olheiros"], ["sales", "Vendas"], ["moves", "Histórico"]]
-const POOLS := [["all", "Contratar"], ["free", "Livres"], ["pre", "A vencer"], ["moneyball", "Moneyball"]]
+const POOLS := [["all", "Todos"], ["free", "Livres"], ["pre", "A vencer"], ["moneyball", "Moneyball"]]
 const GROUPS := ["Todos", "GOL", "DEF", "MEI", "ATA"]
 const AGES := [["Todas", 99], ["≤ 21", 21], ["≤ 25", 25], ["≤ 29", 29]]
 const SORTS := [["rel", "Relevância"], ["ovr", "Avaliação"], ["value", "Valor"], ["price", "Preço"], ["age", "Idade"]]
@@ -269,9 +269,24 @@ func _search_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 	var results := UIKit.vbox(10)
 	results.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	c.add_child(results)
+	# Typing a name should not rebuild hundreds of controls on every keystroke.
+	# The timer belongs to this search field and disappears when the view does.
+	var search_delay := Timer.new()
+	search_delay.one_shot = true
+	search_delay.wait_time = 0.16
+	le.add_child(search_delay)
+	var update_results := func():
+		search_delay.stop()
+		if not GameManager.is_busy() and w == world():
+			_fill_search(results, w, club)
+	search_delay.timeout.connect(update_results)
+	le.text_submitted.connect(func(_q): update_results.call())
 	le.text_changed.connect(func(q: String):
 		_query = q
-		_fill_search(results, w, club))
+		if q == "":
+			update_results.call()
+		else:
+			search_delay.start())
 	_fill_search(results, w, club)
 
 
@@ -472,6 +487,9 @@ func _search_base(w: GameWorld, club: Club, weakest: Array, budget: float, scout
 	for p: Player in all:
 		if p.club_id < 0 or p.club_id == uid or p.retiring:
 			continue
+		# Build the text index on the worker, before the user types. Refresh it
+		# with the ratings so player renames in the editor cannot leave stale hits.
+		_names[p.id] = p.display_name().to_lower() + "\n" + p.full_name().to_lower()
 		var score := PlayerAssessment.score(w, p)
 		var est := int(round(score))
 		var report := {}
@@ -529,13 +547,22 @@ func _free_tab(c: VBoxContainer, w: GameWorld) -> void:
 		if _group > 0 and Pos.group(p.position) != _group - 1:
 			continue
 		list.append(p)
-	list.sort_custom(func(a: Player, b: Player): return PlayerAssessment.score(w,a) > PlayerAssessment.score(w,b))
+	_sort_free(w, list)
 	if list.is_empty():
 		c.add_child(UIKit.state_block("empty", "Nenhum jogador livre nessa posição agora."))
 		return
 	c.add_child(UIKit.label(Fmt.plural(list.size(), "jogador livre", "jogadores livres"), "Muted"))
 	c.add_child(PlayerTable.make(w, list.slice(0, MAX_ROWS), "market", _free_state, _open, [], "", _wide_table()))
 	_default_brief(list)
+
+
+## Evaluate each candidate once; sorting used to recompute the full report
+## for both players at every comparison. Scores live only for this rebuild.
+func _sort_free(w: GameWorld, list: Array) -> void:
+	var scores := {}
+	for p: Player in list:
+		scores[p.id] = PlayerAssessment.score(w, p)
+	list.sort_custom(func(a: Player, b: Player): return scores[a.id] > scores[b.id])
 
 
 ## Vendas: propostas recebidas (cada uma é um objeto com decisão) e os jogadores anunciados.
@@ -782,7 +809,7 @@ func _mission_card(w: GameWorld, club: Club) -> Control:
 			if String(o[0]) == _origin:
 				origin_name = String(o[1])
 		if _origin == "nat":
-			origin_name = "Só %s" % DatabaseManager.nation_name(club.nation)
+			origin_name = "Só %s" % I18n.nation_name(club.nation)
 		card.add_child(_mission_row("Origem", origin_name, func():
 			var items: Array = []
 			var cur := 0
@@ -790,7 +817,7 @@ func _mission_card(w: GameWorld, club: Club) -> Control:
 				var k := String(Scouting.ORIGINS[i][0])
 				if k == _origin:
 					cur = i
-				var sub: String = {"all": "Onde a rede do clube alcança.", "nat": "Só jogadores de %s." % DatabaseManager.nation_name(club.nation), "for": "Só jogadores de fora do país."}.get(k, "")
+				var sub: String = {"all": "Onde a rede do clube alcança.", "nat": "Só jogadores de %s." % I18n.nation_name(club.nation), "for": "Só jogadores de fora do país."}.get(k, "")
 				items.append([String(Scouting.ORIGINS[i][1]), sub])
 			_option_sheet("Origem", items, cur, func(i: int): _origin = String(Scouting.ORIGINS[i][0]))))
 		card.add_child(_mission_row("Idade", "Qualquer" if _age == 0 else "Até %d anos" % int(AGES[_age][1]), func():
@@ -841,7 +868,7 @@ func _league_sheet(w: GameWorld) -> void:
 		if lid == _job_league:
 			cur = valid.size()
 		valid.append(lid)
-		items.append([lg.name, DatabaseManager.nation_name(lg.nation)])
+		items.append([lg.name, I18n.nation_name(lg.nation)])
 	_option_sheet("Liga", items, cur, func(i: int): _job_league = String(valid[i]))
 
 
@@ -963,7 +990,7 @@ func _shortlist_card(w: GameWorld, p: Player, changes: Array) -> Control:
 		card.add_child(UIKit.colored("Novidade: " + ", ".join(parts).to_lower() + ".", changes[0][1], "Small", true))
 	var info := UIKit.hbox(8)
 	var il := Shortlist.interest_label(w, p)
-	var txt := UIKit.label("Livre, sem taxa de transferência" if p.club_id < 0 else "Contrato até %d · %s" % [p.contract_end, Player.STATUS_NAMES[p.squad_status].to_lower()], "Small", true)
+	var txt := UIKit.label("Livre, sem taxa de transferência" if p.club_id < 0 else "Contrato até %d · %s" % [p.contract_end, I18n.term(Player.STATUS_NAMES[p.squad_status]).to_lower()], "Small", true)
 	txt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info.add_child(txt)
 	info.add_child(UIKit.colored(String(il[0]), il[1], "Small"))
@@ -1061,7 +1088,7 @@ func _balance_card(w: GameWorld, club: Club) -> Control:
 	if loans > 0:
 		extra.append("%s." % Fmt.plural(loans, "jogador emprestado", "jogadores emprestados"))
 	if not extra.is_empty():
-		card.add_child(UIKit.label(" ".join(extra), "Small", true))
+		card.add_child(UIKit.label(" ".join(extra.map(func(text): return I18n.t(String(text)))), "Small", true))
 	return UIKit.card_panel(card)
 
 

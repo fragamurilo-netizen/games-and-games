@@ -8,6 +8,7 @@ const SLOTS := 5
 const MAGIC := "MUR1"
 ## Saves anteriores ao mundo multinacional (versão 1, país fictício) não são compatíveis.
 const MIN_VERSION := 2
+const MAX_BLOCK_BYTES := 128 * 1024 * 1024
 
 
 static func _ensure_dir() -> void:
@@ -54,11 +55,15 @@ class Writer:
 	var slot: int
 	var tmp: String
 	var closed := false
+	var error: Error = OK
+	var expected := 0
+	var written := 0
 
 	static func open(slot_i: int, n_clubs: int, n_players: int) -> Writer:
 		SaveManager._ensure_dir()
 		var w := Writer.new()
 		w.slot = slot_i
+		w.expected = n_clubs + n_players + 1
 		w.tmp = SaveManager.slot_path(slot_i) + ".tmp"
 		w.f = FileAccess.open(w.tmp, FileAccess.WRITE)
 		if w.f == null:
@@ -73,10 +78,17 @@ class Writer:
 
 	## Bloco já pronto ([tamanho original, bytes zstd], de SaveManager.encode).
 	func add_encoded(e: Array) -> void:
+		if closed or f == null or error != OK:
+			return
+		if e.size() != 2 or not e[1] is PackedByteArray or int(e[0]) <= 0 or int(e[0]) > SaveManager.MAX_BLOCK_BYTES or e[1].is_empty() or e[1].size() > SaveManager.MAX_BLOCK_BYTES:
+			error = ERR_INVALID_DATA
+			return
 		var z: PackedByteArray = e[1]
 		f.store_32(int(e[0]))
 		f.store_32(z.size())
 		f.store_buffer(z)
+		error = f.get_error()
+		written += 1
 
 	func add_all(blocks: Array) -> void:
 		for e in blocks:
@@ -95,6 +107,14 @@ class Writer:
 		if closed:
 			return ERR_ALREADY_IN_USE
 		add(world.to_dict(false))
+		if error == OK and written != expected:
+			error = ERR_INVALID_DATA
+		if error == OK:
+			f.flush()
+			error = f.get_error()
+		if error != OK:
+			abort()
+			return error
 		closed = true
 		f.close()
 		f = null
@@ -104,9 +124,18 @@ class Writer:
 			return ERR_CANT_OPEN
 		if FileAccess.file_exists(path):
 			if FileAccess.file_exists(path + ".bak"):
-				d.remove(path.get_file() + ".bak")
-			d.rename(path.get_file(), path.get_file() + ".bak")
-		return d.rename(tmp.get_file(), path.get_file())
+				var remove_error := d.remove(path.get_file() + ".bak")
+				if remove_error != OK:
+					return remove_error
+			var backup_error := d.rename(path.get_file(), path.get_file() + ".bak")
+			if backup_error != OK:
+				return backup_error
+		var install_error := d.rename(tmp.get_file(), path.get_file())
+		if install_error != OK and FileAccess.file_exists(path + ".bak"):
+			# Preserve the previous career if the final rename fails (permissions,
+			# storage removed, etc.). Its backup is also readable on the next boot.
+			d.rename(path.get_file() + ".bak", path.get_file())
+		return install_error
 
 
 ## Um bloco do save: [tamanho original, bytes comprimidos].
@@ -126,12 +155,21 @@ static func encode_all(items: Array) -> Array:
 
 
 static func _read_block(f: FileAccess) -> Variant:
+	if f.get_length() - f.get_position() < 8:
+		return null
 	var raw_n := f.get_32()
 	var z_n := f.get_32()
-	if raw_n <= 0 or z_n <= 0 or f.get_position() + z_n > f.get_length():
+	if raw_n <= 0 or raw_n > MAX_BLOCK_BYTES or z_n <= 0 or z_n > MAX_BLOCK_BYTES or f.get_position() + z_n > f.get_length():
 		return null
 	var z := f.get_buffer(z_n)
-	return bytes_to_var(z.decompress(raw_n, FileAccess.COMPRESSION_ZSTD))
+	return _decode_block(z, raw_n)
+
+
+static func _decode_block(z: PackedByteArray, raw_n: int) -> Variant:
+	var raw := z.decompress(raw_n, FileAccess.COMPRESSION_ZSTD)
+	if raw.size() != raw_n:
+		return null
+	return bytes_to_var(raw)
 
 
 ## Lê o formato 3 bloco a bloco (clubes e jogadores já montados) — pico de memória pequeno.
@@ -139,8 +177,14 @@ static func _load_v3(path: String) -> GameWorld:
 	var f := FileAccess.open(path, FileAccess.READ)
 	if f == null or f.get_buffer(4).get_string_from_ascii() != MAGIC3:
 		return null
+	if f.get_length() < 12:
+		return null
 	var n_clubs := f.get_32()
 	var n_players := f.get_32()
+	# Counts and lengths come from disk. Never resize arrays or decompress using
+	# unchecked headers from a truncated/corrupt save.
+	if n_clubs <= 0 or n_clubs > 10000 or n_players > 1000000 or (n_clubs + n_players + 1) * 9 > f.get_length() - 12:
+		return null
 	var clubs: Array = []
 	for i in n_clubs:
 		var cd: Variant = _read_block(f)
@@ -153,16 +197,18 @@ static func _load_v3(path: String) -> GameWorld:
 	var blobs: Array = []
 	blobs.resize(n_players)
 	for i in n_players:
+		if f.get_length() - f.get_position() < 8:
+			return null
 		var raw_n := f.get_32()
 		var z_n := f.get_32()
-		if raw_n <= 0 or z_n <= 0 or f.get_position() + z_n > f.get_length():
+		if raw_n <= 0 or raw_n > MAX_BLOCK_BYTES or z_n <= 0 or z_n > MAX_BLOCK_BYTES or f.get_position() + z_n > f.get_length():
 			return null
 		sizes[i] = raw_n
 		blobs[i] = f.get_buffer(z_n)
 	var players := Parallel.map_chunks(n_players, func(a: int, b: int) -> Array:
 		var out: Array = []
 		for i in range(a, b):
-			var pd: Variant = bytes_to_var((blobs[i] as PackedByteArray).decompress(sizes[i], FileAccess.COMPRESSION_ZSTD))
+			var pd: Variant = _decode_block(blobs[i], sizes[i])
 			out.append(Player.from_dict(pd, true) if pd is Dictionary else null)
 		return out, 128)
 	blobs.clear()
@@ -243,6 +289,14 @@ static func load_world(slot: int) -> GameWorld:
 			KitDesign.ensure_all(w3)
 			DropIns.apply_world(w3)
 			return w3
+		# A corrupt v3 file is not a legacy compressed file. Go straight to its
+		# backup instead of handing untrusted v3 bytes to the legacy decompressor.
+		var probe := FileAccess.open(path, FileAccess.READ)
+		if probe != null:
+			var is_v3 := probe.get_buffer(4).get_string_from_ascii() == MAGIC3
+			probe.close()
+			if is_v3:
+				continue
 		var f := FileAccess.open_compressed(path, FileAccess.READ, FileAccess.COMPRESSION_ZSTD)
 		if f == null:
 			continue

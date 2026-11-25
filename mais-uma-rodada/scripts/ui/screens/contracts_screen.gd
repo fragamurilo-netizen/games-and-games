@@ -156,7 +156,7 @@ func _row(w: GameWorld, club: Club, p: Player) -> Control:
 	var n := UIKit.label(p.display_name(), "H3")
 	n.clip_text = true
 	v.add_child(n)
-	var bits: Array = ["%d anos" % p.age(w.year), Player.STATUS_NAMES[clampi(p.squad_status, 0, Player.STATUS_NAMES.size() - 1)]]
+	var bits: Array = ["%d anos" % p.age(w.year), I18n.term(Player.STATUS_NAMES[clampi(p.squad_status, 0, Player.STATUS_NAMES.size() - 1)])]
 	if p.release_clause > 0:
 		bits.append("multa " + Fmt.money(p.release_clause))
 	if int(p.clauses.get("ab", 0)) > 0 or int(p.clauses.get("gb", 0)) > 0:

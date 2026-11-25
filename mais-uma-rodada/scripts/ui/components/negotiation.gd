@@ -51,6 +51,20 @@ static func open(world: GameWorld, player: Player, kind: String, done: Callable)
 	n._render()
 	last = n
 	UIManager.show_modal(n.box, true)
+	n.box.tree_exiting.connect(n._closed, CONNECT_ONE_SHOT)
+
+
+## The screenshot handle must not retain the whole career or an instance of
+## this script until engine shutdown after the dialog has been destroyed.
+func _closed() -> void:
+	if last == self:
+		last = null
+	on_done = Callable()
+	w = null
+	p = null
+	_money = null
+	_money_summary = null
+	box = null
 
 
 func _init_values() -> void:

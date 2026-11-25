@@ -119,10 +119,12 @@ func _slot_card(s: int, meta: Dictionary, featured: bool) -> Control:
 		who.add_child(UIKit.label(tr("Técnico: %s") % String(meta.get("manager", "")), "Small"))
 		who.add_child(UIKit.label(tr("Salvo em %s") % _date(String(meta.get("saved_at", ""))), "Caps"))
 		foot.add_child(who)
-		var play := UIKit.button("CARREGAR" if featured else "Abrir", "PrimaryButton" if featured else "Button", func(): _load(s), "play")
-		play.custom_minimum_size.x = 220 if featured else 160
-		foot.add_child(play)
 		v.add_child(foot)
+	else:
+		v.add_child(UIKit.label("Os detalhes deste save não estão disponíveis. Você ainda pode tentar abrir a carreira.", "Small", true))
+	var play := UIKit.button("CARREGAR" if featured else "Abrir", "PrimaryButton" if featured else "Button", func(): _load(s), "play")
+	play.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	v.add_child(play)
 	return panel
 
 

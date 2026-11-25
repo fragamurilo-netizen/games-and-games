@@ -230,6 +230,7 @@ func _draw() -> void:
 
 
 func _text(t: String, center: Vector2, fs: int, col: Color, bold: bool) -> void:
+	t = I18n.t(t)
 	var f := _font_bold if bold else _font
 	if f == null:
 		return

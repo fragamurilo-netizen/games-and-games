@@ -639,7 +639,7 @@ static func tabs(items: Array, selected: String, cb: Callable) -> HBoxContainer:
 	for it: Array in items:
 		var b := Button.new()
 		b.theme_type_variation = "TabButton"
-		b.text = String(it[1])
+		b.text = I18n.term(String(it[1]))
 		b.toggle_mode = true
 		b.button_group = g
 		b.button_pressed = String(it[0]) == selected

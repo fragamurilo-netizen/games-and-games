@@ -127,7 +127,7 @@ static func _nation(m: Dictionary, height: int) -> Control:
 	if vs != "":
 		art.score_text = "%d  x  %d" % [int(m.get("ga", 0)), int(m.get("gb", 0))]
 	art.trophy = bool(m.get("trophy", false))
-	art.caption = DatabaseManager.nation_name(code).to_upper() if vs == "" else ""
+	art.caption = I18n.nation_name(code).to_upper() if vs == "" else ""
 	if art.trophy:
 		var t := UIKit.icon_rect("trophy", int(height * 0.42), UIColors.D_GOLD)
 		t.set_meta(&"side", 9)
@@ -309,11 +309,12 @@ func _draw_fg() -> void:
 		cv.draw_string(font, Vector2(w * 0.5 - tw * 0.5, sy + fs * 0.36), score_text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color.WHITE)
 	if caption != "" and h >= 120.0:
 		var cfs := int(clampf(h * 0.075, 10.0, 22.0))
-		var cw := caps.get_string_size(caption, HORIZONTAL_ALIGNMENT_LEFT, -1, cfs).x
+		var localized_caption := I18n.t(caption)
+		var cw := caps.get_string_size(localized_caption, HORIZONTAL_ALIGNMENT_LEFT, -1, cfs).x
 		if cw > w - 20.0:
 			cfs = maxi(8, int(cfs * (w - 20.0) / cw))
-			cw = caps.get_string_size(caption, HORIZONTAL_ALIGNMENT_LEFT, -1, cfs).x
-		cv.draw_string(caps, Vector2(w * 0.5 - cw * 0.5, h - cfs * 0.9), caption, HORIZONTAL_ALIGNMENT_LEFT, -1, cfs, Color(1, 1, 1, 0.9))
+			cw = caps.get_string_size(localized_caption, HORIZONTAL_ALIGNMENT_LEFT, -1, cfs).x
+		cv.draw_string(caps, Vector2(w * 0.5 - cw * 0.5, h - cfs * 0.9), localized_caption, HORIZONTAL_ALIGNMENT_LEFT, -1, cfs, Color(1, 1, 1, 0.9))
 	# Vinheta leve nas bordas (cara de foto).
 	for i in 4:
 		var g := float(i + 1) * h * 0.02

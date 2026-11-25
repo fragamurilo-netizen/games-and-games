@@ -44,7 +44,7 @@ func refresh() -> void:
 		back.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		c.add_child(back)
 	else:
-		c.add_child(UIKit.tabs(TABS, _tab, func(k: String):
+		c.add_child(UIKit.scroll_tabs(TABS, _tab, func(k: String):
 			_tab = k
 			refresh()))
 	var start := c.get_child_count()
@@ -91,7 +91,8 @@ func _header(w: GameWorld, club: Club) -> Control:
 	for key in [["u20", "sub-20"], ["u17", "sub-17"]]:
 		var t := _pos_text(w, String(key[0]))
 		if t != "—":
-			camp.append("%s na liga %s" % [t, key[1]])
+			camp.append(I18n.t("%s na liga %s" % [t, key[1]]))
+	bits = bits.map(func(text): return I18n.t(String(text)))
 	if not camp.is_empty():
 		bits.append(", ".join(camp).capitalize().substr(0, 1) + ", ".join(camp).substr(1) + ".")
 	v.add_child(UIKit.label(" ".join(bits), "Muted", true))
@@ -465,7 +466,7 @@ func _trial(w: GameWorld) -> Control:
 		nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		nr.add_child(nl)
 		col.add_child(nr)
-		col.add_child(UIKit.label("%d anos · %s · %s" % [p.age(w.year), YouthManager.potential_label_of(w, p), p.hometown if p.hometown != "" else DatabaseManager.nation_name(p.nationality)], "Small"))
+		col.add_child(UIKit.label("%d anos · %s · %s" % [p.age(w.year), YouthManager.potential_label_of(w, p), p.hometown if p.hometown != "" else I18n.nation_name(p.nationality)], "Small"))
 		row.add_child(col)
 		row.add_child(UIKit.player_stars(w,p,15))
 		var pid := p.id
@@ -603,7 +604,7 @@ func _nation_line(code: String, caption: String, color: Color) -> Control:
 	var row := UIKit.hbox(10)
 	row.add_child(UIKit.icon_rect("trophy", 28, color))
 	row.add_child(UIKit.flag(code, 40))
-	row.add_child(UIKit.label("%s · %s" % [DatabaseManager.nation_name(code), caption], "H3"))
+	row.add_child(UIKit.label("%s · %s" % [I18n.nation_name(code), caption], "H3"))
 	return row
 
 
@@ -616,7 +617,7 @@ func _score_row(w: GameWorld, g: Dictionary, nations: bool) -> Control:
 		var nm := ""
 		var mark: Control
 		if nations:
-			nm = DatabaseManager.nation_name(String(id))
+			nm = I18n.nation_name(String(id))
 			mark = UIKit.flag(String(id), 34)
 		else:
 			var cl := w.club(int(id))
@@ -647,7 +648,7 @@ func _score_row(w: GameWorld, g: Dictionary, nations: bool) -> Control:
 		return row
 	var v := UIKit.vbox(0)
 	v.add_child(row)
-	var wn: String = DatabaseManager.nation_name(String(g["w"])) if nations else w.club(int(g["w"])).short_name
+	var wn: String = I18n.nation_name(String(g["w"])) if nations else w.club(int(g["w"])).short_name
 	var pl := UIKit.label("%s nos pênaltis" % wn, "Small")
 	pl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(pl)
@@ -707,7 +708,7 @@ func _nation_table_row(code: String, r: Dictionary, pos: int, zone: Color) -> Co
 	pl.custom_minimum_size.x = 30
 	row.add_child(pl)
 	row.add_child(UIKit.flag(code, 34))
-	var nl := UIKit.label(DatabaseManager.nation_name(code), "")
+	var nl := UIKit.label(I18n.nation_name(code), "")
 	nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	nl.clip_text = true

@@ -99,6 +99,7 @@ func _player(p: Vector2, sc: float, mp: MatchPlayer) -> void:
 
 
 func _text(t: String, center: Vector2, fs: int, col: Color, max_w: float) -> void:
+	t = I18n.t(t)
 	var f := _font if _font != null else get_theme_default_font()
 	var s := fs
 	var w := f.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, s).x

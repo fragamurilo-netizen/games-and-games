@@ -226,8 +226,10 @@ func _head_cell(c: Dictionary, lead: bool) -> Control:
 	b.flat = true
 	b.clip_text = true
 	var arrow := ("↓" if bool(state.get("desc", true)) else "↑") if cur else ""
-	b.text = String(c.get("title", "")) + ((" " + arrow) if arrow != "" else "")
-	b.tooltip_text = String(c.get("tip", ""))
+	# The sort arrow changes the source string, so translate the title first.
+	b.text = I18n.t(String(c.get("title", ""))) + ((" " + arrow) if arrow != "" else "")
+	b.tooltip_text = I18n.t(String(c.get("tip", "")))
+	b.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	b.alignment = _align(String(c.get("align", "l" if lead else "r")))
 	b.custom_minimum_size = Vector2(0.0 if lead else float(c.get("w", 72)), HEAD_H)
 	if lead:

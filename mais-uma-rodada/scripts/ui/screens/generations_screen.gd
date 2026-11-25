@@ -22,7 +22,7 @@ func refresh() -> void:
 		return
 	if _nation == "":
 		_nation = w.user_nation() if w.has_user() else "BRA"
-	screen_subtitle = DatabaseManager.nation_name(_nation)
+	screen_subtitle = I18n.nation_name(_nation)
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
@@ -43,9 +43,9 @@ func _picker(w: GameWorld) -> Control:
 	var ob := OptionButton.new()
 	ob.custom_minimum_size.y = 72
 	var ns: Array = Generations._nations(w)
-	ns.sort_custom(func(a, b): return DatabaseManager.nation_name(String(a)) < DatabaseManager.nation_name(String(b)))
+	ns.sort_custom(func(a, b): return I18n.nation_name(String(a)) < I18n.nation_name(String(b)))
 	for i in ns.size():
-		ob.add_item(DatabaseManager.nation_name(String(ns[i])), i)
+		ob.add_item(I18n.nation_name(String(ns[i])), i)
 		if String(ns[i]) == _nation:
 			ob.select(i)
 	ob.item_selected.connect(func(i: int):
@@ -60,7 +60,7 @@ func _base_card(w: GameWorld) -> Control:
 	head.add_child(UIKit.flag(_nation, 54))
 	var col := UIKit.vbox(2)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.add_child(UIKit.label(DatabaseManager.nation_name(_nation), "Section"))
+	col.add_child(UIKit.label(I18n.nation_name(_nation), "Section"))
 	var tr := Generations.trend(w, _nation)
 	var tc := UIColors.GREEN if tr == "em alta" else (UIColors.RED if tr == "em baixa" else UIColors.MUTED)
 	col.add_child(UIKit.colored("Formação de jogadores %s" % tr, tc, "H3"))
@@ -136,7 +136,7 @@ func _categories_card(w: GameWorld) -> Control:
 func _category_sheet(w: GameWorld, by: int) -> void:
 	var cat := Generations.category(w, _nation, by)
 	var v := UIKit.vbox(10)
-	v.add_child(UIKit.label("Categoria %d · %s" % [by, DatabaseManager.nation_name(_nation)], "Title", true))
+	v.add_child(UIKit.label("Categoria %d · %s" % [by, I18n.nation_name(_nation)], "Title", true))
 	v.add_child(UIKit.label("%s · %s ainda jogando · %s" % [Fmt.plural(int(cat["entered"]), "garoto entrou", "garotos entraram") if int(cat["entered"]) > 0 else "Antes do início da carreira", str(int(cat["active"])), Fmt.plural(int(cat["pros"]), "profissional", "profissionais")], "Small", true))
 	for p: Player in cat["best"]:
 		v.add_child(_player_row(w, p))

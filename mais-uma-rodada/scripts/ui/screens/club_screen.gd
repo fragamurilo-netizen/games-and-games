@@ -190,7 +190,7 @@ func _club_hero(w: GameWorld, club: Club) -> Control:
 		col.add_child(UIKit.label(club.nickname, "Muted"))
 	var place := UIKit.hbox(UITokens.S1)
 	place.add_child(UIKit.flag(club.nation, 28))
-	place.add_child(UIKit.label("%s, %s" % [club.city, DatabaseManager.nation_name(club.nation)], "Small", true))
+	place.add_child(UIKit.label("%s, %s" % [club.city, I18n.nation_name(club.nation)], "Small", true))
 	col.add_child(place)
 	col.add_child(UIKit.label(w.league_name(club.league_id), "Small", true))
 	row.add_child(col)
@@ -305,7 +305,7 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 		col.add_child(UIKit.label(club.nickname, "Muted", true))
 	var place := UIKit.hbox(8)
 	place.add_child(UIKit.flag(club.nation, 30))
-	place.add_child(UIKit.label("%s, %s · fundado em %d" % [club.city, DatabaseManager.nation_name(club.nation), club.founded], "Small", true))
+	place.add_child(UIKit.label("%s, %s · fundado em %d" % [club.city, I18n.nation_name(club.nation), club.founded], "Small", true))
 	col.add_child(place)
 	row.add_child(col)
 	card.add_child(row)
@@ -1045,7 +1045,7 @@ func _career_card(w: GameWorld) -> Control:
 	card.add_child(UIKit.section("Carreira · espaço %d" % GameManager.slot))
 	card.add_child(UIKit.button("Salvar agora", "", func():
 		if GameManager.save_now():
-			UIManager.toast("Jogo salvo.", UIColors.GREEN)
+			UIManager.toast("Salvando...", UIColors.ACCENT)
 		else:
 			UIManager.toast("Não foi possível salvar agora.", UIColors.RED), "save"))
 	card.add_child(UIKit.button("Salvar cópia em outro espaço", "GhostButton", _save_copy, "plus"))

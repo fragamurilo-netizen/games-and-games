@@ -241,7 +241,7 @@ func _draw_fx() -> void:
 	# "É OFICIAL" antes da foto.
 	var t1 := clampf((_t - T_CREST - 0.2) / 0.4, 0.0, 1.0) * (1.0 - _ease((_t - T_PHOTO + 0.2) / 0.4))
 	if t1 > 0.0:
-		var msg := "É OFICIAL"
+		var msg := I18n.t("É OFICIAL")
 		var fs := 64
 		var tw := font.get_string_size(msg, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		cv.draw_string(font, Vector2(w * 0.5 - tw * 0.5, size.y * 0.42 + 190.0), msg, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(light, t1))
@@ -270,7 +270,7 @@ func _draw_fx() -> void:
 			nfs = int(nfs * (w - 40.0) / nw)
 			nw = font.get_string_size(nm, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs).x
 		cv.draw_string(font, Vector2(w * 0.5 - nw * 0.5, y), nm, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs, Color(light, ft))
-		var line1 := "%s · %d anos · %s · camisa %d" % [Pos.name_of(player.position), player.age(world.year), DatabaseManager.nation_name(player.nationality), number]
+		var line1 := "%s · %d anos · %s · camisa %d" % [Pos.name_of(player.position), player.age(world.year), I18n.nation_name(player.nationality), number]
 		_center_text(cv, font_caps, line1, y + 44.0, 22, Color(accent, ft))
 		var parts: Array = []
 		if from_club != null:
@@ -293,6 +293,7 @@ func _draw_fx() -> void:
 
 
 func _center_text(cv: Control, font: Font, txt: String, y: float, fs: int, col: Color) -> void:
+	txt = I18n.t(txt)
 	var tw := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 	if tw > size.x - 40.0:
 		fs = maxi(10, int(fs * (size.x - 40.0) / tw))

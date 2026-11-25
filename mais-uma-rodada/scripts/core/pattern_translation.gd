@@ -3,11 +3,13 @@ extends Translation
 ## Tradução por texto exato e por molde ("Meta: %s", "{player} marcou").
 ## Usada pelo I18n; o TranslationServer consulta _get_message para todo texto de Control.
 
-const _TOKEN := "%(?:\\.\\d+)?[sdf]|\\{[A-Za-z_][A-Za-z0-9_]*\\}"
+# No space flag: ordinary text such as "65% de posse" is not a %d token.
+const _TOKEN := "(?<!%)%[-+0#]*\\d*(?:\\.\\d+)?[sdf]|\\{[A-Za-z_][A-Za-z0-9_]*\\}"
 const _CACHE_MAX := 4000
 
 ## Títulos em caixa alta ("CENTRAL DO CLUBE") usam cópias em maiúsculas das chaves.
 var _exact: Dictionary = {}
+var ui_terms: Dictionary = {} # UI words that also happen to be club names (Estrela, Confiança).
 var _exact_upper: Dictionary = {}
 var _exact_lower: Dictionary = {}
 var _patterns: Array = [] # {re: RegEx, anchor: String, names: Array, target: String, upper: bool}
@@ -15,7 +17,7 @@ var _patterns_upper: Array = []
 var _cache: Dictionary = {}
 var _cache_mutex := Mutex.new()
 var _token_re := RegEx.create_from_string(_TOKEN)
-var _target_re := RegEx.create_from_string("%(?:\\.\\d+)?[sdf]|\\{[A-Za-z0-9_]+\\}")
+var _target_re := RegEx.create_from_string("(?<!%)%[-+0#]*\\d*(?:\\.\\d+)?[sdf]|\\{[A-Za-z0-9_]+\\}")
 var _letter_re := RegEx.create_from_string("\\p{L}")
 var _ordinal_re := RegEx.create_from_string("(\\d+)[ºª]")
 
@@ -112,13 +114,13 @@ func lookup(src: String, depth: int = 0) -> String:
 
 
 func _add_pattern(src: String, dst: String, upper: bool) -> void:
-	var rx := "^"
+	var rx := "(?s)^" # A captured news paragraph may include line breaks.
 	var names: Array = []
 	var last := 0
 	var anchor := ""
 	var literal_len := 0
 	for m in _token_re.search_all(src):
-		var lit := src.substr(last, m.get_start() - last)
+		var lit := src.substr(last, m.get_start() - last).replace("%%", "%")
 		if upper:
 			lit = lit.to_upper()
 		rx += _escape(lit)
@@ -127,14 +129,14 @@ func _add_pattern(src: String, dst: String, upper: bool) -> void:
 			anchor = lit.strip_edges()
 		var tok := m.get_string()
 		names.append(tok)
-		if tok == "%d":
-			rx += "(-?\\d+)"
+		if tok.begins_with("%") and tok.ends_with("d"):
+			rx += "([+ -]*\\d+)"
 		elif tok.ends_with("f"):
-			rx += "(-?[\\d.,]+)"
+			rx += "([+ -]*[\\d.,]+)"
 		else:
 			rx += "(.*?)"
 		last = m.get_end()
-	var tail := src.substr(last)
+	var tail := src.substr(last).replace("%%", "%")
 	if upper:
 		tail = tail.to_upper()
 	rx += _escape(tail) + "$"
@@ -174,7 +176,7 @@ func _render(p: Dictionary, m: RegExMatch, depth: int) -> String:
 	var last := 0
 	var seq := 0
 	for tm in _target_re.search_all(target):
-		out += target.substr(last, tm.get_start() - last)
+		out += target.substr(last, tm.get_start() - last).replace("%%", "%")
 		var tok := tm.get_string()
 		var val := tok
 		if tok.begins_with("%"):
@@ -196,7 +198,7 @@ func _render(p: Dictionary, m: RegExMatch, depth: int) -> String:
 					val = groups[idx]
 		out += val
 		last = tm.get_end()
-	return out + target.substr(last)
+	return out + target.substr(last).replace("%%", "%")
 
 
 static func _escape(s: String) -> String:
@@ -210,10 +212,15 @@ static func _escape(s: String) -> String:
 
 ## Em inglês, "3º" das traduções vira "3rd" depois que o número entra na frase.
 func _ordinals(text: String) -> String:
-	if not locale.begins_with("en") or not text.contains("º"):
+	if not locale.begins_with("en") or (not text.contains("º") and not text.contains("ª")):
 		return text
-	var out := text
+	var out := ""
+	var last := 0
 	for m in _ordinal_re.search_all(text):
 		var n := int(m.get_string(1))
-		out = out.replace(m.get_string(), Fmt.ordinal(n))
-	return out
+		var suffix := "th"
+		if n % 100 not in [11, 12, 13]:
+			suffix = {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+		out += text.substr(last, m.get_start() - last) + str(n) + suffix
+		last = m.get_end()
+	return out + text.substr(last)
