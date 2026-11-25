@@ -127,6 +127,9 @@ var _vy := 0.0
 var _vzd := 1.0
 var _vo := Vector2.ZERO
 var _punch := 0.0
+## Tranco da câmera na direção do golpe (posição e velocidade, em U), volta como mola.
+var _kick := 0.0
+var _kick_v := 0.0
 ## Quem a câmera segue: -1 a dupla; 0 ou 1 um lutador só (apresentação).
 var _focus := -1
 ## Pausa de impacto (segundos que faltam), clarão do golpe forte e empolgação da torcida (0 a 1).
@@ -365,7 +368,7 @@ func _start(b: Dictionary) -> void:
 			(rigs[1 - clampi(int(b["side"]), 0, 1)] as Rig2D).ko = true
 			_say("KNOCKDOWN!", 1.6, true)
 			_shake = 1.0
-			_slowmo = 0.7
+			_slowmo = 0.9
 			_hype = 1.0
 			Sfx.vibrate(40)
 		"fim":
@@ -412,6 +415,8 @@ func _process(delta: float) -> void:
 		return
 	if AppSettings.reduce_motion:
 		_shake = 0.0
+		_kick = 0.0
+		_kick_v = 0.0
 		_slowmo = 0.0
 		_hitstop = 0.0
 		_flash = 0.0
@@ -467,6 +472,8 @@ func _process(delta: float) -> void:
 	_camera(delta)
 	_record(dt)
 	_shake = maxf(0.0, _shake - delta * 2.5)
+	_kick_v += (-160.0 * _kick - 16.0 * _kick_v) * delta
+	_kick = clampf(_kick + _kick_v * delta, -0.5, 0.5)
 	_caption_t -= delta
 	_tick_fx(delta)
 	queue_redraw()
@@ -649,8 +656,15 @@ func _animate_ref(dt: float) -> void:
 		tx = mid + off * 0.6
 		p.merge({"torso": 28.0, "na_s": 75.0, "na_e": 0.0}, true)
 	elif pos == "chao":
-		tx = mid + off * 0.75
-		p.merge({"crouch": 0.7, "torso": 40.0, "na_s": 25.0, "na_e": 20.0, "fa_s": 20.0, "fa_e": 25.0}, true)
+		# No chão o juiz fica de fora, agachado olhando, sem ficar em cima da luta.
+		# Fica do lado das pernas de quem está embaixo; colados na grade, dá a volta pela cabeça.
+		var tpi := clampi(int(st.get("top", 0)), 0, 1)
+		var rb: Rig2D = rigs[1 - tpi]
+		var sd := rb.dir
+		tx = rb.px + sd * 4.0
+		if absf(tx) > ARENA - 1.0:
+			tx = rb.px - sd * 4.8
+		p.merge({"crouch": 0.55, "torso": 32.0, "na_s": 25.0, "na_e": 20.0, "fa_s": 20.0, "fa_e": 25.0}, true)
 	elif pos == "clinch":
 		tx = mid + off * 0.6
 	tx = clampf(tx, -ARENA + 1.0, ARENA - 1.0)
@@ -672,11 +686,20 @@ func _animate(dt: float) -> void:
 	var poses: Array = tg[0]
 	var pxs: Array = tg[1]
 	var dirs: Array = tg[2]
-	var fast := not _act.is_empty() and String(_act["type"]) in ["golpe", "gnp", "estudo", "balanca", "fin", "escapa"]
+	var fast := not _act.is_empty() and String(_act["type"]) in ["golpe", "gnp", "estudo", "balanca", "fin", "escapa", "kd"]
 	var ap := 1.0 - exp(-(10.0 if fast else 4.5) * dt)
 	_free_legs(dirs)
+	# No chão ninguém fica de pé plantado: o joelho e o quadril vão à lona como a pose manda.
+	var s_now: Dictionary = st
+	if not _act.is_empty() and float(_act["p"]) < float(SWITCH.get(String(_act["type"]), 0.0)):
+		s_now = _prev
+	var floor_on := String(s_now.get("pos", "")) == "chao" and not _ended and not _between and not _corner_on()
 	for i in 2:
 		var r: Rig2D = rigs[i]
+		if r.plant == floor_on:
+			r.plant = not floor_on
+			if r.plant:
+				r.reset_feet()
 		if not is_equal_approx(r.dir, float(dirs[i])):
 			r.dir = float(dirs[i])
 			r.pose = (poses[i] as Dictionary).duplicate()
@@ -1052,30 +1075,33 @@ func _ground_base(s: Dictionary) -> Array:
 	match g:
 		"meia":
 			B.merge({"sit": 1.0, "rot": 88.0, "head": 25.0, "na_s": 55.0, "na_e": 60.0, "fa_s": 70.0, "fa_e": 50.0, "nl_h": 35.0, "nl_k": 85.0, "fl_h": 12.0, "fl_k": 40.0}, true)
-			T.merge({"torso": 58.0, "head": 15.0, "na_s": 100.0, "na_e": 40.0, "fa_s": 80.0, "fa_e": 50.0, "nl_h": 25.0, "nl_k": 110.0, "fl_h": -15.0, "fl_k": 85.0}, true)
+			T.merge({"torso": 74.0, "head": 20.0, "na_s": 38.0, "na_e": 35.0, "fa_s": 18.0, "fa_e": 30.0, "nl_h": 25.0, "nl_k": 110.0, "fl_h": -15.0, "fl_k": 85.0}, true)
 			t_off = 1.3
 			B["lz"] = 0.6
 			T.merge({"lz": 0.5, "zz": 0.35}, true)
 		"lateral":
 			B.merge({"sit": 1.0, "rot": 90.0, "head": 20.0, "na_s": 95.0, "na_e": 60.0, "fa_s": 40.0, "fa_e": 80.0, "nl_h": 50.0, "nl_k": 95.0, "fl_h": 30.0, "fl_k": 75.0}, true)
-			T.merge({"torso": 70.0, "head": 18.0, "na_s": 20.0, "na_e": 30.0, "fa_s": 55.0, "fa_e": 25.0, "nl_h": 10.0, "nl_k": 100.0, "fl_h": -30.0, "fl_k": 70.0}, true)
+			T.merge({"torso": 74.0, "head": 22.0, "na_s": 30.0, "na_e": 45.0, "fa_s": 12.0, "fa_e": 25.0, "nl_h": 10.0, "nl_k": 100.0, "fl_h": -30.0, "fl_k": 70.0}, true)
 			t_off = 0.7
 			T.merge({"lz": 0.5, "zz": 0.95}, true)
 		"montada":
 			B.merge({"sit": 1.0, "rot": 90.0, "head": 25.0, "na_s": 90.0, "na_e": 30.0, "fa_s": 75.0, "fa_e": 45.0, "nl_h": 45.0, "nl_k": 90.0, "fl_h": 35.0, "fl_k": 85.0}, true)
-			T.merge({"sit": 1.0, "y": 0.1, "torso": 8.0, "head": 5.0, "na_s": 65.0, "na_e": 30.0, "fa_s": 50.0, "fa_e": 40.0, "nl_h": 70.0, "nl_k": 155.0, "fl_h": 62.0, "fl_k": 150.0}, true)
+			T.merge({"sit": 1.0, "y": 0.1, "torso": 18.0, "head": 12.0, "na_s": 62.0, "na_e": 75.0, "fa_s": 38.0, "fa_e": 95.0, "nl_h": 70.0, "nl_k": 155.0, "fl_h": 62.0, "fl_k": 150.0}, true)
 			t_off = -0.5
 			T["lz"] = 2.0
 		"costas":
 			B.merge({"sit": 1.0, "rot": 0.0, "torso": -6.0, "head": 14.0, "na_s": 75.0, "na_e": 80.0, "fa_s": 65.0, "fa_e": 85.0, "nl_h": 84.0, "nl_k": 25.0, "fl_h": 78.0, "fl_k": 15.0}, true)
-			T.merge({"sit": 1.0, "rot": -18.0, "torso": 0.0, "head": 20.0, "na_s": 100.0, "na_e": 75.0, "fa_s": 85.0, "fa_e": 70.0, "nl_h": 70.0, "nl_k": 45.0, "fl_h": 95.0, "fl_k": 20.0}, true)
+			T.merge({"sit": 1.0, "rot": -12.0, "torso": 10.0, "head": 28.0, "na_s": 48.0, "na_e": 75.0, "fa_s": 40.0, "fa_e": 80.0, "nl_h": 70.0, "nl_k": 45.0, "fl_h": 95.0, "fl_k": 20.0}, true)
 			t_off = -1.55
 			dirs[tp] = dB
 			T.merge({"lz": 1.5, "az": 0.25}, true)
 		_:
-			B.merge({"sit": 1.0, "rot": 90.0, "head": 25.0, "na_s": 60.0, "na_e": 30.0, "fa_s": 70.0, "fa_e": 40.0, "nl_h": 45.0, "nl_k": 78.0, "fl_h": 40.0, "fl_k": 70.0}, true)
-			T.merge({"torso": 30.0, "head": 0.0, "na_s": 58.0, "na_e": 20.0, "fa_s": 50.0, "fa_e": 28.0, "nl_h": -2.0, "nl_k": 95.0, "fl_h": -12.0, "fl_k": 80.0, "lz": 0.7}, true)
+			# Guarda fechada: quem está por cima ajoelha colado no quadril, mãos no peito;
+			# as pernas de baixo abraçam a cintura e os pés cruzam nas costas.
+			B.merge({"sit": 1.0, "rot": 90.0, "head": 30.0, "na_s": 75.0, "na_e": 70.0, "fa_s": 95.0, "fa_e": 60.0, "nl_h": 42.0, "nl_k": 48.0, "fl_h": 34.0, "fl_k": 40.0}, true)
+			T.merge({"torso": 16.0, "head": 8.0, "na_s": 72.0, "na_e": 55.0, "fa_s": 62.0, "fa_e": 70.0, "nl_h": -2.0, "nl_k": 95.0, "fl_h": -12.0, "fl_k": 80.0, "lz": 0.7}, true)
 			B["lz"] = 1.4
+			t_off = 1.15
 	dirs[bt] = dB
 	var target_cx := 0.0
 	if bool(s["cage"]):
@@ -1396,7 +1422,9 @@ func _overlay(s: Dictionary, out: Array) -> void:
 			pd["rot"] = float(pd.get("rot", 0.0)) - 8.0 * sin(p * 9.0) * w
 			_add(pa, {"x": 0.6}, w)
 		"kd":
-			var u := smoothstep(0.0, 0.35, p)
+			# As pernas somem na hora (é isso que a câmera lenta mostra) e ele senta na lona.
+			var u := smoothstep(0.02, 0.2, p)
+			_add(pd, {"crouch": 0.7, "head": 28.0, "na_s": -30.0, "fa_s": -30.0}, sin(clampf(p / 0.16, 0.0, 1.0) * PI) * 0.8)
 			var down := {"sit": 1.0, "rot": 72.0, "torso": 0.0, "head": -15.0, "na_s": 20.0, "na_e": 30.0, "fa_s": 5.0, "fa_e": 40.0,
 				"nl_h": 55.0, "nl_k": 30.0, "fl_h": 40.0, "fl_k": 50.0}
 			_mix(pd, down, u * (1.0 - smoothstep(0.85, 1.0, p)))
@@ -1660,6 +1688,8 @@ func _impact() -> void:
 	_punch = maxf(_punch, clampf(dmg * 0.7, 0.0, 1.0))
 	if dmg > 0.55 and time_scale < 2.0 and _queue.size() < 4 and not AppSettings.reduce_motion:
 		_hitstop = clampf(0.03 + dmg * 0.05, 0.045, 0.13)
+	if dmg > 0.6 and not AppSettings.reduce_motion:
+		_kick_v += away * minf(1.6, dmg) * 2.2
 	if dmg > 0.9:
 		_shake = maxf(_shake, minf(1.0, dmg * 0.5))
 		if z == "head":
@@ -1695,7 +1725,7 @@ func _draw() -> void:
 	# dois lutadores caberem, e o que sobra em cima é o teto escuro do ginásio.
 	_U = minf(h / 9.6, w / 12.5)
 	_ground = h * 0.88
-	_sh = Vector2(sin(_rt * 70.0), cos(_rt * 53.0)) * _shake * _U * 0.18
+	_sh = Vector2(sin(_rt * 70.0), cos(_rt * 53.0)) * _shake * _U * 0.18 + Vector2(_kick * _U, absf(_kick) * _U * 0.15)
 	# O tranco do golpe forte fecha um pouco o quadro (e dá folga para o tremor nas bordas).
 	_vzd = _vz * (1.0 + 0.045 * _punch) + 0.03 * minf(1.0, _shake)
 	_vo = Vector2(w * 0.5, _ground) * (1.0 - _vzd) + Vector2(0.0, _vy * h) + _sh
@@ -1735,9 +1765,13 @@ func _draw() -> void:
 	if String(st["pos"]) == "chao" and not _ended:
 		var tp := clampi(int(st["top"]), 0, 1)
 		order = [1 - tp, tp]
-		if String(st["g"]) == "costas":
+		var gg := String(st["g"])
+		if gg == "costas":
 			order = [tp, 1 - tp]
 			layered = tp
+		elif not gg in ["meia", "lateral", "montada"]:
+			# Guarda: a perna de baixo passa por cima da cintura de quem está em cima.
+			layered = 1 - tp
 	elif _ended and _method in ["KO", "TKO"] and _winner >= 0:
 		order = [1 - _winner, _winner]
 	elif not _act.is_empty() and int(_act["side"]) >= 0:
