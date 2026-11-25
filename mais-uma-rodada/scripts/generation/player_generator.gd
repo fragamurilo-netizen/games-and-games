@@ -116,7 +116,7 @@ static func pick_nationality(rng: RandomNumberGenerator, club: Club) -> String:
 	share *= 0.7 + 0.6 * t
 	if rng.randf() >= share:
 		return club.nation
-	return pick_import(rng, club.nation)
+	return pick_import(rng, club.nation, t)
 
 
 ## Base: garotos são quase todos do país. Estrangeiro na base vem de vizinho, de ex-colônia ou da
@@ -164,11 +164,29 @@ static func pick_youth_nationality(rng: RandomNumberGenerator, club: Club, age: 
 	return nat
 
 
-static func pick_import(rng: RandomNumberGenerator, nation: String) -> String:
+## `quality` (0–1): o tamanho do clube na liga. O pequeno compra do vizinho e do mercado barato; o
+## grande garimpa nas escolas que mais formam craques (Brasil, Argentina, França...), como na vida
+## real, em que os melhores do mundo vêm de poucos países.
+static func pick_import(rng: RandomNumberGenerator, nation: String, quality: float = 0.0) -> String:
 	var imports: Dictionary = DatabaseManager.nation(nation).get("imports", {})
 	if imports.is_empty():
 		return nation
-	return RngUtil.weighted_key(rng, imports)
+	if quality <= 0.0:
+		return RngUtil.weighted_key(rng, imports)
+	var q := quality * quality
+	var table := {}
+	for k in imports:
+		table[k] = float(imports[k]) * (1.0 + q * talent_school(String(k)) * IMPORT_TALENT_PULL)
+	return RngUtil.weighted_key(rng, table)
+
+
+## Quanto os clubes grandes puxam para as escolas fortes (1 + q² × escola × isto).
+const IMPORT_TALENT_PULL := 1.3
+
+
+## Força da escola de formação do país (0–3, de nations.json "youth"); país sem nota conta como fraco.
+static func talent_school(nation: String) -> float:
+	return float(DatabaseManager.nation(nation).get("youth", 0.4))
 
 
 ## Nacionalidade de um agente livre: um país com liga (pelo número de clubes) ou um de seus "exportadores".
@@ -310,8 +328,9 @@ static func _generate_attributes(rng: RandomNumberGenerator, p: Player, target: 
 	var vals: Array = []
 	var tpl: Array = TEMPLATE[pos]
 	var profile: Dictionary = RngUtil.pick(rng, PROFILES[pos])
+	var noise := correlated_noise(rng, 5.0)
 	for i in Attr.COUNT:
-		var v: float = target + tpl[i] + rng.randfn(0.0, 5.0)
+		var v: float = target + tpl[i] + noise[i]
 		v += float(profile.get(i, 0)) + float(sig.get(i, 0))
 		vals.append(v)
 	# Idade: jovens mais físicos/menos maduros; veteranos mais inteligentes e mais lentos.
@@ -371,6 +390,30 @@ static func _generate_attributes(rng: RandomNumberGenerator, p: Player, target: 
 			vals[i] = clampf(vals[i], 1.0, 25.0)
 		p.attrs[i] = int(round(soft_attr(spike_cap(vals[i], target, i))))
 	p.recompute_overall()
+
+
+## Famílias de atributos que andam juntos: quem é rápido costuma arrancar bem, quem marca bem
+## desarma bem, quem finaliza bem tem frieza e chute. Cada atributo leva parte do sorteio da família
+## (sem isso saía o ponta de velocidade 88 e aceleração 64, que não existe).
+const ATTR_FAMILIES: Array = [
+	[Attr.VEL, Attr.ACE], [Attr.MAR, Attr.DES, Attr.POS], [Attr.PAS, Attr.VIS], [Attr.FIN, Attr.FRI, Attr.CHL],
+	[Attr.TEC, Attr.DRI, Attr.CRU], [Attr.INT, Attr.DEC], [Attr.FOR, Attr.CAB], [Attr.GOL, Attr.REF],
+]
+const FAMILY_SHARE := 0.62
+
+
+## Ruído dos atributos (desvio `sd`), com a parte comum de cada família.
+static func correlated_noise(rng: RandomNumberGenerator, sd: float) -> Array:
+	var out: Array = []
+	out.resize(Attr.COUNT)
+	var own := sqrt(1.0 - FAMILY_SHARE * FAMILY_SHARE)
+	for i in Attr.COUNT:
+		out[i] = rng.randfn(0.0, sd)
+	for fam: Array in ATTR_FAMILIES:
+		var f := rng.randfn(0.0, sd)
+		for i: int in fam:
+			out[i] = out[i] * own + f * FAMILY_SHARE
+	return out
 
 
 ## O ponto forte de um jogador passa do overall dele, mas não muito: um zagueiro 83 desarma como
@@ -639,14 +682,21 @@ static func calibrate_xi(world: GameWorld, club: Club, level: float) -> void:
 			p.potential = clampi(p.potential + step, p.overall, 94)
 
 
+## Idades sem degraus: o garoto de 17 ainda é raro no profissional (o de 19–20 é comum) e o
+## veterano vai rareando aos poucos depois dos 33, em vez de sumir de uma vez aos 36.
+const KID_AGES := {17: 1.0, 18: 1.6, 19: 1.8, 20: 1.6, 21: 0.9}
+const YOUNG_AGES := {18: 0.7, 19: 1.0, 20: 1.1, 21: 1.2, 22: 1.2, 23: 1.0}
+const VETERAN_AGES := {30: 3.0, 31: 3.0, 32: 2.7, 33: 2.3, 34: 1.8, 35: 1.2, 36: 0.6, 37: 0.25}
+
+
 static func _pick_age(rng: RandomNumberGenerator, tier: int, young_share: float, veteran_share: float) -> int:
 	if tier == 2:
-		return rng.randi_range(17, 20)
+		return int(RngUtil.weighted_key(rng, KID_AGES))
 	var r := rng.randf()
 	if r < young_share * 0.6:
-		return rng.randi_range(18, 22)
+		return int(RngUtil.weighted_key(rng, YOUNG_AGES))
 	if r > 1.0 - veteran_share * 0.7:
-		return rng.randi_range(30, 35)
+		return int(RngUtil.weighted_key(rng, VETERAN_AGES))
 	if tier == 0:
 		return clampi(int(round(rng.randfn(27.0, 3.3))), 20, 34)
 	return clampi(int(round(rng.randfn(25.5, 4.5))), 18, 35)

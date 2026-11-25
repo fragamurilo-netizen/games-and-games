@@ -594,7 +594,7 @@ func _light_pass() -> void:
 		var d := (p - key) / (_s * 0.9)
 		var fall := clampf(d.length(), 0.0, 1.3)
 		var warm := Color(1.0, 0.92, 0.8, 0.1 * (1.0 - smoothstep(0.0, 0.65, fall)))
-		var shade := 0.12 * smoothstep(0.55, 1.35, fall)
+		var shade := 0.2 * smoothstep(0.5, 1.3, fall)
 		if shade > warm.a:
 			return Color(0.04, 0.06, 0.12, shade)
 		return warm
@@ -2872,6 +2872,12 @@ func _mouth() -> void:
 	var rose := Color("#9A5A5E")
 	var rk := lip.get_luminance() / maxf(0.05, rose.get_luminance())
 	var lip_lo := lip.lerp(Color(minf(1.0, rose.r * rk), minf(1.0, rose.g * rk), minf(1.0, rose.b * rk)), darkness * 0.3)
+	# Com bigode, a boca fica na sombra dele: o lábio de cima quase some sob os pelos e o de baixo
+	# escurece um pouco (o lábio claro e cheio no meio da barba parecia uma pílula rosada).
+	var stache := _stache_amount()
+	if stache > 0.0:
+		lip_up = lip_up.darkened(0.3 * stache).lerp(_bcol, 0.25 * stache)
+		lip_lo = lip_lo.darkened(0.22 * stache)
 	var corner_y := mouth_y - smile * _fh * 0.03 + float(f.get("corner", 0.0)) * _fh * 0.022
 	var bow: float = f["bow"]
 	# Canto de um lado mais alto (sorriso de canto) ou boca torta
@@ -3040,6 +3046,14 @@ func _poly_colors(pts: PackedVector2Array, cols: PackedColorArray) -> void:
 
 ## Densidade (0..1) de pelos da barba `P` no ponto (u, v) do rosto. Sem `patches`, ignora as falhas
 ## (a malha usa a versão contínua; as falhas ficam nos fios, que têm resolução para desenhá-las).
+## Quanto bigode há logo acima do lábio de cima (0 = nenhum, 1 = cheio).
+func _stache_amount() -> float:
+	if int(_f["beard"]) == FaceGen.B_NONE or _beard_p.is_empty():
+		return 0.0
+	var v := _M - float(_f["lip_u"]) * 2.0 - 0.025
+	return clampf(_beard_dens(0.0, v, _beard_p, false) * float(_beard_p.get("op", 1.0)), 0.0, 1.0)
+
+
 func _beard_dens(u: float, v: float, P: Dictionary, patches: bool = true) -> float:
 	if P.is_empty():
 		return 0.0
@@ -3248,10 +3262,12 @@ func _beard_dens(u: float, v: float, P: Dictionary, patches: bool = true) -> flo
 	var fdb: float = float(P.get("fd", 0.0))
 	if fdb > 0.0:
 		d *= lerpf(1.0, 0.2, fdb * (1.0 - smoothstep(0.05, 0.4, v)) * smoothstep(0.55, 0.85, au))
-	# Nunca sobre os lábios (o bigode morsa cobre o lábio de cima de propósito)
+	# Nunca sobre os lábios (o bigode morsa cobre o lábio de cima de propósito). O pelo chega até a
+	# borda do lábio, como na vida real: a folga larga de antes deixava um anel de pele lisa em volta
+	# da boca, e o lábio claro no meio da barba virava uma "pílula" rosada.
 	var lip_c := _M + (lip_l - lip_u) * 0.5
-	var le := sqrt(pow(u / (_MW * 1.0), 2.0) + pow((v - lip_c) / ((lip_u + lip_l) * 0.62), 2.0))
-	d *= smoothstep(0.85, 1.05, le)
+	var le := sqrt(pow(u / (_MW * 1.0), 2.0) + pow((v - lip_c) / ((lip_u + lip_l) * 0.5), 2.0))
+	d *= smoothstep(0.84, 1.0, le)
 	d = maxf(d, walrus)
 	# Nunca acima da linha das maçãs
 	d *= smoothstep(_E + 0.08, _E + 0.2, v) if au < 0.8 else 1.0

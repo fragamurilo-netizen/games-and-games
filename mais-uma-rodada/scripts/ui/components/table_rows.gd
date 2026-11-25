@@ -17,6 +17,8 @@ const VIEW_FORM := "form"
 const ROW_PAD := 14
 const W_POS := 36
 const W_CREST := 30
+## Quadradinho do número da posição (cabe "20" na fonte H3).
+const W_POS_BADGE := 34
 const W_FORM := 5 * 18 + 4 * 4
 
 
@@ -47,8 +49,8 @@ static func _cols(compact: bool, view: String, wide: bool) -> Array:
 static func header(compact: bool, view: String = VIEW_ALL, wide: bool = false) -> HBoxContainer:
 	var h := UIKit.hbox(6)
 	var gap := Control.new()
-	# Mesma soma da linha: margem, faixa da zona, posição e escudo (com os espaçamentos).
-	gap.custom_minimum_size.x = ROW_PAD + 5 + 6 + W_POS + 6 + W_CREST
+	# Mesma soma da linha: margem, posição (com a cor da zona) e escudo (com os espaçamentos).
+	gap.custom_minimum_size.x = ROW_PAD + W_POS_BADGE + 6 + W_CREST
 	h.add_child(gap)
 	var n := UIKit.label("CLUBE", "Caps")
 	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -77,14 +79,7 @@ static func table_row(w: GameWorld, r: Dictionary, club_id: int, pos: int, compa
 	var cl := w.club(club_id)
 	var is_user := w.is_user_club(club_id)
 	var h := UIKit.hbox(6)
-	var bar := ColorRect.new()
-	bar.custom_minimum_size = Vector2(3, 0)
-	bar.color = zone
-	h.add_child(bar)
-	var pl := UIKit.label(str(pos), "H3")
-	pl.custom_minimum_size.x = W_POS
-	pl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	h.add_child(pl)
+	h.add_child(position_badge(pos, zone))
 	h.add_child(UIKit.crest(cl, W_CREST))
 	var n := UIKit.label(cl.short_name, "H3" if is_user else "")
 	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -177,7 +172,8 @@ static func standings_table(w: GameWorld, lines: Array, view: String, on_tap: Ca
 	t.row_height = UITokens.H_ROW - 8
 	t.lead_width = 300.0
 	t.lead_min = 290.0
-	t.marker = func(it: Dictionary) -> Color: return it["zone"]
+	# A zona vem no próprio número da posição (quadradinho colorido, como nas tabelas de TV e
+	# dos apps de resultado): o filete fino da borda quase não se via no celular.
 	t.highlight = func(it: Dictionary) -> bool: return w.is_user_club(int(it["id"]))
 	t.row_pressed.connect(func(it: Variant): on_tap.call(int((it as Dictionary)["id"])))
 	var num := func(key: String, title: String, tip: String, strong: bool = false) -> Dictionary:
@@ -228,12 +224,7 @@ static func _standing_lead(w: GameWorld, it: Dictionary) -> Control:
 	var cl := w.club(cid)
 	var is_user := w.is_user_club(cid)
 	var h := UIKit.hbox(6)
-	var pl := UIKit.label(str(int(it["pos"])), "H3")
-	pl.custom_minimum_size.x = 30
-	pl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	pl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	pl.add_theme_font_override(&"font", DataTable.tabular_font())
-	h.add_child(pl)
+	h.add_child(position_badge(int(it["pos"]), it.get("zone", Color(0, 0, 0, 0))))
 	var cr := UIKit.crest(cl, W_CREST)
 	cr.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	h.add_child(cr)
@@ -253,6 +244,31 @@ static func _standing_lead(w: GameWorld, it: Dictionary) -> Control:
 		h.add_child(mv)
 	h.tooltip_text = cl.name
 	return h
+
+
+## Número da posição na tabela; numa zona (título, vaga continental, acesso, rebaixamento) vira um
+## quadradinho na cor da zona, com o número em contraste. A cor nunca vem sozinha: a legenda da
+## tabela diz o que cada uma vale.
+static func position_badge(pos: int, zone: Color) -> Control:
+	var pl := UIKit.label(str(pos), "H3")
+	pl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	pl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	pl.add_theme_font_override(&"font", DataTable.tabular_font())
+	pl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var p := PanelContainer.new()
+	var sb := StyleBoxFlat.new()
+	sb.set_corner_radius_all(UITokens.R_SM)
+	if zone.a > 0.0:
+		sb.bg_color = zone
+		pl.add_theme_color_override(&"font_color", UIColors.on_color(zone))
+	else:
+		sb.bg_color = Color(0, 0, 0, 0)
+	p.add_theme_stylebox_override(&"panel", sb)
+	p.custom_minimum_size = Vector2(W_POS_BADGE, W_POS_BADGE)
+	p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	p.add_child(pl)
+	return p
 
 
 ## Quadradinhos dos últimos jogos (V verde, E cinza, D vermelho), do mais antigo ao mais recente.

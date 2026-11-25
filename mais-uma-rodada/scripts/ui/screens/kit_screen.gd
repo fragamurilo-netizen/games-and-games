@@ -145,6 +145,11 @@ var _proposal_round := 0 # "Pedir outras propostas"
 var _launch := false # aberto pelo convite de lançamento da temporada
 var _history: Array = [] # [{qual: cópia do uniforme}, qual estava aberto] para desfazer
 var _stage: PanelContainer
+## Prévia recolhida: no celular, ao rolar o editor a prévia grande encolhe (só a frente, menor)
+## para sobrar tela para os modelos e as cores; volta ao tamanho cheio no topo.
+var _stage_small := false
+var _stage_views: Array = [] # [frente, costas, legenda]
+var _scroll_hooked := false
 var _nation := "" # seleção em edição ("" = clube do usuário)
 var _proxy: Club = null
 
@@ -392,6 +397,8 @@ func _build_stage(club: Club, pre: bool) -> void:
 		body.add_child(_stage)
 		body.move_child(_stage, 0)
 	UIKit.clear(_stage)
+	_stage_views.clear()
+	_hook_scroll()
 	var v := UIKit.vbox(8)
 	_stage.add_child(v)
 	# Os quatro uniformes: toque para escolher qual editar
@@ -430,10 +437,10 @@ func _build_stage(club: Club, pre: bool) -> void:
 		kv.number = 1 if _which == "gk" else 10
 		kv.back = is_back
 		kv.back_name = _ten_name() if _which != "gk" else ""
-		kv.custom_minimum_size = Vector2(196, 344) if not is_back else Vector2(140, 248)
 		kv.size_flags_vertical = Control.SIZE_SHRINK_END
 		kv.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		big.add_child(kv)
+		_stage_views.append(kv)
 	v.add_child(big)
 	# Legenda e contraste com o titular
 	var cap_row := UIKit.hbox(10)
@@ -448,8 +455,42 @@ func _build_stage(club: Club, pre: bool) -> void:
 		var ok := not (_which in bad)
 		cap_row.add_child(UIKit.pill(("Contraste %d" % sc) if ok else "Igual ao titular", UIColors.GREEN if ok else UIColors.RED, 16))
 	v.add_child(cap_row)
+	_stage_views.append(cap_row)
+	_size_stage()
 	if not pre:
 		v.modulate = Color(1, 1, 1, 1)
+
+
+func _hook_scroll() -> void:
+	if _scroll_hooked or scroll() == null:
+		return
+	_scroll_hooked = true
+	scroll().get_v_scroll_bar().value_changed.connect(func(val: float):
+		# Folga entre recolher e abrir, para a prévia não piscar no limite.
+		var want := _stage_small
+		if not _stage_small and val > 140.0:
+			want = true
+		elif _stage_small and val < 24.0:
+			want = false
+		if want != _stage_small:
+			_stage_small = want
+			_size_stage())
+
+
+## Tamanho da prévia: cheia (frente e costas) ou recolhida (só a frente, menor). Recolhe só em
+## tela estreita; no tablet e deitado sobra espaço.
+func _size_stage() -> void:
+	if _stage_views.size() < 3:
+		return
+	var small := _stage_small and content_width() < 900.0
+	var front: Control = _stage_views[0]
+	var back: Control = _stage_views[1]
+	var cap: Control = _stage_views[2]
+	if not (is_instance_valid(front) and is_instance_valid(back) and is_instance_valid(cap)):
+		return
+	front.custom_minimum_size = Vector2(118, 206) if small else Vector2(196, 344)
+	back.custom_minimum_size = Vector2(84, 148) if small else Vector2(140, 248)
+	cap.visible = not small
 
 
 ## Resumo em palavras: estampa, gola e mangas.
@@ -740,12 +781,16 @@ func _template_grid(club: Club, k: Dictionary) -> Control:
 		kv.custom_minimum_size = Vector2(96, 150)
 		kv.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		inner.add_child(kv)
-		var l := UIKit.label(String(t[0]), "Small")
+		# Nome inteiro em até duas linhas ("Listras largas", "Original do clube"), sem reticências.
+		var l := UIKit.label(String(t[0]), "Small", true)
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		l.max_lines_visible = 2
 		l.custom_minimum_size.x = 104
 		inner.add_child(l)
 		var ready := tk
+		var current := _same_design(k, tk)
+		if current:
+			l.add_theme_color_override(&"font_color", UIColors.TEXT)
 		var cell := UIKit.tap_row(inner, func():
 			_edit(func(kk: Dictionary):
 				var keep := {}
@@ -754,10 +799,21 @@ func _template_grid(club: Club, k: Dictionary) -> Control:
 						keep[key] = kk[key]
 				kk.clear()
 				kk.merge(ready)
-				kk.merge(keep, true)), "RowPanel")
+				kk.merge(keep, true)), "CardHighlight" if current else "RowPanel")
 		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		grid.add_child(cell)
 	return grid
+
+
+## O uniforme em edição é este modelo? (mesmo desenho e mesmas cores; patrocínio não conta)
+static func _same_design(a: Dictionary, b: Dictionary) -> bool:
+	for key in STYLE_KEYS + COLOR_KEYS:
+		if key == "tonal":
+			if bool(a.get(key, false)) != bool(b.get(key, false)):
+				return false
+		elif str(a.get(key, "")).to_lower() != str(b.get(key, "")).to_lower():
+			return false
+	return true
 
 
 ## Miniaturas de cada estampa do grupo, já com as cores do uniforme em edição.

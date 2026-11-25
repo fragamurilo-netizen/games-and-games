@@ -154,7 +154,20 @@ func _build() -> void:
 		var cell: Control = lead_ref.get_ref()
 		if cell != null and size.x > 0.0:
 			# O nome cede espaço até lead_min antes de os números começarem a rolar para o lado.
-			cell.custom_minimum_size.x = maxf(minf(lead_width, lead_min), size.x - num_w)
+			var floor_w := minf(lead_width, lead_min)
+			var lw := maxf(floor_w, size.x - num_w)
+			if num_w > size.x - lw + 1.0:
+				# Rolando: a parte visível termina no fim de uma coluna (nada de coluna cortada ao
+				# meio na borda); o espaço que sobra fica com o nome.
+				var fits := 0.0
+				for c: Dictionary in columns.slice(1):
+					var cw := float(c.get("w", 72)) + GAP
+					if fits + cw > size.x - floor_w:
+						break
+					fits += cw
+				if fits > 0.0:
+					lw = size.x - fits
+			cell.custom_minimum_size.x = lw
 			hint_gap.custom_minimum_size.x = cell.custom_minimum_size.x
 			var over := num_w > size.x - cell.custom_minimum_size.x + 1.0
 			hint_row.visible = over

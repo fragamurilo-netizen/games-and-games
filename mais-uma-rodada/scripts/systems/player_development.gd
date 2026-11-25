@@ -655,6 +655,16 @@ static func retirement_chance(world: GameWorld, p: Player) -> float:
 		age -= 2
 	if p.dev_curve == Player.CURVE_LONGEVO:
 		age -= 1
+	# Quem joga em nível baixo (divisões de baixo, salário pequeno) para antes: troca a bola por um
+	# emprego aos 30 e poucos. Na elite a carreira vai até os 35–38.
+	var lowly := false
+	if p.club_id >= 0:
+		var cl := world.club(p.club_id)
+		lowly = cl != null and (cl.tier >= 3 or p.ovr_f < PlayerGenerator.club_level(cl) - 8.0)
+	else:
+		lowly = p.ovr_f < 60.0
+	if lowly:
+		age += 2
 	var base := 0.0
 	if age >= 39:
 		base = 0.9
@@ -672,6 +682,11 @@ static func retirement_chance(world: GameWorld, p: Player) -> float:
 		base = 0.06
 	elif age >= 32:
 		base = 0.03
+	elif age >= 31:
+		base = 0.015
+	# Joelho e tornozelo cobram: quem vive machucado pode parar ainda perto dos 30.
+	if p.injury_prone >= 15 and p.age(world.year) >= 29:
+		base += 0.02 * float(p.injury_prone - 14)
 	if base <= 0.0:
 		return 0.0
 	if p.club_id < 0:
@@ -690,7 +705,7 @@ static func retirement_chance(world: GameWorld, p: Player) -> float:
 static func announce_retirements(world: GameWorld) -> Array:
 	var out: Array = []
 	for p: Player in world.players.values():
-		if p.retiring or p.age(world.year) < 32:
+		if p.retiring or p.age(world.year) < 29:
 			continue
 		if world.rng.randf() < retirement_chance(world, p):
 			p.retiring = true
@@ -703,7 +718,7 @@ static func process_retirements(world: GameWorld) -> Array:
 	var retired: Array = []
 	for p: Player in world.players.values().duplicate():
 		var go := p.retiring
-		if not go and p.club_id < 0 and p.age(world.year) >= 31:
+		if not go and p.club_id < 0 and p.age(world.year) >= 29:
 			go = world.rng.randf() < retirement_chance(world, p) * 1.2
 		if not go and p.age(world.year) >= 41:
 			go = true
