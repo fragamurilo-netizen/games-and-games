@@ -688,6 +688,9 @@ func _last_played_round(league: League) -> int:
 
 
 func _table(c: VBoxContainer, w: GameWorld, league: League) -> void:
+	var qc := _quad_card(w, league)
+	if qc != null:
+		c.add_child(qc)
 	var po := _playoff_card(w, league)
 	if po != null:
 		c.add_child(po)
@@ -1269,6 +1272,66 @@ func _playoff_card(w: GameWorld, league: League) -> Control:
 				gb += g.hg
 		row.add_child(UIKit.label("%d x %d" % [ga, gb] if played else "—", "Stat"))
 		card.add_child(row)
+	return UIKit.card_panel(card)
+
+
+## Quadrangulares (Série C, Colômbia): os grupos com os pontos da fase, quem sobe e a final.
+func _quad_card(w: GameWorld, league: League) -> Control:
+	if LeagueFormat.kind(league) != "quad" or not league.po.has("qg"):
+		return null
+	var card := UIKit.card("CardHighlight", 6)
+	card.add_child(UIKit.section("Quadrangulares"))
+	var champ := int(league.po.get("champ", -1))
+	if champ >= 0:
+		var cr := UIKit.hbox(10)
+		cr.add_child(UIKit.crest(w.club(champ), 48))
+		cr.add_child(UIKit.label("Campeão: %s" % w.club(champ).name, "H3", true))
+		card.add_child(cr)
+	var up := int(LeagueFormat.cfg(league).get("group_up", 0))
+	for gi in Array(league.po["qg"]).size():
+		card.add_child(UIKit.label("Grupo %s" % CupManager.GROUP_LETTERS[gi], "Caps"))
+		var rows := LeagueFormat.quad_table(league, gi)
+		for i in rows.size():
+			var r: Dictionary = rows[i]
+			var cl := w.club(int(r["id"]))
+			var row := UIKit.hbox(8)
+			var pos := UIKit.label("%d" % (i + 1), "Small")
+			pos.custom_minimum_size.x = 22
+			if i < up:
+				pos.add_theme_color_override(&"font_color", UIColors.ink(UIColors.GREEN))
+			row.add_child(pos)
+			row.add_child(UIKit.crest(cl, 28))
+			var nl := UIKit.label(cl.short_name, "H3" if w.is_user_club(cl.id) else "")
+			nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			if w.is_user_club(cl.id):
+				nl.add_theme_color_override(&"font_color", UIColors.ACCENT)
+			row.add_child(nl)
+			row.add_child(UIKit.label("%+d" % (int(r["gf"]) - int(r["ga"])), "Small"))
+			row.add_child(UIKit.label("%d" % int(r["pts"]), "Stat"))
+			card.add_child(row)
+	for t in league.po.get("ties", []):
+		card.add_child(UIKit.label("Final", "Caps"))
+		var fr := UIKit.hbox(8)
+		var a := w.club(int(t["a"]))
+		var b := w.club(int(t["b"]))
+		for cl in [a, b]:
+			fr.add_child(UIKit.crest(cl, 28))
+			var fl := UIKit.label(cl.short_name, "H3" if int(t["w"]) == cl.id else "")
+			fl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			fl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			fr.add_child(fl)
+		var ga := 0
+		var gb := 0
+		var played := false
+		for g: Fixture in LeagueFormat._tie_fixtures(league, t):
+			if not g.played:
+				continue
+			played = true
+			ga += g.hg if g.home == a.id else g.ag
+			gb += g.ag if g.home == a.id else g.hg
+		fr.add_child(UIKit.label("%d x %d" % [ga, gb] if played else "—", "Stat"))
+		card.add_child(fr)
 	return UIKit.card_panel(card)
 
 

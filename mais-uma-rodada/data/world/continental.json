@@ -749,16 +749,19 @@
 				"E2",
 				"E3",
 				"E4",
-				"E5",
-				"E6",
-				"E7"
+				"E5"
 			],
 			"ko_plan": [
+				"qf",
 				"sf",
 				"f"
 			],
 			"ko_slots": {
+				"qf": [
+					"E6"
+				],
 				"sf": [
+					"E7",
 					"E8"
 				],
 				"f": [
@@ -782,10 +785,10 @@
 				"#1B3A8C"
 			],
 			"trophy": "taca_estadual",
-			"max_clubs": 16,
-			"state_groups": 2,
+			"max_clubs": 20,
+			"state_groups": 4,
 			"per_group": 2,
-			"format": "16 clubes do Nordeste em 2 grupos de 8; os 2 primeiros de cada grupo vão às semifinais (jogo único) e a final é em ida e volta."
+			"format": "20 clubes do Nordeste em 4 grupos de 5, em turno único; os 2 primeiros de cada grupo vão às quartas (jogo único na casa da melhor campanha). Semifinal e final em ida e volta."
 		},
 		"VER": {
 			"name": "Copa Verde",
