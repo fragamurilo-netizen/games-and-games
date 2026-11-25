@@ -63,7 +63,27 @@ const CHAMBER := {
 	"chute_rodado": {"Rl_h": -60.0, "Rl_k": 60.0, "torso": 25.0},
 }
 
+## Mola de cada junta: [frequência parado, frequência no lance, amortecimento]. Braço e cabeça passam
+## do ponto e voltam (chicote); tronco e perna pesam.
+const SPRING := {
+	"x": [12.0, 26.0, 0.9], "y": [20.0, 32.0, 1.0], "crouch": [12.0, 24.0, 0.8], "sit": [16.0, 16.0, 1.0], "rot": [11.0, 15.0, 0.85],
+	"torso": [11.0, 25.0, 0.7], "head": [13.0, 23.0, 0.48], "tw": [12.0, 32.0, 0.8],
+	"na_s": [13.0, 50.0, 0.68], "na_e": [14.0, 56.0, 0.62], "fa_s": [13.0, 50.0, 0.68], "fa_e": [14.0, 56.0, 0.62],
+	"nl_h": [13.0, 40.0, 0.8], "nl_k": [14.0, 44.0, 0.75], "fl_h": [13.0, 40.0, 0.8], "fl_k": [14.0, 44.0, 0.75],
+}
+## Golpes em que a perna sai da lona (o pé deixa de ficar plantado).
+const LEG_FREE := ["chute_baixo", "chute_corpo", "chute_alto", "chute_frontal", "chute_panturrilha", "chute_obliquo", "joelhada", "joelhada_voadora",
+	"chute_giratorio", "chute_rodado", "superman"]
+
 var rigs: Array = []
+## Velocidade de cada junta (mola) e o empurrão que o golpe dá no corpo inteiro.
+## Como o nocauteado cai (0 de costas, 1 de cara, 2 desaba sentado, 3 duro) e há quanto tempo acabou.
+var _ko_kind := 0
+var _last_k := ""
+var _end_t := 0.0
+var _pv := [{}, {}]
+var _push := [0.0, 0.0]
+var _push_v := [0.0, 0.0]
 var time_scale := 1.0
 var stamina := [1.0, 1.0]
 var st := {"pos": "solto", "g": "", "top": -1, "cage": false, "dist": 1}
@@ -157,6 +177,9 @@ func setup(w: GameWorld, fa: Fighter, fb: Fighter, org_color: Color = Color("#C8
 		(rigs[1] as Rig2D).trim = Color("#F1F0EC")
 	(rigs[0] as Rig2D).px = -GAP[1] * 0.5
 	(rigs[1] as Rig2D).px = GAP[1] * 0.5
+	for r: Rig2D in rigs:
+		r.plant = true
+		r.reset_feet()
 	_org = org_color
 	_info = []
 	for f: Fighter in [fa, fb]:
@@ -172,6 +195,7 @@ func setup(w: GameWorld, fa: Fighter, fb: Fighter, org_color: Color = Color("#C8
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_rng.seed = hash(fa.id * 7919 + fb.id)
 	ref = Rig2D.referee(_rng)
+	ref.plant = true
 	for i in 170:
 		_crowd.append(Vector3(_rng.randf_range(-40.0, 40.0), _rng.randf(), _rng.randf()))
 	_crowd.sort_custom(func(a: Vector3, b: Vector3) -> bool: return a.y < b.y)
@@ -184,12 +208,14 @@ func setup(w: GameWorld, fa: Fighter, fb: Fighter, org_color: Color = Color("#C8
 		c.hand = c.skin
 		c.px = (-1.0 if i == 0 else 1.0) * (ARENA + 2.6)
 		c.dir = 1.0 if i == 0 else -1.0
+		c.plant = true
+		c.reset_feet()
 		coaches.append(c)
 
 
 ## Altura do palco: maior nas telas altas, para os lutadores aparecerem grandes.
 static func stage_height() -> float:
-	return clampf(UILayout.viewport.y * 0.36, 300.0, 560.0)
+	return clampf(UILayout.viewport.y * 0.54, 300.0, 860.0)
 
 
 ## Um lance do motor, na ordem. A fila acumulada demais (velocidade alta, "Pular") é resumida:
@@ -307,6 +333,8 @@ func _start(b: Dictionary) -> void:
 	if type == "golpe":
 		d = DUR["giro"] if k in SPINS else (DUR["chute"] if k in KICKS else DUR["golpe"])
 	_act = {"type": type, "side": int(b["side"]), "b": b, "p": 0.0, "dur": d, "hit": false}
+	if type == "golpe" and bool(b.get("hit", false)):
+		_last_k = k
 	_act_n += 1
 	_focus = -1
 	match type:
@@ -320,6 +348,8 @@ func _start(b: Dictionary) -> void:
 					var r: Rig2D = rigs[i]
 					r.px = (-CORNER_X if i == 0 else CORNER_X)
 					r.pose = _relaxed(r)
+					r.reset_feet()
+					_pv[i] = {}
 				ref.px = 0.0
 				_focus = 0
 				_camera(0.0, true)
@@ -339,6 +369,15 @@ func _start(b: Dictionary) -> void:
 		"fim":
 			_caption_for(b)
 			_hype = 1.0
+			_end_t = 0.0
+			# O jeito de cair sai do último golpe: gancho e cruzado derrubam de cara, golpe reto de costas.
+			var lk := _last_k
+			if lk in ["gancho", "overhand", "cotovelada", "chute_alto", "chute_giratorio", "chute_rodado"]:
+				_ko_kind = [1, 3, 1, 0][_act_n % 4]
+			elif lk in ["uppercut", "joelhada", "joelhada_voadora", "chute_corpo"]:
+				_ko_kind = [2, 0, 2, 3][_act_n % 4]
+			else:
+				_ko_kind = [0, 3, 2, 0][_act_n % 4]
 			if _method == "KO" and int(b["side"]) >= 0:
 				var out: Rig2D = rigs[1 - int(b["side"])]
 				out.ko = true
@@ -394,6 +433,8 @@ func _process(delta: float) -> void:
 		_hitstop -= delta
 		dt *= 0.06
 	_time += dt
+	if _ended:
+		_end_t += dt
 	var speed := time_scale * (1.0 + 0.22 * float(_queue.size()))
 	if not _act.is_empty():
 		_act["p"] = float(_act["p"]) + dt * speed / float(_act["dur"])
@@ -476,12 +517,13 @@ func _tick_trail(dt: float) -> void:
 
 ## Grava o quadro (poses, posições, brilhos) para o replay; guarda uns 4 segundos.
 func _record(dt: float) -> void:
-	var fr := {"dt": dt, "p": [], "x": [], "d": [], "f": [], "fx": _fx.duplicate(true), "tr": _trail.duplicate(true)}
+	var fr := {"dt": dt, "p": [], "x": [], "d": [], "f": [], "ft": [], "fx": _fx.duplicate(true), "tr": _trail.duplicate(true)}
 	for r: Rig2D in [rigs[0], rigs[1], ref]:
 		fr["p"].append(r.pose.duplicate())
 		fr["x"].append(r.px)
 		fr["d"].append(r.dir)
 		fr["f"].append(r.flash)
+		fr["ft"].append([float(r.feet["nl"]), float(r.feet["fl"]), float(r.feet_up["nl"]), float(r.feet_up["fl"]), float(r._free_w["nl"]), float(r._free_w["fl"])])
 	_hist.append(fr)
 	var total := 0.0
 	var cut_at := 0
@@ -519,6 +561,10 @@ func _play_replay(delta: float) -> void:
 		r.pose = (fr["p"][i] as Dictionary).duplicate()
 		r.px = float(fr["x"][i])
 		r.dir = float(fr["d"][i])
+		var ft: Array = fr["ft"][i]
+		r.feet = {"nl": ft[0], "fl": ft[1]}
+		r.feet_up = {"nl": ft[2], "fl": ft[3]}
+		r._free_w = {"nl": ft[4], "fl": ft[5]}
 		if i < 2:
 			r.flash = float(fr["f"][i])
 	_fx = (fr["fx"] as Array).duplicate(true)
@@ -612,9 +658,11 @@ func _animate_ref(dt: float) -> void:
 	if dirt != 0.0 and not is_equal_approx(dirt, ref.dir):
 		ref.dir = dirt
 		ref.pose = Rig2D.swap_sides(ref.pose)
+		ref.reset_feet()
 	p["crouch"] = float(p.get("crouch", 0.0)) + 0.03 * sin(_time * 3.0)
 	ref.pose = Rig2D.blend(ref.pose, p, 1.0 - exp(-8.0 * dt))
 	ref.px = lerpf(ref.px, tx, 1.0 - exp(-(4.0 if _ended else 2.2) * dt))
+	ref.step_feet(dt)
 
 
 func _animate(dt: float) -> void:
@@ -623,25 +671,93 @@ func _animate(dt: float) -> void:
 	var pxs: Array = tg[1]
 	var dirs: Array = tg[2]
 	var fast := not _act.is_empty() and String(_act["type"]) in ["golpe", "gnp", "estudo", "balanca", "fin", "escapa"]
-	var rate := 34.0 if fast else 9.0
-	var a := 1.0 - exp(-rate * dt)
 	var ap := 1.0 - exp(-(10.0 if fast else 4.5) * dt)
+	_free_legs(dirs)
 	for i in 2:
 		var r: Rig2D = rigs[i]
-		_footwork(i, poses[i], dt)
 		if not is_equal_approx(r.dir, float(dirs[i])):
 			r.dir = float(dirs[i])
 			r.pose = (poses[i] as Dictionary).duplicate()
+			_pv[i] = {}
+			r.reset_feet()
 		else:
-			r.pose = Rig2D.blend(r.pose, poses[i], a)
+			_spring(i, poses[i], dt, fast)
+		# Empurrão do golpe: o corpo vai para trás e volta para a distância com os próprios passos.
+		_push_v[i] = float(_push_v[i]) + (-36.0 * float(_push[i]) - 12.0 * float(_push_v[i])) * dt
+		_push[i] = clampf(float(_push[i]) + float(_push_v[i]) * dt, -2.2, 2.2)
 		var was := r.px
 		# Ninguém desliza mais rápido do que um passo largo (as idas ao canto são caminhadas).
-		var vmax := (18.0 if fast else 11.0) * dt
-		r.px = clampf(r.px + clampf(lerpf(r.px, float(pxs[i]), ap) - r.px, -vmax, vmax), -ARENA + 0.6, ARENA - 0.6)
+		var vmax := (18.0 if fast else 9.0) * dt
+		var want := float(pxs[i]) + float(_push[i])
+		r.px = clampf(r.px + clampf(lerpf(r.px, want, ap) - r.px, -vmax, vmax), -ARENA + 0.6, ARENA - 0.6)
 		if dt > 0.0005:
 			_vel[i] = lerpf(float(_vel[i]), (r.px - was) / dt, 1.0 - exp(-14.0 * dt))
 			_step[i] = float(_step[i]) + absf(r.px - was) * TAU / 3.0
+		r.step_feet(dt)
 		r.flash = maxf(0.0, r.flash - dt * 3.0)
+
+
+## Um quadro das molas: cada junta persegue o alvo com massa, em vez de escorregar até ele. Cansado,
+## o corpo responde mais mole.
+func _spring(i: int, target: Dictionary, dt: float, fast: bool) -> void:
+	var r: Rig2D = rigs[i]
+	var v: Dictionary = _pv[i]
+	var tired := clampf(1.0 - float(stamina[i]), 0.0, 1.0)
+	var n := clampi(int(ceil(dt * 150.0)), 1, 6)
+	var h := dt / float(n)
+	var soft := 1.0 - 0.25 * tired
+	var a := 1.0 - exp(-(34.0 if fast else 9.0) * dt)
+	for k: String in Rig2D.KEYS:
+		var cur := float(r.pose.get(k, 0.0))
+		var want := float(target.get(k, cur))
+		if not SPRING.has(k):
+			r.pose[k] = lerpf(cur, want, a)
+			continue
+		var sp: Array = SPRING[k]
+		var w := float(sp[1] if fast else sp[0]) * soft
+		var z := float(sp[2]) - 0.08 * tired
+		var vel := float(v.get(k, 0.0))
+		for _s in n:
+			vel += (w * w * (want - cur) - 2.0 * z * w * vel) * h
+			cur += vel * h
+		v[k] = vel
+		r.pose[k] = cur
+	if float(r.pose.get("y", 0.0)) < 0.0:
+		r.pose["y"] = 0.0
+		v["y"] = maxf(0.0, float(v.get("y", 0.0)))
+
+
+## Solavanco: soma velocidade nas juntas (o golpe que entra, o bloqueio que treme).
+func _jolt(i: int, amounts: Dictionary) -> void:
+	var v: Dictionary = _pv[i]
+	for k: String in amounts:
+		v[k] = float(v.get(k, 0.0)) + float(amounts[k])
+
+
+## Quais pernas estão fora da lona neste lance: a de quem chuta, a de quem levanta para checar.
+func _free_legs(dirs: Array) -> void:
+	for r: Rig2D in rigs:
+		r.free["nl"] = false
+		r.free["fl"] = false
+	if _act.is_empty() or String(st["pos"]) == "chao":
+		return
+	var type := String(_act["type"])
+	var p := float(_act["p"])
+	var a := clampi(int(_act["side"]), 0, 1)
+	var b: Dictionary = _act["b"]
+	if type == "golpe":
+		var k := String(b.get("k", ""))
+		if k in LEG_FREE and p > 0.05 and p < 0.88:
+			var over := _resolve(rigs[a], float(dirs[a]), STRIKE.get(k, {}))
+			for sd: String in ["nl", "fl"]:
+				if over.has(sd + "_h") and absf(float(over[sd + "_h"])) > 35.0:
+					(rigs[a] as Rig2D).free[sd] = true
+		if not bool(b.get("hit", false)) and String(b.get("z", "")) == "leg" and p > 0.14 and p < 0.7:
+			var rd: Rig2D = rigs[1 - a]
+			rd.free[("n" if (float(dirs[1 - a]) > 0.0) != rd.southpaw else "f") + "l"] = true
+	elif type == "segura_chute" and p < 0.72:
+		var rk: Rig2D = rigs[1 - a]
+		rk.free[("f" if (float(dirs[1 - a]) > 0.0) != rk.southpaw else "n") + "l"] = true
 
 
 ## Técnicos: fora da grade durante o round; no intervalo entram, param na frente do lutador
@@ -661,15 +777,16 @@ func _animate_coaches(delta: float) -> void:
 		if want != 0.0 and not is_equal_approx(want, c.dir):
 			c.dir = want
 			c.pose = Rig2D.swap_sides(c.pose)
+			c.reset_feet()
 		var p := _relaxed(c)
 		if moving:
-			var ph := c.px * 2.1
-			p.merge({"nl_h": 22.0 * sin(ph), "fl_h": -22.0 * sin(ph), "nl_k": 24.0 * maxf(0.0, cos(ph)), "fl_k": 24.0 * maxf(0.0, -cos(ph)), "torso": 8.0}, true)
+			p.merge({"torso": 8.0, "na_s": 12.0 + 14.0 * sin(c.px * 2.1), "fa_s": -6.0 - 14.0 * sin(c.px * 2.1)}, true)
 		else:
 			# Abaixado na frente dele, uma mão no joelho e a outra marcando as instruções.
 			p.merge({"crouch": 0.45, "torso": 30.0, "head": -6.0, "na_s": 66.0 + 20.0 * sin(_rt * 5.2 + float(i) * 2.0), "na_e": 58.0 + 18.0 * sin(_rt * 7.3 + float(i)),
 				"fa_s": 30.0, "fa_e": 46.0, "nl_h": 18.0, "nl_k": 10.0, "fl_h": -16.0, "fl_k": 12.0}, true)
 		c.pose = Rig2D.blend(c.pose, p, 1.0 - exp(-9.0 * delta))
+		c.step_feet(delta)
 
 
 ## O intervalo no canto só acontece com a vista 2D na tela (a 3D lê as poses e segue como era).
@@ -680,6 +797,8 @@ func _corner_on() -> bool:
 ## Passos: quem está em pé e se deslocando mexe as pernas (uma vai, a outra empurra) em vez de
 ## deslizar. A fase anda com a distância percorrida; a amplitude, com a velocidade.
 func _footwork(i: int, pose: Dictionary, _dt: float) -> void:
+	if (rigs[i] as Rig2D).plant:
+		return
 	if float(pose.get("sit", 0.0)) > 0.5 or absf(float(pose.get("rot", 0.0))) > 20.0 or float(pose.get("y", 0.0)) > 0.3:
 		return
 	var sp := absf(float(_vel[i]))
@@ -736,7 +855,11 @@ func _camera(delta: float, snap: bool = false) -> void:
 		if want != _focus:
 			_focus = want
 			snap = snap or want >= 0
-	var u0 := h / 9.6
+	# Num quadro alto (celular em pé) a escala vem da largura: sobra altura, e a câmera pode
+	# fechar mais (`tall`), até os lutadores encherem o palco.
+	var u0 := minf(h / 9.6, w / 12.5)
+	var hk := h / u0
+	var tall := hk / 9.6
 	var x0 := INF
 	var x1 := -INF
 	var top := 0.0
@@ -767,8 +890,8 @@ func _camera(delta: float, snap: bool = false) -> void:
 		drop = 0.0
 		# No fim o quadro desce um pouco mais: cabem as luvas de quem comemora e quem está deitado.
 		slack = 0.06 if (_ended and replay.is_empty()) else 0.02
-	var z := minf(float(shot[0]), (w / u0) / maxf(4.0, x1 - x0 + 3.4))
-	z = clampf(minf(z, (0.84 + drop) * 9.6 / maxf(1.0, top)), 1.0, 1.6)
+	var z := minf(float(shot[0]) * tall, (w / u0) / maxf(4.0, x1 - x0 + 3.4))
+	z = clampf(minf(z, (0.84 + drop) * hk / maxf(1.0, top)), 1.0, 1.6 * tall)
 	if AppSettings.reduce_motion:
 		z = 1.0
 	var cx := (x0 + x1) * 0.5
@@ -782,7 +905,7 @@ func _camera(delta: float, snap: bool = false) -> void:
 	var rate := 2.0 if z > _vz_t else 6.0
 	_vz_t = lerpf(_vz_t, z, 1.0 - exp(-rate * delta))
 	_vz = lerpf(_vz, _vz_t, 1.0 - exp(-7.0 * delta))
-	var vy := clampf(top * _vz / 9.6 - 0.84, 0.0, drop + slack)
+	var vy := clampf(top * _vz / hk - 0.84, 0.0, drop + slack)
 	_vy = vy if snap else lerpf(_vy, vy, 1.0 - exp(-8.0 * delta))
 	var half := w / u0 * 0.5 / _vz
 	var lim := maxf(0.0, ARENA + 1.0 - half)
@@ -843,7 +966,7 @@ func _base(s: Dictionary) -> Array:
 				p.merge({"torso": 50.0, "head": 25.0, "na_s": 80.0, "na_e": 70.0}, true)
 	else:
 		gap += sin(_time * 0.9) * 0.3
-	var target_cx := sin(_time * 0.17) * 3.0
+	var target_cx := sin(_time * 0.17) * 3.0 + (float(r0.manner["press"]) - float(r1.manner["press"])) * 3.2
 	if bool(s["cage"]):
 		target_cx = _cage_side * (ARENA - 1.4 - gap * 0.5)
 	_cx = lerpf(_cx, target_cx, 0.02)
@@ -970,26 +1093,68 @@ func _end_pose(s: Dictionary) -> Array:
 	var dirs := [1.0, -1.0]
 	var poses := [{}, {}]
 	var dl := 1.0 if l == 0 else -1.0
-	var bob := absf(sin(_time * 5.0)) * 0.25
-	poses[w] = _relaxed(rigs[w])
-	(poses[w] as Dictionary).merge({"na_s": 168.0, "na_e": 12.0, "fa_s": 160.0, "fa_e": 18.0, "head": -18.0, "torso": -6.0, "y": bob}, true)
+	var wr: Rig2D = rigs[w]
+	var cele := String(wr.manner.get("cele", ""))
+	var away := 4.5
+	poses[w] = _relaxed(wr)
 	if _winner < 0:
 		poses[l] = _relaxed(rigs[l])
 		(poses[l] as Dictionary).merge({"head": 20.0, "torso": 10.0}, true)
-		poses[w] = _relaxed(rigs[w])
-	elif _method in ["KO", "TKO"]:
-		poses[l] = {"sit": 1.0, "rot": 92.0, "torso": 0.0, "head": -10.0, "na_s": 8.0, "na_e": 15.0, "fa_s": -10.0, "fa_e": 20.0,
-			"nl_h": 15.0, "nl_k": 25.0, "fl_h": 5.0, "fl_k": 10.0, "x": 0.0, "y": 0.0, "crouch": 0.0}
 	else:
-		poses[l] = _relaxed(rigs[l])
-		(poses[l] as Dictionary).merge({"head": 28.0, "torso": 14.0, "na_s": 20.0}, true)
+		# Cada um comemora do seu jeito.
+		var pw: Dictionary = poses[w]
+		match cele:
+			"frio":
+				# Vira as costas e sai andando, sem olhar para trás.
+				pw.merge({"head": 6.0, "torso": 6.0, "na_s": 10.0, "na_e": 14.0, "fa_s": -8.0, "fa_e": 12.0}, true)
+				dirs[w] = -float(dirs[w])
+				away = 4.5 + minf(4.0, _end_t * 1.3)
+			"humilde":
+				# Ajoelha, mãos juntas, cabeça baixa.
+				pw.merge({"crouch": 1.0, "torso": 30.0, "head": 24.0, "na_s": 62.0, "na_e": 112.0, "fa_s": 58.0, "fa_e": 116.0,
+					"nl_h": 30.0, "nl_k": 60.0, "fl_h": -30.0, "fl_k": 80.0}, true)
+			"guerra":
+				# Braços abertos, peito para fora, grito para a arquibancada.
+				var roar := sin(_time * 11.0)
+				pw.merge({"crouch": 0.2, "torso": -10.0 + 2.5 * roar, "head": -24.0, "na_s": 96.0, "na_e": 112.0 + 5.0 * roar, "fa_s": 84.0, "fa_e": 122.0 - 5.0 * roar}, true)
+			"show":
+				# Pula socando o ar.
+				var hop := absf(sin(_time * 5.2))
+				var pump := sin(_time * 10.4)
+				pw.merge({"y": 0.55 * hop, "crouch": 0.18 * (1.0 - hop), "head": -14.0, "torso": -6.0, "na_s": 150.0 + 18.0 * pump, "na_e": 30.0 - 20.0 * pump,
+					"fa_s": 60.0, "fa_e": 120.0, "nl_k": 20.0 * hop, "fl_k": 35.0 * hop}, true)
+			_:
+				pw.merge({"na_s": 168.0, "na_e": 12.0, "fa_s": 160.0, "fa_e": 18.0, "head": -18.0, "torso": -6.0, "y": absf(sin(_time * 5.0)) * 0.25}, true)
+		if _method in ["KO", "TKO"]:
+			match _ko_kind:
+				1:
+					# Cai para a frente, de cara na lona.
+					poses[l] = {"sit": 1.0, "rot": -94.0, "torso": 0.0, "head": 12.0, "na_s": -20.0, "na_e": 12.0, "fa_s": 30.0, "fa_e": 60.0,
+						"nl_h": -6.0, "nl_k": 8.0, "fl_h": -18.0, "fl_k": 40.0, "x": 0.0, "y": 0.0, "crouch": 0.0}
+					away = 5.2
+				2:
+					# Desaba sentado e deita, joelhos para cima.
+					poses[l] = {"sit": 1.0, "rot": 90.0, "torso": 0.0, "head": -4.0, "na_s": 40.0, "na_e": 30.0, "fa_s": -20.0, "fa_e": 30.0,
+						"nl_h": 62.0, "nl_k": 105.0, "fl_h": 48.0, "fl_k": 90.0, "x": 0.0, "y": 0.0, "crouch": 0.0}
+				3:
+					# Cai duro, braços travados no ar.
+					poses[l] = {"sit": 1.0, "rot": 92.0, "torso": 0.0, "head": -14.0, "na_s": 78.0, "na_e": 14.0, "fa_s": 64.0, "fa_e": 22.0,
+						"nl_h": 10.0, "nl_k": 6.0, "fl_h": 2.0, "fl_k": 4.0, "x": 0.0, "y": 0.0, "crouch": 0.0}
+				_:
+					poses[l] = {"sit": 1.0, "rot": 92.0, "torso": 0.0, "head": -10.0, "na_s": 8.0, "na_e": 15.0, "fa_s": -10.0, "fa_e": 20.0,
+						"nl_h": 15.0, "nl_k": 25.0, "fl_h": 5.0, "fl_k": 10.0, "x": 0.0, "y": 0.0, "crouch": 0.0}
+		else:
+			poses[l] = _relaxed(rigs[l])
+			(poses[l] as Dictionary).merge({"head": 28.0, "torso": 14.0, "na_s": 20.0}, true)
 	var pxs := [0.0, 0.0]
 	var c := _cx
 	if String(s["pos"]) == "chao" or _method in ["KO", "TKO"]:
 		pxs[l] = c - dl * 0.8
-		pxs[w] = pxs[l] + dl * 3.6
+		pxs[w] = pxs[l] + dl * away
 	else:
 		pxs = [c - 2.2, c + 2.2]
+		if cele == "frio" and _winner >= 0:
+			pxs[w] = float(pxs[w]) + (-1.0 if w == 0 else 1.0) * minf(4.0, _end_t * 1.3)
 	return [poses, pxs, dirs]
 
 
@@ -999,22 +1164,151 @@ func _life(s: Dictionary, poses: Array) -> void:
 	for i in 2:
 		var r: Rig2D = rigs[i]
 		var p: Dictionary = poses[i]
+		var m: Dictionary = r.manner
 		var tired := clampf(1.0 - float(stamina[i]), 0.0, 1.0)
-		var ph := _time * (7.5 if r.guard in ["karate", "thai"] else 5.5) + float(i) * 1.7
+		var tempo := float(m["tempo"]) * (1.0 - 0.3 * tired)
+		var bn := float(m["bounce"]) * (1.0 - 0.6 * tired) * (1.0 - 0.5 * r.bruise)
+		var sw := float(m["sway"])
+		var t := _time * tempo + float(m["phase"])
+		var ld := r.lead()
+		var rr := r.rear()
+		r.feet_tap["nl"] = 0.0
+		r.feet_tap["fl"] = 0.0
 		if pos == "solto" and not _between:
-			p["crouch"] = float(p.get("crouch", 0.0)) + 0.05 * sin(ph) * (1.0 - tired * 0.6)
-			p["x"] = float(p.get("x", 0.0)) + (0.35 if r.guard == "karate" else 0.15) * sin(ph * 0.31)
-			if r.guard == "boxe":
-				p["head"] = float(p.get("head", 0.0)) + 8.0 * sin(_time * 2.6 + float(i))
-				p["torso"] = float(p.get("torso", 0.0)) + 6.0 * sin(_time * 2.6 + float(i))
+			match r.guard:
+				"boxe":
+					# Cabeça que não para: pêndulo e mergulho, ombros rodando.
+					p["crouch"] = float(p.get("crouch", 0.0)) + 0.07 * bn * sin(t * 5.5) + 0.1 * sw * maxf(0.0, sin(t * 1.3))
+					p["head"] = float(p.get("head", 0.0)) + 9.0 * sw * sin(t * 2.6)
+					p["torso"] = float(p.get("torso", 0.0)) + 7.0 * sw * sin(t * 2.6 + 0.7)
+					p["tw"] = float(p.get("tw", 0.0)) + 9.0 * sin(t * 1.3)
+					p["x"] = float(p.get("x", 0.0)) + 0.2 * sin(t * 1.7)
+				"dutch":
+					# Guarda fechada, andando para a frente, sem pressa.
+					p["crouch"] = float(p.get("crouch", 0.0)) + 0.03 * bn * sin(t * 5.0)
+					p["x"] = float(p.get("x", 0.0)) + 0.28 * sin(t * 1.1)
+					p["head"] = float(p.get("head", 0.0)) + 3.0 * sin(t * 2.2)
+					p[ld + "a_e"] = float(p.get(ld + "a_e", 0.0)) + 5.0 * sin(t * 5.0)
+				"thai":
+					# Marcha: a perna da frente bate no chão no ritmo e a mão longa mede a distância.
+					var beat := pow(maxf(0.0, sin(t * 3.4)), 3.0)
+					r.feet_tap[ld + "l"] = 0.13 * beat * bn
+					p["crouch"] = float(p.get("crouch", 0.0)) - 0.04 * beat
+					p["torso"] = float(p.get("torso", 0.0)) - 3.0 * beat
+					p[ld + "a_s"] = float(p.get(ld + "a_s", 0.0)) + 9.0 * sin(t * 1.7)
+					p[ld + "a_e"] = float(p.get(ld + "a_e", 0.0)) - 16.0 * maxf(0.0, sin(t * 1.7))
+					p["x"] = float(p.get("x", 0.0)) + 0.12 * sin(t * 1.2)
+				"karate", "tkd":
+					# Pulinho na ponta dos pés, entrando e saindo.
+					var hop := absf(sin(t * 7.2))
+					p["crouch"] = float(p.get("crouch", 0.0)) + 0.09 * bn * (1.0 - hop)
+					r.feet_tap["nl"] = 0.05 * bn * hop
+					r.feet_tap["fl"] = 0.05 * bn * hop
+					p["y"] = float(p.get("y", 0.0)) + 0.05 * bn * hop
+					p["x"] = float(p.get("x", 0.0)) + (0.5 if r.guard == "tkd" else 0.38) * sin(t * 2.1)
+					p[ld + "a_s"] = float(p.get(ld + "a_s", 0.0)) + 6.0 * sin(t * 3.6)
+				"capoeira":
+					# Ginga: o corpo vai de um lado ao outro, um braço protege enquanto o outro abre.
+					var g := sin(t * 2.6)
+					p["x"] = float(p.get("x", 0.0)) + 0.75 * g
+					p["crouch"] = float(p.get("crouch", 0.0)) + 0.14 * absf(g)
+					p["torso"] = float(p.get("torso", 0.0)) + 9.0 * g
+					p["na_s"] = float(p.get("na_s", 0.0)) + 34.0 * g
+					p["fa_s"] = float(p.get("fa_s", 0.0)) - 34.0 * g
+					p["na_e"] = float(p.get("na_e", 0.0)) - 20.0 * g
+					p["head"] = float(p.get("head", 0.0)) - 6.0 * absf(g)
+				"wrestler":
+					# Base baixa, mãos ciscando, e de vez em quando a ameaça de entrar nas pernas.
+					var lvl := pow(maxf(0.0, sin(t * 0.9 + float(i))), 8.0)
+					p["crouch"] = float(p.get("crouch", 0.0)) + 0.04 * bn * sin(t * 5.0) + 0.22 * lvl
+					p["torso"] = float(p.get("torso", 0.0)) + 12.0 * lvl
+					p["na_e"] = float(p.get("na_e", 0.0)) + 15.0 * sin(t * 3.9)
+					p["fa_e"] = float(p.get("fa_e", 0.0)) + 13.0 * sin(t * 3.9 + 1.6)
+					p["head"] = float(p.get("head", 0.0)) + 5.0 * sin(t * 2.4)
+					p["x"] = float(p.get("x", 0.0)) + 0.22 * sin(t * 1.5)
+				"judo":
+					# Em pé, as mãos buscando a pegada, uma de cada vez.
+					p["crouch"] = float(p.get("crouch", 0.0)) + 0.03 * bn * sin(t * 4.4)
+					p["na_s"] = float(p.get("na_s", 0.0)) + 10.0 * sin(t * 3.1)
+					p["na_e"] = float(p.get("na_e", 0.0)) - 20.0 * maxf(0.0, sin(t * 3.1))
+					p["fa_s"] = float(p.get("fa_s", 0.0)) + 10.0 * sin(t * 3.1 + PI)
+					p["fa_e"] = float(p.get("fa_e", 0.0)) - 18.0 * maxf(0.0, sin(t * 3.1 + PI))
+					p["x"] = float(p.get("x", 0.0)) + 0.16 * sin(t * 1.3)
+				"bjj":
+					# Pé no chão, pouca pressa, mãos abertas medindo.
+					p["crouch"] = float(p.get("crouch", 0.0)) + 0.025 * bn * sin(t * 3.8)
+					p["na_e"] = float(p.get("na_e", 0.0)) + 10.0 * sin(t * 2.3)
+					p["fa_e"] = float(p.get("fa_e", 0.0)) + 8.0 * sin(t * 2.3 + 1.2)
+					p["x"] = float(p.get("x", 0.0)) + 0.14 * sin(t * 0.9)
+				_:
+					p["crouch"] = float(p.get("crouch", 0.0)) + 0.055 * bn * sin(t * 5.5)
+					p["head"] = float(p.get("head", 0.0)) + 4.0 * sw * sin(t * 2.3)
+					p["torso"] = float(p.get("torso", 0.0)) + 3.0 * sw * sin(t * 2.3 + 0.6)
+					p["x"] = float(p.get("x", 0.0)) + 0.2 * sin(t * 1.6)
+					p[ld + "a_s"] = float(p.get(ld + "a_s", 0.0)) + 4.0 * sin(t * 2.75)
+			# Altura das mãos de cada um; quem pressiona pende para a frente.
+			var hd := float(m["hands"]) * (1.0 - r.bruise)
+			p["na_s"] = float(p.get("na_s", 0.0)) + hd
+			p["fa_s"] = float(p.get("fa_s", 0.0)) + hd * 0.7
+			p["torso"] = float(p.get("torso", 0.0)) + 4.0 * float(m["press"])
+			_habit(r, p, m, t)
+			# Cansaço: as mãos caem, o tronco pesa e o peito sobe e desce.
 			for side: String in ["na", "fa"]:
-				p[side + "_s"] = float(p.get(side + "_s", 0.0)) - 28.0 * tired + 3.0 * sin(ph * 0.5)
+				p[side + "_s"] = float(p.get(side + "_s", 0.0)) - 28.0 * tired
 				p[side + "_e"] = float(p.get(side + "_e", 0.0)) - 25.0 * tired
-			p["torso"] = float(p.get("torso", 0.0)) + 6.0 * tired
+			p["torso"] = float(p.get("torso", 0.0)) + 6.0 * tired + 3.5 * tired * sin(_time * 4.2 + float(i))
+			p["head"] = float(p.get("head", 0.0)) + 6.0 * tired
+			# Castigo que aparece no corpo: a perna batida quase não apoia, a costela marcada fecha
+			# os cotovelos, o rosto machucado sobe a guarda.
+			if r.leg_dmg > 0.3:
+				var lg := (r.leg_dmg - 0.3) / 0.7
+				p[ld + "l_h"] = float(p.get(ld + "l_h", 0.0)) - 9.0 * lg
+				p[ld + "l_k"] = float(p.get(ld + "l_k", 0.0)) - 8.0 * lg
+				p["torso"] = float(p.get("torso", 0.0)) - 5.0 * lg
+				r.feet_tap[ld + "l"] = maxf(float(r.feet_tap[ld + "l"]), 0.07 * lg * pow(maxf(0.0, sin(_time * 2.2 + float(i))), 2.0))
+			if r.body_dmg > 0.3:
+				var bd := (r.body_dmg - 0.3) / 0.7
+				p[rr + "a_s"] = float(p.get(rr + "a_s", 0.0)) - 16.0 * bd
+				p[ld + "a_s"] = float(p.get(ld + "a_s", 0.0)) - 9.0 * bd
+				p["torso"] = float(p.get("torso", 0.0)) + 7.0 * bd
+			if r.bruise > 0.4:
+				var br := (r.bruise - 0.4) / 0.6
+				p["na_e"] = float(p.get("na_e", 0.0)) + 10.0 * br
+				p["fa_e"] = float(p.get("fa_e", 0.0)) + 8.0 * br
+				p["head"] = float(p.get("head", 0.0)) + 7.0 * br
 		elif pos == "chao":
-			p["torso"] = float(p.get("torso", 0.0)) + 2.5 * sin(_time * 2.0 + float(i))
+			p["torso"] = float(p.get("torso", 0.0)) + 2.5 * sin(_time * 2.0 + float(i)) + 2.0 * tired * sin(_time * 4.2)
 		else:
 			p["x"] = float(p.get("x", 0.0)) + 0.12 * sin(_time * 1.6 + float(i) * 2.0)
+			p["crouch"] = float(p.get("crouch", 0.0)) + 0.04 * sin(_time * 3.1 + float(i) * 1.3)
+			p["torso"] = float(p.get("torso", 0.0)) + 3.0 * tired * sin(_time * 4.2 + float(i))
+
+
+## Cacoete de cada lutador, de tempos em tempos: bate as luvas, solta os ombros, estala o pescoço,
+## baixa a mão para provocar.
+func _habit(r: Rig2D, p: Dictionary, m: Dictionary, t: float) -> void:
+	var habit := String(m["habit"])
+	if habit == "" or not _act.is_empty():
+		return
+	var every := float(m["every"])
+	var u := fmod(t, every) / 0.9
+	if u >= 1.0:
+		return
+	var k := sin(u * PI)
+	match habit:
+		"luvas":
+			var tap := absf(sin(u * PI * 2.0))
+			_mix(p, {"na_s": 58.0, "na_e": 100.0 + 22.0 * tap, "fa_s": 54.0, "fa_e": 104.0 + 22.0 * tap}, k)
+		"ombros":
+			_add(p, {"na_s": -22.0, "fa_s": -20.0, "tw": 14.0 * sin(u * TAU * 1.5), "head": -6.0}, k)
+		"pescoco":
+			_add(p, {"head": 16.0 * sin(u * TAU * 1.5), "torso": -3.0}, k)
+		"pendulo":
+			_add(p, {"x": 0.5 * sin(u * TAU), "crouch": 0.06}, k)
+		"mao_baixa":
+			var ld := r.lead()
+			_mix(p, {ld + "a_s": 14.0, ld + "a_e": 30.0}, k)
+			_add(p, {"head": -8.0, "torso": -4.0}, k)
 
 
 # --- Lances --------------------------------------------------------------------------------
@@ -1328,12 +1622,27 @@ func _impact() -> void:
 		var standing := String(st["pos"]) != "chao"
 		var blocked := z != "head" or int(float(b["t"]) * 7.0 + float(String(b.get("k", "")).length())) % 3 == 1
 		if type == "golpe" and standing and blocked:
+			_jolt(d, {"na_e": 150.0, "fa_e": 120.0, "x": -1.6, "torso": -50.0, "head": -90.0})
+			_push_v[d] = float(_push_v[d]) - rd.dir * 1.6
 			_fx.append({"t": 0.0, "kind": "block", "x": fx + rd.dir * 0.55, "y": fy - (0.3 if z == "leg" else 0.0), "pw": 0.5})
 			_sound("bloqueio", -14.0)
 		return
 	var dmg := float(b.get("dmg", 0.3))
 	var away := -rd.dir
 	rd.flash = clampf(0.25 + dmg * 0.35, 0.0, 0.7)
+	if String(st["pos"]) != "chao":
+		var pk := clampf(0.45 + dmg * 0.75, 0.45, 1.7)
+		match z:
+			"body":
+				_jolt(d, {"torso": 210.0 * pk, "crouch": 1.3 * pk, "head": 110.0 * pk, "x": -1.8 * pk, "na_s": -120.0 * pk, "fa_s": -90.0 * pk})
+			"leg":
+				_jolt(d, _resolve(rd, rd.dir, {"Ll_k": 330.0 * pk, "Ll_h": -120.0 * pk, "crouch": 1.0 * pk, "torso": 70.0 * pk}))
+			_:
+				var upk := -0.6 if String(b.get("k", "")) == "uppercut" else 1.0
+				_jolt(d, {"head": -520.0 * pk * upk, "torso": -170.0 * pk, "x": -2.4 * pk, "na_s": -150.0 * pk, "fa_s": -110.0 * pk, "tw": 160.0 * pk})
+		if String(st["pos"]) == "solto":
+			_push_v[d] = float(_push_v[d]) + away * (0.9 + 2.6 * dmg) * (0.5 if z == "leg" else 1.0)
+			_cx = clampf(_cx + away * dmg * 0.35, -ARENA + 4.0, ARENA - 4.0)
 	_fx.append({"t": 0.0, "kind": "hit", "x": fx, "y": fy, "pw": dmg, "z": z, "v": away})
 	if dmg > 0.7:
 		_fx.append({"t": 0.0, "kind": "ring", "x": fx, "y": fy, "pw": dmg})

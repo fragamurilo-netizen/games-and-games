@@ -5,8 +5,8 @@ extends SceneTree
 ## xvfb-run -a -s "-screen 0 700x520x24" godot --path . --resolution 600x420 --script res://tools/fight_strip.gd -- --out=/tmp/tira.png --case=troca [--every=5] [--from=0] [--max=48] [--at=30,90,150] [--cols=6] [--scale=0.5] [--fem] [--div=M77]
 ## Casos: intro, troca, clinch, chao, intervalo, ko.
 
-const SW := 568
-const SH := 384
+var SW := 568
+var SH := 384
 
 
 func _b(type: String, side: int, pos: String, data: Dictionary = {}) -> Dictionary:
@@ -20,6 +20,7 @@ func _b(type: String, side: int, pos: String, data: Dictionary = {}) -> Dictiona
 func _cases() -> Dictionary:
 	var S := "solto"
 	return {
+		"parado": [{"wait": 30.0}],
 		"intro": [_b("round", -1, S, {"n": 1}), _b("estudo", 0, S, {"t": 1.0}), _b("golpe", 0, S, {"k": "jab", "z": "head", "hit": true, "dmg": 0.4})],
 		"troca": [
 			_b("estudo", 0, S, {"t": 2.0, "dist": 0}),
@@ -84,6 +85,8 @@ func _initialize() -> void:
 	var tail := 1.2
 	var from := 0
 	var at: Array = []
+	var base_a := "boxe"
+	var base_b := "muay_thai"
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--out="):
 			out = a.substr(6)
@@ -103,6 +106,14 @@ func _initialize() -> void:
 			tail = float(a.substr(7))
 		elif a.begins_with("--from="):
 			from = int(a.substr(7))
+		elif a.begins_with("--ba="):
+			base_a = a.get_slice("=", 1)
+		elif a.begins_with("--bb="):
+			base_b = a.get_slice("=", 1)
+		elif a.begins_with("--sw="):
+			SW = int(a.get_slice("=", 1))
+		elif a.begins_with("--sh="):
+			SH = int(a.get_slice("=", 1))
 		elif a.begins_with("--at="):
 			for part in a.substr(5).split(","):
 				at.append(int(part))
@@ -115,8 +126,8 @@ func _initialize() -> void:
 	w.rng.seed = 5
 	var fa := FighterGenerator.make(w, div, 70.0, 0, false, "BRA")
 	var fb := FighterGenerator.make(w, div, 70.0, 0, false, "USA")
-	fa.base = "boxe"
-	fb.base = "muay_thai"
+	fa.base = base_a
+	fb.base = base_b
 	fa.nickname = "Pitbull"
 	fa.record = {"w": 14, "l": 2, "d": 0}
 	fb.record = {"w": 9, "l": 3, "d": 1}

@@ -71,6 +71,21 @@ var glove_blood := 0.0
 var leg_dmg := 0.0
 var body_dmg := 0.0
 ## Volume do cabelo e tipo de barba na luta (ver HairShape) e grossura do pescoço.
+## Pés plantados (palco 2D): cada pé fica onde pisou e a perna se resolve do quadril até ele, então o
+## corpo anda em passos em vez de deslizar. `feet`: x de cada pé (U, no palco); `feet_up`: altura do
+## passo; `free`: perna solta da lona por um lance (chute, joelhada), que segue a pose.
+var manner := {"tempo": 1.0, "bounce": 1.0, "sway": 1.0, "hands": 0.0, "habit": "", "every": 6.0, "phase": 0.0, "show": 0.0, "press": 0.0, "cele": ""}
+## Pé que só encosta na ponta ou bate no chão no ritmo (a perna da frente do tailandês, o pulinho do caratê).
+var feet_tap := {"nl": 0.0, "fl": 0.0}
+var plant := false
+var feet := {"nl": 0.0, "fl": 0.0}
+var feet_up := {"nl": 0.0, "fl": 0.0}
+var free := {"nl": false, "fl": false}
+var _free_w := {"nl": 0.0, "fl": 0.0}
+var _fstep := {"nl": {}, "fl": {}}
+var _frest := 0.0
+var _fbase := 0.0
+var _fbase_ok := false
 var hair_shape: Dictionary = {}
 var beard_kind := 0
 var neck_k := 1.0
@@ -107,14 +122,70 @@ static func from_fighter(w: GameWorld, f: Fighter, facing: float) -> Rig2D:
 	var fam := Styles.family(f.base)
 	if f.base in ["boxe"]:
 		r.guard = "boxe"
-	elif f.base in ["muay_thai", "kickboxing", "kick_holandes", "sanda"]:
+	elif f.base in ["dutch_kb", "kick_holandes"]:
+		r.guard = "dutch"
+	elif f.base in ["muay_thai", "kickboxing", "sanda"]:
 		r.guard = "thai"
-	elif f.base in ["karate", "kyokushin", "taekwondo", "savate", "capoeira"]:
+	elif f.base in ["taekwondo", "savate"]:
+		r.guard = "tkd"
+	elif f.base in ["karate", "kyokushin"]:
 		r.guard = "karate"
+	elif f.base == "capoeira":
+		r.guard = "capoeira"
+	elif f.base in ["judo", "sambo", "combat_sambo", "kurash", "laamb", "greco"]:
+		r.guard = "judo"
+	elif f.base in ["bjj", "nogi", "luta_livre", "catch"]:
+		r.guard = "bjj"
 	elif fam == "agarrada":
 		r.guard = "wrestler"
+	r.manner = _manner_of(w, f)
 	r.pose = r.stance()
 	return r
+
+
+## O jeito de cada um na luta: ritmo, quanto balança, altura das mãos, um cacoete e a postura que
+## a personalidade dá. Sai do próprio lutador, então é sempre o mesmo de uma luta para a outra.
+static func _manner_of(w: GameWorld, f: Fighter) -> Dictionary:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([f.id, f.first, f.last, "jeito"])
+	var age := w.age_of(f)
+	var heavy := clampf((f.natural_kg - 66.0) / 50.0, 0.0, 1.0)
+	var m := {
+		"tempo": rng.randf_range(0.84, 1.2), "bounce": rng.randf_range(0.6, 1.4) * (1.0 - 0.35 * heavy) * (0.8 if age >= 35 else 1.0),
+		"sway": rng.randf_range(0.5, 1.5), "hands": rng.randf_range(-9.0, 8.0),
+		"habit": ["luvas", "ombros", "pescoco", "pendulo", "mao_baixa", "", ""][rng.randi() % 7], "every": rng.randf_range(4.5, 8.0),
+		"phase": rng.randf() * 10.0, "show": 0.0, "press": 0.0, "cele": ["", "", "guerra", "show"][rng.randi() % 4],
+	}
+	if Persona.has(f, "humilde"):
+		m["cele"] = "humilde"
+	elif Persona.has(f, "frio"):
+		m["cele"] = "frio"
+	elif Persona.has(f, "showman") or Persona.has(f, "falastrao"):
+		m["cele"] = "show"
+	elif Persona.has(f, "guerreiro") or Persona.has(f, "encrenqueiro"):
+		m["cele"] = "guerra"
+	if Persona.has(f, "nervoso"):
+		m["tempo"] = float(m["tempo"]) + 0.14
+		m["habit"] = "luvas" if String(m["habit"]) == "" else m["habit"]
+	if Persona.has(f, "frio"):
+		m["tempo"] = float(m["tempo"]) - 0.1
+		m["bounce"] = float(m["bounce"]) * 0.8
+	if Persona.has(f, "showman") or Persona.has(f, "falastrao"):
+		m["show"] = 1.0
+		m["hands"] = float(m["hands"]) - 12.0
+		m["habit"] = "mao_baixa"
+	if Persona.has(f, "guerreiro") or Persona.has(f, "encrenqueiro"):
+		m["press"] = 1.0
+	match f.gift:
+		"intocavel":
+			m["sway"] = float(m["sway"]) * 1.5 + 0.4
+			m["hands"] = float(m["hands"]) - 10.0
+		"pressao", "queixo_de_granito":
+			m["press"] = 1.0
+		"folego_sem_fim":
+			m["bounce"] = float(m["bounce"]) * 1.3
+			m["tempo"] = float(m["tempo"]) + 0.08
+	return m
 
 
 ## Cabelo, barba e pescoço a partir do rosto gerado.
@@ -180,6 +251,21 @@ static func swap_sides(p: Dictionary) -> Dictionary:
 
 func _stance_raw() -> Dictionary:
 	match guard:
+		"dutch":
+			return {"x": 0.0, "y": 0.0, "crouch": 0.18, "rot": 0.0, "torso": 10.0, "head": 10.0, "na_s": 62.0, "na_e": 128.0, "fa_s": 48.0, "fa_e": 138.0,
+				"nl_h": 18.0, "nl_k": 18.0, "fl_h": -19.0, "fl_k": 22.0}
+		"tkd":
+			return {"x": 0.0, "y": 0.0, "crouch": 0.1, "rot": 0.0, "torso": -2.0, "head": -2.0, "na_s": 16.0, "na_e": 78.0, "fa_s": 30.0, "fa_e": 118.0,
+				"nl_h": 29.0, "nl_k": 9.0, "fl_h": -27.0, "fl_k": 12.0}
+		"capoeira":
+			return {"x": 0.0, "y": 0.0, "crouch": 0.3, "rot": 0.0, "torso": 18.0, "head": -8.0, "na_s": 66.0, "na_e": 104.0, "fa_s": -4.0, "fa_e": 56.0,
+				"nl_h": 24.0, "nl_k": 30.0, "fl_h": -25.0, "fl_k": 22.0}
+		"judo":
+			return {"x": 0.0, "y": 0.0, "crouch": 0.18, "rot": 0.0, "torso": 12.0, "head": 0.0, "na_s": 48.0, "na_e": 88.0, "fa_s": 36.0, "fa_e": 98.0,
+				"nl_h": 16.0, "nl_k": 18.0, "fl_h": -16.0, "fl_k": 20.0}
+		"bjj":
+			return {"x": 0.0, "y": 0.0, "crouch": 0.3, "rot": 0.0, "torso": 22.0, "head": -6.0, "na_s": 42.0, "na_e": 94.0, "fa_s": 32.0, "fa_e": 102.0,
+				"nl_h": 22.0, "nl_k": 30.0, "fl_h": -18.0, "fl_k": 30.0}
 		"boxe":
 			return {"x": 0.0, "y": 0.0, "crouch": 0.2, "rot": 0.0, "torso": 12.0, "head": 8.0, "na_s": 55.0, "na_e": 120.0, "fa_s": 35.0, "fa_e": 135.0,
 				"nl_h": 18.0, "nl_k": 18.0, "fl_h": -20.0, "fl_k": 22.0}
@@ -209,6 +295,106 @@ func _dirv(deg: float) -> Vector2:
 	return Vector2(sin(a) * dir, cos(a))
 
 
+## Corpo de pé na lona (dá para plantar os pés).
+func grounded() -> bool:
+	return float(pose.get("sit", 0.0)) <= 0.5 and absf(float(pose.get("rot", 0.0))) < 20.0 and float(pose.get("y", 0.0)) < 0.12
+
+
+## Onde a pose pura poria cada pé: [x no palco (U), altura acima do pé de apoio (U do corpo)].
+func _foot_fk() -> Dictionary:
+	var j := _joints_at(Vector2.ZERO, 1.0)
+	var low := -INF
+	for k: String in ["nl_an", "fl_an"]:
+		low = maxf(low, (j[k] as Vector2).y)
+	var base := px + float(pose.get("x", 0.0)) * dir
+	var out := {"base": base}
+	for sd: String in ["nl", "fl"]:
+		var an: Vector2 = j[sd + "_an"]
+		out[sd] = [base + clampf(an.x, -1.35 * height_k, 1.35 * height_k), (low - an.y) / height_k]
+	return out
+
+
+## Põe os dois pés onde a pose manda, sem passo (entrada em cena, virada, replay).
+func reset_feet() -> void:
+	var fk := _foot_fk()
+	for sd: String in ["nl", "fl"]:
+		feet[sd] = float(fk[sd][0])
+		feet_up[sd] = 0.0
+		_fstep[sd] = {}
+		_free_w[sd] = 0.0
+	_fbase = float(fk["base"])
+	_fbase_ok = true
+
+
+## Um quadro dos passos: o pé que ficou longe de onde a base pede dá um passo (um de cada vez, o
+## mais atrasado primeiro); parado, os pés se acertam com passos curtos.
+func step_feet(dt: float) -> void:
+	if not plant or dt <= 0.0:
+		return
+	var fk := _foot_fk()
+	var base := float(fk["base"])
+	if not _fbase_ok:
+		reset_feet()
+	var vel := clampf((base - _fbase) / dt, -14.0, 14.0)
+	_fbase = base
+	for sd: String in ["nl", "fl"]:
+		_free_w[sd] = move_toward(float(_free_w[sd]), 1.0 if bool(free[sd]) else 0.0, dt * 14.0)
+	if not grounded():
+		for sd: String in ["nl", "fl"]:
+			feet[sd] = float(fk[sd][0])
+			feet_up[sd] = 0.0
+			_fstep[sd] = {}
+		return
+	var moving := absf(vel) > 0.6
+	_frest = 0.0 if moving else _frest + dt
+	var thr := 0.16 if _frest > 0.22 else 0.5
+	var busy := 0.0
+	for sd: String in ["nl", "fl"]:
+		var home := float(fk[sd][0])
+		if float(_free_w[sd]) > 0.5 or float(fk[sd][1]) > 1.0:
+			# Perna no ar: o pé pousa onde a pose puser.
+			feet[sd] = home
+			feet_up[sd] = 0.0
+			_fstep[sd] = {}
+			continue
+		var stp: Dictionary = _fstep[sd]
+		if not stp.is_empty():
+			var dur := float(stp["dur"])
+			stp["t"] = float(stp["t"]) + dt / dur
+			var t := minf(1.0, float(stp["t"]))
+			var to := home + clampf(vel * dur * 0.6, -1.1, 1.1)
+			feet[sd] = lerpf(float(stp["from"]), to, t * t * (3.0 - 2.0 * t))
+			feet_up[sd] = sin(t * PI) * float(stp["h"])
+			if t >= 1.0:
+				_fstep[sd] = {}
+				feet_up[sd] = 0.0
+			else:
+				busy = maxf(busy, 1.0 - t)
+		# Longe demais (o corpo foi levado): o pé vem arrastado.
+		var far := home - float(feet[sd])
+		if absf(far) > 2.4:
+			feet[sd] = home - signf(far) * 2.4
+	# Correndo, o segundo pé sai antes do primeiro pousar.
+	if busy > (0.45 if absf(vel) > 6.0 else 0.0):
+		return
+	var pick := ""
+	var best := thr
+	for sd: String in ["nl", "fl"]:
+		if not (_fstep[sd] as Dictionary).is_empty() or float(_free_w[sd]) > 0.5 or float(fk[sd][1]) > 1.0:
+			continue
+		var err := float(fk[sd][0]) - float(feet[sd])
+		# Quem está do lado para onde o corpo vai sai primeiro (pé da frente ao avançar).
+		var lead_bonus := 0.12 if moving and (float(feet[sd]) - base) * vel > 0.0 else 0.0
+		if absf(err) + lead_bonus > best:
+			best = absf(err) + lead_bonus
+			pick = sd
+	if pick != "":
+		var e := absf(float(fk[pick][0]) - float(feet[pick]))
+		var quick := clampf(absf(vel) / 9.0, 0.0, 1.0)
+		_fstep[pick] = {"from": float(feet[pick]), "t": 0.0, "dur": clampf(0.12 + 0.07 * e, 0.12, 0.25) * (1.0 - 0.35 * quick),
+			"h": clampf(0.06 + 0.2 * e, 0.08, 0.42)}
+
+
 ## Juntas em coordenadas do palco (pixels). `ground_y`: linha do chão; `U`: pixels por U. O ponto
 ## mais baixo do corpo (pé, quadril ou cabeça, se deitado) encosta no chão; `y` levanta do chão
 ## (pulo, joelhada voadora, arremesso).
@@ -228,6 +414,23 @@ func joints(origin_x: float, ground_y: float, U: float) -> Dictionary:
 	for k: String in j:
 		if j[k] is Vector2:
 			j[k] = (j[k] as Vector2) + Vector2(0, dy)
+	var planted := plant and not sit and grounded()
+	var pw := {"nl": 0.0, "fl": 0.0}
+	if planted:
+		# O quadril desce o que faltar para as duas pernas alcançarem onde os pés estão (passada larga).
+		var reach0 := (L_THIGH + L_SHIN) * Uh * 0.985
+		var drop := 0.0
+		for side: String in ["nl", "fl"]:
+			var h0 := (ground_y - (j[side + "_an"] as Vector2).y) / Uh
+			pw[side] = (1.0 - smoothstep(0.75, 1.15, h0)) * (1.0 - float(_free_w[side]))
+			var dxp := absf(origin_x + float(feet[side]) * U - (j["hip"] as Vector2).x)
+			var top := ground_y - sqrt(maxf(0.0, reach0 * reach0 - minf(dxp, reach0) * minf(dxp, reach0)))
+			drop = maxf(drop, (top - (j["hip"] as Vector2).y) * float(pw[side]))
+		drop = minf(drop, 1.1 * Uh)
+		if drop > 0.0:
+			for k: String in j:
+				if j[k] is Vector2:
+					j[k] = (j[k] as Vector2) + Vector2(0, drop)
 	if not sit:
 		for side: String in ["nl", "fl"]:
 			var hipj: Vector2 = j["hip"]
@@ -239,7 +442,32 @@ func joints(origin_x: float, ground_y: float, U: float) -> Dictionary:
 			# Pé que ficou perto do chão (o de trás, na base) desce até a lona: a perna estica o que
 			# falta e o calcanhar fica um pouco levantado, apoiado na ponta.
 			var reach := (1.0 - smoothstep(0.55, 1.0, h)) * fwd
-			if lift <= 0.0 and h > 0.02 and reach > 0.0:
+			var wp := float(pw[side])
+			if wp > 0.0:
+				# Pé plantado: a perna vai do quadril até onde ele pisou; esticada para trás, o
+				# calcanhar levanta e o apoio fica na ponta.
+				var l1p := L_THIGH * Uh
+				var l2p := L_SHIN * Uh
+				var fx := origin_x + float(feet[side]) * U
+				var back := clampf(-(fx - hipj.x) * dir / (1.2 * Uh), 0.0, 1.0)
+				var far_k := clampf((Vector2(fx - hipj.x, ground_y - hipj.y).length() / (l1p + l2p) - 0.86) / 0.12, 0.0, 1.0)
+				var heel := 0.24 * back * far_k
+				var tgtp := an.lerp(Vector2(fx, ground_y - (float(feet_up[side]) + float(feet_tap[side]) + heel) * Uh), wp)
+				var vp := tgtp - hipj
+				var dp := clampf(vp.length(), 0.05 * Uh, (l1p + l2p) * 0.999)
+				var up := vp.normalized()
+				var ap := (l1p * l1p - l2p * l2p + dp * dp) / (2.0 * dp)
+				var hp := sqrt(maxf(0.0, l1p * l1p - ap * ap))
+				var pp := Vector2(-up.y, up.x)
+				if pp.x * dir < 0.0:
+					pp = -pp
+				kn = hipj + up * ap + pp * hp
+				an = hipj + up * dp
+				j[side + "_kn"] = kn
+				j[side + "_an"] = an
+				h = (ground_y - an.y) / Uh
+				fwd = maxf(fwd, wp)
+			elif lift <= 0.0 and h > 0.02 and reach > 0.0:
 				var dx := clampf(an.x - hipj.x, -1.35 * Uh, 1.35 * Uh)
 				var tgt := an.lerp(Vector2(hipj.x + dx, ground_y - minf(0.3 * h, 0.2) * Uh), reach)
 				var l1 := L_THIGH * Uh
