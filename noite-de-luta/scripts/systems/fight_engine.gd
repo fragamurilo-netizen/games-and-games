@@ -78,6 +78,7 @@ var beats: Array = []
 var ko_factor := 1.0
 var mods: Array = [{}, {}]
 var _round_events: Array = []
+var round_live := false
 var _last_strike := ""
 ## Repertório de cada lado (Styles.profile): golpes, quedas, finalizações e marcas da escola.
 var prof: Array = [{}, {}]
@@ -149,6 +150,15 @@ func run_all() -> Dictionary:
 
 ## Corre um round inteiro e devolve os lances dele.
 func run_round() -> Array:
+	begin_round()
+	while step_round():
+		pass
+	return _round_events
+
+
+## O round pode correr aos poucos: `begin_round` abre e cada `step_round` anda um trecho da luta.
+## Assim o plano trocado no meio do round (o grito do corner) vale dali em diante.
+func begin_round() -> Array:
 	round_no += 1
 	t = 0.0
 	pos = "solto"
@@ -161,7 +171,15 @@ func run_round() -> Array:
 	round_stats.append(rs)
 	_log(-1, "info", "Começa o %dº round." % round_no)
 	_beat("round", -1, {"n": round_no})
-	while t < ROUND_S and not finished:
+	round_live = true
+	return _round_events
+
+
+## Anda um trecho do round. Devolve se o round continua.
+func step_round() -> bool:
+	if not round_live:
+		return false
+	if t < ROUND_S and not finished:
 		var dt: float
 		if pos == "chao":
 			dt = rng.randf_range(7.0, 14.0)
@@ -182,12 +200,14 @@ func run_round() -> Array:
 				_tick_ground(dt)
 		for i in 2:
 			s[i]["rock"] = maxf(0.0, float(s[i]["rock"]) - dt * 0.011 * (0.6 + _at(i, "coracao") / 120.0))
-	if not finished:
-		t = ROUND_S
-		_score_round()
-		_beat("fim_round", -1, {"n": round_no})
-		_log(-1, "round", "Fim do %dº round." % round_no)
-	return _round_events
+	if not (t < ROUND_S and not finished):
+		if not finished:
+			t = ROUND_S
+			_score_round()
+			_beat("fim_round", -1, {"n": round_no})
+			_log(-1, "round", "Fim do %dº round." % round_no)
+		round_live = false
+	return round_live
 
 
 ## Intervalo: recupera fôlego, o corte é tratado e o médico olha.

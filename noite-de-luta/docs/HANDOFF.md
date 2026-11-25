@@ -1,5 +1,30 @@
 # Noite de Luta — nota de passagem (24/11/2026)
 
+## Rodada 17 de 25/11/2026: luta viva e vida dos lutadores (APK 1.2.0)
+
+O dono, depois do 1.1.0: "ta rapido o jogo ta perfeito, mas nao é divertido, nem intuitivo, nem facil de jogar", "numeros e telas demais, clique demais", "animações absurdas", "mais personalidade, mais historico dos lutadores, mais vida deles", "sem microcopy", "chechenos e russos", "todos que refletem a vida real", "estilos diferentes, coisas raras".
+
+**Luta 2D**
+- `Rig2D`: pés plantados (`plant`, `feet`, `feet_up`, `feet_tap`, `free`), passos (`step_feet`, um pé de cada vez, o mais atrasado primeiro) e perna resolvida do quadril até o pé dentro de `joints()`; o quadril desce na passada larga e o calcanhar de trás levanta. Chute e joelhada soltam a perna (`free`, ligado pelo palco em `_free_legs`).
+- `FightStage2D._spring`: cada junta é uma mola (tabela `SPRING`: frequência parado, no lance, amortecimento); cansado responde mais mole. `_jolt` soma velocidade no impacto, `_push` empurra o corpo e a dupla anda junto (`_cx`).
+- `_life` por escola (`guard`: boxe, dutch, thai, karate, tkd, capoeira, wrestler, judo, bjj, mma) e por lutador (`Rig2D.manner`: ritmo, balanço, altura das mãos, cacoete, pressão, comemoração). Castigo aparece na postura (perna batida, costela, rosto).
+- Nocaute cai de quatro jeitos (`_ko_kind`, pelo último golpe); comemoração pela personalidade (`manner.cele`: frio sai andando, humilde ajoelha, guerra grita, show pula).
+- Calção de cada um (`kit_cut`, `kit_stripe`, `kit_band`, cores próprias para quem não tem equipe).
+- Palco com 47% da altura da tela em pé; a câmera usa `tall` para fechar mais.
+
+**Luta jogável**
+- `FightEngine.begin_round()` / `step_round()`: o round corre aos poucos (mesma sequência do `run_round`). A tela gera os trechos conforme o relógio anda, então `set_plan` no meio do round vale dali em diante.
+- `FightScreen.SHOUTS`: gritos do corner no rodapé (em pé, por cima, por baixo). Gritar de novo solta. Sem abas durante o round: só as três últimas linhas da narração. Números e placar ficam no intervalo; o plano completo abre por um botão.
+- "Noite de luta" (antigo plano de luta): frente a frente, leitura do técnico, plano em uma linha, Simular e Ir para a luta. O resto abre em "Plano e detalhes".
+
+**Vida dos lutadores**
+- `PastFights`: lutas de antes do jogo, geradas na hora a partir do cartel (nunca gravadas), coerentes com sequência, cinturões e datas. `tools/past_probe.gd` confere.
+- `Bio` + `data/world/bio.json`: terra por cultura (Daguestão, Chechênia, Tartaristão, Ossétia), herança de família, frases de vida, linha do tempo, dons raros (`Fighter.gift`, entram no `Styles.profile`) e artes raras para o país.
+- Ficha: primeiro quem ele é (escola, dom, traços, história), depois três barras, pontos fortes e fracos; os dezoito atributos abrem em "Todos os atributos". Carreira: marcos, lutas (do jogo e de antes), depois curvas e médias.
+- `TutorialKit.tip` desligado (`force_tips` liga de volta).
+
+**Não feito nesta rodada**: revisão de todos os textos de apoio das outras telas; animações de chão continuam as antigas (só ganharam mola); 3D não foi tocado.
+
 ## Rodada 16 de 24/11/2026: interface 2.0 (APK 1.1.0)
 
 Pedido do dono logo depois do 1.0.0, nas palavras dele: "Eu acho toda a UI lenta, feia e

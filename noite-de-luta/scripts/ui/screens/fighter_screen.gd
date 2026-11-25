@@ -6,6 +6,7 @@ var _tab := "ficha"
 var _f: Fighter
 ## A lista do que pesa na moral está aberta.
 var _moral_open := false
+var _attrs_open := false
 
 
 func setup(p: Dictionary) -> void:
@@ -55,7 +56,10 @@ func _header(w: GameWorld, f: Fighter) -> Control:
 	v.add_child(nm)
 	var nat := UIKit.hbox(8)
 	nat.add_child(UIKit.flag(f.nation, 34))
-	nat.add_child(UIKit.label("%s · %d anos" % [DataDB.nation_name(f.nation), w.age_of(f)], "Small"))
+	var home := UIKit.label("%s · %d anos" % [Bio.hometown(f), w.age_of(f)], "Small")
+	home.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	home.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	nat.add_child(home)
 	v.add_child(nat)
 	v.add_child(UIKit.label(FightKit.record_detail(f), "H3"))
 	var t := w.team(f.team_id)
@@ -112,9 +116,8 @@ func _ficha(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 	var cut := maxf(0.0, (f.natural_kg - limit) / f.natural_kg)
 	body.add_child(UIKit.kv("Peso fora de luta", "%s (corte de %d%%)" % [Fmt.kg(f.natural_kg), int(round(cut * 100.0))], UIColors.ORANGE if cut > 0.11 else UIColors.TEXT))
 	body.add_child(UIKit.kv("Condição física", "%d%%" % int(f.condition), UIColors.GREEN if f.condition >= 90.0 else (UIColors.ORANGE if f.condition >= 70.0 else UIColors.RED)))
-	# Primeiro o que decide uma contratação ou uma luta: os atributos, o teto e o humor. O físico,
-	# o estilo e a personalidade vêm depois.
-	var cards: Array = [FightKit.attr_card(f)]
+	# Primeiro quem ele é e como luta; os dezoito atributos ficam a um toque.
+	var cards: Array = [_story_card(w, f), _skills_card(f)]
 	if not f.retired:
 		cards.append(_potential_card(w, f))
 		cards.append(_moral_card(w, f))
@@ -123,10 +126,69 @@ func _ficha(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 			cards.append(rv)
 	cards.append(UIKit.card_panel(body))
 	cards.append(_style_card(f))
-	cards.append(_persona_card(f))
 	for x: Control in cards:
 		c.add_child(x)
 	columnize(c, 2, 2)
+
+
+## Quem ele é: a terra, a escola, o dom raro, o temperamento e a história de vida em poucas frases.
+func _story_card(w: GameWorld, f: Fighter) -> Control:
+	var card := UIKit.card("Card", UITokens.S2)
+	var chips := UIKit.flow(6)
+	chips.add_child(UIKit.pill(Styles.name(f.base), UIColors.BLUE, 16))
+	var g := Bio.gift(f)
+	if not g.is_empty():
+		chips.add_child(UIKit.pill("★ " + String(g.get("name", "")), UIColors.GOLD, 16))
+	var her := Bio.heritage(f)
+	if her != "":
+		chips.add_child(UIKit.pill("Família " + her, UIColors.MUTED, 16))
+	for t: String in f.traits:
+		chips.add_child(UIKit.pill(Persona.name_of(t), UIColors.ORANGE, 16))
+	card.add_child(chips)
+	if not g.is_empty():
+		card.add_child(UIKit.colored(String(g.get("desc", "")), UIColors.GOLD, "Small", true))
+	for ln: String in Bio.lines(w, f):
+		card.add_child(UIKit.label(ln, "", true))
+	return UIKit.card_panel(card)
+
+
+## Como ele luta, em três barras; o que tem de melhor e de pior; a lista inteira a um toque.
+func _skills_card(f: Fighter) -> Control:
+	var box := UIKit.vbox(UITokens.S2)
+	var card := UIKit.card("Card", UITokens.S2)
+	for g: Array in Fighter.GROUPS:
+		var v := f.avg(g[1])
+		var row := UIKit.hbox(10)
+		var n := UIKit.label(String(g[0]), "H3")
+		n.custom_minimum_size.x = 150
+		row.add_child(n)
+		var b := UIKit.bar(v, 100.0, UIColors.attr_color(v), 10)
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(b)
+		var val := UIKit.label(str(int(round(v))), "H3")
+		val.add_theme_color_override(&"font_color", FightKit.level_color(v))
+		val.custom_minimum_size.x = 34
+		val.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		row.add_child(val)
+		card.add_child(row)
+	var keys: Array = Fighter.ATTR_NAMES.keys().filter(func(k: String) -> bool: return f.attrs.has(k))
+	keys.sort_custom(func(a: String, b: String) -> bool: return f.a(a) > f.a(b))
+	var best := UIKit.flow(6)
+	for k: String in keys.slice(0, 3):
+		best.add_child(UIKit.pill("%s %d" % [String(FightKit.ATTR_SHORT.get(k, Fighter.ATTR_NAMES.get(k, k))), int(f.a(k))], UIColors.GREEN, 16))
+	for k: String in keys.slice(maxi(3, keys.size() - 2)):
+		best.add_child(UIKit.pill("%s %d" % [String(FightKit.ATTR_SHORT.get(k, Fighter.ATTR_NAMES.get(k, k))), int(f.a(k))], UIColors.RED, 16))
+	card.add_child(best)
+	var more := UIKit.button("Fechar" if _attrs_open else "Todos os atributos", "TextButton", func():
+		_attrs_open = not _attrs_open
+		refresh())
+	more.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	card.add_child(more)
+	box.add_child(UIKit.card_panel(card))
+	if _attrs_open:
+		box.add_child(FightKit.attr_card(f))
+	return box
 
 
 ## Rivais (quem tem história com ele e por quê) e, para quem está perto do cinturão, o que a
@@ -258,8 +320,6 @@ func _potential_card(w: GameWorld, f: Fighter) -> Control:
 	card.add_child(UIKit.bar(k * 100.0, 100.0, UIColors.GOLD, 6))
 	for line: String in Scouting.report_lines(w, f):
 		card.add_child(UIKit.label(line, "Small", true))
-	if float(est["hi"]) - float(est["lo"]) >= 4.0:
-		card.add_child(UIKit.label("As estrelas apagadas são a dúvida: a faixa fecha quando se conhece mais.", "Muted", true))
 	if mine:
 		return UIKit.card_panel(card)
 	var job := Scouting.job_of(w, f)
@@ -337,11 +397,41 @@ func _carreira(w: GameWorld, f: Fighter, c: VBoxContainer) -> void:
 		var hl := UIKit.colored(hn, UIColors.GOLD, "Small", true)
 		sum.add_child(UIKit.tap_row(hl, func(): UIManager.push("legacy", {"tab": "hall" if hn.begins_with("Hall") else "premios"})))
 	c.add_child(UIKit.card_panel(sum))
+	# A história e as lutas primeiro; as curvas e as médias ficam depois, para quem quiser.
+	var tl := _timeline_card(w, f)
+	if tl != null:
+		c.add_child(tl)
+	c.add_child(_fights_block(w, f))
 	c.add_child(_evolution_card(w, f))
 	if f.is_pro():
-		c.add_child(_numbers_card(w, f))
 		c.add_child(_marks_card(w, f))
-	c.add_child(_fights_block(w, f))
+		c.add_child(_numbers_card(w, f))
+
+
+## A carreira em marcos: a estreia, a primeira derrota, o cinturão, a maior vitória.
+func _timeline_card(w: GameWorld, f: Fighter) -> Control:
+	var items := Bio.timeline(w, f)
+	if items.is_empty():
+		return null
+	var card := UIKit.card("Card", UITokens.S2)
+	card.add_child(UIKit.label("A história até aqui", "Section"))
+	for it: Dictionary in items:
+		var row := UIKit.hbox(10)
+		var yr := UIKit.label(str(int(it["year"])), "Caps")
+		yr.custom_minimum_size.x = 48
+		row.add_child(yr)
+		var mark := ColorRect.new()
+		mark.custom_minimum_size = Vector2(3, 0)
+		var tone := String(it.get("tone", ""))
+		mark.color = UIColors.GOLD if tone == "gold" else (UIColors.RED if tone == "bad" else (UIColors.GREEN if tone == "good" else UIColors.MUTED))
+		row.add_child(mark)
+		var tv := UIKit.vbox(0)
+		tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tv.add_child(UIKit.label(String(it["title"]), "H3", true))
+		tv.add_child(UIKit.label(String(it["text"]), "Small", true))
+		row.add_child(tv)
+		card.add_child(row)
+	return UIKit.card_panel(card)
 
 
 var _all_fights := false

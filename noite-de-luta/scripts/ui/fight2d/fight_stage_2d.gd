@@ -166,15 +166,17 @@ func setup(w: GameWorld, fa: Fighter, fb: Fighter, org_color: Color = Color("#C8
 	for i in 2:
 		var r: Rig2D = rigs[i]
 		r.corner = UIColors.CORNER_RED if i == 0 else UIColors.CORNER_BLUE
-		if w.team(([fa, fb][i] as Fighter).team_id) == null:
-			r.shorts = r.corner.darkened(0.35)
-			r.trim = Color("#F1F0EC")
-	# Equipes com a mesma cor: o corner azul usa calção azul para dar para distinguir.
+	# Calções parecidos: o do corner azul inverte as cores; se ainda confundir, vai de azul.
 	var c0: Color = (rigs[0] as Rig2D).shorts
-	var c1: Color = (rigs[1] as Rig2D).shorts
-	if Vector3(c0.r - c1.r, c0.g - c1.g, c0.b - c1.b).length() < 0.3:
-		(rigs[1] as Rig2D).shorts = UIColors.CORNER_BLUE.darkened(0.35)
-		(rigs[1] as Rig2D).trim = Color("#F1F0EC")
+	var r1: Rig2D = rigs[1]
+	var near := func(a: Color, b: Color) -> bool: return Vector3(a.r - b.r, a.g - b.g, a.b - b.b).length() < 0.3
+	if near.call(c0, r1.shorts):
+		var sw := r1.shorts
+		r1.shorts = r1.trim
+		r1.trim = sw
+		if near.call(c0, r1.shorts):
+			r1.shorts = UIColors.CORNER_BLUE.darkened(0.35)
+			r1.trim = Color("#F1F0EC")
 	(rigs[0] as Rig2D).px = -GAP[1] * 0.5
 	(rigs[1] as Rig2D).px = GAP[1] * 0.5
 	for r: Rig2D in rigs:
@@ -215,7 +217,7 @@ func setup(w: GameWorld, fa: Fighter, fb: Fighter, org_color: Color = Color("#C8
 
 ## Altura do palco: maior nas telas altas, para os lutadores aparecerem grandes.
 static func stage_height() -> float:
-	return clampf(UILayout.viewport.y * 0.54, 300.0, 860.0)
+	return clampf(UILayout.viewport.y * 0.47, 300.0, 860.0)
 
 
 ## Um lance do motor, na ordem. A fila acumulada demais (velocidade alta, "Pular") é resumida:

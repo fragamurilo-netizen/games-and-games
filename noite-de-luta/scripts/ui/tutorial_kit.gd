@@ -1,5 +1,7 @@
 class_name TutorialKit
 extends RefCounted
+
+static var force_tips := false
 ## Interface do tutorial guiado: o cartão "Primeiros passos" do Início (o passo da vez, o botão
 ## que leva até lá e a opção de pular) e a dica de primeira vez no alto das telas. As regras
 ## estão em Tutorial.
@@ -95,6 +97,10 @@ static func sync(w: GameWorld) -> bool:
 ## Dica de primeira vez: entra no alto do conteúdo da tela, uma vez por carreira. Chamar no fim
 ## de `refresh()` (depois das colunas). Continua visível enquanto a tela estiver aberta.
 static func tip(screen: BaseScreen, key: String) -> void:
+	# Faixas de dica desligadas: o jogo se explica jogando (pedido do dono, 1.2.0). `force_tips`
+	# liga de volta para quem quiser testar.
+	if not force_tips:
+		return
 	var w := GameManager.world
 	if w == null or screen == null or screen.content() == null:
 		return

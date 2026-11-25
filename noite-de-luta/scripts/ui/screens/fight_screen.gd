@@ -11,6 +11,28 @@ extends BaseScreen
 ## vão para uma coluna à direita.
 
 const TABS := [["lances", "Lances"], ["numeros", "Números"], ["placar", "Placar"]]
+## Gritos do corner durante o round: [chave, texto do botão, o que muda no plano, o que volta ao soltar].
+const SHOUTS := {
+	"pe": [
+		["cima", "Pra cima!", {"postura": 2, "ritmo": 2}, {"postura": 1, "ritmo": 1}],
+		["calma", "Respira!", {"postura": 0, "ritmo": 0, "contra": 1}, {"postura": 1, "ritmo": 1, "contra": 0}],
+		["derruba", "Derruba!", {"jogo": 2}, {"jogo": 1}],
+		["em_pe", "Em pé!", {"jogo": 0}, {"jogo": 1}],
+	],
+	"cima": [
+		["bate", "Bate!", {"por_cima": 0}, {}],
+		["finaliza", "Finaliza!", {"por_cima": 1}, {}],
+		["segura", "Segura!", {"por_cima": 2}, {}],
+		["solta", "Solta!", {"por_cima": 3}, {}],
+	],
+	"baixo": [
+		["levanta", "Levanta!", {"por_baixo": 0}, {}],
+		["raspa", "Raspa!", {"por_baixo": 1}, {}],
+		["finaliza", "Finaliza!", {"por_baixo": 2}, {}],
+	],
+}
+## Quantos lances narrados ficam na tela durante o round.
+const FEED_LINES := 3
 
 var _e: FightEngine
 var _b: Bout
@@ -33,6 +55,9 @@ var _pos_lbl: Label
 var _bars_box: Control
 var _mini: FightHud.MiniLine
 var _spectator := false
+## Onde a luta está na tela (pe | cima | baixo): escolhe os gritos do corner.
+var _ctx := "pe"
+var _shout_row: HBoxContainer
 ## Luta animada (lances do motor encenados) e onde ela está na lista de lances.
 var _stage: FightStage2D
 var _stage_holder: MarginContainer
@@ -167,7 +192,7 @@ func _layout() -> void:
 func _stage_h() -> float:
 	if _land:
 		return 220.0
-	return FightStage2D.stage_height() * (0.66 if _state == "done" else 1.0)
+	return FightStage2D.stage_height() * (0.6 if _state == "done" else (0.5 if _state == "corner" else 1.0))
 
 
 func _size_stage(animate: bool = false) -> void:
@@ -358,6 +383,12 @@ func _update_board(ev: Dictionary) -> void:
 		(_bars[i][0] as ProgressBar).value = float(st[i]) * 100.0
 		(_bars[i][1] as ProgressBar).value = clampf(float(hd[i]) / 3.0, 0.0, 1.0) * 100.0
 	var pos := String(ev.get("pos", "solto"))
+	var ctx := "pe"
+	if pos.begins_with("chao:") and _side >= 0:
+		ctx = "cima" if int(pos.split(":")[2]) == _side else "baixo"
+	if ctx != _ctx:
+		_ctx = ctx
+		_fill_shouts()
 	if pos.begins_with("chao:"):
 		var parts := pos.split(":")
 		var tp := int(parts[2])
@@ -374,7 +405,7 @@ func _update_board(ev: Dictionary) -> void:
 func _refresh_live() -> void:
 	var tot := [FightHud.sum([_base[0], _live[0]]), FightHud.sum([_base[1], _live[1]])]
 	_mini.set_stats(tot[0], tot[1])
-	if _state != "round":
+	if _state != "round" or _num_box == null:
 		return
 	if _tab == "numeros" and _num_panel != null:
 		if _scope == "luta":
@@ -407,7 +438,8 @@ func _set_tab(k: String) -> void:
 
 func _start_round() -> void:
 	_state = "round"
-	_events = _e.run_round()
+	# O round corre aos poucos, junto com o relógio: o grito do corner vale dali em diante.
+	_events = _e.begin_round()
 	_shown = 0
 	_clock = 0.0
 	_round_lbl.text = "R%d de %d" % [_e.round_no, _e.rounds]
@@ -421,10 +453,16 @@ func _start_round() -> void:
 	var c := reset()
 	_feed = UIKit.vbox(UITokens.S1)
 	c.add_child(_feed)
-	_build_numbers(c)
-	_build_score(c)
-	_tabs_holder.visible = true
-	_set_tab(_tab)
+	_num_box = null
+	_score_box = null
+	_num_panel = null
+	_lean_bar = null
+	_tabs_holder.visible = false
+	_tab = "lances"
+	_ctx = "pe"
+	_mini.visible = false
+	_pos_lbl.visible = false
+	_size_stage(true)
 	_controls()
 	set_process(true)
 
@@ -458,6 +496,12 @@ func _build_score(c: Container) -> void:
 func _controls() -> void:
 	var foot := footer()
 	UIKit.clear(foot)
+	_shout_row = null
+	if _side >= 0:
+		# O corner grita e o lutador muda o jeito de lutar dali em diante.
+		_shout_row = UIKit.hbox(UITokens.S1)
+		foot.add_child(_shout_row)
+		_fill_shouts()
 	var row := UIKit.hbox(UITokens.S2)
 	var items: Array = []
 	for i in AppSettings.FIGHT_SPEED_NAMES.size():
@@ -471,10 +515,61 @@ func _controls() -> void:
 	row.add_child(UIKit.button("Pular", "GhostButton", func():
 		_clock = 99999.0
 		_skip = true))
-	if _stage != null:
-		var vi := AppSettings.FIGHT_VIEWS.find(AppSettings.fight_view)
-		row.add_child(UIKit.button(AppSettings.FIGHT_VIEW_NAMES[maxi(0, vi)], "GhostButton", _toggle_view))
 	foot.add_child(row)
+
+
+func _shout_on(sh: Array) -> bool:
+	for k: String in (sh[2] as Dictionary):
+		if int(_plan.get(k, -1)) != int(sh[2][k]):
+			return false
+	return true
+
+
+func _fill_shouts() -> void:
+	if _shout_row == null or not is_instance_valid(_shout_row):
+		return
+	UIKit.clear(_shout_row)
+	for sh: Array in SHOUTS[_ctx]:
+		var on := _shout_on(sh)
+		var b := UIKit.chip(String(sh[1]), on, null, func(): _shout(sh))
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.custom_minimum_size.y = 56
+		b.add_theme_font_size_override(&"font_size", 17)
+		_shout_row.add_child(b)
+
+
+## Grito do corner: troca o plano na hora. Gritar de novo a mesma ordem solta (volta ao equilíbrio).
+func _shout(sh: Array) -> void:
+	var release := _shout_on(sh) and not (sh[3] as Dictionary).is_empty()
+	var change: Dictionary = sh[3] if release else sh[2]
+	for k: String in change:
+		_plan[k] = int(change[k])
+	_e.set_plan(_side, _plan)
+	if not release and _feed != null:
+		var me := world().fighter(_b.a if _side == 0 else _b.b)
+		var h := UIKit.hbox(8)
+		var t := UIKit.label(Fmt.clock(FightEngine.ROUND_S - minf(_clock, FightEngine.ROUND_S)), "Meta")
+		t.custom_minimum_size.x = 52
+		t.add_theme_font_override(&"font", DataTable.tabular_font())
+		h.add_child(t)
+		var mark := ColorRect.new()
+		mark.custom_minimum_size = Vector2(3, 0)
+		mark.color = UIColors.GOLD
+		h.add_child(mark)
+		h.add_child(UIKit.colored("Corner de %s: “%s”" % [me.short_name(), String(sh[1])], UIColors.GOLD, "Small", true))
+		_push_line(h)
+	_fill_shouts()
+
+
+## Põe uma linha na narração e deixa só as últimas na tela.
+func _push_line(h: Control) -> void:
+	_feed.add_child(h)
+	var kids := _feed.get_children().filter(func(n: Node) -> bool: return not n.is_queued_for_deletion())
+	while kids.size() > FEED_LINES:
+		(kids.pop_front() as Node).queue_free()
+	var n := kids.size()
+	for i in n:
+		(kids[i] as Control).modulate.a = [0.4, 0.7, 1.0][clampi(i + 3 - n, 0, 2)]
 
 
 func _process(delta: float) -> void:
@@ -484,6 +579,10 @@ func _process(delta: float) -> void:
 	var held := _stage != null and _stage_holder.visible and _stage.holding() and _clock < 9000.0
 	if not held:
 		_clock += delta * AppSettings.FIGHT_SPEEDS[clampi(_speed, 0, AppSettings.FIGHT_SPEEDS.size() - 1)]
+	var guard := 0
+	while _e.round_live and _e.t <= _clock and guard < 400:
+		_e.step_round()
+		guard += 1
 	var last: Dictionary = {}
 	while _shown < _events.size() and float((_events[_shown] as Dictionary)["t"]) <= _clock:
 		last = _events[_shown]
@@ -492,16 +591,13 @@ func _process(delta: float) -> void:
 	if not last.is_empty():
 		_update_board(last)
 		_refresh_live()
-		if _tab == "lances":
-			var sc := scroll()
-			(func(): if is_instance_valid(sc): sc.scroll_vertical = int(sc.get_v_scroll_bar().max_value)).call_deferred()
 	_feed_stage()
 	var shown_clock := minf(_clock, FightEngine.ROUND_S)
 	if _shown > 0 and _shown >= _events.size():
 		shown_clock = float((_events.back() as Dictionary)["t"])
 	_clock_lbl.text = Fmt.clock(FightEngine.ROUND_S - shown_clock)
 	var stage_busy := _stage != null and _stage_holder.visible and not _stage.idle()
-	if _shown >= _events.size() and (_clock >= FightEngine.ROUND_S or _e.finished) and not stage_busy:
+	if not _e.round_live and _shown >= _events.size() and (_clock >= FightEngine.ROUND_S or _e.finished) and not stage_busy:
 		set_process(false)
 		_end_round()
 
@@ -520,12 +616,13 @@ func _add_line(ev: Dictionary) -> void:
 	h.add_child(mark)
 	var var_name := "H3" if kind in ["forte", "kd", "fin", "fim", "queda"] else ("Small" if kind == "info" else "")
 	var l := UIKit.label(String(ev["text"]), var_name, true)
+	l.max_lines_visible = 2
 	if kind in ["kd", "fim"]:
 		l.add_theme_color_override(&"font_color", UIColors.GOLD)
 	elif kind == "fin":
 		l.add_theme_color_override(&"font_color", UIColors.ORANGE)
 	h.add_child(l)
-	_feed.add_child(h)
+	_push_line(h)
 	var ls: Array = ev.get("ls", [])
 	if ls.size() == 2:
 		_live = ls
@@ -568,6 +665,7 @@ func _interval_cards(c: Container) -> VBoxContainer:
 func _corner() -> void:
 	_state = "corner"
 	_tabs_holder.visible = false
+	_size_stage(true)
 	if _spectator:
 		_corner_both()
 		return
@@ -585,11 +683,18 @@ func _corner() -> void:
 	card.add_child(UIKit.kv("Fôlego de %s" % me.short_name(), "%d%%" % int(stam * 100.0), UIColors.GREEN if stam > 0.6 else (UIColors.ORANGE if stam > 0.35 else UIColors.RED)))
 	if float(_e.s[_side]["cut"]) > 0.5:
 		card.add_child(UIKit.colored("O corte está feio. Mais um round apanhando e o médico pode parar a luta.", UIColors.RED, "Small", true))
-	c.add_child(UIKit.section_header("Plano para o %dº round" % (_e.round_no + 1)))
+	# O plano inteiro fica guardado: quem quiser mexer em tudo abre; o resto se grita no round.
 	var pc := UIKit.card("Card", UITokens.S2)
+	var pc_panel := UIKit.card_panel(pc)
+	pc_panel.visible = false
 	pc.add_child(PlanEditor.build(_plan, func(): pass, false))
-	c.add_child(UIKit.card_panel(pc))
-	c.add_child(UIKit.label("Plano do técnico para %s contra %s: %s." % [me.short_name(), opp.short_name(), FightPlan.summary(FightPlan.suggest(me, opp))], "Small", true))
+	var open := UIKit.button("Plano: %s" % FightPlan.summary(_plan), "GhostButton", Callable())
+	open.pressed.connect(func():
+		pc_panel.visible = not pc_panel.visible
+		open.visible = false)
+	open.clip_text = true
+	c.add_child(open)
+	c.add_child(pc_panel)
 	var foot := footer()
 	UIKit.clear(foot)
 	foot.add_child(UIKit.button("Começar o %dº round" % (_e.round_no + 1), "PrimaryButton", func():
@@ -659,6 +764,7 @@ func _finish() -> void:
 	keep_log(_b, _e)
 	GameManager.save_now()
 	_pips.set_round(_e.round_no, _e.rounds, true)
+	_mini.visible = true
 	_size_stage(true)
 	_show_result(true)
 

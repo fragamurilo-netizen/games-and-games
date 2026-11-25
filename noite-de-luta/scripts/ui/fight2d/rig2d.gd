@@ -28,6 +28,11 @@ var hair := Color("#2A1D16")
 var beard := Color("#2A1D16")
 var has_beard := false
 var bald := false
+const KIT_COLORS := ["#16171B", "#F1F0EC", "#1F3A6E", "#B3262E", "#1E6B45", "#D9A521", "#5B2A86", "#D8641F", "#157A7A", "#6B6E78", "#C2417A", "#2B4BA8"]
+## Corte do calção (medio | curto | sunga), faixa lateral e barra de outra cor.
+var kit_cut := "medio"
+var kit_stripe := true
+var kit_band := true
 var shorts := Color("#1B1B1F")
 var trim := Color("#C8102E")
 var glove := Color("#232327")
@@ -115,10 +120,28 @@ static func from_fighter(w: GameWorld, f: Fighter, facing: float) -> Rig2D:
 	r.height_k = clampf(f.height_cm / 178.0, 0.86, 1.14)
 	r.dir = facing
 	r.southpaw = f.southpaw
+	# O calção é dele: cores da equipe para quem tem equipe, cores próprias para os outros; o corte
+	# vem da escola (o tailandês curto e de barra larga, a sunga de quem veio da luta agarrada).
+	var kr := RandomNumberGenerator.new()
+	kr.seed = hash([f.id, f.first, f.last, "kit"])
 	var t := w.team(f.team_id)
 	if t != null:
 		r.shorts = t.color1
 		r.trim = t.color2 if not t.color2.is_equal_approx(t.color1) else t.color1.lightened(0.4)
+	else:
+		var a := kr.randi() % KIT_COLORS.size()
+		var b := (a + 1 + kr.randi() % (KIT_COLORS.size() - 1)) % KIT_COLORS.size()
+		r.shorts = Color(KIT_COLORS[a])
+		r.trim = Color(KIT_COLORS[b])
+		if absf(r.shorts.get_luminance() - r.trim.get_luminance()) < 0.18:
+			r.trim = Color("#F1F0EC") if r.shorts.get_luminance() < 0.5 else Color("#16171B")
+	r.kit_stripe = kr.randf() < 0.6
+	r.kit_band = kr.randf() < 0.65
+	if f.base in ["muay_thai", "kickboxing", "dutch_kb", "sanda"]:
+		r.kit_cut = "curto"
+		r.kit_band = true
+	elif Styles.family(f.base) == "agarrada" and kr.randf() < 0.55:
+		r.kit_cut = "sunga"
 	var fam := Styles.family(f.base)
 	if f.base in ["boxe"]:
 		r.guard = "boxe"
@@ -1071,9 +1094,12 @@ func _shorts_leg(j: Dictionary, side: String, off: Vector2, dim: float, Uh: floa
 	if not _load(side + "c"):
 		_begin()
 		var cut: Array = [[-0.14, 1.04, 0], [0.12, 1.1, 0], [0.45, 1.14, 0], [0.8, 1.2, 0], [0.9, 1.23, 0], [0.9, 1.23, 1], [0.98, 1.25, 1]]
-		if fem:
-			# Shorts justo das lutadoras, até o alto da coxa
+		if fem or kit_cut == "sunga":
+			# Shorts justo das lutadoras (e a sunga de quem veio da luta agarrada), até o alto da coxa
 			cut = [[-0.14, 1.03, 0], [0.12, 1.04, 0], [0.36, 1.05, 0], [0.52, 1.05, 0], [0.52, 1.06, 1], [0.6, 1.06, 1]]
+		elif kit_cut == "curto":
+			# Calção tailandês: curto, largo, de barra alta
+			cut = [[-0.14, 1.05, 0], [0.12, 1.13, 0], [0.38, 1.22, 0], [0.5, 1.27, 0], [0.5, 1.27, 1], [0.68, 1.32, 1]]
 		for row: Array in cut:
 			var t := float(row[0])
 			var i := 0
@@ -1082,10 +1108,10 @@ func _shorts_leg(j: Dictionary, side: String, off: Vector2, dim: float, Uh: floa
 			var k := clampf((t - ts[i]) / maxf(0.0001, ts[i + 1] - ts[i]), 0.0, 1.0)
 			var g := float(row[1]) * Uh
 			var pad := (0.012 if fem else 0.025) * Uh
-			_row(hip + seg * t, n, lerpf(fr[i], fr[i + 1], k) * g + pad, lerpf(bk[i], bk[i + 1], k) * g + pad, trim if int(row[2]) == 1 else shorts, t)
+			_row(hip + seg * t, n, lerpf(fr[i], fr[i + 1], k) * g + pad, lerpf(bk[i], bk[i + 1], k) * g + pad, trim if int(row[2]) == 1 and kit_band else shorts, t)
 	_emit(side + "c", dim, 0.45 if dim >= 1.0 else 0.0, maxf(1.0, Uh * 0.03))
-	if _ol <= 0.0 and dim >= 1.0:
-		_ln(_at(-0.1, -0.12), _at(0.5 if fem else 0.88, -0.15), Color(trim, 0.85), maxf(1.0, Uh * 0.09))
+	if _ol <= 0.0 and dim >= 1.0 and kit_stripe:
+		_ln(_at(-0.1, -0.12), _at(0.5 if fem or kit_cut != "medio" else 0.88, -0.15), Color(trim, 0.85), maxf(1.0, Uh * 0.09))
 
 
 func _neck(j: Dictionary, sk: Color, tn: Vector2, Uh: float) -> void:

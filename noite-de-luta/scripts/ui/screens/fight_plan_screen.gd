@@ -5,11 +5,12 @@ static var plans: Dictionary = {} # id da luta -> plano escolhido
 
 var _plan: Dictionary = {}
 var _side := 0
+var _open := false
 
 
 func setup(p: Dictionary) -> void:
 	super.setup(p)
-	screen_title = "Plano de luta"
+	screen_title = "Noite de luta"
 	show_nav = false
 
 
@@ -32,8 +33,25 @@ func refresh() -> void:
 	top.add_child(UIKit.label("%s · %d rounds%s" % [Matchmaker.division_short(b.division), b.rounds, " · valendo o cinturão" if b.title else ""], "Caps"))
 	top.add_child(FightKit.faceoff(w, w.fighter(b.a), w.fighter(b.b), 130))
 	c.add_child(UIKit.card_panel(top))
-	# Primeiro a decisão: o que o técnico leu e o plano do primeiro round. Como os dois chegam
-	# (pesagem e camp), a ficha e os atributos do adversário ficam logo abaixo, para consulta.
+	# A noite da luta cabe numa tela: os dois frente a frente, o que o técnico viu e o botão de
+	# lutar. O plano inteiro, a pesagem e os números ficam a um toque para quem quiser.
+	var quick := UIKit.card("Card", UITokens.S2)
+	var qr := UIKit.hbox(UITokens.S2)
+	var qi := UIKit.icon_rect("whistle", 24, UIColors.ACCENT)
+	qi.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	qr.add_child(qi)
+	qr.add_child(UIKit.label(PlanEditor.coach_read(me, opp), "", true))
+	quick.add_child(qr)
+	quick.add_child(UIKit.kv("Plano", FightPlan.summary(_plan)))
+	var more := UIKit.button("Fechar" if _open else "Plano e detalhes", "TextButton", func():
+		_open = not _open
+		refresh())
+	more.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	quick.add_child(more)
+	c.add_child(UIKit.card_panel(quick))
+	_foot(w, b)
+	if not _open:
+		return
 	var pc := UIKit.card("Card", UITokens.S2)
 	var ph := UIKit.hbox(8)
 	var pt := UIKit.label("Plano para o 1º round", "Section")
@@ -46,16 +64,7 @@ func refresh() -> void:
 	reset_btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	ph.add_child(reset_btn)
 	pc.add_child(ph)
-	var read := UIKit.hbox(UITokens.S2)
-	var ri := UIKit.icon_rect("whistle", 24, UIColors.ACCENT)
-	ri.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	read.add_child(ri)
-	read.add_child(UIKit.label(PlanEditor.coach_read(me, opp), "Small", true))
-	var rp := PanelContainer.new()
-	rp.theme_type_variation = "CardInset"
-	rp.add_child(read)
-	pc.add_child(rp)
-	pc.add_child(PlanEditor.build(_plan, func(): plans[b.id] = _plan.duplicate()))
+	pc.add_child(PlanEditor.build(_plan, func(): plans[b.id] = _plan.duplicate(), false))
 	c.add_child(UIKit.card_panel(pc))
 	# Como chegam: a pesagem e o camp de cada um, num cartão só.
 	var wi := Career.weigh_in(w, b)
@@ -99,7 +108,11 @@ func refresh() -> void:
 	c.add_child(UIKit.card_panel(tape))
 	c.add_child(UIKit.section_header("Atributos de %s" % opp.short_name()))
 	c.add_child(FightKit.attr_card(opp, me))
+
+
+func _foot(w: GameWorld, b: Bout) -> void:
 	var foot := footer()
+	UIKit.clear(foot)
 	var row := UIKit.hbox(UITokens.S2)
 	var sim := UIKit.button("Simular", "GhostButton", func():
 		plans[b.id] = _plan.duplicate()
@@ -119,4 +132,3 @@ func refresh() -> void:
 	go.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(go)
 	foot.add_child(row)
-	TutorialKit.tip(self, "fight_plan")
